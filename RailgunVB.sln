@@ -2,6 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RailgunVB", "RailgunVB\RailgunVB.vbproj", "{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.Commands", "Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj", "{9976511D-FA20-4C1F-8CEA-192859B30104}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.Core", "Discord.Net\src\Discord.Net.Core\Discord.Net.Core.csproj", "{1F3C1873-837E-4165-BF11-BD10B7666DE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.WebSocket", "Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj", "{7A1F912D-6474-4621-891F-65BBFA8C6C26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord", "Shared.Music\src\AudioChord\AudioChord.csproj", "{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord.Parsers", "Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj", "{B15A8668-4E34-4949-A289-AFA2F407A370}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +22,25 @@ Global
 		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9976511D-FA20-4C1F-8CEA-192859B30104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9976511D-FA20-4C1F-8CEA-192859B30104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9976511D-FA20-4C1F-8CEA-192859B30104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9976511D-FA20-4C1F-8CEA-192859B30104}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F3C1873-837E-4165-BF11-BD10B7666DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F3C1873-837E-4165-BF11-BD10B7666DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F3C1873-837E-4165-BF11-BD10B7666DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F3C1873-837E-4165-BF11-BD10B7666DE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A1F912D-6474-4621-891F-65BBFA8C6C26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A1F912D-6474-4621-891F-65BBFA8C6C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A1F912D-6474-4621-891F-65BBFA8C6C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A1F912D-6474-4621-891F-65BBFA8C6C26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B15A8668-4E34-4949-A289-AFA2F407A370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B15A8668-4E34-4949-A289-AFA2F407A370}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B15A8668-4E34-4949-A289-AFA2F407A370}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B15A8668-4E34-4949-A289-AFA2F407A370}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
