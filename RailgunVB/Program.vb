@@ -24,6 +24,7 @@ Module Program
         })
         
         _cmdManager = New CommandManager(_config, _client)
+        Await _cmdManager.InitializeCommandsAsync()
         
         Await _client.LoginAsync(TokenType.Bot, _config.DiscordToken)
         Await _client.StartAsync()
