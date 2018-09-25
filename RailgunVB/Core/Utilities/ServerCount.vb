@@ -9,7 +9,7 @@ Namespace Core.Utilities
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _client As DiscordShardedClient
         
-        Private ReadOnly WithEvents _timer As New Timer(TimeSpan.FromMinutes(30).TotalMilliseconds)
+        Private WithEvents _timer As New Timer(TimeSpan.FromMinutes(30).TotalMilliseconds)
         
         Public Property PreviousGuildCount As Integer = 0
 
@@ -21,7 +21,7 @@ Namespace Core.Utilities
             _timer.Start()
         End Sub
         
-        Private Async Function UpdateServerCountAsync() As Task Handles _timer.Elapsed
+        Private Async Sub UpdateServerCountAsync() Handles _timer.Elapsed
             If PreviousGuildCount = _client.Guilds.Count Then Return
             
             PreviousGuildCount = _client.Guilds.Count
@@ -31,7 +31,7 @@ Namespace Core.Utilities
                 _config.DiscordConfig.Prefix,
                 PreviousGuildCount
             ), type := ActivityType.Watching)
-        End Function
+        End Sub
         
     End Class
     
