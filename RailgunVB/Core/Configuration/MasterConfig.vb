@@ -39,59 +39,47 @@ Namespace Core.Configuration
         
         Private Shared Async Function SetupAsync() As Task(Of MasterConfig)
             ' <===== DISCORD CONFIGURATION SETUP =====>
-            Console.Write("Discord || Token: ")
-            Dim token As String = Console.ReadLine()
-
-            Console.Write("Discord || Prefix [!]: ")
-            Dim rawPrefix As String = Console.ReadLine()
-            Dim prefix As String = If(String.IsNullOrWhiteSpace(rawPrefix), "!", rawPrefix)
-
-            Console.Write("Discord || Master Admin ID: ")
-            Dim masterAdminId As ULong = ULong.Parse(Console.ReadLine())
+            Dim token As String = SetupInput("Discord || Token: ")
+            Dim prefix As String = SetupInput("Discord || Prefix [!]: ", "!")
+            Dim masterAdminId As ULong = ULong.Parse(SetupInput("Discord || Master Admin ID: "))
             
             Dim discordConfig As New DiscordConfig(token, prefix, masterAdminId)
             ' <=======================================>
             
             ' <===== POSTGRE DATABASE CONFIGURATION SETUP =====>
-            Console.Write("Database || Postgre || Hostname [localhost]: ")
-            Dim prawHostname as String = Console.ReadLine()
-            Dim phostname As String = If(String.IsNullOrWhiteSpace(prawHostname), "localhost", prawHostname)
-            
-            Console.Write("Database || Postgre || Username: ")
-            Dim pusername As String = Console.ReadLine()
-            
-            Console.Write("Database || Postgre || Password: ")
-            Dim ppassword As String = Console.ReadLine()
-            
-            Console.Write("Database || Postgre || Database: ")
-            Dim pdatabase As String = Console.ReadLine()
+            Dim phostname As String = SetupInput("Database || Postgre || Hostname [localhost]: ", "localhost")
+            Dim pusername As String = SetupInput("Database || Postgre || Username: ")
+            Dim ppassword As String = SetupInput("Database || Postgre || Password: ")
+            Dim pdatabase As String = SetupInput("Database || Postgre || Database: ")
             
             Dim postgreDatabaseConfig as New DatabaseConfig(phostname, pusername, ppassword, pdatabase)
             ' <==============================================>
             
             ' <===== MONGO DATABASE CONFIGURATION SETUP =====>
-            Console.Write("Database || Mongo || Hostname [localhost]: ")
-            Dim mrawHostname as String = Console.ReadLine()
-            Dim mhostname As String = If(String.IsNullOrWhiteSpace(mrawHostname), "localhost", mrawHostname)
-            
-            Console.Write("Database || Mongo || Username: ")
-            Dim musername As String = Console.ReadLine()
-            
-            Console.Write("Database || Mongo || Password: ")
-            Dim mpassword As String = Console.ReadLine()
+            Dim mhostname As String = SetupInput("Database || Mongo || Hostname [localhost]: ", "localhost")
+            Dim musername As String = SetupInput("Database || Mongo || Username: ")
+            Dim mpassword As String = SetupInput("Database || Mongo || Password: ")
             
             Dim mongoDatabaseConfig as New DatabaseConfig(mhostname, musername, mpassword, Nothing)
             ' <==============================================>
 
-            Console.Write("Other || Google API Key: ")
-            Dim googleApiKey As String = Console.ReadLine()
-
-            Console.Write("Other || RandomCat API Key: ")
-            Dim randomCatApiKey As String = Console.ReadLine()
+            Dim googleApiKey As String = SetupInput("Other || Google API Key: ")
+            Dim randomCatApiKey As String = SetupInput("Other || RandomCat API Key: ")
 
             Dim masterConfig As New MasterConfig(discordConfig, postgreDatabaseConfig, mongoDatabaseConfig, googleApiKey, randomCatApiKey)
             await masterConfig.SaveAsync()
             Return masterConfig
+        End Function
+        
+        Private Shared Function SetupInput(query As String) As String
+            Console.Write(query)
+            Return Console.ReadLine()
+        End Function
+        
+        Private Shared Function SetupInput(query As String, defaultTo As String) As String
+            Console.Write(query)
+            Dim output As String = Console.ReadLine()
+            Return If(String.IsNullOrWhiteSpace(query), defaultTo, output)
         End Function
         
         Private Async Function SaveAsync() As Task
