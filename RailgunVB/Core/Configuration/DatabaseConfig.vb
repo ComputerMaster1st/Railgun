@@ -1,6 +1,6 @@
 Namespace Core.Configuration
     
-    Public Class PostgreDatabaseConfig
+    Public Class DatabaseConfig
     
         Public ReadOnly Property Hostname As String
         Public ReadOnly Property Username As String

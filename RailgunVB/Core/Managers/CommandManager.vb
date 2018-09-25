@@ -36,8 +36,8 @@ Namespace Core.Managers
             _log = New Log(_config, _client)
             _serverCount = New ServerCount(_config, _client)
             
-            Dim postgreConfig As PostgreDatabaseConfig = _config.PostgreDatabaseConfig
-            Dim mongoConfig As MongoDatabaseConfig = _config.MongoDatabaseConfig
+            Dim postgreConfig As DatabaseConfig = _config.PostgreDatabaseConfig
+            Dim mongoConfig As DatabaseConfig = _config.MongoDatabaseConfig
             
             _treeDiagramService = New TreeDiagramService(
                 New PostgresConfig(

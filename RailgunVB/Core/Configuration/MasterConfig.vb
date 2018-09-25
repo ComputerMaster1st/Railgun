@@ -9,8 +9,8 @@ Namespace Core.Configuration
         <JsonIgnore> Private Const Filename As String = "masterconfig.json"
         
         Public ReadOnly Property DiscordConfig As DiscordConfig
-        Public ReadOnly Property PostgreDatabaseConfig As PostgreDatabaseConfig
-        Public ReadOnly Property MongoDatabaseConfig As MongoDatabaseConfig
+        Public ReadOnly Property PostgreDatabaseConfig As DatabaseConfig
+        Public ReadOnly Property MongoDatabaseConfig As DatabaseConfig
         
         Public ReadOnly Property GoogleApiToken As String
         Public ReadOnly Property RandomCatApiToken As String
@@ -18,8 +18,8 @@ Namespace Core.Configuration
         <JsonConstructor>
         Public Sub New (
             discordConfig As DiscordConfig,
-            postgreDatabaseConfig As PostgreDatabaseConfig,
-            mongoDatabaseConfig As MongoDatabaseConfig,
+            postgreDatabaseConfig As DatabaseConfig,
+            mongoDatabaseConfig As DatabaseConfig,
             googleApiToken As String,
             randomCatApiToken As String
         )
@@ -66,7 +66,7 @@ Namespace Core.Configuration
             Console.Write("Database || Postgre || Database: ")
             Dim pdatabase As String = Console.ReadLine()
             
-            Dim postgreDatabaseConfig as New PostgreDatabaseConfig(phostname, pusername, ppassword, pdatabase)
+            Dim postgreDatabaseConfig as New DatabaseConfig(phostname, pusername, ppassword, pdatabase)
             ' <==============================================>
             
             ' <===== MONGO DATABASE CONFIGURATION SETUP =====>
@@ -80,7 +80,7 @@ Namespace Core.Configuration
             Console.Write("Database || Mongo || Password: ")
             Dim mpassword As String = Console.ReadLine()
             
-            Dim mongoDatabaseConfig as New MongoDatabaseConfig(mhostname, musername, mpassword)
+            Dim mongoDatabaseConfig as New DatabaseConfig(mhostname, musername, mpassword, Nothing)
             ' <==============================================>
 
             Console.Write("Other || Google API Key: ")
