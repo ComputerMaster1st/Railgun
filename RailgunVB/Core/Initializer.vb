@@ -6,13 +6,14 @@ Imports Discord.WebSocket
 Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
+Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Configuration
 
-Namespace Core.Managers
+Namespace Core
     
-    Public Class SystemManager
+    Public Class Initializer
     
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _log As Log
@@ -62,6 +63,7 @@ Namespace Core.Managers
                 .AddSingleton(_commandService) _
                 .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
                 .AddSingleton(_treeDiagramService.GetMusicService()) _
+                .AddSingleton(Of Analytics) _
                 .AddSingleton(Of CommandManager) _
                 .BuildServiceProvider()
             

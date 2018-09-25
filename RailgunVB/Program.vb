@@ -1,13 +1,14 @@
 Imports System
 Imports Discord
 Imports Discord.WebSocket
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Managers
 
 Module Program
     Private _config As MasterConfig
     Private _client As DiscordShardedClient
-    Private _sysManager As SystemManager
+    Private _sysManager As Initializer
     
     Sub Main(args As String())
         RunAsync().GetAwaiter().GetResult()
@@ -23,7 +24,7 @@ Module Program
             .DefaultRetryMode = RetryMode.AlwaysRetry
         })
         
-        _sysManager = New SystemManager(_config, _client)
+        _sysManager = New Initializer(_config, _client)
         Await _sysManager.InitializeCommandsAsync()
         
         Await _client.LoginAsync(TokenType.Bot, _config.DiscordConfig.Token)
