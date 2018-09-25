@@ -9,7 +9,8 @@ Namespace Core.Configuration
         <JsonIgnore> Private Const Filename As String = "masterconfig.json"
         
         Public ReadOnly Property DiscordConfig As DiscordConfig
-        Public ReadOnly Property DatabaseConfig As DatabaseConfig
+        Public ReadOnly Property PostgreDatabaseConfig As PostgreDatabaseConfig
+        Public ReadOnly Property MongoDatabaseConfig As MongoDatabaseConfig
         
         Public ReadOnly Property GoogleApiToken As String
         Public ReadOnly Property RandomCatApiToken As String
@@ -17,12 +18,14 @@ Namespace Core.Configuration
         <JsonConstructor>
         Public Sub New (
             discordConfig As DiscordConfig,
-            databaseConfig As DatabaseConfig,
+            postgreDatabaseConfig As PostgreDatabaseConfig,
+            mongoDatabaseConfig As MongoDatabaseConfig,
             googleApiToken As String,
             randomCatApiToken As String
         )
             Me.DiscordConfig = discordConfig
-            Me.DatabaseConfig = databaseConfig
+            Me.PostgreDatabaseConfig = postgreDatabaseConfig
+            Me.MongoDatabaseConfig = mongoDatabaseConfig
             Me.GoogleApiToken = googleApiToken
             Me.RandomCatApiToken = randomCatApiToken
         End Sub
@@ -49,22 +52,36 @@ Namespace Core.Configuration
             Dim discordConfig As New DiscordConfig(token, prefix, masterAdminId)
             ' <=======================================>
             
-            ' <===== DATABASE CONFIGURATION SETUP =====>
+            ' <===== POSTGRE DATABASE CONFIGURATION SETUP =====>
             Console.WriteLine("Database || Hostname [localhost]: ")
-            Dim rawHostname as String = Console.ReadLine()
-            Dim hostname As String = If(String.IsNullOrWhiteSpace(rawHostname), "localhost")
+            Dim prawHostname as String = Console.ReadLine()
+            Dim phostname As String = If(String.IsNullOrWhiteSpace(prawHostname), "localhost")
             
             Console.WriteLine("Database || Username: ")
-            Dim username As String = Console.ReadLine()
+            Dim pusername As String = Console.ReadLine()
             
             Console.WriteLine("Database || Password: ")
-            Dim password As String = Console.ReadLine()
+            Dim ppassword As String = Console.ReadLine()
             
             Console.WriteLine("Database || Database: ")
-            Dim database As String = Console.ReadLine()
+            Dim pdatabase As String = Console.ReadLine()
             
-            Dim databaseConfig as New DatabaseConfig(hostname, username, password, database)
-            ' <========================================>
+            Dim postgreDatabaseConfig as New PostgreDatabaseConfig(phostname, pusername, ppassword, pdatabase)
+            ' <==============================================>
+            
+            ' <===== MONGO DATABASE CONFIGURATION SETUP =====>
+            Console.WriteLine("Database || Hostname [localhost]: ")
+            Dim mrawHostname as String = Console.ReadLine()
+            Dim mhostname As String = If(String.IsNullOrWhiteSpace(mrawHostname), "localhost")
+            
+            Console.WriteLine("Database || Username: ")
+            Dim musername As String = Console.ReadLine()
+            
+            Console.WriteLine("Database || Password: ")
+            Dim mpassword As String = Console.ReadLine()
+            
+            Dim mongoDatabaseConfig as New MongoDatabaseConfig(mhostname, musername, mpassword)
+            ' <==============================================>
 
             Console.Write("Other || Google API Key: ")
             Dim googleApiKey As String = Console.ReadLine()
@@ -72,7 +89,7 @@ Namespace Core.Configuration
             Console.Write("Other || RandomCat API Key: ")
             Dim randomCatApiKey As String = Console.ReadLine()
 
-            Dim masterConfig As New MasterConfig(discordConfig, databaseConfig, googleApiKey, randomCatApiKey)
+            Dim masterConfig As New MasterConfig(discordConfig, postgreDatabaseConfig, mongoDatabaseConfig, googleApiKey, randomCatApiKey)
             await masterConfig.SaveAsync()
             Return masterConfig
         End Function
