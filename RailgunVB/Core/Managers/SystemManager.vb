@@ -12,13 +12,13 @@ Imports TreeDiagram.Configuration
 
 Namespace Core.Managers
     
-    Public Class CommandManager
+    Public Class SystemManager
     
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _log As Log
         Private ReadOnly _serverCount As ServerCount
         
-        Private ReadOnly _client As DiscordShardedClient
+        Private WithEvents _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
         
         Private ReadOnly _treeDiagramService As TreeDiagramService

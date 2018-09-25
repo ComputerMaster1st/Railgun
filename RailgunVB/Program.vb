@@ -7,7 +7,7 @@ Imports RailgunVB.Core.Managers
 Module Program
     Private _config As MasterConfig
     Private _client As DiscordShardedClient
-    Private _cmdManager As CommandManager
+    Private _cmdManager As SystemManager
     
     Sub Main(args As String())
         RunAsync().GetAwaiter().GetResult()
@@ -23,7 +23,7 @@ Module Program
             .DefaultRetryMode = RetryMode.AlwaysRetry
         })
         
-        _cmdManager = New CommandManager(_config, _client)
+        _cmdManager = New SystemManager(_config, _client)
         Await _cmdManager.InitializeCommandsAsync()
         
         Await _client.LoginAsync(TokenType.Bot, _config.DiscordConfig.Token)
