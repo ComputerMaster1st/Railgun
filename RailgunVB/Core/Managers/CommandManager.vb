@@ -7,6 +7,8 @@ Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Utilities
+Imports TreeDiagram
+Imports TreeDiagram.Configuration
 
 Namespace Core.Managers
     
@@ -18,6 +20,8 @@ Namespace Core.Managers
         
         Private ReadOnly _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
+        
+        Private ReadOnly _treeDiagramService As TreeDiagramService
         
         Private ReadOnly _services As IServiceProvider
 
@@ -32,6 +36,23 @@ Namespace Core.Managers
             _log = New Log(_config, _client)
             _serverCount = New ServerCount(_config, _client)
             
+            Dim postgreConfig As PostgreDatabaseConfig = _config.PostgreDatabaseConfig
+            Dim mongoConfig As MongoDatabaseConfig = _config.MongoDatabaseConfig
+            
+            _treeDiagramService = New TreeDiagramService(
+                New PostgresConfig(
+                    postgreConfig.Hostname,
+                    postgreConfig.Username,
+                    postgreConfig.Password,
+                    postgreConfig.Database
+                ), 
+                New MongoConfig(
+                    mongoConfig.Hostname,
+                    mongoConfig.Username,
+                    mongoConfig.Password
+                )
+            )
+            
             _services = New ServiceCollection() _
                 .AddSingleton(_config) _
                 .AddSingleton(_log) _
@@ -39,6 +60,8 @@ Namespace Core.Managers
                 .AddSingleton(_client) _
                 .AddSingleton(Of IDiscordClient)(_config) _
                 .AddSingleton(_commandService) _
+                .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
+                .AddSingleton(_treeDiagramService.GetMusicService()) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 

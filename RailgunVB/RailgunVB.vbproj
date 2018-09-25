@@ -14,5 +14,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj" />
       <ProjectReference Include="..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj" />
+      <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
     </ItemGroup>
 </Project>

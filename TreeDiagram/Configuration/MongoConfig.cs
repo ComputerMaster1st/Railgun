@@ -2,8 +2,15 @@ namespace TreeDiagram.Configuration
 {
     public class MongoConfig
     {
-        public string Hostname { get; private set; }
-        public string Username { get; private set; }
-        public string Password { get; private set; }
+        public string Hostname { get; }
+        public string Username { get; }
+        public string Password { get; }
+
+        public MongoConfig(string hostname, string username, string password)
+        {
+            Hostname = hostname;
+            Username = username;
+            Password = password;
+        }
     }
 }
