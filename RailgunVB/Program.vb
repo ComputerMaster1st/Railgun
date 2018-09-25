@@ -26,7 +26,7 @@ Module Program
         _cmdManager = New CommandManager(_config, _client)
         Await _cmdManager.InitializeCommandsAsync()
         
-        Await _client.LoginAsync(TokenType.Bot, _config.DiscordToken)
+        Await _client.LoginAsync(TokenType.Bot, _config.DiscordConfig.Token)
         Await _client.StartAsync()
         Await Task.Delay(-1)
     End Function

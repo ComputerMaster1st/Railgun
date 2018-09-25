@@ -7,13 +7,13 @@ Namespace Core.Logging
     
     Public Class Log
         
-        Private ReadOnly _config As MasterConfig
+        Private ReadOnly _config As Configuration.DiscordConfig
         Private ReadOnly WithEvents _client As DiscordShardedClient
         
         Private ReadOnly _logFilename As String = String.Format("logs/{0}.log", DateTime.Today.ToString("yyyy-MM-dd"))
 
         Public Sub New(config As MasterConfig, client As DiscordShardedClient)
-            _config = config
+            _config = config.DiscordConfig
             _client = client
         End Sub
         
@@ -59,7 +59,8 @@ Namespace Core.Logging
             Dim output As String = String.Format(
                 "[ {0} ] || {1} {2}",
                 DateTime.Now.ToString("HH:mm:ss"),
-                If(Not (type.Equals(BotLogType.Common)), String.Format("{0} ||", type), "")
+                If(Not (type.Equals(BotLogType.Common)), String.Format("{0} ||", type), ""),
+                entry
             )
             
             Try

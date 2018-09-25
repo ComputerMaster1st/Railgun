@@ -28,7 +28,7 @@ Namespace Core.Utilities
             
             Await _client.SetGameAsync(String.Format(
                 "{0}help || {1} Servers!",
-                _config.DiscordPrefix,
+                _config.DiscordConfig.Prefix,
                 PreviousGuildCount
             ), type := ActivityType.Watching)
         End Function
