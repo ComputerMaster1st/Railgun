@@ -1,4 +1,5 @@
 Imports System.Reflection
+Imports System.Text
 Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
@@ -38,8 +39,10 @@ Namespace Core.Managers
                 .AddSingleton(Of IDiscordClient)(_config) _
                 .AddSingleton(_commandService) _
                 .BuildServiceProvider()
+            
+            AddHandler TaskScheduler.UnobservedTaskException, Async Function(s, a) Await UnobservedTaskAsync(a) 
         End Sub
-        
+
         Public Async Function InitializeCommandsAsync() As Task
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Info,
@@ -55,6 +58,28 @@ Namespace Core.Managers
                 String.Format("{0} Loaded!", _commandService.Commands.Count)
             ))
         End Function
+        
+        Private Async Function UnobservedTaskAsync(args As UnobservedTaskExceptionEventArgs) As Task
+            args.SetObserved()
+            
+            Await _log.LogToConsoleAsync(new LogMessage(
+                LogSeverity.Error,
+                "Unobserved",
+                "An unobserved task threw an exception!",
+                args.Exception
+            ))
+            
+            Dim output As New StringBuilder
+            
+            output.AppendLine("An unobserved task threw an exception!") _
+                .AppendLine(args.Exception.ToString())
+            
+            If output.Length < 1950 Then
+                Await _log.LogToBotLogAsync(output.ToString(), BotLogType.TaskScheduler)
+            Else 
+                Await _log.LogToBotLogAsync("An unobserved task threw an exception! Refer to log files!", BotLogType.TaskScheduler)
+            End If
+        End Sub
         
     End Class
     
