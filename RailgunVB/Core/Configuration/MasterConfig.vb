@@ -44,7 +44,7 @@ Namespace Core.Configuration
 
             Console.Write("Discord || Prefix [!]: ")
             Dim rawPrefix As String = Console.ReadLine()
-            Dim prefix As String = If(String.IsNullOrWhiteSpace(rawPrefix), "!")
+            Dim prefix As String = If(String.IsNullOrWhiteSpace(rawPrefix), "!", rawPrefix)
 
             Console.Write("Discord || Master Admin ID: ")
             Dim masterAdminId As ULong = ULong.Parse(Console.ReadLine())
@@ -53,31 +53,31 @@ Namespace Core.Configuration
             ' <=======================================>
             
             ' <===== POSTGRE DATABASE CONFIGURATION SETUP =====>
-            Console.WriteLine("Database || Hostname [localhost]: ")
+            Console.Write("Database || Postgre || Hostname [localhost]: ")
             Dim prawHostname as String = Console.ReadLine()
-            Dim phostname As String = If(String.IsNullOrWhiteSpace(prawHostname), "localhost")
+            Dim phostname As String = If(String.IsNullOrWhiteSpace(prawHostname), "localhost", prawHostname)
             
-            Console.WriteLine("Database || Username: ")
+            Console.Write("Database || Postgre || Username: ")
             Dim pusername As String = Console.ReadLine()
             
-            Console.WriteLine("Database || Password: ")
+            Console.Write("Database || Postgre || Password: ")
             Dim ppassword As String = Console.ReadLine()
             
-            Console.WriteLine("Database || Database: ")
+            Console.Write("Database || Postgre || Database: ")
             Dim pdatabase As String = Console.ReadLine()
             
             Dim postgreDatabaseConfig as New PostgreDatabaseConfig(phostname, pusername, ppassword, pdatabase)
             ' <==============================================>
             
             ' <===== MONGO DATABASE CONFIGURATION SETUP =====>
-            Console.WriteLine("Database || Hostname [localhost]: ")
+            Console.Write("Database || Mongo || Hostname [localhost]: ")
             Dim mrawHostname as String = Console.ReadLine()
-            Dim mhostname As String = If(String.IsNullOrWhiteSpace(mrawHostname), "localhost")
+            Dim mhostname As String = If(String.IsNullOrWhiteSpace(mrawHostname), "localhost", mrawHostname)
             
-            Console.WriteLine("Database || Username: ")
+            Console.Write("Database || Mongo || Username: ")
             Dim musername As String = Console.ReadLine()
             
-            Console.WriteLine("Database || Password: ")
+            Console.Write("Database || Mongo || Password: ")
             Dim mpassword As String = Console.ReadLine()
             
             Dim mongoDatabaseConfig as New MongoDatabaseConfig(mhostname, musername, mpassword)

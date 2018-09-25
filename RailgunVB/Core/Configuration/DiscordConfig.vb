@@ -48,7 +48,7 @@ Namespace Core.Configuration
                     _BotLogChannels.TimerMngr = channelId
                     Exit Select
             End Select
-        End Function
+        End Sub
         
         Public Function AssignAdmin(userId As ULong) As Boolean
             If _OtherAdmins.Contains(userId) Then Return False

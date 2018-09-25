@@ -8,7 +8,7 @@ Namespace Core.Logging
     Public Class Log
         
         Private ReadOnly _config As Configuration.DiscordConfig
-        Private ReadOnly WithEvents _client As DiscordShardedClient
+        Private WithEvents _client As DiscordShardedClient
         
         Private ReadOnly _logFilename As String = String.Format("logs/{0}.log", DateTime.Today.ToString("yyyy-MM-dd"))
 
@@ -17,7 +17,7 @@ Namespace Core.Logging
             _client = client
         End Sub
         
-        Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, Optional pingMaster As Boolean = False, Optional filename As String = String.Empty) As Task
+        Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, Optional pingMaster As Boolean = False, Optional filename As String = Nothing) As Task
             If _config.MasterGuildId = 0 Then Return
             
             Dim guild As IGuild = Await CType(_client, IDiscordClient).GetGuildAsync(_config.MasterGuildId)
@@ -74,7 +74,7 @@ Namespace Core.Logging
                     Return
                 End If
                 
-                Dim pingMasterStr As String = If(pingMaster, String.Format("<@!{0}>", _config.MasterAdminId, String.Empty))
+                Dim pingMasterStr As String = If(pingMaster, String.Format("<@!{0}>", _config.MasterAdminId), String.Empty)
                 
                 If Not (String.IsNullOrEmpty(filename))
                     Await tc.SendFileAsync(filename, String.Format("Error! Refer to file, {0}!", pingMasterStr))
