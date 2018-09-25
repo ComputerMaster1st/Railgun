@@ -65,6 +65,7 @@ Namespace Core
                 .AddSingleton(_treeDiagramService.GetMusicService()) _
                 .AddSingleton(Of Analytics) _
                 .AddSingleton(Of CommandManager) _
+                .AddSingleton(Of FilterManager) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
