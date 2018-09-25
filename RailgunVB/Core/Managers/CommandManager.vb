@@ -24,8 +24,8 @@ Namespace Core.Managers
             _client = client
             
             _commandService = New CommandService(New CommandServiceConfig() With {
-                                                    .DefaultRunMode = RunMode.Async
-                                                    })
+                 .DefaultRunMode = RunMode.Async
+             })
             
             _log = New Log(_config, _client)
             _serverCount = New ServerCount(_config, _client)

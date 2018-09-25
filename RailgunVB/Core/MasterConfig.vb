@@ -17,12 +17,13 @@ Namespace Core
         Public ReadOnly Property RandomCatApiToken As String
         Public ReadOnly Property OtherAdmins As List(Of ULong) = New List(Of ULong)()
 
-        Public Sub New (discordToken As String,
-                        discordPrefix As String,
-                        masterAdminId As ULong,
-                        googleApiToken As String,
-                        randomCatApiToken As String)
-            
+        Public Sub New (
+            discordToken As String,
+            discordPrefix As String,
+            masterAdminId As ULong,
+            googleApiToken As String,
+            randomCatApiToken As String
+        )
             Me.DiscordToken = discordToken
             Me.DiscordPrefix = discordPrefix
             Me.MasterAdminId = masterAdminId
@@ -32,15 +33,16 @@ Namespace Core
         End Sub
         
         <JsonConstructor>
-        Private Sub New (discordToken As String,
-                         discordPrefix As String,
-                         masterAdminId As ULong,
-                         masterGuildId As ULong,
-                         botLogChannels As BotLogChannels,
-                         googleApiToken As String,
-                         randomCatApiToken As String,
-                         otherAdmins As List(Of ULong))
-            
+        Private Sub New (
+            discordToken As String,
+            discordPrefix As String,
+            masterAdminId As ULong,
+            masterGuildId As ULong,
+            botLogChannels As BotLogChannels,
+            googleApiToken As String,
+            randomCatApiToken As String,
+            otherAdmins As List(Of ULong)
+        )
             Me.DiscordToken = discordToken
             Me.DiscordPrefix = discordPrefix
             Me.MasterAdminId = masterAdminId

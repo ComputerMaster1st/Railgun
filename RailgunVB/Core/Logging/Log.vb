@@ -55,10 +55,11 @@ Namespace Core.Logging
         End Function
         
         Private Async Function SendBotLogAsync(guild As IGuild, type As BotLogType, channelId As ULong, entry As String, pingMaster As Boolean, filename As String) As Task
-            Dim output As String = String.Format("[ {0} ] || {1} {2}",
-                                                 DateTime.Now.ToString("HH:mm:ss"),
-                                                 If(Not (type.Equals(BotLogType.Common)), String.Format("{0} ||", type), "")
-                                                )
+            Dim output As String = String.Format(
+                "[ {0} ] || {1} {2}",
+                DateTime.Now.ToString("HH:mm:ss"),
+                If(Not (type.Equals(BotLogType.Common)), String.Format("{0} ||", type), "")
+            )
             
             Try
                 Dim tc As ITextChannel
