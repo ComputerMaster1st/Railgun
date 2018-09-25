@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TreeDiagram.Configuration;
+using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
@@ -11,6 +12,9 @@ namespace TreeDiagram
         private readonly string _data;
 
         private const int Port = 5432;
+
+        public DbSet<UserMention> UserMentions { get; internal set; }
+        public DbSet<UserPrefix> UserPrefixes { get; internal set; }
 
         internal TreeDiagramContext(PostgresConfig config)
         {
