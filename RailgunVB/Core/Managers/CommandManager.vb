@@ -41,7 +41,7 @@ Namespace Core.Managers
                 .AddSingleton(_commandService) _
                 .BuildServiceProvider()
             
-            AddHandler TaskScheduler.UnobservedTaskException, Async Function(s, a) Await UnobservedTaskAsync(a) 
+            AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
         End Sub
 
         Public Async Function InitializeCommandsAsync() As Task
@@ -80,7 +80,7 @@ Namespace Core.Managers
             Else 
                 Await _log.LogToBotLogAsync("An unobserved task threw an exception! Refer to log files!", BotLogType.TaskScheduler)
             End If
-        End Sub
+        End Function
         
     End Class
     
