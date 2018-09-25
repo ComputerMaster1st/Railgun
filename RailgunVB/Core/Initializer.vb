@@ -71,6 +71,8 @@ Namespace Core
         End Sub
 
         Public Async Function InitializeCommandsAsync() As Task
+            _services.GetService(Of Analytics)()
+            
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Info,
                 "System",

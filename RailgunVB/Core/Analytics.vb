@@ -17,7 +17,7 @@ Namespace Core
         Public ReadOnly Property UpdatedMessages As ULong = 0
         Public Property DeletedMessages As ULong = 0
         
-        Public Property UsedCommands As New Dictionary(Of String, Integer)
+        Public ReadOnly Property UsedCommands As New Dictionary(Of String, Integer)
 
         Public Sub New(log As Log, client As DiscordShardedClient, commandService As CommandService)
             _log = log
