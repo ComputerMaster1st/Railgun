@@ -2,7 +2,7 @@ Imports System.IO
 Imports Newtonsoft.Json
 Imports RailgunVB.Core.Logging
 
-Namespace Core
+Namespace Core.Configuration
     
     <JsonObject(MemberSerialization.Fields)>
     Public Class MasterConfig

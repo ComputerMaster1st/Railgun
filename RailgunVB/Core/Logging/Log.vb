@@ -1,6 +1,7 @@
 Imports System.IO
 Imports Discord
 Imports Discord.WebSocket
+Imports RailgunVB.Core.Configuration
 
 Namespace Core.Logging
     

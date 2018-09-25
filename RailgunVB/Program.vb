@@ -1,7 +1,7 @@
 Imports System
 Imports Discord
 Imports Discord.WebSocket
-Imports RailgunVB.Core
+Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Managers
 
 Module Program

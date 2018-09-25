@@ -1,6 +1,7 @@
 Imports System.Timers
 Imports Discord
 Imports Discord.WebSocket
+Imports RailgunVB.Core.Configuration
 
 Namespace Core.Utilities
     

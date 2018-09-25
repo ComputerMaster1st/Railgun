@@ -4,6 +4,7 @@ Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.Extensions.DependencyInjection
+Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Utilities
 
