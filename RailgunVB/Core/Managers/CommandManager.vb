@@ -10,34 +10,35 @@ Namespace Core.Managers
         
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _log As Log
+        Private ReadOnly _analytics As Analytics
         
         Private WithEvents _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
 
-        Public Sub New(config As MasterConfig, log As Log, client As DiscordShardedClient, commandService As CommandService)
+        Public Sub New(config As MasterConfig, 
+                       log As Log, 
+                       analytics As Analytics,
+                       client As DiscordShardedClient, 
+                       commandService As CommandService
+                      )
             _config = config
             _log = log
-            _client = client ' Using
+            _analytics = analytics
+            _client = client
             _commandService = commandService
         End Sub
         
         Private Async Function AutoDeleteFilterMsgAsync(userMsg As IUserMessage, filterMsg As IUserMessage) As Task
-            
+            Try
+                Await userMsg.DeleteAsync()
+                
+                _analytics.DeletedMessages += 1
+                
+                Await Task.Delay(5000)
+                Await filterMsg.DeleteAsync()
+            Catch
+            End Try
         End Function
-        
-        '                private async Task AutoDeleteFilterMsgAsync(IUserMessage message, IUserMessage filterMsg) {
-'            Analytics analytics = treeDiagramProvider.GetService<Analytics>();
-'
-'            try {
-'                await message.DeleteAsync();
-'
-'                analytics.DeletedMessages++;
-'
-'                await Task.Delay(5000);
-'                await filterMsg.DeleteAsync();
-'            } catch { }
-'        }
-'
         
         Private Async Function ReceiveMessageAsync(sMessage As SocketMessage) As Task Handles _client.MessageReceived
             If sMessage Is Nothing OrElse 
@@ -56,14 +57,16 @@ Namespace Core.Managers
         End Function
         
         Private Async Function ProcessMessageAsync(sMessage As SocketMessage) As Task
-            
+            Try
+                Dim msg As IUserMessage = sMessage
+                Dim guild As IGuild = CType(msg.Channel, ITextChannel).Guild
+                
+            End Try
         End Function
         
 
 '        private async Task ProcessMessageAsync(SocketMessage sMessage) {
 '            try {
-'                IUserMessage message = (IUserMessage)sMessage;
-'                IGuild guild = ((ITextChannel)message.Channel).Guild;
 '                FilterManager mFilter = treeDiagramProvider.GetService<FilterManager>();
 '                IUserMessage filterMsg = await mFilter.ApplyFilterAsync(message);
 '
