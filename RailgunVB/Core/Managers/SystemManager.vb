@@ -18,7 +18,7 @@ Namespace Core.Managers
         Private ReadOnly _log As Log
         Private ReadOnly _serverCount As ServerCount
         
-        Private WithEvents _client As DiscordShardedClient
+        Private ReadOnly _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
         
         Private ReadOnly _treeDiagramService As TreeDiagramService
@@ -31,7 +31,7 @@ Namespace Core.Managers
             
             _commandService = New CommandService(New CommandServiceConfig() With {
                  .DefaultRunMode = RunMode.Async
-             })
+            })
             
             _log = New Log(_config, _client)
             _serverCount = New ServerCount(_config, _client)
@@ -62,6 +62,7 @@ Namespace Core.Managers
                 .AddSingleton(_commandService) _
                 .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
                 .AddSingleton(_treeDiagramService.GetMusicService()) _
+                .AddSingleton(Of CommandManager) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
@@ -70,16 +71,16 @@ Namespace Core.Managers
         Public Async Function InitializeCommandsAsync() As Task
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Info,
-                "Services",
-                "Ready!"
+                "System",
+                "TreeDiagram Ready!"
             ))
             
             Await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)
             
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Info,
-                "CommandMngr",
-                String.Format("{0} Loaded!", _commandService.Commands.Count)
+                "System",
+                String.Format("{0} Commands Loaded!", _commandService.Commands.Count)
             ))
         End Function
         
@@ -88,7 +89,7 @@ Namespace Core.Managers
             
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Error,
-                "Unobserved",
+                "System",
                 "An unobserved task threw an exception!",
                 args.Exception
             ))
