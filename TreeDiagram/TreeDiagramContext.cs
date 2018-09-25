@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using TreeDiagram.Configuration;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.Server.Filter;
 using TreeDiagram.Models.Server.Fun;
+using TreeDiagram.Models.Server.Warning;
 using TreeDiagram.Models.TreeTimer;
 using TreeDiagram.Models.User;
 
@@ -46,6 +49,15 @@ namespace TreeDiagram
         {
             optionsBuilder.UseNpgsql($"Server={_host};Port={Port};Database={_data};UserId={_user};Password={_pass};");
             base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ServerMusic>(x =>
+            {
+                x.Property(y => y.PlaylistId).HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+            });
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
