@@ -20,8 +20,7 @@ Namespace Core.Filters
             If String.IsNullOrWhiteSpace(message.Content) Then Return Nothing
             
             Dim tc As ITextChannel = message.Channel
-            Dim data As FilterCaps = Await _dbContext.FilterCapses.FirstOrDefaultAsync(
-                Function(find) find.Id = tc.GuildId)
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetAsync(tc.GuildId)
             
             If data Is Nothing OrElse Not (data.IsEnabled) OrElse 
                (Not (data.IncludeBots) AndAlso (message.Author.IsBot Or message.Author.IsWebhook)) OrElse 

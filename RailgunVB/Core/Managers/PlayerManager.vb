@@ -37,8 +37,7 @@ Namespace Core.Managers
         Private Async Function PlayerCurrentlyPlayingAsync(sender As Object, 
                                                            args As PlayerCurrentlyPlayingEventArgs) As Task
             Try
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.FirstOrDefaultAsync(
-                    Function(find) find.Id = args.GuildId)
+                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(args.GuildId)
                 Dim tc As ITextChannel = _activePlayers(args.GuildId).Item1
                 
                 If Not (data.SilentNowPlaying)
@@ -118,8 +117,7 @@ Namespace Core.Managers
         Public Async Function CreatePlayerAsync(user As IGuildUser, vc As IVoiceChannel, tc As ITextChannel, 
                                                 Optional autoJoin As Boolean = False, 
                                                 Optional preRequestedSong As Song = Nothing) As Task
-            Dim data As ServerMusic = Await _dbContext.ServerMusics.FirstOrDefaultAsync(
-                Function(find) find.Id = tc.GuildId)
+            Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(tc.GuildId)
             Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
             
             If playlist.Songs.Count < 1

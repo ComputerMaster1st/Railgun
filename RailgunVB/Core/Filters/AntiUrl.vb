@@ -24,7 +24,7 @@ Namespace Core.Filters
             If String.IsNullOrWhiteSpace(message.Content) Then Return Nothing
             
             Dim tc As ITextChannel = message.Channel
-            Dim data As FilterUrl = Await _context.FilterUrls.FirstOrDefaultAsync(Function(find) find.Id = tc.GuildId)
+            Dim data As FilterUrl = Await _context.FilterUrls.GetAsync(tc.GuildId)
             
             If data Is Nothing OrElse 
                Not (data.IsEnabled) OrElse 

@@ -77,14 +77,12 @@ Namespace Core.Managers
                 End If
                 
                 Dim argPos As Integer = 0
-                Dim sCommand As ServerCommand = Await _dbContext.ServerCommands.FirstOrDefaultAsync(
-                    Function(find) find.Id = guild.Id)
+                Dim sCommand As ServerCommand = Await _dbContext.ServerCommands.GetAsync(guild.Id)
                 
                 If ((sCommand Is Nothing OrElse Not (sCommand.RespondToBots)) AndAlso msg.Author.IsBot) OrElse 
                    msg.Author.IsWebhook Then Return
                 
-                Dim uCommand As UserCommand = Await _dbContext.UserCommands.FirstOrDefaultAsync(
-                    Function(find) find.Id = msg.Author.Id)
+                Dim uCommand As UserCommand = Await _dbContext.UserCommands.GetAsync(msg.Author.Id)
                 
                 If msg.HasStringPrefix(_config.DiscordConfig.Prefix, argPos)
                     Await ExecuteCommandAsync(_config.DiscordConfig.Prefix, msg, argPos, sCommand)
