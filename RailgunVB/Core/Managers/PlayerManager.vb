@@ -19,7 +19,7 @@ Namespace Core.Managers
         Private ReadOnly _musicService As MusicService
         Private ReadOnly _dbContext As TreeDiagramContext
 
-        Private ReadOnly _activePlayers As New Dictionary(Of ULong, Tuple(Of ITextChannel, Player))
+        Public ReadOnly Property ActivePlayers As New Dictionary(Of ULong, Tuple(Of ITextChannel, Player))
         
         Public Sub New(log As Log, commandUtils As CommandUtils, musicService As MusicService, 
                        dbContext As TreeDiagramContext)
@@ -30,7 +30,7 @@ Namespace Core.Managers
         End Sub
         
         Private Async Function PlayerConnectedAsync(sender As Object, args As PlayerConnectedEventArgs) As Task
-            Dim tc As ITextChannel = _activePlayers(args.GuildId).Item1
+            Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             Await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Connected!", BotLogType.MusicPlayer)
         End Function
         
@@ -38,7 +38,7 @@ Namespace Core.Managers
                                                            args As PlayerCurrentlyPlayingEventArgs) As Task
             Try
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(args.GuildId)
-                Dim tc As ITextChannel = _activePlayers(args.GuildId).Item1
+                Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
                 
                 If Not (data.SilentNowPlaying)
                     Dim output As New StringBuilder
@@ -57,12 +57,12 @@ Namespace Core.Managers
             Catch
                 _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", 
                                                       $"{args.GuildId} Missing TC!")).GetAwaiter()
-                _activePlayers(args.GuildId).Item2.CancelStream()
+                ActivePlayers(args.GuildId).Item2.CancelStream()
             End Try
         End Function
         
         Private Async Function PlayerTimeoutAsync(sender As Object, args As PlayerTimeoutEventArgs) As Task
-            Dim tc As ITextChannel = _activePlayers(args.GuildId).Item1
+            Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             
             Try
                 Await tc.SendMessageAsync("Connection to Discord Voice has timed out! Please try again.")
@@ -80,7 +80,7 @@ Namespace Core.Managers
         End Function
 
         Private Async Function PlayerFinishedAsync(sender As Object, args As PlayerFinishedEventArgs) As Task
-            Dim tc As ITextChannel = _activePlayers(args.GuildId).Item1
+            Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             
             Try
                 Dim output As New StringBuilder
@@ -158,7 +158,7 @@ Namespace Core.Managers
             End If
             
             player.StartPlayer(playlist.Id, autoJoin)
-            _activePlayers.Add(tc.GuildId, Tuple.Create(tc, player))
+            ActivePlayers.Add(tc.GuildId, Tuple.Create(tc, player))
             
             Dim autoString As String = $"{If(autoJoin, "Auto-", "")}Connecting..."
             
@@ -167,13 +167,13 @@ Namespace Core.Managers
         End Function
         
         Public Sub DisconnectPlayer(playerId As ULong)
-            _activePlayers(playerId).Item2.CancelStream()
+            ActivePlayers(playerId).Item2.CancelStream()
         End Sub
         
         Private Async Function StopPlayerAsync(playerId As ULong, Optional autoLeave As Boolean = False) As Task
-            If Not (_activePlayers.ContainsKey(playerId)) Then Return
+            If Not (ActivePlayers.ContainsKey(playerId)) Then Return
             
-            Dim player As Player = _activePlayers(playerId).Item2
+            Dim player As Player = ActivePlayers(playerId).Item2
             
             If Not (autoLeave) Then player.CancelStream()
             
@@ -182,18 +182,18 @@ Namespace Core.Managers
             End While
             
             player.Task.Dispose()
-            _activePlayers.Remove(playerId)
+            ActivePlayers.Remove(playerId)
             
             await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"))
         End Function
         
         Public Function GetPlayer(playerId As ULong) As Player
-            If _activePlayers.ContainsKey(playerId) Then Return _activePlayers(playerId).Item2
+            If ActivePlayers.ContainsKey(playerId) Then Return ActivePlayers(playerId).Item2
             Return Nothing
         End Function
         
         Public Function IsCreated(playerId As ULong) As Boolean
-            If _activePlayers.ContainsKey(playerId) Then Return True
+            If ActivePlayers.ContainsKey(playerId) Then Return True
             Return False
         End Function
         

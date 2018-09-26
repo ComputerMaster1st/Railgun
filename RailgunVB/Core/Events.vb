@@ -1,10 +1,15 @@
 Imports AudioChord
+Imports Discord
 Imports Discord.WebSocket
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
+Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
+Imports TreeDiagram.Enums
+Imports TreeDiagram.Models.Server
+Imports TreeDiagram.Models.User
 
 Namespace Core
     
@@ -15,175 +20,145 @@ Namespace Core
         Private ReadOnly _commandUtils As CommandUtils
         Private ReadOnly _serverCount As ServerCount
 
-        Private ReadOnly _client As DiscordShardedClient
+        Private WithEvents _client As DiscordShardedClient
         
         Private ReadOnly _dbContext As TreeDiagramContext
         Private ReadOnly _musicService As MusicService
         
         Private ReadOnly _playerManager As PlayerManager
+        Private ReadOnly _timerManager As TimerManager
         
         Private _initialized As Boolean = False
         Private ReadOnly _shardsReady As New Dictionary(Of Integer, Boolean)
+        
+        Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, serverCount As ServerCount,
+                       client As DiscordShardedClient, dbContext As TreeDiagramContext, musicService As MusicService,
+                       playerManager As PlayerManager, timerManager As TimerManager)
+            _config = config
+            _log = log
+            _commandUtils = commandUtils
+            _serverCount = serverCount
+            
+            _client = client
+            
+            _dbContext = dbContext
+            _musicService = musicService
+            
+            _playerManager = playerManager
+            _timerManager = timerManager
+        End Sub
+        
+        Private Async Function JoinedGuildAsync(sGuild As SocketGuild) As Task Handles _client.JoinedGuild
+            Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager)
+        End Function
+        
+        Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
+            Await Task.Run(New Action(AddressOf DedicatedLeftGuildAsync(sGuild)))
+        End Function
+        
+        Private Async Function DedicatedLeftGuildAsync(sGuild As SocketGuild) As Task
+            If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
+            
+            Await _musicService.CancelGuildMusicProcessingAsync(sGuild.Id)
+            Await _dbContext.DeleteGuildDataAsync(sGuild.Id)
+            Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager)
+        End Function
+        
+        Private Async Function UserJoinedAsync(sUser As SocketGuildUser) As Task Handles _client.UserJoined
+            Dim sJoinLeave As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            
+            If sJoinLeave Is Nothing Then Return
+            
+            Dim notification As String = sJoinLeave.GetMessage(MsgType.Join).Replace("<server>", sUser.Guild.Name) _
+                .Replace("<user>", Await _commandUtils.GetUsernameOrMentionAsync(sUser))
+            
+            Await SendJoinLeaveMessageAsync(sJoinLeave, sUser, notification)
+        End Function
+        
+        Private Async Function UserLeaveAsync(sUser As SocketGuildUser) As Task Handles _client.UserLeft
+            Dim sJoinLeave As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            
+            If sJoinLeave Is Nothing Then Return
+            
+            Dim notification As String = sJoinLeave.GetMessage(MsgType.Leave)
+            
+            If Not (String.IsNullOrEmpty(notification)) Then notification = notification _
+                .Replace("<user>", Await _commandUtils.GetUsernameOrMentionAsync(sUser))
+            
+            Await SendJoinLeaveMessageAsync(sJoinLeave, sUser, notification)
+        End Function
+        
+        Private Async Function SendJoinLeaveMessageAsync(data As ServerJoinLeave, user As IGuildUser, 
+                                                         message As String) As Task
+            If String.IsNullOrEmpty(message)
+                Return
+            ElseIf data.SendToDM
+                Try
+                    Dim dm As IDMChannel = Await user.GetOrCreateDMChannelAsync()
+                    
+                    Await dm.SendMessageAsync(message)
+                Catch
+                End Try
+            ElseIf data.ChannelId <> 0
+                Dim tc As ITextChannel = Await user.Guild.GetTextChannelAsync(data.ChannelId)
+                
+                If tc IsNot Nothing Then Await tc.SendMessageAsync(message)
+            End If
+        End Function
+        
+        Private Async Function UserVoiceStateUpdatedAsync(sUser As SocketUser, before As SocketVoiceState, 
+                                                          after As SocketVoiceState) As Task _
+                                                          Handles _client.UserVoiceStateUpdated
+            If sUser.IsBot OrElse after.VoiceChannel Is Nothing Then 
+                Return
+            End If
+            
+            Dim guild As IGuild = after.VoiceChannel.Guild
+            Dim user As IGuildUser = Await guild.GetUserAsync(sUser.Id)
+            
+            If _playerManager.IsCreated(guild.Id) OrElse user.VoiceChannel Is Nothing Then Return
+            
+            Dim sMusic As ServerMusic = Await _dbContext.ServerMusics.GetAsync(guild.Id)
+            
+            If sMusic Is Nothing Then Return
+            
+            Dim tc As ITextChannel = If(sMusic.AutoTextChannel <> 0, Await guild.GetTextChannelAsync(sMusic.AutoTextChannel), Nothing)
+            Dim vc As IVoiceChannel = user.VoiceChannel
+            
+            If vc.Id = sMusic.AutoVoiceChannel AndAlso tc IsNot Nothing Then _ 
+                Await _playerManager.CreatePlayerAsync(user, vc, tc, True)
+        End Function
+        
+        Private Async Function ShardReadyAsync(sClient As DiscordSocketClient) As Task Handles _client.ShardReady
+            If _playerManager.ActivePlayers.Count > 0
+                For Each player In _playerManager.ActivePlayers
+                    player.Value.Item2.CancelStream()
+                Next
+            End If
+            
+            If Not (_shardsReady.ContainsKey(sClient.ShardId)) 
+                _shardsReady.Add(sClient.ShardId, False)
+            Else 
+                _shardsReady(sClient.ShardId) = True
+            End If
+            
+            Await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}", 
+                $"Shard {If(_shardsReady(sClient.ShardId), "Re-", "")}Connected! ({sClient.Guilds.Count} Servers)"))
+            Await _timerManager.Initialize()
+            
+            If _initialized 
+                Return
+            ElseIf _shardsReady.Count < _client.Shards.Count
+                Return
+            End If
+            
+            _initialized = True
+            _serverCount.PreviousGuildCount = _client.Guilds.Count
+            
+            Await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help || {_client.Guilds.Count} Servers!", 
+                                       type := ActivityType.Watching)
+        End Function
+            
     End Class
     
 End NameSpace
-'
-'namespace Railgun.Core
-'{
-'    public class Events
-'    {
-
-'        private TimerManager timerManager;
-'
-'        public Events(MasterConfig config, DiscordShardedClient client, Log log, CommandUtils commandUtils, ServerCount serverCount, MusicService musicService, PlayerManager playerManager, TimerManager timerManager, VManager<GFD_Bite> vgBite, VManager<GFD_RST> vgRst, VManager<GD_Command> vgCommand, VManager<GD_JoinLeave> vgJoinLeave, VManager<GD_Music> vgMusic, VManager<GD_Mention> vgMention, VManager<GD_Prefix> vgPrefix, VManager<GD_Warn> vgWarn, VManager<UD_Mention> vuMention, VManager<FD_AntiCaps> vfAntiCaps, VManager<FD_AntiUrl> vfAntiUrl) {
-'            client.JoinedGuild += JoinedGuildAsync;
-'            client.LeftGuild += LeftGuildAsync;
-'            client.UserJoined += UserJoinedAsync;
-'            client.UserLeft += UserLeftAsync;
-'            client.UserVoiceStateUpdated += UserVoiceUpdatedAsync;
-'            client.ShardReady += ShardReadyAsync;
-'
-'            this.config = config;
-'            this.client = client;
-'            this.log = log;
-'            this.commandUtils = commandUtils;
-'            this.serverCount = serverCount;
-'            this.musicService = musicService;
-'            this.timerManager = timerManager;
-'            this.playerManager = playerManager;
-'            this.vgBite = vgBite;
-'            this.vgRst = vgRst;
-'            this.vgCommand = vgCommand;
-'            this.vgJoinLeave = vgJoinLeave;
-'            this.vgMention = vgMention;
-'            this.vgMusic = vgMusic;
-'            this.vgPrefix = vgPrefix;
-'            this.vgWarn = vgWarn;
-'            this.vuMention = vuMention;
-'            this.vfAntiCaps = vfAntiCaps;
-'            this.vfAntiUrl = vfAntiUrl;
-'        }
-'
-'        private async Task JoinedGuildAsync(SocketGuild sGuild)
-'            => await log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager);
-'
-'        private async Task LeftGuildAsync(SocketGuild sGuild)
-'            => await Task.Factory.StartNew(async () => await DedicatedLeftGuildTask(sGuild));
-'
-'        private async Task DedicatedLeftGuildTask(SocketGuild sGuild) {
-'            if (playerManager.IsCreated(sGuild.Id)) playerManager.GetPlayer(sGuild.Id).CancelStream();
-'
-'            GFD_Bite vBite = await vgBite.GetAsync(sGuild.Id);
-'            GFD_RST vRst = await vgRst.GetAsync(sGuild.Id);
-'            GD_Command vCommand = await vgCommand.GetAsync(sGuild.Id);
-'            GD_JoinLeave vJoinLeave = await vgJoinLeave.GetAsync(sGuild.Id);
-'            GD_Music vMusic = await vgMusic.GetAsync(sGuild.Id);
-'            GD_Mention vMention = await vgMention.GetAsync(sGuild.Id);
-'            GD_Prefix vPrefix = await vgPrefix.GetAsync(sGuild.Id);
-'            GD_Warn vWarn = await vgWarn.GetAsync(sGuild.Id);    
-'            FD_AntiCaps vAntiCaps = await vfAntiCaps.GetAsync(sGuild.Id);
-'            FD_AntiUrl vAntiUrl = await vfAntiUrl.GetAsync(sGuild.Id);
-'
-'            await musicService.CancelGuildMusicProcessingAsync(sGuild.Id);
-'
-'            if (vBite != null) await vBite.DeleteAsync();
-'            if (vRst != null) await vRst.DeleteAsync();
-'            if (vCommand != null) await vCommand.DeleteAsync();
-'            if (vJoinLeave != null) await vJoinLeave.DeleteAsync();
-'            if (vMention != null) await vMention.DeleteAsync();
-'            if (vMusic != null) await vMusic.DeleteAsync();            
-'            if (vPrefix != null) await vPrefix.DeleteAsync();
-'            if (vWarn != null) await vWarn.DeleteAsync();
-'            if (vAntiCaps != null) await vAntiCaps.DeleteAsync();
-'            if (vAntiUrl != null) await vAntiUrl.DeleteAsync();
-'
-'            await log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager);
-'        }
-'
-'        private async Task UserJoinedAsync(SocketGuildUser sUser) {
-'            IGuildUser user = sUser;
-'            GD_JoinLeave gJoinLeave = await vgJoinLeave.GetAsync(user.GuildId);
-'
-'            if (gJoinLeave == null) return;
-'
-'            GD_Mention gMention = await vgMention.GetAsync(user.GuildId);
-'            UD_Mention uMention = await vuMention.GetAsync(user.Id);
-'            string notification = gJoinLeave.GetMessage(MsgType.Join).Replace("<server>", user.Guild.Name);
-'
-'            notification = notification.Replace("<user>", await commandUtils.GetUsernameOrMentionAsync(user));
-'            await SendJoinLeaveMessageAsync(gJoinLeave, user, notification);            
-'        }
-'
-'        private async Task UserLeftAsync(SocketGuildUser sUser) {
-'            IGuildUser user = sUser;
-'            GD_JoinLeave gJoinLeave = await vgJoinLeave.GetAsync(user.GuildId);
-'
-'            if (gJoinLeave == null) return;
-'
-'            string notification = gJoinLeave.GetMessage(MsgType.Leave);
-'
-'            if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<user>", user.Username);
-'            else return;
-'            
-'            await SendJoinLeaveMessageAsync(gJoinLeave, user, notification);      
-'        }
-'
-'        private async Task SendJoinLeaveMessageAsync(GD_JoinLeave gJoinLeave, IGuildUser user, string notification) {
-'            if (string.IsNullOrEmpty(notification))
-'                return;
-'            else if (gJoinLeave.SendAsDm)
-'                try {
-'                    IDMChannel dm = await user.GetOrCreateDMChannelAsync();
-'                    await dm.SendMessageAsync(notification);
-'                } catch { }                
-'            else if (gJoinLeave.JoinLeaveChannelId != 0) {
-'                IGuild guild = user.Guild;
-'                ITextChannel tc = await guild.GetTextChannelAsync(gJoinLeave.JoinLeaveChannelId);
-'
-'                if (tc != null) await tc.SendMessageAsync(notification);
-'            }
-'        }
-'
-'        private async Task UserVoiceUpdatedAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after) {
-'            if (sUser.IsBot || sUser.IsWebhook) return;
-'
-'            if (after.VoiceChannel == null) return;
-'
-'            IGuild guild = after.VoiceChannel.Guild;
-'            IGuildUser user = await guild.GetUserAsync(sUser.Id);
-'
-'            if (playerManager.IsCreated(guild.Id) || user.VoiceChannel == null) 
-'                return;
-'
-'            GD_Music gMusic = await vgMusic.GetAsync(guild.Id);
-'
-'            if (gMusic == null) return;
-'
-'            IVoiceChannel vc = user.VoiceChannel;
-'            ITextChannel tc = (gMusic.AutoTextChannel != 0) ? await guild.GetTextChannelAsync(gMusic.AutoTextChannel) : null;
-'
-'            if (vc.Id == gMusic.AutoVoiceChannel && tc != null)
-'                await playerManager.CreatePlayerAsync(user, vc, tc, true);
-'        }
-'
-'        private async Task ShardReadyAsync(DiscordSocketClient sClient) {
-'            if (playerManager.ActivePlayers.Count > 0)
-'                foreach (var player in playerManager.ActivePlayers)
-'                    player.Value.Item2.CancelStream();
-'            
-'            if (!shardsReady.ContainsKey(sClient.ShardId)) shardsReady.Add(sClient.ShardId, false);
-'            else shardsReady[sClient.ShardId] = true;
-'
-'            await log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}", $"Shard {((shardsReady[sClient.ShardId]) ? "Re-" : "")}Connected! ({sClient.Guilds.Count} Servers)"));
-'            await timerManager.Initialize();
-'            
-'            if (initialized) return;
-'            else if (shardsReady.Count < client.Shards.Count) return;
-'
-'            initialized = true;
-'            serverCount.PreviousGuildCount = client.Guilds.Count;
-'            
-'            await client.SetGameAsync($"{config.Prefix}help || {client.Guilds.Count} Servers!", type:ActivityType.Watching);
-'        }
-'    }
-'}
