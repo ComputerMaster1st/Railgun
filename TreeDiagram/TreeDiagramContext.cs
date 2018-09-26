@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Configuration;
@@ -57,6 +58,23 @@ namespace TreeDiagram
                 x.Property(y => y.PlaylistId).HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
             });
             base.OnModelCreating(modelBuilder);
+        }
+
+        public async Task DeleteGuildDataAsync(ulong id)
+        {
+            await FilterCapses.DeleteAsync(id);
+            await FilterUrls.DeleteAsync(id);
+            
+            await FunBites.DeleteAsync(id);
+            await FunRsts.DeleteAsync(id);
+            
+            await ServerCommands.DeleteAsync(id);
+            await ServerMentions.DeleteAsync(id);
+            await ServerMusics.DeleteAsync(id);
+            await ServerWarnings.DeleteAsync(id);
+            await ServerJoinLeaves.DeleteAsync(id);
+
+            await SaveChangesAsync();
         }
     }
 }
