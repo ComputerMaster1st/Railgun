@@ -5,10 +5,10 @@ using System.Timers;
 
 namespace TreeDiagram.Models
 {
-    public class TimerBase
+    public abstract class TimerBase : ITreeModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
-        public int Id { get; internal set; }
+        public ulong Id { get; internal set; }
         
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }

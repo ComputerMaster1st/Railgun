@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using TreeDiagram.Configuration;
 using TreeDiagram.Models.Server;
@@ -20,22 +19,22 @@ namespace TreeDiagram
 
         private const int Port = 5432;
         
-        public DbSet<FilterCaps> FilterCapses { get; internal set; }
-        public DbSet<FilterUrl> FilterUrls { get; internal set; }
+        public TreeDbSet<FilterCaps> FilterCapses { get; internal set; }
+        public TreeDbSet<FilterUrl> FilterUrls { get; internal set; }
         
-        public DbSet<FunBite> FunBites { get; internal set; }
-        public DbSet<FunRst> FunRsts { get; internal set; }
+        public TreeDbSet<FunBite> FunBites { get; internal set; }
+        public TreeDbSet<FunRst> FunRsts { get; internal set; }
 
-        public DbSet<ServerCommand> ServerCommands { get; internal set; }
-        public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; }
-        public DbSet<ServerMention> ServerMentions { get; internal set; }
-        public DbSet<ServerMusic> ServerMusics { get; internal set; }
-        public DbSet<ServerWarning> ServerWarnings { get; internal set; }
+        public TreeDbSet<ServerCommand> ServerCommands { get; internal set; }
+        public TreeDbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; }
+        public TreeDbSet<ServerMention> ServerMentions { get; internal set; }
+        public TreeDbSet<ServerMusic> ServerMusics { get; internal set; }
+        public TreeDbSet<ServerWarning> ServerWarnings { get; internal set; }
         
-        public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
+        public TreeDbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
 
-        public DbSet<UserCommand> UserCommands { get; internal set; }
-        public DbSet<UserMention> UserMentions { get; internal set; }
+        public TreeDbSet<UserCommand> UserCommands { get; internal set; }
+        public TreeDbSet<UserMention> UserMentions { get; internal set; }
 
         internal TreeDiagramContext(PostgresConfig config)
         {
