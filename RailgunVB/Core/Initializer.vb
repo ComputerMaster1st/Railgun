@@ -61,6 +61,7 @@ Namespace Core
                 .AddSingleton(Of CommandManager) _
                 .AddSingleton(Of FilterManager) _
                 .AddSingleton(Of PlayerManager) _
+                .AddSingleton(Of TimerManager) _
                 .AddSingleton(Of AntiCaps) _
                 .AddSingleton(Of AntiUrl) _
                 .BuildServiceProvider()
