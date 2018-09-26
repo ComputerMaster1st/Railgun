@@ -73,6 +73,7 @@ Namespace Core
 
         Public Async Function InitializeCommandsAsync() As Task
             _services.GetService(Of Analytics)()
+            _services.GetService(Of CommandManager)()
             
             Await _log.LogToConsoleAsync(new LogMessage(
                 LogSeverity.Info,
