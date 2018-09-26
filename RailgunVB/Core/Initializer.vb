@@ -5,6 +5,7 @@ Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Configuration
+Imports RailgunVB.Core.Filters
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Utilities
@@ -55,9 +56,12 @@ Namespace Core
                 .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
                 .AddSingleton(_treeDiagramService.GetMusicService()) _
                 .AddSingleton(Of Analytics) _
+                .AddSingleton(Of CommandUtils) _
+                .AddSingleton(Of Events) _
                 .AddSingleton(Of CommandManager) _
                 .AddSingleton(Of FilterManager) _
-                .AddSingleton(Of CommandUtils) _
+                .AddSingleton(Of PlayerManager) _
+                .AddSingleton(Of AntiUrl) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
@@ -65,7 +69,9 @@ Namespace Core
 
         Public Async Function InitializeCommandsAsync() As Task
             _services.GetService(Of Analytics)()
+            _services.GetService(Of Events)()
             _services.GetService(Of CommandManager)()
+            _services.GetService(Of AntiUrl)()
             
             Await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", "TreeDiagram Ready!"))
             Await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)
