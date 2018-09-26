@@ -4,6 +4,7 @@ Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.Extensions.DependencyInjection
+Imports RailgunVB.Core.Api
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Filters
 Imports RailgunVB.Core.Logging
@@ -58,6 +59,7 @@ Namespace Core
                 .AddSingleton(Of Analytics) _
                 .AddSingleton(Of CommandUtils) _
                 .AddSingleton(Of Events) _
+                .AddSingleton(Of RandomCat) _
                 .AddSingleton(Of CommandManager) _
                 .AddSingleton(Of FilterManager) _
                 .AddSingleton(Of PlayerManager) _
