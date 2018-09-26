@@ -4,7 +4,7 @@ Imports Discord.Commands
 Imports Discord.WebSocket
 Imports RailgunVB.Core.Logging
 
-Namespace Core
+Namespace Core.Utilities
     
     Public Class Analytics
         

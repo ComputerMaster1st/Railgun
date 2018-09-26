@@ -6,6 +6,7 @@ Imports Discord.WebSocket
 Imports Microsoft.EntityFrameworkCore
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
+Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
 Imports TreeDiagram.Models.User
