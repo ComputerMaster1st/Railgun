@@ -31,17 +31,14 @@ Namespace Core
         End Function
         
         Private Function MessageReceived(oldMessage As Cacheable(Of IMessage, ULong), 
-                                         newMessage As SocketMessage, 
-                                         channel As ISocketMessageChannel
-                                         ) As Task Handles _client.MessageUpdated
+                                         newMessage As SocketMessage,  channel As ISocketMessageChannel
+                                        ) As Task Handles _client.MessageUpdated
             _UpdatedMessages += 1
             Return Task.CompletedTask
         End Function
         
-        Private Async Function ExecutedCommandAsync(command As CommandInfo, 
-                                                    context As ICommandContext, 
-                                                    result As IResult
-                                                   ) As Task Handles _commandService.CommandExecuted
+        Private Async Function ExecutedCommandAsync(command As CommandInfo,  context As ICommandContext, 
+                                                    result As IResult) As Task Handles _commandService.CommandExecuted
             If Not (result.IsSuccess) Then Return
             
             Dim cmdString As String = command.Aliases(0)

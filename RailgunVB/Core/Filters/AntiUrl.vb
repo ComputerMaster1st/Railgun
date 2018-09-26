@@ -38,9 +38,8 @@ Namespace Core.Filters
             If message.Author.Id = self.Id 
                 Return Nothing
             ElseIf Not (self.GetPermissions(tc).ManageMessages)
-                Await tc.SendMessageAsync(String.Format(
-                    "{0} Triggered but missing {1} permission!", 
-                    Format.Bold("Anti-Url :"), Format.Bold("Manage Messages")))
+                Await tc.SendMessageAsync(
+                    $"{Format.Bold("Anti-Url :")} Triggered but missing {Format.Bold("Manage Messages")} permission!")
                 Return Nothing
             End If
             
@@ -48,8 +47,8 @@ Namespace Core.Filters
             Dim content As String = message.Content.ToLower()
             Dim output As New StringBuilder
             
-            output.AppendFormat("{0} Deleted {1}'s Message! {2}", 
-                                Format.Bold("Anti-Url :"), user.Mention, Format.Bold("Reason :"))
+            output.AppendFormat("{0} Deleted {1}'s Message! {2}", Format.Bold("Anti-Url :"), user.Mention, 
+                Format.Bold("Reason :"))
             
             If data.BlockServerInvites AndAlso content.Contains("discord.gg/") Then 
                 output.AppendFormat("Server Invite")

@@ -10,14 +10,16 @@ Namespace Core.Logging
         Private ReadOnly _config As Configuration.DiscordConfig
         Private WithEvents _client As DiscordShardedClient
         
-        Private ReadOnly _logFilename As String = String.Format("logs/{0}.log", DateTime.Today.ToString("yyyy-MM-dd"))
+        Private ReadOnly _logFilename As String = $"logs/{DateTime.Today.ToString("yyyy-MM-dd")}.log"
 
         Public Sub New(config As MasterConfig, client As DiscordShardedClient)
             _config = config.DiscordConfig
             _client = client
         End Sub
         
-        Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, Optional pingMaster As Boolean = False, Optional filename As String = Nothing) As Task
+        Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, 
+                                               Optional pingMaster As Boolean = False, 
+                                               Optional filename As String = Nothing) As Task
             If _config.MasterGuildId = 0 Then Return
             
             Dim guild As IGuild = Await CType(_client, IDiscordClient).GetGuildAsync(_config.MasterGuildId)
@@ -55,13 +57,11 @@ Namespace Core.Logging
             Await WriteToLogFileAsync(message.ToString())
         End Function
         
-        Private Async Function SendBotLogAsync(guild As IGuild, type As BotLogType, channelId As ULong, entry As String, pingMaster As Boolean, filename As String) As Task
-            Dim output As String = String.Format(
-                "[ {0} ] || {1} {2}",
-                DateTime.Now.ToString("HH:mm:ss"),
-                If(Not (type.Equals(BotLogType.Common)), String.Format("{0} ||", type), ""),
-                entry
-            )
+        Private Async Function SendBotLogAsync(guild As IGuild, type As BotLogType, channelId As ULong,
+                                               entry As String, pingMaster As Boolean, filename As String) As Task
+            Dim output As String = 
+                $"[ {DateTime.Now.ToString("HH:mm:ss")} ] || { _ 
+                    If(Not (type.Equals(BotLogType.Common)), $"{type} ||")} {entry}"
             
             Try
                 Dim tc As ITextChannel
@@ -74,10 +74,10 @@ Namespace Core.Logging
                     Return
                 End If
                 
-                Dim pingMasterStr As String = If(pingMaster, String.Format("<@!{0}>", _config.MasterAdminId), String.Empty)
+                Dim pingMasterStr As String = If(pingMaster, $"<@!{_config.MasterAdminId}>", String.Empty)
                 
                 If Not (String.IsNullOrEmpty(filename))
-                    Await tc.SendFileAsync(filename, String.Format("Error! Refer to file, {0}!", pingMasterStr))
+                    Await tc.SendFileAsync(filename, $"Error! Refer to file, {pingMasterStr}!")
                     File.Delete(filename)
                     Return
                 End If

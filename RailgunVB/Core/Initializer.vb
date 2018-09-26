@@ -41,18 +41,9 @@ Namespace Core
             Dim mongoConfig As DatabaseConfig = _config.MongoDatabaseConfig
             
             _treeDiagramService = New TreeDiagramService(
-                New PostgresConfig(
-                    postgreConfig.Hostname,
-                    postgreConfig.Username,
-                    postgreConfig.Password,
+                New PostgresConfig(postgreConfig.Hostname, postgreConfig.Username, postgreConfig.Password,
                     postgreConfig.Database
-                ), 
-                New MongoConfig(
-                    mongoConfig.Hostname,
-                    mongoConfig.Username,
-                    mongoConfig.Password
-                )
-            )
+                ), New MongoConfig(mongoConfig.Hostname, mongoConfig.Username, mongoConfig.Password))
             
             _services = New ServiceCollection() _
                 .AddSingleton(_config) _
@@ -75,30 +66,17 @@ Namespace Core
             _services.GetService(Of Analytics)()
             _services.GetService(Of CommandManager)()
             
-            Await _log.LogToConsoleAsync(new LogMessage(
-                LogSeverity.Info,
-                "System",
-                "TreeDiagram Ready!"
-            ))
-            
+            Await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", "TreeDiagram Ready!"))
             Await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)
-            
-            Await _log.LogToConsoleAsync(new LogMessage(
-                LogSeverity.Info,
-                "System",
-                String.Format("{0} Commands Loaded!", _commandService.Commands.Count)
-            ))
+            Await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", 
+                $"{_commandService.Commands.Count} Commands Loaded!"))
         End Function
         
         Private Async Function UnobservedTaskAsync(args As UnobservedTaskExceptionEventArgs) As Task
             args.SetObserved()
             
-            Await _log.LogToConsoleAsync(new LogMessage(
-                LogSeverity.Error,
-                "System",
-                "An unobserved task threw an exception!",
-                args.Exception
-            ))
+            Await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Error, "System", 
+                "An unobserved task threw an exception!", args.Exception))
             
             Dim output As New StringBuilder
             
@@ -108,7 +86,8 @@ Namespace Core
             If output.Length < 1950 Then
                 Await _log.LogToBotLogAsync(output.ToString(), BotLogType.TaskScheduler)
             Else 
-                Await _log.LogToBotLogAsync("An unobserved task threw an exception! Refer to log files!", BotLogType.TaskScheduler)
+                Await _log.LogToBotLogAsync("An unobserved task threw an exception! Refer to log files!", 
+                    BotLogType.TaskScheduler)
             End If
         End Function
         

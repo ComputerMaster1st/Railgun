@@ -25,15 +25,9 @@ Namespace Core.Managers
         
         Private ReadOnly _services As IServiceProvider
 
-        Public Sub New(config As MasterConfig, 
-                       log As Log, 
-                       analytics As Analytics, 
-                       filterManager As FilterManager, 
-                       dbContext As TreeDiagramContext,
-                       client As DiscordShardedClient, 
-                       commandService As CommandService, 
-                       services As IServiceProvider
-                      )
+        Public Sub New(config As MasterConfig, log As Log, analytics As Analytics, filterManager As FilterManager, 
+                       dbContext As TreeDiagramContext, client As DiscordShardedClient,
+                       commandService As CommandService,  services As IServiceProvider)
             _config = config
             _log = log
             _analytics = analytics
@@ -66,8 +60,7 @@ Namespace Core.Managers
         End Function
         
         Private Async Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
-                                                  newMessage As SocketMessage, 
-                                                  channel As ISocketMessageChannel
+                                                  newMessage As SocketMessage, channel As ISocketMessageChannel
                                                  ) As Task Handles _client.MessageUpdated
             Await ProcessMessageAsync(newMessage)
         End Function
@@ -105,7 +98,8 @@ Namespace Core.Managers
                     Await ExecuteCommandAsync(uCommand.Prefix, msg, argPos, sCommand)
                 End If
             Catch e As Exception
-                _log.LogToConsoleAsync(New LogMessage(LogSeverity.Warning, "Command", "Unexpected Exception!", e)).GetAwaiter()
+                _log.LogToConsoleAsync(New LogMessage(
+                    LogSeverity.Warning, "Command", "Unexpected Exception!", e)).GetAwaiter()
             End Try
         End Function
         
@@ -159,8 +153,8 @@ Namespace Core.Managers
             End If
             
             Await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager, true)
-            Await cmdContext.Channel.SendMessageAsync($"{Format.Bold("OH NO!")} Something bad has happened inside of me! 
-                I've alerted my developer about the problem. I hope they'll get me all patched up soon!")
+            Await cmdContext.Channel.SendMessageAsync($"{Format.Bold("OH NO!") _
+                    } Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!")
         End Function
         
     End Class
