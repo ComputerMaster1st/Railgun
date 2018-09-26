@@ -57,6 +57,7 @@ Namespace Core
                 .AddSingleton(Of Analytics) _
                 .AddSingleton(Of CommandManager) _
                 .AddSingleton(Of FilterManager) _
+                .AddSingleton(Of CommandUtils) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
