@@ -16,7 +16,6 @@ Namespace Core.Music
         Private _client As IAudioClient = Nothing
         Private _audioDisconnected As Boolean = False
         Private _audioDisconnectException As Exception = Nothing
-        Private _autoJoined As Boolean = False
         Private _autoDisconnected As Boolean = False
         Private _musicCancelled As Boolean = False
         Private _streamCancelled As Boolean = False
@@ -90,7 +89,6 @@ Namespace Core.Music
         
         Public Sub StartPlayer(playlistId As ObjectId, autoJoin As Boolean)
             _playlistId = playlistId
-            _autoJoined = autoJoin
             _Task = Task.Run(New Action(AddressOf StartAsync))
         End Sub
         
