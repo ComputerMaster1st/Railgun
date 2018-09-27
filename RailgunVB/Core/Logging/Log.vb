@@ -56,6 +56,24 @@ Namespace Core.Logging
         End Function
         
         Public Async Function LogToConsoleAsync(message As LogMessage) As Task Handles _client.Log
+            Select message.Severity
+                Case LogSeverity.Info
+                    Console.ForegroundColor = ConsoleColor.Blue
+                    Exit Select
+                Case LogSeverity.Critical
+                    Console.ForegroundColor = ConsoleColor.DarkRed
+                    Exit Select
+                Case LogSeverity.Error
+                    Console.ForegroundColor = ConsoleColor.Red
+                    Exit Select
+                Case LogSeverity.Warning
+                    Console.ForegroundColor = ConsoleColor.Yellow
+                    Exit Select
+                Case Else
+                    Console.ForegroundColor = ConsoleColor.Magenta
+                    Exit Select
+            End Select
+            
             Console.WriteLine(message.ToString())
             Await WriteToLogFileAsync(message.ToString())
         End Function

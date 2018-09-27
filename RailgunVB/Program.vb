@@ -20,7 +20,7 @@ Module Program
         _config = Await MasterConfig.LoadAsync()
         
         _client = New DiscordShardedClient(New DiscordSocketConfig() With {
-            .LogLevel = LogSeverity.Verbose,
+            .LogLevel = LogSeverity.Info,
             .DefaultRetryMode = RetryMode.AlwaysRetry
         })
         
