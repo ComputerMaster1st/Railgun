@@ -5,6 +5,7 @@ Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Api
+Imports RailgunVB.Core.Api.Youtube
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Filters
 Imports RailgunVB.Core.Logging
@@ -66,6 +67,7 @@ Namespace Core
                 .AddSingleton(Of TimerManager) _
                 .AddSingleton(Of AntiCaps) _
                 .AddSingleton(Of AntiUrl) _
+                .AddTransient(Of YoutubeSearch) _
                 .BuildServiceProvider()
             
             AddHandler TaskScheduler.UnobservedTaskException, Async Sub(s, a) Await UnobservedTaskAsync(a) 
