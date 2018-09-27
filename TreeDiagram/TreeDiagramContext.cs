@@ -65,17 +65,17 @@ namespace TreeDiagram
 
         public async Task DeleteGuildDataAsync(ulong id)
         {
-            await FilterCapses.DeleteAsync(id);
-            await FilterUrls.DeleteAsync(id);
+            FilterCapses.Remove(await FilterCapses.FirstOrDefaultAsync(find => find.Id == id));
+            FilterUrls.Remove(await FilterUrls.FirstOrDefaultAsync(find => find.Id == id));
             
-            await FunBites.DeleteAsync(id);
-            await FunRsts.DeleteAsync(id);
+            FunBites.Remove(await FunBites.FirstOrDefaultAsync(find => find.Id == id));
+            FunRsts.Remove(await FunRsts.FirstOrDefaultAsync(find => find.Id == id));
             
-            await ServerCommands.DeleteAsync(id);
-            await ServerMentions.DeleteAsync(id);
-            await ServerMusics.DeleteAsync(id);
-            await ServerWarnings.DeleteAsync(id);
-            await ServerJoinLeaves.DeleteAsync(id);
+            ServerCommands.Remove(await ServerCommands.FirstOrDefaultAsync(find => find.Id == id));
+            ServerMentions.Remove(await ServerMentions.FirstOrDefaultAsync(find => find.Id == id));
+            ServerMusics.Remove(await ServerMusics.FirstOrDefaultAsync(find => find.Id == id));
+            ServerWarnings.Remove(await ServerWarnings.FirstOrDefaultAsync(find => find.Id == id));
+            ServerJoinLeaves.Remove(await ServerJoinLeaves.FirstOrDefaultAsync(find => find.Id == id));
 
             await SaveChangesAsync();
         }

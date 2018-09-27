@@ -99,7 +99,7 @@ Namespace Core.Containers
                 Data.Timer = Nothing
             End If
             
-            Await _dbContext.TimerRemindMes.DeleteAsync(Data.GuildId)
+            _dbContext.TimerRemindMes.Remove(Data)
             Await _dbContext.SaveChangesAsync()
         End Function
         

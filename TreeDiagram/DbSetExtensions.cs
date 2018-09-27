@@ -31,8 +31,5 @@ namespace TreeDiagram
 
         public static async Task<TEntity> GetAsync<TEntity>(this DbSet<TEntity> set, ulong id)
             where TEntity : class, ITreeModel => await set.FirstOrDefaultAsync(find => find.Id == id);
-        
-        public static async Task DeleteAsync<TEntity>(this DbSet<TEntity> set, ulong id)
-            where TEntity : class, ITreeModel => set.Remove(await set.FirstOrDefaultAsync(find => find.Id == id));
     }
 }
