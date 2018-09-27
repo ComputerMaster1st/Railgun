@@ -53,10 +53,24 @@ namespace TreeDiagram
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ServerMusic>(x =>
-            {
-                x.Property(y => y.PlaylistId).HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
-            });
+            modelBuilder
+                .Entity<FilterCaps>(x => { x.ToTable(typeof(FilterCaps).Name); })
+                .Entity<FilterUrl>(x => { x.ToTable(typeof(FilterUrl).Name); })
+                .Entity<FunBite>(x => { x.ToTable(typeof(FunBite).Name); })
+                .Entity<FunRst>(x => { x.ToTable(typeof(FunRst).Name); })
+                .Entity<ServerCommand>(x => { x.ToTable(typeof(ServerCommand).Name); })
+                .Entity<ServerJoinLeave>(x => { x.ToTable(typeof(ServerJoinLeave).Name); })
+                .Entity<ServerMention>(x => { x.ToTable(typeof(ServerMention).Name); })
+                .Entity<ServerMusic>(x =>
+                {
+                    x.Property(y => y.PlaylistId)
+                        .HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+                    x.ToTable(typeof(ServerMusic).Name);
+                })
+                .Entity<ServerWarning>(x => { x.ToTable(typeof(ServerWarning).Name); })
+                .Entity<TimerRemindMe>(x => { x.ToTable(typeof(TimerRemindMe).Name); })
+                .Entity<UserCommand>(x => { x.ToTable(typeof(UserCommand).Name); })
+                .Entity<UserMention>(x => { x.ToTable(typeof(UserMention).Name); });
             base.OnModelCreating(modelBuilder);
         }
 
