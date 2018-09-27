@@ -7,6 +7,15 @@ namespace TreeDiagram
 {
     public static class DbSetExtensions
     {
+        public static async Task<TEntity> CreateAsync<TEntity>(this DbSet<TEntity> set) 
+            where TEntity : class, ITreeModel 
+        {
+            var data = (TEntity)Activator.CreateInstance(typeof(TEntity));
+            await set.AddAsync(data);
+
+            return data;
+        }
+        
         public static async Task<TEntity> GetOrCreateAsync<TEntity>(this DbSet<TEntity> set, ulong id)
             where TEntity : class, ITreeModel
         {
