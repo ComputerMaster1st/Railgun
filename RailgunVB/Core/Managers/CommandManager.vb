@@ -73,7 +73,7 @@ Namespace Core.Managers
                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 
                 If filterMsg IsNot Nothing
-                    Await Task.Run(New Action(AddressOf AutoDeleteFilterMsgAsync(msg, filterMsg)))
+                    Await Task.Run(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg))
                     Return
                 End If
                 

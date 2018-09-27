@@ -10,11 +10,14 @@ Namespace Core.Logging
         Private ReadOnly _config As Configuration.DiscordConfig
         Private WithEvents _client As DiscordShardedClient
         
-        Private ReadOnly _logFilename As String = $"logs/{DateTime.Today.ToString("yyyy-MM-dd")}.log"
+        Private Const LogDirectory As String = "logs"
+        Private ReadOnly _logFilename As String = $"{LogDirectory}/{DateTime.Today.ToString("yyyy-MM-dd")}.log"
 
         Public Sub New(config As MasterConfig, client As DiscordShardedClient)
             _config = config.DiscordConfig
             _client = client
+            
+            If Not (Directory.Exists(LogDirectory)) Then Directory.CreateDirectory(LogDirectory)
         End Sub
         
         Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, 
@@ -61,7 +64,7 @@ Namespace Core.Logging
                                                entry As String, pingMaster As Boolean, filename As String) As Task
             Dim output As String = 
                 $"[ {DateTime.Now.ToString("HH:mm:ss")} ] || { _ 
-                    If(Not (type.Equals(BotLogType.Common)), $"{type} ||")} {entry}"
+                    If(Not (type = BotLogType.Common), $"{type} ||", "")} {entry}"
             
             Try
                 Dim tc As ITextChannel

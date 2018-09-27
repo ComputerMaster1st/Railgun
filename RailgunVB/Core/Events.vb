@@ -53,7 +53,7 @@ Namespace Core
         End Function
         
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
-            Await Task.Run(New Action(AddressOf DedicatedLeftGuildAsync(sGuild)))
+            Await Task.Run(Async Sub() Await DedicatedLeftGuildAsync(sGuild))
         End Function
         
         Private Async Function DedicatedLeftGuildAsync(sGuild As SocketGuild) As Task

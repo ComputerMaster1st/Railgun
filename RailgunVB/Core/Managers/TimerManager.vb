@@ -30,7 +30,7 @@ Namespace Core.Managers
             _log = log
             _dbContext = dbContext
             
-            AddHandler _masterTimer.Elapsed, MasterTimerElapsed
+            AddHandler _masterTimer.Elapsed, Async Sub() Await MasterTimerElapsed()
             _masterTimer.AutoReset = True
         End Sub
         
@@ -122,8 +122,8 @@ Namespace Core.Managers
                                                               Optional isNew As Boolean = False) As Task(Of Boolean)
             Dim remainingTime As TimeSpan = data.TimerExpire - DateTime.UtcNow
             
-            If remainingTime.TotalMinutes < 30 AndAlso 
-               _remindMeContainers.Count(Function(container) container.Data.Id = data.Id) < 1
+            If remainingTime.TotalMinutes < 30 AndAlso _remindMeContainers.FirstOrDefault(
+                Function(find) find.Data.Id = data.Id) Is Nothing
                 Dim container As New RemindMeContainer(_log, _client, _dbContext, data)
                 
                 container.StartTimer(remainingTime.TotalMilliseconds)

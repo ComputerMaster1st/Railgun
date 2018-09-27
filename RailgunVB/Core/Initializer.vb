@@ -53,7 +53,7 @@ Namespace Core
                 .AddSingleton(_log) _
                 .AddSingleton(_serverCount) _
                 .AddSingleton(_client) _
-                .AddSingleton(Of IDiscordClient)(_config) _
+                .AddSingleton(Of IDiscordClient)(_client) _
                 .AddSingleton(_commandService) _
                 .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
                 .AddSingleton(_treeDiagramService.GetMusicService()) _

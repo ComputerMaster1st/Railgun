@@ -27,7 +27,7 @@ Namespace Core.Containers
         Public Sub StartTimer(ms As Double)
             Data.Timer = New Timer(ms)
             Data.Timer.AutoReset = False
-            AddHandler Data.Timer.Elapsed, RemindMeElapsed
+            AddHandler Data.Timer.Elapsed, Async Sub(s, a) Await RemindMeElapsed()
             Data.Timer.Start()
         End Sub
 
@@ -101,7 +101,7 @@ Namespace Core.Containers
             
             Await _dbContext.TimerRemindMes.DeleteAsync(Data.GuildId)
             Await _dbContext.SaveChangesAsync()
-        End Sub
+        End Function
         
     End Class
 

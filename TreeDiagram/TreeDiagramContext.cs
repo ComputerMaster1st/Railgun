@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
@@ -11,7 +13,7 @@ using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
-    public class TreeDiagramContext : DbContext
+    public sealed class TreeDiagramContext : DbContext
     {
         private readonly string _host;
         private readonly string _user;
@@ -20,22 +22,22 @@ namespace TreeDiagram
 
         private const int Port = 5432;
         
-        public TreeDbSet<FilterCaps> FilterCapses { get; internal set; }
-        public TreeDbSet<FilterUrl> FilterUrls { get; internal set; }
+        public DbSet<FilterCaps> FilterCapses { get; internal set; }
+        public DbSet<FilterUrl> FilterUrls { get; internal set; }
         
-        public TreeDbSet<FunBite> FunBites { get; internal set; }
-        public TreeDbSet<FunRst> FunRsts { get; internal set; }
+        public DbSet<FunBite> FunBites { get; internal set; }
+        public DbSet<FunRst> FunRsts { get; internal set; }
 
-        public TreeDbSet<ServerCommand> ServerCommands { get; internal set; }
-        public TreeDbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; }
-        public TreeDbSet<ServerMention> ServerMentions { get; internal set; }
-        public TreeDbSet<ServerMusic> ServerMusics { get; internal set; }
-        public TreeDbSet<ServerWarning> ServerWarnings { get; internal set; }
+        public DbSet<ServerCommand> ServerCommands { get; internal set; }
+        public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; }
+        public DbSet<ServerMention> ServerMentions { get; internal set; }
+        public DbSet<ServerMusic> ServerMusics { get; internal set; }
+        public DbSet<ServerWarning> ServerWarnings { get; internal set; }
         
-        public TreeDbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
+        public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
 
-        public TreeDbSet<UserCommand> UserCommands { get; internal set; }
-        public TreeDbSet<UserMention> UserMentions { get; internal set; }
+        public DbSet<UserCommand> UserCommands { get; internal set; }
+        public DbSet<UserMention> UserMentions { get; internal set; }
 
         internal TreeDiagramContext(PostgresConfig config)
         {
@@ -53,24 +55,11 @@ namespace TreeDiagram
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder
-                .Entity<FilterCaps>(x => { x.ToTable(typeof(FilterCaps).Name); })
-                .Entity<FilterUrl>(x => { x.ToTable(typeof(FilterUrl).Name); })
-                .Entity<FunBite>(x => { x.ToTable(typeof(FunBite).Name); })
-                .Entity<FunRst>(x => { x.ToTable(typeof(FunRst).Name); })
-                .Entity<ServerCommand>(x => { x.ToTable(typeof(ServerCommand).Name); })
-                .Entity<ServerJoinLeave>(x => { x.ToTable(typeof(ServerJoinLeave).Name); })
-                .Entity<ServerMention>(x => { x.ToTable(typeof(ServerMention).Name); })
-                .Entity<ServerMusic>(x =>
-                {
-                    x.Property(y => y.PlaylistId)
-                        .HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
-                    x.ToTable(typeof(ServerMusic).Name);
-                })
-                .Entity<ServerWarning>(x => { x.ToTable(typeof(ServerWarning).Name); })
-                .Entity<TimerRemindMe>(x => { x.ToTable(typeof(TimerRemindMe).Name); })
-                .Entity<UserCommand>(x => { x.ToTable(typeof(UserCommand).Name); })
-                .Entity<UserMention>(x => { x.ToTable(typeof(UserMention).Name); });
+            modelBuilder.Entity<ServerMusic>(x =>
+            {
+                x.Property(y => y.PlaylistId)
+                    .HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+            });
             base.OnModelCreating(modelBuilder);
         }
 

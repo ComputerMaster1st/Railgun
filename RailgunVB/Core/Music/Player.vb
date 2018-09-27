@@ -165,7 +165,7 @@ Namespace Core.Music
             
             Try
                 Await ConnectToVoiceAsync()
-                Connected?.Invoke(Me, New PlayerConnectedEventArgs(_guildId))
+                ConnectedEvent?.Invoke(Me, New PlayerConnectedEventArgs(_guildId))
                 AddHandler _client.Disconnected, AddressOf AudioDisconnected
                 
                 Using client = _client, discordStream As AudioOutStream = client.CreateOpusStream()
@@ -184,7 +184,7 @@ Namespace Core.Music
                         If Requests.Count < 1 Then AddSongRequest(Await QueueSongAsync())
                         
                         Dim song As Song = Await _musicService.GetSongAsync(GetFirstSongRequest())
-                        Playing?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id, song.Metadata))
+                        PlayingEvent?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id, song.Metadata))
                         
                         Using databaseStream As Stream = Await song.GetMusicStreamAsync(), 
                             opusStream = New OpusOggReadStream(databaseStream)
@@ -217,7 +217,7 @@ Namespace Core.Music
                 End Using
             Catch timeEx As TimeoutException
                 _Status = PlayerStatus.Timeout
-                Timeout?.Invoke(Me, New PlayerTimeoutEventArgs(_guildId, timeEx))
+                TimeoutEvent?.Invoke(Me, New PlayerTimeoutEventArgs(_guildId, timeEx))
             Catch inEx As Exception
                 _Status = PlayerStatus.FailSafe
                 ex = inEx
@@ -227,7 +227,7 @@ Namespace Core.Music
                     _autoDisconnected = False
                 End If
                 
-                Finished?.Invoke(Me, New PlayerFinishedEventArgs(_guildId, _autoDisconnected, ex))
+                FinishedEvent?.Invoke(Me, New PlayerFinishedEventArgs(_guildId, _autoDisconnected, ex))
                 _Status = PlayerStatus.Disconnected
             End Try
         End Function
