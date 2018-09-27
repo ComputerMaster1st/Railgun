@@ -1,5 +1,7 @@
+Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core.Api
+Imports RailgunVB.Core.Preconditions
 
 Namespace Commands
     
@@ -13,7 +15,7 @@ Namespace Commands
             _randomCat = randomCat
         End Sub
         
-        <Command>
+        <Command, BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function CatAsync() As Task
             await Context.Channel.SendFileAsync(await _randomCat.GetRandomCatAsync(), "CatImg.png")
         End Function
