@@ -8,7 +8,7 @@ Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Fun
 
-Namespace Commands
+Namespace Commands.Fun
     
     <Group("bite")>
     Public Class Bite

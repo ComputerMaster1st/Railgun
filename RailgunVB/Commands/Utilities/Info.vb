@@ -9,7 +9,7 @@ Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("info")>
     Public Class Info

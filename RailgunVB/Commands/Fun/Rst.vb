@@ -7,7 +7,7 @@ Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Fun
 
-Namespace Commands
+Namespace Commands.Fun
     
     <Group("rst")>
     Public Class Rst

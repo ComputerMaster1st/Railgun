@@ -2,7 +2,7 @@ Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core.Utilities
 
-Namespace Commands
+Namespace Commands.Fun
     
     <Group("roll")>
     Public Class Roll

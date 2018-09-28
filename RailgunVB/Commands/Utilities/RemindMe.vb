@@ -5,7 +5,7 @@ Imports RailgunVB.Core.Managers
 Imports TreeDiagram
 Imports TreeDiagram.Models.TreeTimer
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("remindme")>
     Public Class RemindMe

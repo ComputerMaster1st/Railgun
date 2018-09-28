@@ -4,7 +4,7 @@ Imports Discord.Commands
 Imports TreeDiagram
 Imports TreeDiagram.Models.User
 
-Namespace Commands
+Namespace Commands.User
     
     <Group("myself"), [Alias]("self")>
     Public Class Myself

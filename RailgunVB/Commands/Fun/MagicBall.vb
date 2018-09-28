@@ -1,6 +1,6 @@
 Imports Discord.Commands
 
-Namespace Commands
+Namespace Commands.Fun
     
     <Group("8ball")>
     Public Class MagicBall

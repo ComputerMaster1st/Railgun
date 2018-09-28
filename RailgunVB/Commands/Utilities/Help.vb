@@ -3,7 +3,7 @@ Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core.Preconditions
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("help"), BotPerms(ChannelPermission.AttachFiles)>
     Public Class Help

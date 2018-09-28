@@ -2,7 +2,7 @@ Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("ping")>
     Public Class Ping

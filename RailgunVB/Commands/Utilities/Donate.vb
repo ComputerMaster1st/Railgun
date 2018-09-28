@@ -2,7 +2,7 @@ Imports System.Text
 Imports Discord
 Imports Discord.Commands
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("donate")>
     Public Class Donate

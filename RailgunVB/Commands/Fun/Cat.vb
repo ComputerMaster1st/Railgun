@@ -3,7 +3,7 @@ Imports Discord.Commands
 Imports RailgunVB.Core.Api
 Imports RailgunVB.Core.Preconditions
 
-Namespace Commands
+Namespace Commands.Fun
     
     <Group("cat")>
     Public Class Cat

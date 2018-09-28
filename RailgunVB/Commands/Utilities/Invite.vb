@@ -1,6 +1,6 @@
 Imports Discord.Commands
 
-Namespace Commands
+Namespace Commands.Utilities
     
     <Group("invite")>
     Public Class Invite
