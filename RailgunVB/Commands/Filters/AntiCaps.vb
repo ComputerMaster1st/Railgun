@@ -1,0 +1,170 @@
+Imports System.Text
+Imports Discord
+Imports Discord.Commands
+Imports RailgunVB.Core.Preconditions
+Imports TreeDiagram
+Imports TreeDiagram.Models.Server.Filter
+
+Namespace Commands.Filters
+    
+    <Group("anticaps"), UserPerms(GuildPermission.ManageMessages), 
+        BotPerms(GuildPermission.ManageMessages)>
+    Public Class AntiCaps
+        Inherits ModuleBase
+    
+        Private ReadOnly _dbContext As TreeDiagramContext
+
+        Public Sub New(dbContext As TreeDiagramContext)
+            _dbContext = dbContext
+        End Sub
+        
+        <Command>
+        Public Async Function EnableAsync() As Task
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
+            
+            data.IsEnabled = Not (data.IsEnabled)
+            
+            Await _dbContext.SaveChangesAsync()
+            Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
+        End Function
+        
+        <Command("includebots")>
+        Public Async Function IncludeBotsAsync() As Task
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
+            
+            data.IncludeBots = Not (data.IncludeBots)
+            
+            Await _dbContext.SaveChangesAsync()
+            Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
+        End Function
+        
+        <Command("percent")>
+        Public Async Function PercentAsync(percent As Integer) As Task
+            If percent < 50 OrElse percent > 100
+                await ReplyAsync("Anti-Caps Percentage must be between 50-100.")
+                Return
+            End If
+            
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
+            
+            data.Percentage = percent
+            
+            If Not (data.IsEnabled) Then data.IsEnabled = True
+            
+            Await _dbContext.SaveChangesAsync()
+            await ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.")
+        End Function
+        
+        <Command("minlength")>
+        Public Async Function MinLengthAsync(length As Integer) As Task
+            If length < 0
+                await ReplyAsync("Please specify a minimum message length of 0 or above.")
+                Return
+            End If
+            
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
+            
+            data.Length = length
+            
+            If Not (data.IsEnabled) Then data.IsEnabled = True
+            
+            Await _dbContext.SaveChangesAsync()
+            await ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.")
+        End Function
+        
+        <Command("ignore")>
+        Public Async Function IgnoreAsync(Optional pChannel As ITextChannel = Nothing) As Task
+            Dim tc As ITextChannel = If(pChannel, Context.Channel)
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
+            
+            If data.IgnoredChannels.Contains(tc.Id)
+                data.IgnoredChannels.Remove(tc.Id)
+                await ReplyAsync("Anti-Caps is now monitoring this channel.")
+            Else 
+                data.IgnoredChannels.Add(tc.Id)
+                await ReplyAsync("Anti-Caps is no longer monitoring this channel.")
+            End If
+            
+            Await _dbContext.SaveChangesAsync()
+        End Function
+        
+        <Command("show")>
+        Public Async Function ShowAsync() As Task
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetAsync(Context.Guild.Id)
+            
+            If data Is Nothing
+                await ReplyAsync("There are no settings available for Anti-Caps. Currently disabled.")
+                Return
+            End If
+            
+            Dim output As New StringBuilder
+            
+            output.AppendLine("Anti-Caps Settings").AppendLine() _
+                .AppendFormat("          Status : {0}", If(data.IsEnabled, "Enabled", "Disabled")).AppendLine() _
+                .AppendFormat("    Monitor Bots : {0}", If(data.IncludeBots, "Yes", "No")).AppendLine() _
+                .AppendFormat("     Sensitivity : {0}", data.Percentage).AppendLine() _
+                .AppendFormat("Min. Msg. Length : {0}", data.Length).AppendLine()
+            
+            If data.IgnoredChannels.Count > 0
+                Dim initial As Boolean = True
+                Dim deletedChannels As New List(Of ULong)
+                
+                For Each channelId As ULong In data.IgnoredChannels
+                    Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channelId)
+                    
+                    If tc Is Nothing
+                        deletedChannels.Add(channelId)
+                        Continue For 
+                    ElseIf initial
+                        output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine()
+                        initial = False
+                    Else 
+                        output.AppendFormat("                 : #{0}", tc.Name).AppendLine()
+                    End If
+                Next
+                
+                If deletedChannels.Count > 0
+                    For Each channelId As ULong In deletedChannels
+                        data.IgnoredChannels.Remove(channelId)
+                    Next
+                    
+                    Await _dbContext.SaveChangesAsync()
+                End If
+            Else 
+                output.AppendLine("Ignored Channels : None")
+            End If
+            
+            await ReplyAsync(Format.Code(output.ToString()))
+        End Function
+        
+        <Command("reset")>
+        Public Async Function ResetAsync() As Task
+            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetAsync(Context.Guild.Id)
+            
+            If data Is Nothing
+                await ReplyAsync("Anti-Caps has no data to reset.")
+                Return
+            End If
+            
+            _dbContext.FilterCapses.Remove(data)
+            Await _dbContext.SaveChangesAsync()
+            await ReplyAsync("Anti-Caps has been reset & disabled.")
+        End Function
+        
+    End Class
+'
+'        [Command("reset")]
+'        public async Task ResetAsync() {
+'            FD_AntiCaps data = await vAntiCaps.GetAsync(Context.Guild.Id);
+'
+'            if (data == null) {
+'                await ReplyAsync("Anti-Caps has no data to reset.");
+'                return;
+'            }
+'
+'            await data.DeleteAsync();
+'            await ReplyAsync("Anti-Caps has been reset & disabled.");
+'        }
+'    }
+'}
+End NameSpace
