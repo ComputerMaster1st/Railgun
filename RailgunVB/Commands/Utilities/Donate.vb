@@ -8,6 +8,7 @@ Namespace Commands.Utilities
     Public Class Donate
         Inherits ModuleBase
         
+        <Command>
         Public Function SendCoffeeAsync() As Task
             Dim output As New StringBuilder
             

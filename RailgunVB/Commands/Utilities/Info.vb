@@ -121,6 +121,7 @@ Namespace Commands.Utilities
             await ReplyAsync(Format.Code(output.ToString()))
         End Function
         
+        <Command("dev")>
         Public Async Function DeveloperAsync() As Task
             Dim output As New StringBuilder
             

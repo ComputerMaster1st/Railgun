@@ -9,6 +9,7 @@ Namespace Commands.Utilities
     Public Class Help
         Inherits ModuleBase
         
+        <Command>
         Public Function SendHelpAsync() As Task
             Dim output As New StringBuilder
             

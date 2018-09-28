@@ -19,6 +19,7 @@ Namespace Commands.Utilities
             _dbContext = dbContext
         End Sub
         
+        <Command>
         Public Async Function RemindMeAsync(expireIn As String, <Remainder> message As String) As Task
             If String.IsNullOrWhiteSpace(message)
                 Await ReplyAsync("You didn't specify a message to remind you about.")

@@ -20,6 +20,7 @@ Namespace Commands.Utilities
             Await WhoisAsync(user)
         End Function
         
+        <Command>
         Public Async Function WhoisAsync(Optional pUser As IUser = Nothing) As Task
             Dim user As IUser = If(pUser Is Nothing, Context.User, pUser)
             Dim username As String = $"{user.Username}#{user.DiscriminatorValue}"
