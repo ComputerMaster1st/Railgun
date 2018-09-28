@@ -12,10 +12,9 @@ Namespace Core.Utilities
         Public ReadOnly Context As ICommandContext
         Public ReadOnly DbContext As TreeDiagramContext
 
-        Public Sub New(client As DiscordShardedClient, iClient As IDiscordClient, context As ICommandContext, 
-                       dbContext As TreeDiagramContext)
+        Public Sub New(client As DiscordShardedClient, context As ICommandContext, dbContext As TreeDiagramContext)
             Client = client
-            IClient = iClient
+            IClient = Client
             Context = context
             DbContext = dbContext
         End Sub
