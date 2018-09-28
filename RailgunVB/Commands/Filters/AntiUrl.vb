@@ -140,10 +140,7 @@ Namespace Commands.Filters
                     
                     If tc Is Nothing
                         deletedChannels.Add(channelId)
-                        Continue For 
-                    End If
-                    
-                    If initial
+                    ElseIf initial
                         output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine()
                         initial = False
                     Else 
