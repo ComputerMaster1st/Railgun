@@ -96,6 +96,12 @@ Namespace Core.Configuration
             Await SaveAsync()
         End Function
         
+        Public Async Function AssignPrefixAsync(input As String) As Task(Of Boolean)
+            DiscordConfig.Prefix = input
+            Await SaveAsync()
+            Return True
+        End Function
+        
         Public Async Function AssignAdminAsync(userId As ULong) As Task(Of Boolean)
             If Not (_DiscordConfig.AssignAdmin(userId)) Then Return False
             
