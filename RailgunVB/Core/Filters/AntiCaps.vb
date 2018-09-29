@@ -1,5 +1,4 @@
 Imports Discord
-Imports Microsoft.EntityFrameworkCore
 Imports RailgunVB.Core.Managers
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Filter

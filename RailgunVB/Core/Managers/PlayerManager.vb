@@ -1,7 +1,6 @@
 Imports System.Text
 Imports AudioChord
 Imports Discord
-Imports Microsoft.EntityFrameworkCore
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Music.PlayerEventArgs

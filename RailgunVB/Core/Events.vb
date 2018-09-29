@@ -4,12 +4,10 @@ Imports Discord.WebSocket
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
-Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Enums
 Imports TreeDiagram.Models.Server
-Imports TreeDiagram.Models.User
 
 Namespace Core
     
