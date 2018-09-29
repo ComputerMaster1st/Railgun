@@ -20,9 +20,13 @@ Namespace Commands.Server
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         Private Async Function WarnUserAsync(data As ServerWarning, user As IUser, reason As String) As Task
             data.AddWarning(user.Id, reason)
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"{user.Mention} has received a warning! Reason: {Format.Bold(reason)}")
         End Function
         
@@ -49,7 +53,6 @@ Namespace Commands.Server
                 await Context.Guild.AddBanAsync(user, 7, reason)
                 
                 data.ResetWarnings(user.Id)
-                Await _dbContext.SaveChangesAsync()
                 
                 await ReplyAsync($"{Format.Bold(user.Username)} has been Auto-Banned from the server. Reason: {Format.Bold($"{reason} & Too many warnings!")}")
                 await _log.LogToBotLogAsync($"Auto Ban || <{Context.Guild.Name} ({Context.Guild.Id})> Successful! {user.Username}#{user.DiscriminatorValue}", BotLogType.Common)
@@ -104,8 +107,6 @@ Namespace Commands.Server
                 Next
                 
                 output.AppendFormat("Detected {0} unknown user(s)! These user(s) have been automatically removed from the list.", UnknownUsers.Count).AppendLine()
-                
-                Await _dbContext.SaveChangesAsync()
             End If
             
             await ReplyAsync(output.ToString())
@@ -157,7 +158,6 @@ Namespace Commands.Server
             
             data.ResetWarnings(user.Id)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"{user.Mention} no longer has any warnings.")
         End Function
         
@@ -172,7 +172,6 @@ Namespace Commands.Server
             
             data.Warnings.Clear()
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync("Warnings list is now empty.")
         End Function
         
@@ -195,7 +194,6 @@ Namespace Commands.Server
                 message = "Auto-Ban has been disabled."
             End If
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync(message)
         End Function
         
@@ -209,7 +207,7 @@ Namespace Commands.Server
             End If
             
             _dbContext.ServerWarnings.Remove(data)
-            Await _dbContext.SaveChangesAsync()
+            
             await ReplyAsync("Warnings has been reset & disabled.")
         End Function
         

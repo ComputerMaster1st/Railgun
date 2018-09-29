@@ -152,7 +152,7 @@ Namespace Commands.Music
                 End If
                 
                 Dim songId As String = $"YOUTUBE#{_musicService.ParseYoutubeUrl(input)}"
-                Dim song As Song = Nothing
+                Dim song As Song
                 
                 If playlist.Songs.Contains(songId)
                     song = Await _musicService.GetSongAsync(songId)

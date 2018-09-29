@@ -18,13 +18,17 @@ Namespace Commands.Filters
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command>
         Public Async Function EnableAsync() As Task
             Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
             
             data.IsEnabled = Not (data.IsEnabled)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
         End Function
         
@@ -34,7 +38,6 @@ Namespace Commands.Filters
             
             data.IncludeBots = Not (data.IncludeBots)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
         End Function
         
@@ -51,7 +54,6 @@ Namespace Commands.Filters
             
             If Not (data.IsEnabled) Then data.IsEnabled = True
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.")
         End Function
         
@@ -68,7 +70,6 @@ Namespace Commands.Filters
             
             If Not (data.IsEnabled) Then data.IsEnabled = True
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.")
         End Function
         
@@ -84,8 +85,6 @@ Namespace Commands.Filters
                 data.IgnoredChannels.Add(tc.Id)
                 await ReplyAsync("Anti-Caps is no longer monitoring this channel.")
             End If
-            
-            Await _dbContext.SaveChangesAsync()
         End Function
         
         <Command("show")>
@@ -127,8 +126,6 @@ Namespace Commands.Filters
                     For Each channelId As ULong In deletedChannels
                         data.IgnoredChannels.Remove(channelId)
                     Next
-                    
-                    Await _dbContext.SaveChangesAsync()
                 End If
             Else 
                 output.AppendLine("Ignored Channels : None")
@@ -147,24 +144,9 @@ Namespace Commands.Filters
             End If
             
             _dbContext.FilterCapses.Remove(data)
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync("Anti-Caps has been reset & disabled.")
         End Function
-        
+
     End Class
-'
-'        [Command("reset")]
-'        public async Task ResetAsync() {
-'            FD_AntiCaps data = await vAntiCaps.GetAsync(Context.Guild.Id);
-'
-'            if (data == null) {
-'                await ReplyAsync("Anti-Caps has no data to reset.");
-'                return;
-'            }
-'
-'            await data.DeleteAsync();
-'            await ReplyAsync("Anti-Caps has been reset & disabled.");
-'        }
-'    }
-'}
+    
 End NameSpace

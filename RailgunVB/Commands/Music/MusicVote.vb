@@ -18,13 +18,17 @@ Namespace Commands.Music
                 _dbContext = dbContext
             End Sub
             
+            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+                Await _dbContext.SaveChangesAsync()
+                MyBase.AfterExecute(command)
+            End Sub
+            
             <Command>
             Public Async Function EnableAsync() As Task
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 
                 data.VoteSkipEnabled = Not (data.VoteSkipEnabled)
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Music Vote-Skip is now {If(data.VoteSkipEnabled, Format.Bold(
                     $"Enabled @ {data.VoteSkipLimit}%"), Format.Bold("Disabled"))}.")
             End Function
@@ -42,7 +46,6 @@ Namespace Commands.Music
                 
                 If Not (data.VoteSkipEnabled) Then data.VoteSkipEnabled = True
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Music Vote-Skip is now {If(Not (data.VoteSkipEnabled), 
                     Format.Bold("enabled &"), "")} set to skip songs when {data.VoteSkipLimit}% of users have voted.")
             End Function

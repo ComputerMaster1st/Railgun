@@ -29,6 +29,11 @@ Namespace Commands.Music
                 _musicService = musicService
             End Sub
             
+            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+                Await _dbContext.SaveChangesAsync()
+                MyBase.AfterExecute(command)
+            End Sub
+            
             <Command("playlist")>
             Public Async Function PlaylistAsync() As Task
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
@@ -44,7 +49,6 @@ Namespace Commands.Music
                 data.PlaylistId = ObjectId.Empty
                 
                 If Not (_full)
-                    Await _dbContext.SaveChangesAsync()
                     await ReplyAsync("Server playlist is now empty.")
                 End If
             End Function
@@ -76,7 +80,6 @@ Namespace Commands.Music
                 End If
                 
                 _dbContext.ServerMusics.Remove(data)
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync("Music settings & playlist has been reset.")
             End Function
             

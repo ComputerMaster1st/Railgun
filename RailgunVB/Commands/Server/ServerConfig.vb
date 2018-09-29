@@ -18,6 +18,11 @@ Namespace Commands.Server
             Public Sub New(dbContext As TreeDiagramContext)
                 _dbContext = dbContext
             End Sub
+            
+            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+                Await _dbContext.SaveChangesAsync()
+                MyBase.AfterExecute(command)
+            End Sub
         
             <Command("mention")>
             Public Async Function MentionAsync() As Task
@@ -25,16 +30,13 @@ Namespace Commands.Server
             
                 If data IsNot Nothing
                     _dbContext.ServerMentions.Remove(data)
-                    Await _dbContext.SaveChangesAsync()
                     await ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.")
                     Return
                 End If
             
                 data = Await _dbContext.ServerMentions.GetOrCreateAsync(Context.Guild.Id)
-            
                 data.DisableMentions = True
             
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.")
             End Function
         
@@ -47,14 +49,12 @@ Namespace Commands.Server
                     Return
                 ElseIf String.IsNullOrWhiteSpace(input) AndAlso Not (String.IsNullOrEmpty(data.Prefix))
                     data.Prefix = String.Empty
-                    Await _dbContext.SaveChangesAsync()
                     await ReplyAsync("Server prefix has been removed.")
                     Return
                 End If
             
                 data.Prefix = input
             
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Server prefix has been set! `{input} <command>`!")
             End Function
         
@@ -64,7 +64,6 @@ Namespace Commands.Server
             
                 data.DeleteCmdAfterUse = Not (data.DeleteCmdAfterUse)
             
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync(
                     $"Commands used will {Format.Bold(If(data.DeleteCmdAfterUse, "now", "no longer"))} be deleted.")
             End Function
@@ -75,7 +74,6 @@ Namespace Commands.Server
             
                 data.RespondToBots = Not (data.RespondToBots)
             
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync(
                     $"I will {Format.Bold(If(data.RespondToBots, "now", "no longer"))} respond to other bots.")
             End Function

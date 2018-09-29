@@ -18,13 +18,17 @@ Namespace Commands.Music
                 _dbContext = dbContext
             End Sub
             
+            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+                Await _dbContext.SaveChangesAsync()
+                MyBase.AfterExecute(command)
+            End Sub
+            
             <Command("running")>
             Public Async Function RunningAsync() As Task
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 
                 data.SilentNowPlaying = Not (data.SilentNowPlaying)
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"{Format.Bold(If(data.SilentNowPlaying, "Engaged", "Disengaged"))} Silent Running!")
             End Function
             
@@ -34,7 +38,6 @@ Namespace Commands.Music
                 
                 data.SilentSongProcessing = Not (data.SilentSongProcessing)
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"{Format.Bold(
                     If(data.SilentSongProcessing, "Engaged", "Disengaged"))} Silent Installation!")
             End Function

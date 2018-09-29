@@ -18,6 +18,11 @@ Namespace Commands.JoinLeave
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command>
         Public Async Function EnableAsync() As Task
             Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id)
@@ -32,7 +37,6 @@ Namespace Commands.JoinLeave
             
             data.ChannelId = Context.Channel.Id
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Join/Leave Notifications is now {Format.Bold(
                 If(data.ChannelId = 0, "Enabled & Set", "Set"))} to this channel.")
         End Function
@@ -48,7 +52,6 @@ Namespace Commands.JoinLeave
             
             data.SendToDM = Not (data.SendToDM)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Join/Leave Notification will {Format.Bold(
                 If(data.SendToDM, "Now", "No Longer"))} be sent via DMs.")
         End Function
@@ -113,7 +116,7 @@ Namespace Commands.JoinLeave
             End If
             
             _dbContext.ServerJoinLeaves.Remove(data)
-            Await _dbContext.SaveChangesAsync()
+            
             await ReplyAsync("Join/Leave Notifications has been reset & disabled.")
         End Function
         

@@ -18,6 +18,11 @@ Namespace Commands.Music
                 _dbContext = dbContext
             End Sub
             
+            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+                Await _dbContext.SaveChangesAsync()
+                MyBase.AfterExecute(command)
+            End Sub
+            
             <Command("join")>
             Public Async Function JoinAsync() As Task
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
@@ -30,7 +35,6 @@ Namespace Commands.Music
                     data.AutoVoiceChannel = 0
                     data.AutoTextChannel = 0
                     
-                    Await _dbContext.SaveChangesAsync()
                     await ReplyAsync("Music Auto-Join has been disabled.")
                     Return
                 End If
@@ -38,7 +42,6 @@ Namespace Commands.Music
                 data.AutoVoiceChannel = vc.Id
                 data.AutoTextChannel = Context.Channel.Id
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"{If(data.AutoVoiceChannel = 0, "Music Auto-Join is now enabled!", "") _ 
                     } Will automatically join {Format.Bold(vc.Name)} and use {Format.Bold(
                         "#" + Context.Channel.Name)} to post status messages.")
@@ -50,7 +53,6 @@ Namespace Commands.Music
                 
                 data.AutoSkip = Not (data.AutoSkip)
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Music Auto-Skip is now {Format.Bold(If(data.AutoSkip, "Enabled", "Disabled"))}.")
             End Function
             
@@ -60,7 +62,6 @@ Namespace Commands.Music
                 
                 data.AutoDownload = Not (data.AutoDownload)
                 
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync($"Music Auto-Download is now {Format.Bold(
                     If(data.AutoDownload, "Enabled", "Disabled"))}.")
             End Function

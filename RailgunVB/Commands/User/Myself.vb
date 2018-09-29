@@ -16,6 +16,11 @@ Namespace Commands.User
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command("mention")>
         Public Async Function MentionsAsync() As Task
             Dim data As UserMention = Await _dbContext.UserMentions.GetOrCreateAsync(Context.User.Id)
@@ -28,7 +33,6 @@ Namespace Commands.User
             
             data.DisableMentions = Not (data.DisableMentions)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Personal mentions are now {Format.Bold("Disabled")}.")
         End Function
         
@@ -41,7 +45,6 @@ Namespace Commands.User
                 Return
             ElseIf String.IsNullOrWhiteSpace(input) AndAlso data IsNot Nothing
                 _dbContext.UserCommands.Remove(data)
-                Await _dbContext.SaveChangesAsync()
                 await ReplyAsync("Personal prefix has been removed.")
                 Return
             End If
@@ -49,7 +52,6 @@ Namespace Commands.User
             data = Await _dbContext.UserCommands.GetOrCreateAsync(Context.User.Id)
             data.Prefix = input
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Personal prefix has been set! `{input} <command>`!")
         End Function
         

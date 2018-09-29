@@ -19,13 +19,17 @@ Namespace Commands.Filters
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command>
         Public Async Function EnableAsync() As Task
             Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
             
             data.IsEnabled = Not (data.IsEnabled)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
         End Function
         
@@ -35,7 +39,6 @@ Namespace Commands.Filters
             
             data.IncludeBots = Not (data.IncludeBots)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
         End Function
         
@@ -45,7 +48,6 @@ Namespace Commands.Filters
             
             data.BlockServerInvites = Not (data.BlockServerInvites)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.BlockServerInvites, "Enabled", "Disabled"))}.")
         End Function
         
@@ -63,7 +65,6 @@ Namespace Commands.Filters
             
             If Not (data.IsEnabled) Then data.IsEnabled = True
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"The Url {Format.Bold(newUrl)} is now added to list.")
         End Function
         
@@ -79,7 +80,6 @@ Namespace Commands.Filters
             
             data.BannedUrls.Remove(newUrl)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"The Url {Format.Bold(newUrl)} is now removed from list.")
         End Function
         
@@ -95,8 +95,6 @@ Namespace Commands.Filters
                 data.IgnoredChannels.Add(tc.Id)
                 await ReplyAsync("Anti-Url is no longer monitoring this channel.")
             End If
-            
-            Await _dbContext.SaveChangesAsync()
         End Function
         
         <Command("mode")>
@@ -107,7 +105,6 @@ Namespace Commands.Filters
             
             If Not (data.IsEnabled) Then data.IsEnabled = True
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Switched Anti-Url Mode to {If(data.DenyMode, Format.Bold("Deny"), 
                 Format.Bold("Allow"))}. {If(data.DenyMode, "Deny", "Allow")} all urls except listed.")
         End Function
@@ -152,8 +149,6 @@ Namespace Commands.Filters
                     For Each channelId As ULong In deletedChannels
                         data.IgnoredChannels.Remove(channelId)
                     Next
-                    
-                    Await _dbContext.SaveChangesAsync()
                 End If
             End If
             
@@ -193,7 +188,7 @@ Namespace Commands.Filters
             End If
             
             _dbContext.FilterUrls.Remove(data)
-            Await _dbContext.SaveChangesAsync()
+            
             await ReplyAsync("Anti-Url has been reset & disabled.")
         End Function
         

@@ -21,6 +21,11 @@ Namespace Commands.Fun
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command>
         Public Async Function RstAsync() As Task
             Dim data As FunRst = Await _dbContext.FunRsts.GetAsync(Context.Guild.Id)
@@ -58,7 +63,6 @@ Namespace Commands.Fun
             
             data.AddRst(msg)
             
-            Await _dbContext.SaveChangesAsync()
             Await ReplyAsync($"Added To RST: {Format.Code(msg)}")
         End Function
         
@@ -80,7 +84,6 @@ Namespace Commands.Fun
             
             data.Rst.RemoveAt(index)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync("Message Removed!")
         End Function
         
@@ -124,7 +127,6 @@ Namespace Commands.Fun
             
             data.IsEnabled = Not (data.IsEnabled)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"RST is now {If(data.IsEnabled, Format.Bold("enabled"), Format.Bold("disabled"))}!")
         End Function
         
@@ -138,7 +140,7 @@ Namespace Commands.Fun
             End If
             
             _dbContext.FunRsts.Remove(data)
-            Await _dbContext.SaveChangesAsync()
+            
             await ReplyAsync("RST has been reset.")
         End Function
         

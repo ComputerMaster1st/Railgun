@@ -24,6 +24,11 @@ Namespace Commands.Fun
             _dbContext = dbContext
         End Sub
         
+        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
+            Await _dbContext.SaveChangesAsync()
+            MyBase.AfterExecute(command)
+        End Sub
+        
         <Command>
         Public Async Function BiteAsync(Optional user As IUser = Nothing) As Task
             Dim data As FunBite = Await _dbContext.FunBites.GetAsync(Context.Guild.Id)
@@ -105,7 +110,6 @@ Namespace Commands.Fun
             
             data.AddBite(msg)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Added Sentence: {Format.Code(msg)}")
         End Function
         
@@ -165,7 +169,6 @@ Namespace Commands.Fun
 
             data.Bites.RemoveAt(index)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync("Message Removed.")
         End Function
         
@@ -175,7 +178,6 @@ Namespace Commands.Fun
             
             data.IsEnabled = Not (data.IsEnabled)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync($"Bites are now {If(data.IsEnabled, Format.Bold("enabled"), Format.Bold("disabled"))}!")
         End Function
         
@@ -190,7 +192,6 @@ Namespace Commands.Fun
             
             _dbContext.FunBites.Remove(data)
             
-            Await _dbContext.SaveChangesAsync()
             await ReplyAsync("Bites has been reset.")
         End Function
         
