@@ -81,7 +81,7 @@ Namespace Commands.Server
             
             Await Context.Guild.AddBanAsync(user, 7, reason)
             
-            If data IsNot Nothing AndAlso data.Warnings.Count(Function (find) find.UserId = user.Id) > 0
+            If data IsNot Nothing AndAlso data.Warnings.Where(Function (find) find.UserId = user.Id).Count > 0
                 data.ResetWarnings(user.Id)
                 Await _dbContext.SaveChangesAsync()
             End If
