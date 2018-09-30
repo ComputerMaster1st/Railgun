@@ -53,6 +53,16 @@ Namespace Commands.Utilities
                 commandsExecuted += command.Value
             Next
             
+            Dim gcOutput As New StringBuilder
+            Dim gcGen = 0
+            
+            While gcGen <= GC.MaxGeneration
+                gcOutput.AppendFormat("Gen {0} : {1} || ", gcGen, GC.CollectionCount(gcGen))
+                gcGen += 1
+            End While
+            
+            gcOutput.Remove(gcOutput.Length - 3, 3)
+            
             Dim output As New StringBuilder
             
             output.AppendLine("Railgun System Status") _
@@ -91,6 +101,8 @@ Namespace Commands.Utilities
                                                                           2)).AppendLine() _
                 .AppendFormat("        Paged Memory : {0} MB", Math.Round((self.PagedMemorySize64 / 1024.0) / 1024, 
                                                                           2)).AppendLine() _
+                .AppendLine() _
+                .AppendFormat("  Garbage Collection : {0}", gcOutput.ToString()).AppendLine() _
                 .AppendLine() _
                 .AppendLine("End of Report!")
             
