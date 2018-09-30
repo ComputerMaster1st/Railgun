@@ -1,5 +1,6 @@
 Imports System.Reflection
 Imports System.Text
+Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
@@ -25,8 +26,6 @@ Namespace Core
         Private ReadOnly _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
         
-        Private ReadOnly _treeDiagramService As TreeDiagramService
-        
         Private ReadOnly _services As IServiceProvider
 
         Public Sub New(config As MasterConfig, client As DiscordShardedClient)
@@ -43,11 +42,6 @@ Namespace Core
             Dim postgreConfig As DatabaseConfig = _config.PostgreDatabaseConfig
             Dim mongoConfig As DatabaseConfig = _config.MongoDatabaseConfig
             
-            _treeDiagramService = New TreeDiagramService(
-                New PostgresConfig(postgreConfig.Hostname, postgreConfig.Username, postgreConfig.Password,
-                    postgreConfig.Database
-                ), New MongoConfig(mongoConfig.Hostname, mongoConfig.Username, mongoConfig.Password))
-            
             _services = New ServiceCollection() _
                 .AddSingleton(_config) _
                 .AddSingleton(_log) _
@@ -55,8 +49,18 @@ Namespace Core
                 .AddSingleton(_client) _
                 .AddSingleton(Of IDiscordClient)(_client) _
                 .AddSingleton(_commandService) _
-                .AddSingleton(_treeDiagramService.GetTreeDiagramContext()) _
-                .AddSingleton(_treeDiagramService.GetMusicService()) _
+                .AddTransient(Of TreeDiagramContext)(function(provider) New TreeDiagramContext(
+                    New PostgresConfig(
+                        postgreConfig.Hostname, 
+                        postgreConfig.Username, 
+                        postgreConfig.Password, 
+                        postgreConfig.Database))) _
+                .AddSingleton(New MusicService(New MusicServiceConfig() With {
+                    .Hostname = mongoConfig.Hostname,
+                    .Username = mongoConfig.Username,
+                    .Password = mongoConfig.Password,
+                    .EnableResync = True
+                })) _
                 .AddSingleton(Of Analytics) _
                 .AddSingleton(Of CommandUtils) _
                 .AddSingleton(Of Events) _

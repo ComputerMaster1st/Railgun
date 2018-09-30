@@ -39,7 +39,7 @@ namespace TreeDiagram
         public DbSet<UserCommand> UserCommands { get; internal set; }
         public DbSet<UserMention> UserMentions { get; internal set; }
 
-        internal TreeDiagramContext(PostgresConfig config)
+        public TreeDiagramContext(PostgresConfig config)
         {
             _host = config.Hostname;
             _user = config.Username;
