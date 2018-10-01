@@ -52,7 +52,6 @@ Namespace Core.Filters
             If data.BlockServerInvites AndAlso content.Contains("discord.gg/") Then 
                 output.AppendFormat("Server Invite")
                 Return Await tc.SendMessageAsync(output.ToString())
-                
             ElseIf _regex.IsMatch(content) AndAlso CheckContentForUrl(data, content)
                 output.AppendFormat("Unlisted Url Block")
                 Return Await tc.SendMessageAsync(output.ToString())

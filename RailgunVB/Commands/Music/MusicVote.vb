@@ -8,7 +8,7 @@ Namespace Commands.Music
     
     Partial Public Class Music
         
-        <Group("vote"), UserPerms(GuildPermission.ManageGuild)>
+        <Group("voteskip"), UserPerms(GuildPermission.ManageGuild)>
         Public Class MusicVote
             Inherits ModuleBase
             
