@@ -1,6 +1,6 @@
-Imports AudioChord
 Imports Discord
 Imports Discord.WebSocket
+Imports Microsoft.EntityFrameworkCore
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
@@ -21,7 +21,6 @@ Namespace Core
         Private WithEvents _client As DiscordShardedClient
         
         Private ReadOnly _dbContext As TreeDiagramContext
-        Private ReadOnly _musicService As MusicService
         
         Private ReadOnly _playerManager As PlayerManager
         Private ReadOnly _timerManager As TimerManager
@@ -30,8 +29,8 @@ Namespace Core
         Private ReadOnly _shardsReady As New Dictionary(Of Integer, Boolean)
         
         Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, serverCount As ServerCount,
-                       client As DiscordShardedClient, dbContext As TreeDiagramContext, musicService As MusicService,
-                       playerManager As PlayerManager, timerManager As TimerManager)
+                       client As DiscordShardedClient, dbContext As TreeDiagramContext, playerManager As PlayerManager, 
+                       timerManager As TimerManager)
             _config = config
             _log = log
             _commandUtils = commandUtils
@@ -40,7 +39,8 @@ Namespace Core
             _client = client
             
             _dbContext = dbContext
-            _musicService = musicService
+            
+            _dbContext.Database.OpenConnection()
             
             _playerManager = playerManager
             _timerManager = timerManager
@@ -51,13 +51,12 @@ Namespace Core
         End Function
         
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
-            Await Task.Run(Async Sub() Await DedicatedLeftGuildAsync(sGuild))
+            Await Task.Run(New Action(Async Sub() Await DedicatedLeftGuildAsync(sGuild)))
         End Function
         
         Private Async Function DedicatedLeftGuildAsync(sGuild As SocketGuild) As Task
             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
             
-            Await _musicService.CancelGuildMusicProcessingAsync(sGuild.Id)
             Await _dbContext.DeleteGuildDataAsync(sGuild.Id)
             Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager)
         End Function

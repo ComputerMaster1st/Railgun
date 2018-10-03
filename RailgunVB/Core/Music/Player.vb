@@ -20,12 +20,12 @@ Namespace Core.Music
         Private _musicCancelled As Boolean = False
         Private _streamCancelled As Boolean = False
         
-        Private ReadOnly _playedSongs As New List(Of String)
+        Private ReadOnly _playedSongs As New List(Of ISong)
         
         Public Property AutoSkipped As Boolean = False
         Public ReadOnly Property CreatedAt As DateTime = DateTime.Now
         Public Property RepeatSong As Boolean = False
-        Public ReadOnly Property Requests As New List(Of String)
+        Public ReadOnly Property Requests As New List(Of ISong)
         Public ReadOnly Property SongStartedAt As DateTime = Nothing
         Public ReadOnly Property Status As PlayerStatus = PlayerStatus.Idle
         Public ReadOnly Property Task As Task = Nothing
@@ -60,22 +60,22 @@ Namespace Core.Music
             _audioDisconnected = audioDisconnected
         End Sub
         
-        Public Function AddSongRequest(songId As String) As Boolean
-            If Not (Requests.Contains(songId))
-                Requests.Add(songId)
+        Public Function AddSongRequest(song As ISong) As Boolean
+            If Not (Requests.Contains(song))
+                Requests.Add(song)
                 Return True
             End If
             
             Return False
         End Function
         
-        Public Function GetFirstSongRequest() As String
+        Public Function GetFirstSongRequest() As ISong
             If Requests.Count > 0 Then Return Requests(0)
-            Return String.Empty
+            Return Nothing
         End Function
         
-        Public Sub RemoveSongRequest(songId As String)
-            If Requests.Contains(songId) Then Requests.Remove(songId)
+        Public Sub RemoveSongRequest(song As ISong)
+            If Requests.Contains(song) Then Requests.Remove(song)
         End Sub
 
         Public Function VoteSkip(userId As ULong) As Boolean
@@ -98,10 +98,10 @@ Namespace Core.Music
             Return users.Count(Function(user) Not (user.IsBot))
         End Function
         
-        Private Async Function QueueSongAsync() As Task(Of String)
+        Private Async Function QueueSongAsync() As Task(Of ISong)
             Dim rand As New Random()
-            Dim playlist As Playlist = Await _musicService.GetPlaylistAsync(_playlistId)
-            Dim request As String = String.Empty
+            Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
+            Dim request As ISong = Nothing
             
             If playlist Is Nothing OrElse playlist.Songs.Count < 1
                 Return Nothing
@@ -109,18 +109,18 @@ Namespace Core.Music
                 _playedSongs.Clear()
             End If
             
-            Dim requestedSong As String = GetFirstSongRequest()
+            Dim requestedSong As ISong = GetFirstSongRequest()
             
-            If Not (String.IsNullOrEmpty(requestedSong)) Then Return requestedSong
+            If requestedSong IsNot Nothing Then Return requestedSong
             
-            While String.IsNullOrEmpty(request)
+            While request Is Nothing
                 Try
-                    request = playlist.Songs(rand.Next(0, playlist.Songs.Count))
+                    request = Await _musicService.GetSongAsync(playlist.Songs(rand.Next(0, playlist.Songs.Count)).Id)
                     
-                    If Not (String.IsNullOrEmpty(request)) AndAlso _playedSongs.Contains(request) Then _
-                        request = String.Empty
+                    If request IsNot Nothing AndAlso _playedSongs.Contains(request) Then _
+                        request = Nothing
                 Catch
-                    request = String.Empty
+                    request = Nothing
                 End Try
             End While
             
@@ -183,8 +183,8 @@ Namespace Core.Music
                         
                         If Requests.Count < 1 Then AddSongRequest(Await QueueSongAsync())
                         
-                        Dim song As Song = Await _musicService.GetSongAsync(GetFirstSongRequest())
-                        PlayingEvent?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id, song.Metadata))
+                        Dim song As ISong = GetFirstSongRequest()
+                        PlayingEvent?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id.ToString(), song.Metadata))
                         
                         Using databaseStream As Stream = Await song.GetMusicStreamAsync(), 
                             opusStream = New OpusOggReadStream(databaseStream)
@@ -206,7 +206,7 @@ Namespace Core.Music
                         If RepeatSong 
                             RepeatSong = False
                         Else
-                            RemoveSongRequest(song.Id)
+                            RemoveSongRequest(song)
                         End If
                         
                         If AutoSkipped AndAlso Requests.Count < 1 Then AutoSkipped = False

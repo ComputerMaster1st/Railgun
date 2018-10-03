@@ -37,13 +37,13 @@ Namespace Commands.Music
                 _musicService = musicService
             End Sub
             
-            Private Async Function QueueSongAsync(player As Player, playlist As Playlist, song As Song, 
+            Private Async Function QueueSongAsync(player As Player, playlist As Playlist, song As ISong, 
                                                   data As ServerMusic, response As IUserMessage) As Task
                 Dim nowInstalled = False
                 
-                If Not (playlist.Songs.Contains(song.Id))
-                    playlist.Songs.Add(song.Id)
-                    Await playlist.SaveAsync()
+                If Not (playlist.Songs.Contains(song))
+                    playlist.Songs.Add(song)
+                    Await _musicService.Playlist.UpdateAsync(playlist)
                     nowInstalled = True
                 End If
                 
@@ -99,7 +99,7 @@ Namespace Commands.Music
                     Await UploadAsync(player, playlist, data, response)
                 ElseIf input.Contains("YOUTUBE#") OrElse input.Contains("DISCORD#")
                     Await AddByIdAsync(input, player, playlist, data, response)
-                ElseIf input.Contains("http://" Or "https//")
+                ElseIf input.Contains("http://") OrElse input.Contains("https//")
                     Await AddByUrlAsync(input.Trim("<"c, ">"c), player, playlist, data, response)
                 Else
                     await SearchAsync(input, player, playlist, data, response)
@@ -110,7 +110,7 @@ Namespace Commands.Music
                                                response As IUserMessage) As Task
                 Try
                     Dim attachment As IAttachment = Context.Message.Attachments.FirstOrDefault()
-                    Dim song As Song = Await _musicService.DownloadSongFromDiscordAsync(
+                    Dim song As ISong = Await _musicService.Discord.DownloadAsync(
                         attachment.ProxyUrl, $"{Context.Message.Author.Username}#{Context.Message.Author.DiscriminatorValue}",
                         attachment.Id)
                     
@@ -131,11 +131,12 @@ Namespace Commands.Music
             
             Private Async Function AddByIdAsync(input As String, player As Player, playlist As Playlist, 
                                                 data As ServerMusic, response As IUserMessage) As Task
-                Dim song As Song = Await _musicService.GetSongAsync(input)
+                Dim song As ISong = Nothing
                 
-                If song IsNot Nothing
+                If Await _musicService.TryGetSongAsync(SongId.Parse(input), Sub(songOut) song = songOut)
                     Await QueueSongAsync(player, playlist, song, data, response)
-                ElseIf song Is Nothing AndAlso Not (input.Contains("YOUTUBE#"))
+                    Return
+                ElseIf Not (input.Contains("YOUTUBE#"))
                     Await response.ModifyAsync(Function(x) x.Content = "Specified song does not exist.")
                     Return
                 End If
@@ -146,26 +147,28 @@ Namespace Commands.Music
             
             Private Async Function AddByUrlAsync(input As String, player As Player, playlist As Playlist, 
                                                  data As ServerMusic, response As IUserMessage) As Task
+                Dim videoId As String = String.Empty
+                Dim song As ISong = Nothing
+                
                 If Not (input.Contains("youtu"))
                     Await response.ModifyAsync(Function(x) x.Content = "Only YouTube links can be processed.")
                     Return
-                End If
-                
-                Dim songId As String = $"YOUTUBE#{_musicService.ParseYoutubeUrl(input)}"
-                Dim song As Song
-                
-                If playlist.Songs.Contains(songId)
-                    song = Await _musicService.GetSongAsync(songId)
-                    Await QueueSongAsync(player, playlist, song, data, response)
+                ElseIf Not (_musicService.Youtube.TryParseYoutubeUrl(input, videoId))
+                    Await response.ModifyAsync(Function(x) x.Content = "Invalid Youtube Video Link")
                     Return
-                ElseIf Not (playlist.Songs.Contains(songId)) AndAlso Not (data.AutoDownload)
-                    Await response.ModifyAsync(
-                        Function(x) x.Content = "Unable to queue song! Auto-Download is disabled!")
-                    Return
+                ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(songOut) song = songOut)
+                    If playlist.Songs.Contains(song)
+                        Await QueueSongAsync(player, playlist, song, data, response)
+                        Return
+                    ElseIf Not (data.AutoDownload)
+                        Await response.ModifyAsync(
+                            Function(x) x.Content = "Unable to queue song! Auto-Download is disabled!")
+                        Return
+                    End If
                 End If
                 
                 Try
-                    song = Await _musicService.DownloadSongFromYouTubeAsync(input)
+                    song = Await _musicService.Youtube.DownloadAsync(New Uri(input))
                     Await QueueSongAsync(player, playlist, song, data, response)
                 Catch ex As Exception
                     response.ModifyAsync(Function(x) _

@@ -1,5 +1,8 @@
+Imports Newtonsoft.Json
+
 Namespace Core.Logging
     
+    <JsonObject(MemberSerialization.Fields)>
     Public Class BotLogChannels
         
         Public Property Common As ULong = 0

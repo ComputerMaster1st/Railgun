@@ -1,6 +1,5 @@
 Imports AudioChord
 Imports Discord
-Imports Microsoft.EntityFrameworkCore
 Imports MongoDB.Bson
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
@@ -19,10 +18,8 @@ Namespace Core.Utilities
         End Sub
         
         Public Async Function GetUsernameOrMentionAsync(user As IGuildUser) As Task(Of String)
-            Dim sMention As ServerMention = await _context.ServerMentions.FirstOrDefaultAsync(
-                Function(find) find.Id = user.GuildId)
-            Dim uMention As UserMention = await _context.UserMentions.FirstOrDefaultAsync(
-                Function(find) find.Id = user.Id)
+            Dim sMention As ServerMention = await _context.ServerMentions.GetAsync(user.GuildId)
+            Dim uMention As UserMention = await _context.UserMentions.GetAsync(user.Id)
             
             If (sMention IsNot Nothing AndAlso sMention.DisableMentions) OrElse 
                (uMention IsNot Nothing AndAlso uMention.DisableMentions)
@@ -33,9 +30,10 @@ Namespace Core.Utilities
         End Function
         
         Public Async Function GetPlaylistAsync(data As ServerMusic) As Task(Of Playlist)
-            If Not (data.PlaylistId = ObjectId.Empty) Then Return Await _musicService.GetPlaylistAsync(data.PlaylistId)
+            If Not (data.PlaylistId = ObjectId.Empty) Then Return Await _musicService.Playlist.GetPlaylistAsync(
+                data.PlaylistId)
 
-            Dim playlist As Playlist = Await _musicService.CreatePlaylist()
+            Dim playlist As New Playlist
             data.PlaylistId = playlist.Id
             
             Await _context.SaveChangesAsync()

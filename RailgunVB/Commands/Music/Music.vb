@@ -68,7 +68,7 @@ Namespace Commands.Music
                 Return
             End If
             
-            Dim playlist As Playlist = Await _musicService.GetPlaylistAsync(data.PlaylistId)
+            Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
             
             If playlist Is Nothing OrElse playlist.Songs.Count < 1
                 await ReplyAsync("Server playlist is currently empty.")
@@ -81,9 +81,7 @@ Namespace Commands.Music
                 .AppendFormat("Total Songs : {0}", playlist.Songs.Count).AppendLine() _
                 .AppendLine()
             
-            For Each id As String in playlist.Songs
-                Dim song As Song = Await _musicService.GetSongAsync(id)
-                
+            For Each song As ISong in playlist.Songs
                 output.AppendFormat("--       Id =>", song.Id).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
@@ -186,8 +184,8 @@ Namespace Commands.Music
             
             Dim i = 0
             While player.Requests.Count > i
-                Dim songId As String = player.Requests(i)
-                Dim meta As SongMetadata = (Await _musicService.GetSongAsync(songId)).Metadata
+                Dim song As ISong = player.Requests(i)
+                Dim meta As SongMetadata = song.Metadata
                 
                 output.AppendFormat("{0} : {1} || Length : {2}", If(i = 0, "Next", Format.Code($"[{i}]")), 
                                     Format.Bold(meta.Name), Format.Bold(meta.Length.ToString())).AppendLine()
@@ -207,7 +205,7 @@ Namespace Commands.Music
                 await ReplyAsync("There are no settings available for Music.")
                 Return
             ElseIf data.PlaylistId <> ObjectId.Empty
-                Dim playlist As Playlist = Await _musicService.GetPlaylistAsync(data.PlaylistId)
+                Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
                 songCount = playlist.Songs.Count
             End If
             

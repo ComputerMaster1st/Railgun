@@ -35,24 +35,24 @@ Namespace Commands.Root
         Public Async Function ShowAsync() As Task
             Dim masterGuild As IGuild = Await Context.Client.GetGuildAsync(_config.DiscordConfig.MasterGuildId)
             Dim masterGuildName As String = If(masterGuild IsNot Nothing, masterGuild.Name, "Not Set")
-            Dim masterGuildId As ULong = If(masterGuild IsNot Nothing, masterGuild.Id, "")
+            Dim masterGuildId As ULong = If(masterGuild IsNot Nothing, masterGuild.Id, 0)
             
-            Dim audiochordTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.AudioChord)
-            Dim commandTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.CommandMngr)
-            Dim defaultTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.Common)
-            Dim guildTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.GuildMngr)
-            Dim musicTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicMngr)
-            Dim playerTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicPlayer)
-            Dim timerTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.TimerMngr)
-            Dim taskTc As ITextChannel = 
-                    Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.TaskSch)
+            Dim audiochordTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.AudioChord <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.AudioChord), Nothing)
+            Dim commandTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.CommandMngr <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.CommandMngr), Nothing)
+            Dim defaultTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.Common <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.Common), Nothing)
+            Dim guildTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.GuildMngr <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.GuildMngr), Nothing)
+            Dim musicTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.MusicMngr <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicMngr), Nothing)
+            Dim playerTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.MusicPlayer <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicPlayer), Nothing)
+            Dim timerTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.TimerMngr <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.TimerMngr), Nothing)
+            Dim taskTc As ITextChannel = If(_config.DiscordConfig.BotLogChannels.TaskSch <> 0,
+                Await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.TaskSch), Nothing)
             
             Dim botLogOutput As New StringBuilder
                 

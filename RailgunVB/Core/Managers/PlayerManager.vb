@@ -28,13 +28,12 @@ Namespace Core.Managers
             _dbContext = dbContext
         End Sub
         
-        Private Async Function PlayerConnectedAsync(sender As Object, args As PlayerConnectedEventArgs) As Task
+        Private Async Function PlayerConnectedAsync(args As PlayerConnectedEventArgs) As Task
             Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             Await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Connected!", BotLogType.MusicPlayer)
         End Function
         
-        Private Async Function PlayerCurrentlyPlayingAsync(sender As Object, 
-                                                           args As PlayerCurrentlyPlayingEventArgs) As Task
+        Private Async Function PlayerCurrentlyPlayingAsync(args As PlayerCurrentlyPlayingEventArgs) As Task
             Try
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(args.GuildId)
                 Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
@@ -60,7 +59,7 @@ Namespace Core.Managers
             End Try
         End Function
         
-        Private Async Function PlayerTimeoutAsync(sender As Object, args As PlayerTimeoutEventArgs) As Task
+        Private Async Function PlayerTimeoutAsync(args As PlayerTimeoutEventArgs) As Task
             Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             
             Try
@@ -78,7 +77,7 @@ Namespace Core.Managers
             End Try
         End Function
 
-        Private Async Function PlayerFinishedAsync(sender As Object, args As PlayerFinishedEventArgs) As Task
+        Private Async Function PlayerFinishedAsync(args As PlayerFinishedEventArgs) As Task
             Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
             
             Try
@@ -115,13 +114,13 @@ Namespace Core.Managers
 
         Public Async Function CreatePlayerAsync(user As IGuildUser, vc As IVoiceChannel, tc As ITextChannel, 
                                                 Optional autoJoin As Boolean = False, 
-                                                Optional preRequestedSong As Song = Nothing) As Task
+                                                Optional preRequestedSong As ISong = Nothing) As Task
             Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(tc.GuildId)
             Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
             
             If playlist.Songs.Count < 1
-                If preRequestedSong IsNot Nothing AndAlso Not (playlist.Songs.Contains(preRequestedSong.Id)) Then _ 
-                    playlist.Songs.Add(preRequestedSong.Id)
+                If preRequestedSong IsNot Nothing AndAlso Not (playlist.Songs.Contains(preRequestedSong)) Then _ 
+                    playlist.Songs.Add(preRequestedSong)
                 
                 Await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...")
                 
@@ -130,13 +129,13 @@ Namespace Core.Managers
                 
                 While playlist.Songs.Count < 100
                     Dim i As Integer = rand.Next(0, repository.Count())
-                    Dim song As Song = repository.ElementAtOrDefault(i)
+                    Dim song As ISong = repository.ElementAtOrDefault(i)
                     
-                    If song IsNot Nothing AndAlso Not (playlist.Songs.Contains(song.Id)) Then _
-                        playlist.Songs.Add(song.Id)
+                    If song IsNot Nothing AndAlso Not (playlist.Songs.Contains(song)) Then _
+                        playlist.Songs.Add(song)
                 End While
                 
-                Await playlist.SaveAsync()
+                Await _musicService.Playlist.UpdateAsync(playlist)
             End If
             
             Dim username As String = Await _commandUtils.GetUsernameOrMentionAsync(user) 
@@ -146,10 +145,10 @@ Namespace Core.Managers
             
             Dim player As New Player(_musicService, vc)
             
-            AddHandler player.Connected, AddressOf PlayerConnectedAsync
-            AddHandler player.Playing, AddressOf PlayerCurrentlyPlayingAsync
-            AddHandler player.Timeout, AddressOf PlayerTimeoutAsync
-            AddHandler player.Finished, AddressOf PlayerFinishedAsync
+            AddHandler player.Connected, Async Sub(s, a) Await PlayerConnectedAsync(a)
+            AddHandler player.Playing, Async Sub(s, a) Await PlayerCurrentlyPlayingAsync(a)
+            AddHandler player.Timeout, Async Sub(s, a) Await PlayerTimeoutAsync(a)
+            AddHandler player.Finished, Async Sub(s, a) Await PlayerFinishedAsync(a)
             
             If preRequestedSong IsNot Nothing
                 player.AddSongRequest(preRequestedSong.Id)
