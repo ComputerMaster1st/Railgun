@@ -44,7 +44,7 @@ Namespace Commands.Music
                 End If
                 
                 Await StreamAsync()
-                Await _musicService.DeletePlaylistAsync(data.PlaylistId)
+                Await _musicService.Playlist.DeleteAsync(data.PlaylistId)
                 
                 data.PlaylistId = ObjectId.Empty
                 

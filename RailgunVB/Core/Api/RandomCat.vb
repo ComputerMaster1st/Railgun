@@ -15,7 +15,7 @@ Namespace Core.Api
         End Sub
         
         Public Async Function GetRandomCatAsync() As Task(Of Stream)
-            Await _client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med")
+            Return Await _client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med")
         End Function
         
     End Class

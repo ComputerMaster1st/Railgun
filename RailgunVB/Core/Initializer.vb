@@ -82,7 +82,6 @@ Namespace Core
             _services.GetService(Of Analytics)()
             _services.GetService(Of Events)()
             _services.GetService(Of CommandManager)()
-            _services.GetService(Of MusicManager)()
             _services.GetService(Of AntiCaps)()
             _services.GetService(Of AntiUrl)()
             

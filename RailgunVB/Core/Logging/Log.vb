@@ -7,14 +7,14 @@ Namespace Core.Logging
     
     Public Class Log
         
-        Private ReadOnly _config As Configuration.DiscordConfig
+        Private ReadOnly _config As MasterConfig
         Private WithEvents _client As DiscordShardedClient
         
         Private Const LogDirectory As String = "logs"
         Private ReadOnly _logFilename As String = $"{LogDirectory}/{DateTime.Today.ToString("yyyy-MM-dd")}.log"
 
         Public Sub New(config As MasterConfig, client As DiscordShardedClient)
-            _config = config.DiscordConfig
+            _config = config
             _client = client
             
             If Not (Directory.Exists(LogDirectory)) Then Directory.CreateDirectory(LogDirectory)
@@ -23,34 +23,34 @@ Namespace Core.Logging
         Public Async Function LogToBotLogAsync(entry As String, type As BotLogType, 
                                                Optional pingMaster As Boolean = False, 
                                                Optional filename As String = Nothing) As Task
-            If _config.MasterGuildId = 0 Then Return
+            If _config.DiscordConfig.MasterGuildId = 0 Then Return
             
-            Dim guild As IGuild = Await CType(_client, IDiscordClient).GetGuildAsync(_config.MasterGuildId)
+            Dim guild As IGuild = Await CType(_client, IDiscordClient).GetGuildAsync(_config.DiscordConfig.MasterGuildId)
             
             Select type
                 Case BotLogType.Common
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.Common, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.Common, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.AudioChord
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.AudioChord, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.AudioChord, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.CommandManager
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.CommandMngr, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.CommandMngr, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.GuildManager
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.GuildMngr, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.GuildMngr, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.MusicManager
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.MusicMngr, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.MusicMngr, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.MusicPlayer
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.MusicPlayer, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.MusicPlayer, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.TaskScheduler
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.TaskSch, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.TaskSch, entry, pingMaster, filename)
                     Exit Select
                 Case BotLogType.TimerManager
-                    Await SendBotLogAsync(guild, type, _config.BotLogChannels.TimerMngr, entry, pingMaster, filename)
+                    Await SendBotLogAsync(guild, type, _config.DiscordConfig.BotLogChannels.TimerMngr, entry, pingMaster, filename)
                     Exit Select
             End Select
         End Function
@@ -89,13 +89,13 @@ Namespace Core.Logging
                 
                 If Not (channelId = 0) Then
                     tc = Await guild.GetTextChannelAsync(channelId)
-                ElseIf Not (_config.BotLogChannels.Common = 0) Then
-                    tc = Await guild.GetTextChannelAsync(_config.BotLogChannels.Common)
+                ElseIf Not (_config.DiscordConfig.BotLogChannels.Common = 0) Then
+                    tc = Await guild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.Common)
                 Else
                     Return
                 End If
                 
-                Dim pingMasterStr As String = If(pingMaster, $"<@!{_config.MasterAdminId}>", String.Empty)
+                Dim pingMasterStr As String = If(pingMaster, $"<@!{_config.DiscordConfig.MasterAdminId}>", String.Empty)
                 
                 If Not (String.IsNullOrEmpty(filename))
                     Await tc.SendFileAsync(filename, $"Error! Refer to file, {pingMasterStr}!")

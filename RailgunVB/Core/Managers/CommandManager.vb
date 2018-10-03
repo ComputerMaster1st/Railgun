@@ -72,11 +72,11 @@ Namespace Core.Managers
                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 
                 If filterMsg IsNot Nothing
-                    Await Task.Run(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg))
+                    Await Task.Run(New Action(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg)))
                     Return
                 End If
                 
-                Dim argPos As Integer = 0
+                Dim argPos = 0
                 Dim sCommand As ServerCommand = Await _dbContext.ServerCommands.GetAsync(guild.Id)
                 
                 If ((sCommand Is Nothing OrElse Not (sCommand.RespondToBots)) AndAlso msg.Author.IsBot) OrElse 
@@ -121,6 +121,10 @@ Namespace Core.Managers
             Select result.Error
                 Case CommandError.UnmetPrecondition
                     Await tc.SendMessageAsync(cmdError)
+                    Exit Select
+                Case Else
+                    Await _log.LogToConsoleAsync(
+                        New LogMessage(LogSeverity.Warning, "Command", result.Error.ToString() + " : " + result.ErrorReason))
                     Exit Select
             End Select
         End Function

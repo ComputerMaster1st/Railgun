@@ -1,6 +1,5 @@
 Imports System.IO
 Imports System.Text
-Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core.Managers
@@ -16,11 +15,9 @@ Namespace Commands.Music
             Inherits ModuleBase
             
             Private ReadOnly _playerManager As PlayerManager
-            Private ReadOnly _musicService As MusicService
 
-            Public Sub New(playerManager As PlayerManager, musicService As MusicService)
+            Public Sub New(playerManager As PlayerManager)
                 _playerManager = playerManager
-                _musicService = musicService
             End Sub
             
             <Command("active"), BotPerms(ChannelPermission.AttachFiles)>
@@ -60,26 +57,6 @@ Namespace Commands.Music
             Public Async Function KillAsync(id As ULong) As Task
                 _playerManager.DisconnectPlayer(id)
                 await ReplyAsync($"Sent 'Kill Code' to Player ID {id}.")
-            End Function
-            
-            <Command("queue-restart")>
-            Public Async Function RestartQueueAsync() As Task
-                Dim status As QueueProcessorStatus = _musicService.RestartQueueProcessorAsync()
-                Dim output As String
-                
-                Select status
-                    Case QueueProcessorStatus.Idle
-                        output = "Global Queue Processor is currently idling."
-                        Exit Select
-                    Case QueueProcessorStatus.Running
-                        output = "Global Queue Processor is currently running."
-                        Exit Select
-                    Case QueueProcessorStatus.Restarted
-                        output = "Global Queue Processor has now been restarted."
-                        Exit Select
-                End Select
-                
-                await ReplyAsync(output)
             End Function
             
         End Class

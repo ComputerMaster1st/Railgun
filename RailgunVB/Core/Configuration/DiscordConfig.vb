@@ -1,20 +1,33 @@
+Imports Newtonsoft.Json
 Imports RailgunVB.Core.Logging
 
 Namespace Core.Configuration
     
+    <JsonObject(MemberSerialization.Fields)>
     Public Class DiscordConfig
-    
+        
         Public ReadOnly Property Token As String
         Public Property Prefix As String
-        Public ReadOnly Property MasterAdminId As ULong
+        Public ReadOnly Property MasterAdminId As ULong = 0
         Public ReadOnly Property MasterGuildId As ULong = 0
-        Public ReadOnly Property BotLogChannels As BotLogChannels = New BotLogChannels
-        Public ReadOnly Property OtherAdmins As List(Of ULong) = New List(Of ULong)()
+        Public ReadOnly Property BotLogChannels As New BotLogChannels
+        Public ReadOnly Property OtherAdmins As New List(Of ULong)()
         
         Public Sub New(token As String, prefix As String, masterAdminId As ULong)
             Me.Token = token
             Me.Prefix = prefix
             Me.MasterAdminId = masterAdminId
+        End Sub
+        
+        <JsonConstructor>
+        Private Sub New(token As String, prefix As String, masterAdminId As ULong, masterGuildId As ULong, 
+                        botLogChannels As BotLogChannels, otherAdmins As List(Of ULong))
+            Me.Token = token
+            Me.Prefix = prefix
+            Me.MasterAdminId = masterAdminId
+            Me.MasterGuildId = masterGuildId
+            Me.BotLogChannels = botLogChannels
+            Me.OtherAdmins = otherAdmins
         End Sub
         
         Public Sub AssignMasterGuild(guildId As ULong)
