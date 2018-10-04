@@ -4,6 +4,7 @@ Imports Discord.Commands
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Filter
+Imports TreeDiagram.Models.Server.Filter.IgnoreChannel
 
 Namespace Commands.Filters
     
@@ -78,11 +79,11 @@ Namespace Commands.Filters
             Dim tc As ITextChannel = If(pChannel, Context.Channel)
             Dim data As FilterCaps = Await _dbContext.FilterCapses.GetOrCreateAsync(Context.Guild.Id)
             
-            If data.IgnoredChannels.Contains(tc.Id)
-                data.IgnoredChannels.Remove(tc.Id)
+            If data.IgnoredChannels.Where(Function(f) f.ChannelId = tc.Id).Count > 0
+                data.IgnoredChannels.RemoveAll(Function(f) f.ChannelId = tc.Id)
                 await ReplyAsync("Anti-Caps is now monitoring this channel.")
             Else 
-                data.IgnoredChannels.Add(tc.Id)
+                data.IgnoredChannels.Add(New FilterCapsIgnoreChannel(tc.Id))
                 await ReplyAsync("Anti-Caps is no longer monitoring this channel.")
             End If
         End Function
@@ -106,13 +107,13 @@ Namespace Commands.Filters
             
             If data.IgnoredChannels.Count > 0
                 Dim initial As Boolean = True
-                Dim deletedChannels As New List(Of ULong)
+                Dim deletedChannels As New List(Of FilterCapsIgnoreChannel)
                 
-                For Each channelId As ULong In data.IgnoredChannels
-                    Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channelId)
+                For Each channel As FilterCapsIgnoreChannel In data.IgnoredChannels
+                    Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channel.ChannelId)
                     
                     If tc Is Nothing
-                        deletedChannels.Add(channelId)
+                        deletedChannels.Add(channel)
                         Continue For 
                     ElseIf initial
                         output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine()
@@ -123,8 +124,8 @@ Namespace Commands.Filters
                 Next
                 
                 If deletedChannels.Count > 0
-                    For Each channelId As ULong In deletedChannels
-                        data.IgnoredChannels.Remove(channelId)
+                    For Each channel As FilterCapsIgnoreChannel In deletedChannels
+                        data.IgnoredChannels.Remove(channel)
                     Next
                 End If
             Else 

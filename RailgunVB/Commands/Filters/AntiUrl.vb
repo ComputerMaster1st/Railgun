@@ -5,6 +5,7 @@ Imports Discord.Commands
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Filter
+Imports TreeDiagram.Models.Server.Filter.IgnoreChannel
 
 Namespace Commands.Filters
     
@@ -88,11 +89,11 @@ Namespace Commands.Filters
             Dim tc As ITextChannel = If(pChannel, Context.Channel)
             Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
             
-            If data.IgnoredChannels.Contains(tc.Id)
-                data.IgnoredChannels.Remove(tc.Id)
+            If data.IgnoredChannels.Where(Function(f) f.ChannelId = tc.Id).Count > 0
+                data.IgnoredChannels.RemoveAll(Function(f) f.ChannelId = tc.Id)
                 await ReplyAsync("Anti-Url is now monitoring this channel.")
             Else 
-                data.IgnoredChannels.Add(tc.Id)
+                data.IgnoredChannels.Add(New FilterUrlIgnoreChannel(tc.Id))
                 await ReplyAsync("Anti-Url is no longer monitoring this channel.")
             End If
         End Function
@@ -130,13 +131,13 @@ Namespace Commands.Filters
             If data.IgnoredChannels.Count < 1
                 output.AppendLine("Ignored Channels : None")
             Else 
-                Dim deletedChannels As New List(Of ULong)
+                Dim deletedChannels As New List(Of FilterUrlIgnoreChannel)
                 
-                For Each channelId As ULong In data.IgnoredChannels
-                    Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channelId)
+                For Each channel As FilterUrlIgnoreChannel In data.IgnoredChannels
+                    Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channel.ChannelId)
                     
                     If tc Is Nothing
-                        deletedChannels.Add(channelId)
+                        deletedChannels.Add(channel)
                     ElseIf initial
                         output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine()
                         initial = False
@@ -146,8 +147,8 @@ Namespace Commands.Filters
                 Next
                 
                 If deletedChannels.Count > 0
-                    For Each channelId As ULong In deletedChannels
-                        data.IgnoredChannels.Remove(channelId)
+                    For Each channel As FilterUrlIgnoreChannel In deletedChannels
+                        data.IgnoredChannels.Remove(channel)
                     Next
                 End If
             End If

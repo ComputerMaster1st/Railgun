@@ -23,7 +23,8 @@ Namespace Core.Filters
             
             If data Is Nothing OrElse Not (data.IsEnabled) OrElse 
                (Not (data.IncludeBots) AndAlso (message.Author.IsBot Or message.Author.IsWebhook)) OrElse 
-               data.IgnoredChannels.Contains(tc.Id) OrElse message.Content.Length < data.Length
+               data.IgnoredChannels.Where(Function(f) f.ChannelId = tc.Id).Count > 0 OrElse 
+               message.Content.Length < data.Length
                 Return Nothing
             End If
             
