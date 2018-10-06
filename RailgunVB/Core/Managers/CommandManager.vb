@@ -90,7 +90,7 @@ Namespace Core.Managers
                     Await ExecuteCommandAsync(_client.CurrentUser.Mention, msg, argPos, sCommand)
                 ElseIf (sCommand IsNot Nothing AndAlso Not (String.IsNullOrEmpty(sCommand.Prefix))) AndAlso 
                        msg.HasStringPrefix(sCommand.Prefix, argPos)
-                    Await ExecuteCommandAsync(uCommand.Prefix, msg, argPos, sCommand)
+                    Await ExecuteCommandAsync(sCommand.Prefix, msg, argPos, sCommand)
                 ElseIf (uCommand IsNot Nothing AndAlso Not (String.IsNullOrEmpty(uCommand.Prefix))) AndAlso 
                        msg.HasStringPrefix(uCommand.Prefix, argPos)
                     Await ExecuteCommandAsync(uCommand.Prefix, msg, argPos, sCommand)
