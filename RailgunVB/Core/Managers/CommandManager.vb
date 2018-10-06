@@ -56,13 +56,13 @@ Namespace Core.Managers
                TypeOf sMessage.Channel Is SocketDMChannel OrElse 
                TypeOf sMessage.Channel Is SocketGroupChannel Then Return
             
-            Await ProcessMessageAsync(sMessage)
+            Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(sMessage)))
         End Function
         
         Private Async Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
                                                   newMessage As SocketMessage, channel As ISocketMessageChannel
                                                  ) As Task Handles _client.MessageUpdated
-            Await ProcessMessageAsync(newMessage)
+            Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(newMessage)))
         End Function
         
         Private Async Function ProcessMessageAsync(sMessage As SocketMessage) As Task

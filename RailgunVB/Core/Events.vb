@@ -55,10 +55,6 @@ Namespace Core
         End Function
         
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
-            Await Task.Run(New Action(Async Sub() Await DedicatedLeftGuildAsync(sGuild)))
-        End Function
-        
-        Private Async Function DedicatedLeftGuildAsync(sGuild As SocketGuild) As Task
             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
             
             Dim sMusic As ServerMusic = Await _dbContext.ServerMusics.GetAsync(sGuild.Id)
