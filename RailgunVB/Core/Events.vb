@@ -1,6 +1,8 @@
+Imports AudioChord
 Imports Discord
 Imports Discord.WebSocket
 Imports Microsoft.EntityFrameworkCore
+Imports MongoDB.Bson
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
@@ -21,6 +23,7 @@ Namespace Core
         Private WithEvents _client As DiscordShardedClient
         
         Private ReadOnly _dbContext As TreeDiagramContext
+        Private ReadOnly _musicService As MusicService
         
         Private ReadOnly _playerManager As PlayerManager
         Private ReadOnly _timerManager As TimerManager
@@ -30,7 +33,7 @@ Namespace Core
         
         Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, serverCount As ServerCount,
                        client As DiscordShardedClient, dbContext As TreeDiagramContext, playerManager As PlayerManager, 
-                       timerManager As TimerManager)
+                       timerManager As TimerManager, musicService As MusicService)
             _config = config
             _log = log
             _commandUtils = commandUtils
@@ -39,6 +42,7 @@ Namespace Core
             _client = client
             
             _dbContext = dbContext
+            _musicService = musicService
             
             _dbContext.Database.OpenConnection()
             
@@ -56,6 +60,10 @@ Namespace Core
         
         Private Async Function DedicatedLeftGuildAsync(sGuild As SocketGuild) As Task
             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
+            
+            Dim sMusic As ServerMusic = Await _dbContext.ServerMusics.GetAsync(sGuild.Id)
+            If sMusic IsNot Nothing AndAlso sMusic.PlaylistId <> ObjectId.Empty Then _ 
+                Await _musicService.Playlist.DeleteAsync(sMusic.PlaylistId)
             
             Await _dbContext.DeleteGuildDataAsync(sGuild.Id)
             Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager)
