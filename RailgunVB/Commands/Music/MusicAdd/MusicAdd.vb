@@ -51,7 +51,7 @@ Namespace Commands.Music
                         $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} || ID : {Format.Bold(song.Id.ToString())}")
                 Catch ex As Exception
                     response.ModifyAsync(Function(c) c.Content = 
-                        $"Install Failure - {Format.Bold("(Attached File)") + ex.Message}").GetAwaiter()
+                        $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}").GetAwaiter()
                     
                     Dim output As New StringBuilder
                     

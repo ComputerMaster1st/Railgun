@@ -42,12 +42,12 @@ Namespace Commands.Music
                 If Not (Await _musicService.TryGetSongAsync(SongId.Parse(id), Sub(output) song = output))
                     Await ReplyAsync("Unknown Music Id Given!")
                     Return
-                ElseIf Not (playlist.Songs.Contains(song))
+                ElseIf Not (playlist.Songs.Contains(song.Id))
                     Await ReplyAsync("Unknown Music Id Given!")
                     Return
                 End If
                 
-                playlist.Songs.Remove(song)
+                playlist.Songs.Remove(song.Id)
                 
                 Await _musicService.Playlist.UpdateAsync(playlist)
                 await ReplyAsync("Music removed from playlist.")
@@ -65,7 +65,7 @@ Namespace Commands.Music
                 
                 Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
                 
-                playlist.Songs.Remove(player.GetFirstSongRequest())
+                playlist.Songs.Remove(player.GetFirstSongRequest().Id)
                 
                 Await _musicService.Playlist.UpdateAsync(playlist)
                 await ReplyAsync("Removed from playlist. Skipping to next song...")
