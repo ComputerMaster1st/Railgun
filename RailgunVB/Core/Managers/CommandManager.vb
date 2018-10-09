@@ -3,6 +3,7 @@ Imports System.Text
 Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
+Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Utilities
@@ -18,7 +19,6 @@ Namespace Core.Managers
         Private ReadOnly _log As Log
         Private ReadOnly _analytics As Analytics
         Private ReadOnly _filterManager As FilterManager
-        Private ReadOnly _dbContext As TreeDiagramContext
         
         Private WithEvents _client As DiscordShardedClient
         Private WithEvents _commandService As CommandService
@@ -26,13 +26,11 @@ Namespace Core.Managers
         Private ReadOnly _services As IServiceProvider
 
         Public Sub New(config As MasterConfig, log As Log, analytics As Analytics, filterManager As FilterManager, 
-                       dbContext As TreeDiagramContext, client As DiscordShardedClient,
-                       commandService As CommandService,  services As IServiceProvider)
+                       client As DiscordShardedClient, commandService As CommandService, services As IServiceProvider)
             _config = config
             _log = log
             _analytics = analytics
             _filterManager = filterManager
-            _dbContext = dbContext
             _client = client
             _commandService = commandService
             _services = services
@@ -83,12 +81,19 @@ Namespace Core.Managers
                 End If
                 
                 Dim argPos = 0
-                Dim sCommand As ServerCommand = Await _dbContext.ServerCommands.GetAsync(guild.Id)
+                Dim sCommand As ServerCommand
+                Dim uCommand As UserCommand
                 
-                If ((sCommand Is Nothing OrElse Not (sCommand.RespondToBots)) AndAlso msg.Author.IsBot) OrElse 
-                   msg.Author.IsWebhook Then Return
+                Using scope As IServiceScope = _services.CreateScope()
+                    Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 
-                Dim uCommand As UserCommand = Await _dbContext.UserCommands.GetAsync(msg.Author.Id)
+                    sCommand = Await context.ServerCommands.GetAsync(guild.Id)
+                
+                    If ((sCommand Is Nothing OrElse Not (sCommand.RespondToBots)) AndAlso msg.Author.IsBot) OrElse 
+                       msg.Author.IsWebhook Then Return
+                
+                    uCommand = Await context.UserCommands.GetAsync(msg.Author.Id)
+                End Using
                 
                 If msg.HasStringPrefix(_config.DiscordConfig.Prefix, argPos)
                     Await ExecuteCommandAsync(_config.DiscordConfig.Prefix, msg, argPos, sCommand)
