@@ -41,8 +41,8 @@ Namespace Commands.Music
                                                   data As ServerMusic, response As IUserMessage) As Task
                 Dim nowInstalled = False
                 
-                If Not (playlist.Songs.Contains(song))
-                    playlist.Songs.Add(song)
+                If Not (playlist.Songs.Contains(song.Id))
+                    playlist.Songs.Add(song.Id)
                     Await _musicService.Playlist.UpdateAsync(playlist)
                     nowInstalled = True
                 End If
