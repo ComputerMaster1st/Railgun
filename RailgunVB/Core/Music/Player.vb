@@ -115,7 +115,7 @@ Namespace Core.Music
             
             While request Is Nothing
                 Try
-                    request = Await _musicService.GetSongAsync(playlist.Songs(rand.Next(0, playlist.Songs.Count)).Id)
+                    request = Await _musicService.GetSongAsync(playlist.Songs(rand.Next(0, playlist.Songs.Count)))
                     
                     If request IsNot Nothing AndAlso _playedSongs.Contains(request) Then _
                         request = Nothing

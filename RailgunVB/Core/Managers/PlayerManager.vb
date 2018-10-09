@@ -124,7 +124,7 @@ Namespace Core.Managers
                 
                 Await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...")
                 
-                Dim repository As IEnumerable(Of Song) = (Await _musicService.GetAllSongsAsync()).ToList()
+                Dim repository As IEnumerable(Of ISong) = (Await _musicService.GetAllSongsAsync()).ToList()
                 Dim rand As New Random
                 
                 While playlist.Songs.Count < 100

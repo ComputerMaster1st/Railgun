@@ -43,12 +43,12 @@ Namespace Core.Managers
                         Sub(properties) properties.Content = $"{Format.Bold("Invalid Url :")} <{cleanUrl}>")
                     Continue For
                 ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(out) song = out)
-                    If playlist.Songs.Contains(song)
+                    If playlist.Songs.Contains(song.Id)
                         Await response.ModifyAsync(
                             Sub(properties) properties.Content = 
                                 $"{Format.Bold("Already Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
                     Else 
-                        playlist.Songs.Add(song)
+                        playlist.Songs.Add(song.Id)
                         playlistModified = True
                         Await response.ModifyAsync(
                             Sub(properties) properties.Content = 
@@ -60,7 +60,7 @@ Namespace Core.Managers
                         
                 Try
                     song = Await _musicService.Youtube.DownloadAsync(New Uri(url))
-                    playlist.Songs.Add(song)
+                    playlist.Songs.Add(song.Id)
                     playlistModified = True
                     Await response.ModifyAsync(
                         Sub(properties) properties.Content = 
@@ -73,6 +73,7 @@ Namespace Core.Managers
             Next
             
             If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
+            
             Await _dbContext.SaveChangesAsync()
             Await tc.SendMessageAsync("Done!")
         End Function

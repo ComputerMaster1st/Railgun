@@ -51,10 +51,10 @@ Namespace Core.Managers
         End Function
         
         Private Async Function ReceiveMessageAsync(sMessage As SocketMessage) As Task Handles _client.MessageReceived
-            If sMessage Is Nothing OrElse 
-               TypeOf sMessage Is SocketSystemMessage OrElse 
-               TypeOf sMessage.Channel Is SocketDMChannel OrElse 
-               TypeOf sMessage.Channel Is SocketGroupChannel Then Return
+            If sMessage Is Nothing OrElse TypeOf sMessage IsNot SocketUserMessage OrElse 
+                TypeOf sMessage.Channel IsNot SocketGuildChannel
+                Return
+            End If
             
             Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(sMessage)))
         End Function
@@ -62,13 +62,19 @@ Namespace Core.Managers
         Private Async Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
                                                   newMessage As SocketMessage, channel As ISocketMessageChannel
                                                  ) As Task Handles _client.MessageUpdated
+            If newMessage Is Nothing OrElse TypeOf newMessage IsNot SocketUserMessage OrElse 
+               TypeOf newMessage.Channel IsNot SocketGuildChannel
+                Return
+            End If
+            
             Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(newMessage)))
         End Function
         
         Private Async Function ProcessMessageAsync(sMessage As SocketMessage) As Task
             Try
                 Dim msg As IUserMessage = sMessage
-                Dim guild As IGuild = CType(msg.Channel, ITextChannel).Guild
+                dim tc As ITextChannel = msg.Channel
+                Dim guild As IGuild = tc.Guild
                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 
                 If filterMsg IsNot Nothing
@@ -121,10 +127,6 @@ Namespace Core.Managers
             Select result.Error
                 Case CommandError.UnmetPrecondition
                     Await tc.SendMessageAsync(cmdError)
-                    Exit Select
-                Case Else
-                    Await _log.LogToConsoleAsync(
-                        New LogMessage(LogSeverity.Warning, "Command", result.Error.ToString() + " : " + result.ErrorReason))
                     Exit Select
             End Select
         End Function

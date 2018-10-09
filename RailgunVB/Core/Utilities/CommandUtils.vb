@@ -34,8 +34,10 @@ Namespace Core.Utilities
                 data.PlaylistId)
 
             Dim playlist As New Playlist
+            
             data.PlaylistId = playlist.Id
             
+            Await _musicService.Playlist.UpdateAsync(playlist)
             Await _context.SaveChangesAsync()
             
             Return playlist

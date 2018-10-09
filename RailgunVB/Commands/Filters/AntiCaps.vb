@@ -4,7 +4,6 @@ Imports Discord.Commands
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Filter
-Imports TreeDiagram.Models.Server.Filter.IgnoreChannel
 
 Namespace Commands.Filters
     
@@ -83,7 +82,7 @@ Namespace Commands.Filters
                 data.IgnoredChannels.RemoveAll(Function(f) f.ChannelId = tc.Id)
                 await ReplyAsync("Anti-Caps is now monitoring this channel.")
             Else 
-                data.IgnoredChannels.Add(New FilterCapsIgnoreChannel(tc.Id))
+                data.IgnoredChannels.Add(New IgnoredChannels(tc.Id))
                 await ReplyAsync("Anti-Caps is no longer monitoring this channel.")
             End If
         End Function
@@ -107,9 +106,9 @@ Namespace Commands.Filters
             
             If data.IgnoredChannels.Count > 0
                 Dim initial As Boolean = True
-                Dim deletedChannels As New List(Of FilterCapsIgnoreChannel)
+                Dim deletedChannels As New List(Of IgnoredChannels)
                 
-                For Each channel As FilterCapsIgnoreChannel In data.IgnoredChannels
+                For Each channel As IgnoredChannels In data.IgnoredChannels
                     Dim tc As ITextChannel = Await Context.Guild.GetTextChannelAsync(channel.ChannelId)
                     
                     If tc Is Nothing
@@ -124,7 +123,7 @@ Namespace Commands.Filters
                 Next
                 
                 If deletedChannels.Count > 0
-                    For Each channel As FilterCapsIgnoreChannel In deletedChannels
+                    For Each channel As IgnoredChannels In deletedChannels
                         data.IgnoredChannels.Remove(channel)
                     Next
                 End If

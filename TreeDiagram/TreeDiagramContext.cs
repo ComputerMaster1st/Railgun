@@ -11,15 +11,8 @@ using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
-    public sealed class TreeDiagramContext : DbContext
+    public sealed class TreeDiagramContext : DbContext 
     {
-        private readonly string _host;
-        private readonly string _user;
-        private readonly string _pass;
-        private readonly string _data;
-
-        private const int Port = 5432;
-        
         public DbSet<FilterCaps> FilterCapses { get; internal set; }
         public DbSet<FilterUrl> FilterUrls { get; internal set; }
         
@@ -37,19 +30,7 @@ namespace TreeDiagram
         public DbSet<UserCommand> UserCommands { get; internal set; }
         public DbSet<UserMention> UserMentions { get; internal set; }
 
-        public TreeDiagramContext(PostgresConfig config)
-        {
-            _host = config.Hostname;
-            _user = config.Username;
-            _pass = config.Password;
-            _data = config.Database;
-        }
-        
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql($"Server={_host};Port={Port};Database={_data};UserId={_user};Password={_pass};");
-            base.OnConfiguring(optionsBuilder);
-        }
+        public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +39,9 @@ namespace TreeDiagram
                 x.Property(y => y.PlaylistId)
                     .HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
             });
+            modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
             base.OnModelCreating(modelBuilder);
         }
 

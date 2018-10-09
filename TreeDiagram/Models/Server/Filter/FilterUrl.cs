@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using TreeDiagram.Models.Server.Filter.IgnoreChannel;
 
 namespace TreeDiagram.Models.Server.Filter
 {
-    public class FilterUrl : FilterBase<FilterUrlIgnoreChannel>
+    public class FilterUrl : FilterBase
     {
         public bool BlockServerInvites { get; set; } = false;
         public bool DenyMode { get; set; } = false;

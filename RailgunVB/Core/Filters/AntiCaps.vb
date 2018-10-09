@@ -7,19 +7,17 @@ Namespace Core.Filters
     
     Public Class AntiCaps
         Implements IMessageFilter
-    
-        Private ReadOnly _dbContext As TreeDiagramContext
         
-        Public Sub New(manager As FilterManager, dbContext As TreeDiagramContext)
+        Public Sub New(manager As FilterManager)
             manager.RegisterFilter(Me)
-            _dbContext = dbContext
         End Sub
         
-        Public Async Function FilterAsync(message As IUserMessage) As Task(Of IUserMessage) Implements IMessageFilter.FilterAsync
+        Public Async Function FilterAsync(message As IUserMessage, context As TreeDiagramContext) As Task(
+            Of IUserMessage) Implements IMessageFilter.FilterAsync
             If String.IsNullOrWhiteSpace(message.Content) Then Return Nothing
             
             Dim tc As ITextChannel = message.Channel
-            Dim data As FilterCaps = Await _dbContext.FilterCapses.GetAsync(tc.GuildId)
+            Dim data As FilterCaps = Await context.FilterCapses.GetAsync(tc.GuildId)
             
             If data Is Nothing OrElse Not (data.IsEnabled) OrElse 
                (Not (data.IncludeBots) AndAlso (message.Author.IsBot Or message.Author.IsWebhook)) OrElse 

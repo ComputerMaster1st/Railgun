@@ -81,7 +81,9 @@ Namespace Commands.Music
                 .AppendFormat("Total Songs : {0}", playlist.Songs.Count).AppendLine() _
                 .AppendLine()
             
-            For Each song As ISong in playlist.Songs
+            For Each songId As SongId in playlist.Songs
+                Dim song As ISong = Await _musicService.GetSongAsync(songId)
+                
                 output.AppendFormat("--       Id =>", song.Id).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _

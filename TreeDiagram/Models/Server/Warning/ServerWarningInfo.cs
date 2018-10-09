@@ -6,10 +6,13 @@ namespace TreeDiagram.Models.Server.Warning
 {
     public class ServerWarningInfo
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)] 
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int WarningId { get; private set; }
         public ulong UserId { get; private set; }
-        public List<string> Reasons { get; private set; } = new List<string>();
+        public List<string> Reasons { get; set; } = new List<string>();
 
-        public ServerWarningInfo(ulong userId) => UserId = userId;
+        public ServerWarningInfo(ulong userId) {
+            UserId = userId;
+        }
     }
 }

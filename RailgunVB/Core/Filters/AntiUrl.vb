@@ -10,20 +10,18 @@ Namespace Core.Filters
     Public Class AntiUrl
         Implements IMessageFilter
         
-        Private ReadOnly _context As TreeDiagramContext
         Private ReadOnly _regex As New Regex("(http(s)?)://(www.)?")
         
-        Public Sub New(context As TreeDiagramContext, manager As FilterManager)
-            _context = context
+        Public Sub New(manager As FilterManager)
             manager.RegisterFilter(Me)
         End Sub
         
-        Public Async Function FilterAsync(message As IUserMessage) As Task(Of IUserMessage) _
+        Public Async Function FilterAsync(message As IUserMessage, context As TreeDiagramContext) As Task(Of IUserMessage) _
             Implements IMessageFilter.FilterAsync
             If String.IsNullOrWhiteSpace(message.Content) Then Return Nothing
             
             Dim tc As ITextChannel = message.Channel
-            Dim data As FilterUrl = Await _context.FilterUrls.GetAsync(tc.GuildId)
+            Dim data As FilterUrl = Await context.FilterUrls.GetAsync(tc.GuildId)
             
             If data Is Nothing OrElse 
                Not (data.IsEnabled) OrElse 
@@ -65,8 +63,9 @@ Namespace Core.Filters
         
         Private Function CheckContentForUrl(data As FilterUrl, content As String) As Boolean
             For Each url As String In data.BannedUrls
-                If (data.DenyMode AndAlso Not (content.Contains(url))) OrElse 
-                   (Not (data.DenyMode) AndAlso content.Contains(url))
+                If data.DenyMode AndAlso Not (content.Contains(url)) AndAlso _regex.IsMatch(content)
+                    Return True
+                ElseIf Not (data.DenyMode) AndAlso content.Contains(url)
                     Return True
                 End If
             Next

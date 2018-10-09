@@ -13,7 +13,7 @@ Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
-Imports TreeDiagram.Configuration
+Imports Microsoft.EntityFrameworkCore
 
 Namespace Core
     
@@ -49,12 +49,15 @@ Namespace Core
                 .AddSingleton(_client) _
                 .AddSingleton(Of IDiscordClient)(_client) _
                 .AddSingleton(_commandService) _
-                .AddTransient(Of TreeDiagramContext)(function(provider) New TreeDiagramContext(
-                    New PostgresConfig(
-                        postgreConfig.Hostname, 
-                        postgreConfig.Username, 
-                        postgreConfig.Password, 
-                        postgreConfig.Database))) _
+                .AddDbContext(Of TreeDiagramContext)(function(optionsBuilder) optionsBuilder.UseNpgsql(
+                    String.Format("Server={0};Port=5432;Database={1};UserId={2};Password={3};", 
+                                  postgreConfig.Hostname, 
+                                  postgreConfig.Database, 
+                                  postgreConfig.Username, 
+                                  postgreConfig.Password)) _
+                    .EnableSensitiveDataLogging _
+                    .UseLazyLoadingProxies
+                ) _
                 .AddSingleton(New MusicService(New MusicServiceConfig() With {
                     .Hostname = mongoConfig.Hostname,
                     .Username = mongoConfig.Username,
