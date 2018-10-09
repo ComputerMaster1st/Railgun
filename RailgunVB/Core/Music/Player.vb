@@ -20,7 +20,7 @@ Namespace Core.Music
         Private _musicCancelled As Boolean = False
         Private _streamCancelled As Boolean = False
         
-        Private ReadOnly _playedSongs As New List(Of ISong)
+        Private ReadOnly _playedSongs As New List(Of SongId)
         
         Public Property AutoSkipped As Boolean = False
         Public ReadOnly Property CreatedAt As DateTime = DateTime.Now
@@ -117,7 +117,7 @@ Namespace Core.Music
                 Try
                     request = Await _musicService.GetSongAsync(playlist.Songs(rand.Next(0, playlist.Songs.Count)))
                     
-                    If request IsNot Nothing AndAlso _playedSongs.Contains(request) Then _
+                    If request IsNot Nothing AndAlso _playedSongs.Contains(request.Id) Then _
                         request = Nothing
                 Catch
                     request = Nothing
