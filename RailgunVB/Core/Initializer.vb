@@ -65,7 +65,7 @@ Namespace Core
                     .EnableResync = True
                 })) _
                 .AddSingleton(Of Analytics) _
-                .AddSingleton(Of CommandUtils) _
+                .AddTransient(Of CommandUtils) _
                 .AddSingleton(Of Events) _
                 .AddSingleton(Of RandomCat) _
                 .AddSingleton(Of CommandManager) _
