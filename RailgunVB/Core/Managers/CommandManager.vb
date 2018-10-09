@@ -25,14 +25,13 @@ Namespace Core.Managers
         
         Private ReadOnly _services As IServiceProvider
 
-        Public Sub New(config As MasterConfig, log As Log, analytics As Analytics, filterManager As FilterManager, 
-                       client As DiscordShardedClient, commandService As CommandService, services As IServiceProvider)
-            _config = config
-            _log = log
-            _analytics = analytics
-            _filterManager = filterManager
-            _client = client
-            _commandService = commandService
+        Public Sub New(services As IServiceProvider)
+            _config = services.GetService(Of MasterConfig)
+            _log = services.GetService(Of Log)
+            _analytics = services.GetService(Of Analytics)
+            _filterManager = services.GetService(Of FilterManager)
+            _client = services.GetService(Of DiscordShardedClient)
+            _commandService = services.GetService(Of CommandService)
             _services = services
         End Sub
         

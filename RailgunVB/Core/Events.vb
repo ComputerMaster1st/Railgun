@@ -1,7 +1,7 @@
 Imports AudioChord
 Imports Discord
 Imports Discord.WebSocket
-Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.Extensions.DependencyInjection
 Imports MongoDB.Bson
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
@@ -19,35 +19,25 @@ Namespace Core
         Private ReadOnly _log As Log
         Private ReadOnly _commandUtils As CommandUtils
         Private ReadOnly _serverCount As ServerCount
-
         Private WithEvents _client As DiscordShardedClient
-        
-        Private ReadOnly _dbContext As TreeDiagramContext
         Private ReadOnly _musicService As MusicService
-        
         Private ReadOnly _playerManager As PlayerManager
         Private ReadOnly _timerManager As TimerManager
+        Private ReadOnly _services As IServiceProvider
         
         Private _initialized As Boolean = False
         Private ReadOnly _shardsReady As New Dictionary(Of Integer, Boolean)
         
-        Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, serverCount As ServerCount,
-                       client As DiscordShardedClient, dbContext As TreeDiagramContext, playerManager As PlayerManager, 
-                       timerManager As TimerManager, musicService As MusicService)
-            _config = config
-            _log = log
-            _commandUtils = commandUtils
-            _serverCount = serverCount
-            
-            _client = client
-            
-            _dbContext = dbContext
-            _musicService = musicService
-            
-            _dbContext.Database.OpenConnection()
-            
-            _playerManager = playerManager
-            _timerManager = timerManager
+        Public Sub New(services As IServiceProvider)
+            _config = services.GetService(Of MasterConfig)
+            _log = services.GetService(Of Log)
+            _commandUtils = services.GetService(Of CommandUtils)
+            _serverCount = services.GetService(Of ServerCount)
+            _client = services.GetService(Of DiscordShardedClient)
+            _musicService = services.GetService(Of MusicService)
+            _playerManager = services.GetService(Of PlayerManager)
+            _timerManager = services.GetService(Of TimerManager)
+            _services = services
         End Sub
         
         Private Async Function JoinedGuildAsync(sGuild As SocketGuild) As Task Handles _client.JoinedGuild
@@ -57,16 +47,26 @@ Namespace Core
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
             
-            Dim sMusic As ServerMusic = Await _dbContext.ServerMusics.GetAsync(sGuild.Id)
-            If sMusic IsNot Nothing AndAlso sMusic.PlaylistId <> ObjectId.Empty Then _ 
-                Await _musicService.Playlist.DeleteAsync(sMusic.PlaylistId)
-            
-            Await _dbContext.DeleteGuildDataAsync(sGuild.Id)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                
+                Dim sMusic As ServerMusic = Await context.ServerMusics.GetAsync(sGuild.Id)
+                If sMusic IsNot Nothing AndAlso sMusic.PlaylistId <> ObjectId.Empty Then _ 
+                    Await _musicService.Playlist.DeleteAsync(sMusic.PlaylistId)
+                
+                Await context.DeleteGuildDataAsync(sGuild.Id)
+            End Using
+
             Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager)
         End Function
         
         Private Async Function UserJoinedAsync(sUser As SocketGuildUser) As Task Handles _client.UserJoined
-            Dim sJoinLeave As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            Dim sJoinLeave As ServerJoinLeave
+            
+            Using scope As IServiceScope = _services.CreateScope()
+                sJoinLeave = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
+                    .ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            End Using
             
             If sJoinLeave Is Nothing Then Return
             
@@ -77,7 +77,12 @@ Namespace Core
         End Function
         
         Private Async Function UserLeaveAsync(sUser As SocketGuildUser) As Task Handles _client.UserLeft
-            Dim sJoinLeave As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            Dim sJoinLeave As ServerJoinLeave
+            
+            Using scope As IServiceScope = _services.CreateScope()
+                sJoinLeave = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
+                    .ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            End Using
             
             If sJoinLeave Is Nothing Then Return
             
@@ -119,7 +124,11 @@ Namespace Core
             
             If _playerManager.IsCreated(guild.Id) OrElse user.VoiceChannel Is Nothing Then Return
             
-            Dim sMusic As ServerMusic = Await _dbContext.ServerMusics.GetAsync(guild.Id)
+            Dim sMusic As ServerMusic
+            Using scope As IServiceScope = _services.CreateScope()
+                sMusic = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
+                    .ServerMusics.GetAsync(guild.Id)
+            End Using
             
             If sMusic Is Nothing Then Return
             
