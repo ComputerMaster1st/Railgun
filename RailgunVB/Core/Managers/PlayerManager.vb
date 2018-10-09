@@ -1,6 +1,7 @@
 Imports System.Text
 Imports AudioChord
 Imports Discord
+Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Music.PlayerEventArgs
@@ -14,18 +15,16 @@ Namespace Core.Managers
         
         Private ReadOnly _log As Log
         Private ReadOnly _commandUtils As CommandUtils
-        
+        Private ReadOnly _services As IServiceProvider
         Private ReadOnly _musicService As MusicService
-        Private ReadOnly _dbContext As TreeDiagramContext
 
         Public ReadOnly Property ActivePlayers As New Dictionary(Of ULong, Tuple(Of ITextChannel, Player))
         
-        Public Sub New(log As Log, commandUtils As CommandUtils, musicService As MusicService, 
-                       dbContext As TreeDiagramContext)
-            _log = log
-            _commandUtils = commandUtils
-            _musicService = musicService
-            _dbContext = dbContext
+        Public Sub New(services As IServiceProvider)
+            _log = services.GetService(Of Log)
+            _commandUtils = services.GetService(Of CommandUtils)
+            _musicService = services.GetService(Of MusicService)
+            _services = services
         End Sub
         
         Private Async Function PlayerConnectedAsync(args As PlayerConnectedEventArgs) As Task
@@ -35,7 +34,13 @@ Namespace Core.Managers
         
         Private Async Function PlayerCurrentlyPlayingAsync(args As PlayerCurrentlyPlayingEventArgs) As Task
             Try
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(args.GuildId)
+                Dim data As ServerMusic
+                
+                Using scope As IServiceScope = _services.CreateScope()
+                    data = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
+                        .ServerMusics.GetAsync(args.GuildId)
+                End Using
+                
                 Dim tc As ITextChannel = ActivePlayers(args.GuildId).Item1
                 
                 If Not (data.SilentNowPlaying)
@@ -115,7 +120,12 @@ Namespace Core.Managers
         Public Async Function CreatePlayerAsync(user As IGuildUser, vc As IVoiceChannel, tc As ITextChannel, 
                                                 Optional autoJoin As Boolean = False, 
                                                 Optional preRequestedSong As ISong = Nothing) As Task
-            Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(tc.GuildId)
+            Dim data As ServerMusic
+                
+            Using scope As IServiceScope = _services.CreateScope()
+                data = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
+                    .ServerMusics.GetOrCreateAsync(tc.GuildId)
+            End Using
             Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
             
             If playlist.Songs.Count < 1

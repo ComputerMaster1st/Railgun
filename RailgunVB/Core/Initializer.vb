@@ -67,7 +67,7 @@ Namespace Core
                 .AddSingleton(Of Analytics) _
                 .AddTransient(Of CommandUtils) _
                 .AddSingleton(Of Events) _
-                .AddSingleton(Of RandomCat) _
+                .AddTransient(Of RandomCat) _
                 .AddSingleton(Of CommandManager) _
                 .AddSingleton(Of FilterManager) _
                 .AddSingleton(Of MusicManager) _

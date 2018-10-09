@@ -1,6 +1,7 @@
 Imports System.Text
 Imports System.Timers
 Imports Discord
+Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Logging
 Imports TreeDiagram
 Imports TreeDiagram.Models.TreeTimer
@@ -11,16 +12,16 @@ Namespace Core.Containers
     
         Private ReadOnly _log As Log
         Private ReadOnly _client As IDiscordClient
-        Private ReadOnly _dbContext As TreeDiagramContext
+        Private ReadOnly _services As IServiceProvider
         
         Public ReadOnly Property Data As TimerRemindMe
         Public ReadOnly Property IsCompleted As Boolean = False
         Public ReadOnly Property HasCrashed As Boolean = False
         
-        Public Sub New(log As Log, client As IDiscordClient, dbContext As TreeDiagramContext, data As TimerRemindMe)
-            _log = log
-            _client = client
-            _dbContext = dbContext
+        Public Sub New(services As IServiceProvider, data As TimerRemindMe)
+            _log = services.GetService(Of Log)
+            _client = services.GetService(Of IDiscordClient)
+            _services = services
             Me.Data = data
         End Sub
         
@@ -99,8 +100,12 @@ Namespace Core.Containers
                 Data.Timer = Nothing
             End If
             
-            _dbContext.TimerRemindMes.Remove(Data)
-            Await _dbContext.SaveChangesAsync()
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                
+                context.TimerRemindMes.Remove(Data)
+                Await context.SaveChangesAsync()
+            End Using
         End Function
         
     End Class

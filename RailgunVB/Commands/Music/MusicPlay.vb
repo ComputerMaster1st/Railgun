@@ -64,7 +64,7 @@ Namespace Commands.Music
                                                            preRequestedSong := song)
                     Return
                 ElseIf player.VoiceChannel.Id <> vc.Id
-                    Await response.ModifyAsync(Function(x) x.Content = 
+                    Await response.ModifyAsync(Sub(x) x.Content = 
                         "Please be in the same voice channel as me when requesting a song to play.")
                     Return
                 End If
@@ -77,7 +77,7 @@ Namespace Commands.Music
                     player.CancelMusic()
                 End If
                 
-                Await response.ModifyAsync(Function(x) x.Content = output.ToString())
+                Await response.ModifyAsync(Sub(x) x.Content = output.ToString())
             End Function
             
             <Command>
@@ -116,7 +116,7 @@ Namespace Commands.Music
                     
                     Await QueueSongAsync(player, playlist, song, data, response)
                 Catch ex As Exception
-                    response.ModifyAsync(Function(x) x.Content = 
+                    response.ModifyAsync(Sub(x) x.Content = 
                         $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}").GetAwaiter()
                     
                     Dim output As New StringBuilder
@@ -137,7 +137,7 @@ Namespace Commands.Music
                     Await QueueSongAsync(player, playlist, song, data, response)
                     Return
                 ElseIf Not (input.Contains("YOUTUBE#"))
-                    Await response.ModifyAsync(Function(x) x.Content = "Specified song does not exist.")
+                    Await response.ModifyAsync(Sub(x) x.Content = "Specified song does not exist.")
                     Return
                 End If
                 
@@ -151,18 +151,18 @@ Namespace Commands.Music
                 Dim song As ISong = Nothing
                 
                 If Not (input.Contains("youtu"))
-                    Await response.ModifyAsync(Function(x) x.Content = "Only YouTube links can be processed.")
+                    Await response.ModifyAsync(Sub(x) x.Content = "Only YouTube links can be processed.")
                     Return
                 ElseIf Not (_musicService.Youtube.TryParseYoutubeUrl(input, videoId))
-                    Await response.ModifyAsync(Function(x) x.Content = "Invalid Youtube Video Link")
+                    Await response.ModifyAsync(Sub(x) x.Content = "Invalid Youtube Video Link")
                     Return
                 ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(songOut) song = songOut)
-                    If playlist.Songs.Contains(song)
+                    If playlist.Songs.Contains(song.Id)
                         Await QueueSongAsync(player, playlist, song, data, response)
                         Return
                     ElseIf Not (data.AutoDownload)
                         Await response.ModifyAsync(
-                            Function(x) x.Content = "Unable to queue song! Auto-Download is disabled!")
+                            Sub(x) x.Content = "Unable to queue song! Auto-Download is disabled!")
                         Return
                     End If
                 End If
@@ -171,7 +171,7 @@ Namespace Commands.Music
                     song = Await _musicService.Youtube.DownloadAsync(New Uri(input))
                     Await QueueSongAsync(player, playlist, song, data, response)
                 Catch ex As Exception
-                    response.ModifyAsync(Function(x) _
+                    response.ModifyAsync(Sub(x) _
                         x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}").GetAwaiter()
                     
                     Dim output As New StringBuilder
@@ -186,11 +186,11 @@ Namespace Commands.Music
             Private Async Function SearchAsync(input As String, player As Player, playlist As Playlist, 
                                                data As ServerMusic, response As IUserMessage) As Task
                 If String.IsNullOrEmpty(_config.GoogleApiToken)
-                    Await response.ModifyAsync(Function(x) x.Content = 
+                    Await response.ModifyAsync(Sub(x) x.Content = 
                         "Music Search is disabled due to no YouTube API V3 key being installed. Please contact the master admin.")
                     Return
                 ElseIf String.IsNullOrWhiteSpace(input)
-                    Await response.ModifyAsync(Function(x) x.Content = "Search Query can not be empty.")
+                    Await response.ModifyAsync(Sub(x) x.Content = "Search Query can not be empty.")
                     Return
                 End If
                 
@@ -198,7 +198,7 @@ Namespace Commands.Music
                 Dim video As YoutubeVideoData = Await search.GetVideoAsync(input)
                 
                 If video Is Nothing
-                    Await response.ModifyAsync(Function(x) x.Content = "Unable to find anything using that query.")
+                    Await response.ModifyAsync(Sub(x) x.Content = "Unable to find anything using that query.")
                     Return
                 End If
                 

@@ -1,6 +1,7 @@
 Imports System.Text
 Imports AudioChord
 Imports Discord
+Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
@@ -12,70 +13,72 @@ Namespace Core.Managers
         
         Private ReadOnly _log As Log
         Private ReadOnly _commandUtils As CommandUtils
+        Private ReadOnly _services As IServiceProvider
+        Private ReadOnly _musicService As MusicService
         
-        Private ReadOnly _dbContext As TreeDiagramContext
-        Private WithEvents _musicService As MusicService
-        
-        Public Sub New(log As Log, commandUtils As CommandUtils, dbContext As TreeDiagramContext, 
-                       musicService As MusicService)
-            _log = log
-            _commandUtils = commandUtils
-            _dbContext = dbContext
-            _musicService = musicService
+        Public Sub New(services As IServiceProvider)
+            _log = services.GetService(Of Log)
+            _commandUtils = services.GetService(Of CommandUtils)
+            _musicService = services.GetService(Of MusicService)
+            _services = services
         End Sub
         
         Public Async Function AddYoutubeSongsAsync(guildId As ULong, urlList As List(Of String), 
                                                    tc As ITextChannel) As Task
-            Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(guildId)
-            Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
-            Dim response As IUserMessage
-            Dim playlistModified = False
-                    
-            For Each url As String In urlList
-                response = Await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...")
-                
-                Dim cleanUrl As String = url.Trim(" "c, "<"c, ">"c)
-                Dim videoId As String = String.Empty
-                Dim song As ISong = Nothing
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                Dim data As ServerMusic = Await context.ServerMusics.GetOrCreateAsync(guildId)
+                Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                Dim response As IUserMessage
+                Dim playlistModified = False
                         
-                If Not (_musicService.Youtube.TryParseYoutubeUrl(url, videoId))
-                    Await response.ModifyAsync(
-                        Sub(properties) properties.Content = $"{Format.Bold("Invalid Url :")} <{cleanUrl}>")
-                    Continue For
-                ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(out) song = out)
-                    If playlist.Songs.Contains(song.Id)
+                For Each url As String In urlList
+                    response = Await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...")
+                    
+                    Dim cleanUrl As String = url.Trim(" "c, "<"c, ">"c)
+                    Dim videoId As String = String.Empty
+                    Dim song As ISong = Nothing
+                            
+                    If Not (_musicService.Youtube.TryParseYoutubeUrl(url, videoId))
                         Await response.ModifyAsync(
-                            Sub(properties) properties.Content = 
-                                $"{Format.Bold("Already Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
-                    Else 
+                            Sub(properties) properties.Content = $"{Format.Bold("Invalid Url :")} <{cleanUrl}>")
+                        Continue For
+                    ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(out) song = out)
+                        If playlist.Songs.Contains(song.Id)
+                            Await response.ModifyAsync(
+                                Sub(properties) properties.Content = 
+                                    $"{Format.Bold("Already Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
+                        Else 
+                            playlist.Songs.Add(song.Id)
+                            playlistModified = True
+                            Await response.ModifyAsync(
+                                Sub(properties) properties.Content = 
+                                    $"{Format.Bold("Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
+                        End If
+                                
+                        Continue For
+                    End If
+                            
+                    Try
+                        song = Await _musicService.Youtube.DownloadAsync(New Uri(url))
                         playlist.Songs.Add(song.Id)
                         playlistModified = True
                         Await response.ModifyAsync(
                             Sub(properties) properties.Content = 
-                                $"{Format.Bold("Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
-                    End If
-                            
-                    Continue For
-                End If
-                        
-                Try
-                    song = Await _musicService.Youtube.DownloadAsync(New Uri(url))
-                    playlist.Songs.Add(song.Id)
-                    playlistModified = True
-                    Await response.ModifyAsync(
-                        Sub(properties) properties.Content = 
-                            $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
-                Catch ex As Exception
-                    response.ModifyAsync(
-                        Sub(properties) properties.Content = 
-                            $"{Format.Bold("Failed To Install :")} (<{cleanUrl}>), {ex.Message}").GetAwaiter()
-                End Try
-            Next
+                                $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
+                    Catch ex As Exception
+                        response.ModifyAsync(
+                            Sub(properties) properties.Content = 
+                                $"{Format.Bold("Failed To Install :")} (<{cleanUrl}>), {ex.Message}").GetAwaiter()
+                    End Try
+                Next
+                
+                If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
+                
+                Await context.SaveChangesAsync()
+                Await tc.SendMessageAsync("Done!")
+            End Using
             
-            If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
-            
-            Await _dbContext.SaveChangesAsync()
-            Await tc.SendMessageAsync("Done!")
         End Function
         
         Public Async Function YoutubePlaylistStatusUpdatedAsync(tc As ITextChannel, status As SongProcessStatus, 

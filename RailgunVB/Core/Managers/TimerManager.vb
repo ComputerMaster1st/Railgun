@@ -1,6 +1,6 @@
 Imports System.Text
 Imports System.Timers
-Imports Discord
+Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core.Containers
 Imports RailgunVB.Core.Logging
 Imports TreeDiagram
@@ -14,10 +14,8 @@ Namespace Core.Managers
         Private ReadOnly _remindMeContainers As New List(Of RemindMeContainer)
         Private _initialized As Boolean = False
         
-        Private ReadOnly _client As IDiscordClient
         Private ReadOnly _log As Log
-        
-        Private ReadOnly _dbContext As TreeDiagramContext
+        Private ReadOnly _services As IServiceProvider
         
         Public ReadOnly Property RemindMeContainerCount As Integer
             Get
@@ -25,10 +23,9 @@ Namespace Core.Managers
             End Get
         End Property
 
-        Public Sub New(client As IDiscordClient, log As Log, dbContext As TreeDiagramContext)
-            _client = client
-            _log = log
-            _dbContext = dbContext
+        Public Sub New(services As IServiceProvider)
+            _log = services.GetService(Of Log)
+            _services = services
             
             AddHandler _masterTimer.Elapsed, Async Sub() Await MasterTimerElapsed()
             _masterTimer.AutoReset = True
@@ -47,22 +44,26 @@ Namespace Core.Managers
             Dim crashedTimers = 0
             Dim completedTimers = 0
             
-            For Each data As TimerRemindMe In _dbContext.TimerRemindMes
-                If data.TimerExpire < DateTime.UtcNow
-                    Dim container As New RemindMeContainer(_log, _client, _dbContext, data)
-                    
-                    Await container.ExecuteOverride()
-                    
-                    If container.IsCompleted
-                        completedTimers += 1
-                    ElseIf container.HasCrashed
-                        crashedTimers += 1
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                
+                For Each data As TimerRemindMe In context.TimerRemindMes
+                    If data.TimerExpire < DateTime.UtcNow
+                        Dim container As New RemindMeContainer(_services, data)
+                        
+                        Await container.ExecuteOverride()
+                        
+                        If container.IsCompleted
+                            completedTimers += 1
+                        ElseIf container.HasCrashed
+                            crashedTimers += 1
+                        End If
+                        Continue For
+                    ElseIf Await CreateAndStartRemindMeContainer(data)
+                        newTimers += 1
                     End If
-                    Continue For
-                ElseIf Await CreateAndStartRemindMeContainer(data)
-                    newTimers += 1
-                End If
-            Next
+                Next
+            End Using
             
             _masterTimer.Start()
             
@@ -100,9 +101,13 @@ Namespace Core.Managers
                 index += 1
             End While
             
-            For Each data As TimerRemindMe In _dbContext.TimerRemindMes
-                If Await CreateAndStartRemindMeContainer(data) Then newTimers += 1
-            Next
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                
+                For Each data As TimerRemindMe In context.TimerRemindMes
+                    If Await CreateAndStartRemindMeContainer(data) Then newTimers += 1
+                Next
+            End Using
             
             If newTimers = 0 AndAlso completedTimers = 0 AndAlso crashedTimers = 0 Then Return
             
@@ -124,7 +129,7 @@ Namespace Core.Managers
             
             If remainingTime.TotalMinutes < 30 AndAlso _remindMeContainers.FirstOrDefault(
                 Function(find) find.Data.Id = data.Id) Is Nothing
-                Dim container As New RemindMeContainer(_log, _client, _dbContext, data)
+                Dim container As New RemindMeContainer(_services, data)
                 
                 container.StartTimer(remainingTime.TotalMilliseconds)
                 
