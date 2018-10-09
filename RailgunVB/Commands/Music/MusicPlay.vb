@@ -59,7 +59,7 @@ Namespace Commands.Music
                 Dim vc As IVoiceChannel = user.VoiceChannel
                 
                 If player Is Nothing
-                    Await response.ModifyAsync(Function(x) x.Content = output.ToString())
+                    Await response.ModifyAsync(Sub(x) x.Content = output.ToString())
                     Await _playerManager.CreatePlayerAsync(user, vc, Context.Channel, 
                                                            preRequestedSong := song)
                     Return
@@ -69,7 +69,7 @@ Namespace Commands.Music
                     Return
                 End If
                 
-                player.AddSongRequest(song.Id)
+                player.AddSongRequest(song)
                 
                 If data.AutoSkip AndAlso Not (player.AutoSkipped)
                     output.AppendLine("Auto-Skipping current song as requested.")

@@ -119,8 +119,8 @@ Namespace Core.Managers
             Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
             
             If playlist.Songs.Count < 1
-                If preRequestedSong IsNot Nothing AndAlso Not (playlist.Songs.Contains(preRequestedSong)) Then _ 
-                    playlist.Songs.Add(preRequestedSong)
+                If preRequestedSong IsNot Nothing AndAlso Not (playlist.Songs.Contains(preRequestedSong.Id)) Then _ 
+                    playlist.Songs.Add(preRequestedSong.Id)
                 
                 Await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...")
                 
@@ -131,8 +131,8 @@ Namespace Core.Managers
                     Dim i As Integer = rand.Next(0, repository.Count())
                     Dim song As ISong = repository.ElementAtOrDefault(i)
                     
-                    If song IsNot Nothing AndAlso Not (playlist.Songs.Contains(song)) Then _
-                        playlist.Songs.Add(song)
+                    If song IsNot Nothing AndAlso Not (playlist.Songs.Contains(song.Id)) Then _
+                        playlist.Songs.Add(song.Id)
                 End While
                 
                 Await _musicService.Playlist.UpdateAsync(playlist)
@@ -151,7 +151,7 @@ Namespace Core.Managers
             AddHandler player.Finished, Async Sub(s, a) Await PlayerFinishedAsync(a)
             
             If preRequestedSong IsNot Nothing
-                player.AddSongRequest(preRequestedSong.Id)
+                player.AddSongRequest(preRequestedSong)
                 player.AutoSkipped = True
             End If
             
