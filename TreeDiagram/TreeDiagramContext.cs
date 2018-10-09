@@ -47,17 +47,25 @@ namespace TreeDiagram
 
         public async Task DeleteGuildDataAsync(ulong id)
         {
-            FilterCapses.Remove(await FilterCapses.FirstOrDefaultAsync(find => find.Id == id));
-            FilterUrls.Remove(await FilterUrls.FirstOrDefaultAsync(find => find.Id == id));
+            var filterCaps = await FilterCapses.FirstOrDefaultAsync(find => find.Id == id);
+            var filterUrl = await FilterUrls.FirstOrDefaultAsync(find => find.Id == id);
+            var funBites = await FunBites.FirstOrDefaultAsync(find => find.Id == id);
+            var funRst = await FunRsts.FirstOrDefaultAsync(find => find.Id == id);
+            var serverCommand = await ServerCommands.FirstOrDefaultAsync(find => find.Id == id);
+            var serverMention = await ServerMentions.FirstOrDefaultAsync(find => find.Id == id);
+            var serverMusic = await ServerMusics.FirstOrDefaultAsync(find => find.Id == id);
+            var serverWarning = await ServerWarnings.FirstOrDefaultAsync(find => find.Id == id);
+            var serverJoinLeave = await ServerJoinLeaves.FirstOrDefaultAsync(find => find.Id == id);
             
-            FunBites.Remove(await FunBites.FirstOrDefaultAsync(find => find.Id == id));
-            FunRsts.Remove(await FunRsts.FirstOrDefaultAsync(find => find.Id == id));
-            
-            ServerCommands.Remove(await ServerCommands.FirstOrDefaultAsync(find => find.Id == id));
-            ServerMentions.Remove(await ServerMentions.FirstOrDefaultAsync(find => find.Id == id));
-            ServerMusics.Remove(await ServerMusics.FirstOrDefaultAsync(find => find.Id == id));
-            ServerWarnings.Remove(await ServerWarnings.FirstOrDefaultAsync(find => find.Id == id));
-            ServerJoinLeaves.Remove(await ServerJoinLeaves.FirstOrDefaultAsync(find => find.Id == id));
+            if (filterCaps != null) FilterCapses.Remove(filterCaps);
+            if (filterUrl != null) FilterUrls.Remove(filterUrl);
+            if (funBites != null) FunBites.Remove(funBites);
+            if (funRst != null) FunRsts.Remove(funRst);
+            if (serverCommand != null) ServerCommands.Remove(serverCommand);
+            if (serverMention != null) ServerMentions.Remove(serverMention);
+            if (serverMusic != null) ServerMusics.Remove(serverMusic);
+            if (serverWarning != null) ServerWarnings.Remove(serverWarning);
+            if (serverJoinLeave != null) ServerJoinLeaves.Remove(serverJoinLeave);
 
             await SaveChangesAsync();
         }

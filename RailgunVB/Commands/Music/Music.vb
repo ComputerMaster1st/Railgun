@@ -123,7 +123,7 @@ Namespace Commands.Music
                 Return
             End If
             
-            Dim meta As SongMetadata = (Await _musicService.GetSongAsync(player.GetFirstSongRequest())).Metadata
+            Dim meta As SongMetadata = player.GetFirstSongRequest().Metadata
             Dim output As New StringBuilder
             
             output.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine() _
@@ -141,7 +141,7 @@ Namespace Commands.Music
                 .AppendFormat("Total Songs : {0}", repo.Count()).AppendLine() _
                 .AppendLine()
             
-            For Each song As Song in repo
+            For Each song As ISong in repo
                 output.AppendFormat("--       Id =>", song.Id).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
