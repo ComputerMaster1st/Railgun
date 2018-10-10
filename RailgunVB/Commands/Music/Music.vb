@@ -89,7 +89,7 @@ Namespace Commands.Music
                     Continue For
                 End If
                 
-                output.AppendFormat("--       Id =>", song.Id.ToString()).AppendLine() _
+                output.AppendFormat("--       Id => {0}", song.Id.ToString()).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
                     .AppendFormat("--      Url => {0}", song.Metadata.Url).AppendLine() _
@@ -155,7 +155,7 @@ Namespace Commands.Music
                 .AppendLine()
             
             For Each song As ISong in repo
-                output.AppendFormat("--       Id =>", song.Id.ToString()).AppendLine() _
+                output.AppendFormat("--       Id => {0}", song.Id.ToString()).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
                     .AppendFormat("--      Url => {0}", song.Metadata.Url).AppendLine() _
@@ -197,12 +197,12 @@ Namespace Commands.Music
             output.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), (player.Requests.Count - 1)).AppendLine() _
                 .AppendLine()
             
-            Dim i = 0
+            Dim i = 1
             While player.Requests.Count > i
                 Dim song As ISong = player.Requests(i)
                 Dim meta As SongMetadata = song.Metadata
                 
-                output.AppendFormat("{0} : {1} || Length : {2}", If(i = 0, "Next", Format.Code($"[{i}]")), 
+                output.AppendFormat("{0} : {1} || Length : {2}", If(i = 1, "Next", Format.Code($"[{i}]")), 
                                     Format.Bold(meta.Name), Format.Bold(meta.Length.ToString())).AppendLine()
                 
                 i += 1
