@@ -52,8 +52,7 @@ Namespace Commands.Music
                 output.AppendFormat("{0} Queued {1} as requested by {2}. {3}", 
                     If(nowInstalled, "Installed &", ""), Format.Bold(song.Metadata.Name), 
                     Format.Bold(await _commandUtils.GetUsernameOrMentionAsync(Context.User)), 
-                    If(player, "Now starting music player...")).AppendLine()
-                
+                    If(player Is Nothing, "Now starting music player...", "")).AppendLine()
                 
                 Dim user As IGuildUser = Context.User
                 Dim vc As IVoiceChannel = user.VoiceChannel
