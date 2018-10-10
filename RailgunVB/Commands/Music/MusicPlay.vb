@@ -91,6 +91,7 @@ Namespace Commands.Music
                 
                 Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                Await _dbContext.SaveChangesAsync()
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                 Dim response As IUserMessage = await ReplyAsync("Standby...")
                 
