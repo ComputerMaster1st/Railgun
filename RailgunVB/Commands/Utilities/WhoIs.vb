@@ -106,15 +106,15 @@ Namespace Commands.Utilities
             Dim percent As Integer = Math.Round((score / 214) * 100)
             
             Select percent
-                Case >= 100
+                Case Is >= 100
                     Return 5
-                Case >= 80
+                Case Is >= 80
                     Return 4
-                Case >= 60
+                Case Is >= 60
                     Return 3
-                Case >= 40
+                Case Is >= 40
                     Return 2
-                Case >= 20
+                Case Is >= 20
                     Return 1
                 Case Else
                     Return 0
