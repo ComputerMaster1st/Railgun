@@ -93,7 +93,7 @@ Namespace Core.Managers
                     
                     Dim logOutput As New StringBuilder
                     
-                    logOutput.AppendFormat("<{0} (1)> Process Failure!", tc.Guild.Name, tc.GuildId).AppendLine() _ 
+                    logOutput.AppendFormat("<{0} ({1})> Process Failure!", tc.Guild.Name, tc.GuildId).AppendLine() _ 
                         .AppendFormat("{0} - {1}", url, output.Exceptions.Message)
                     
                     Await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord)
@@ -110,7 +110,7 @@ Namespace Core.Managers
                     
                     Dim logOutput As New StringBuilder
                     
-                    logOutput.AppendFormat("<{0} (1)> Processed Song!", tc.Guild.Name, tc.GuildId).AppendLine() _ 
+                    logOutput.AppendFormat("<{0} ({1})> Processed Song!", tc.Guild.Name, tc.GuildId).AppendLine() _ 
                         .AppendFormat("{0} <{1}> - {2}", song.Id.ToString(), song.Metadata.Length.ToString(), 
                                       song.Metadata.Name)
                     
