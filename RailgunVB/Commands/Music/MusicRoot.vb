@@ -38,7 +38,7 @@ Namespace Commands.Music
                     output.AppendFormat("Id : {0} || Spawned At : {1} || Status : {2}", info.Key, player.CreatedAt, 
                                         player.Status).AppendLine() _ 
                         .AppendFormat("\\--> Latency : {0}ms || Playing : {1} || Since : {2}", player.Latency, 
-                                      player.GetFirstSongRequest(), player.SongStartedAt).AppendLine().AppendLine()
+                                      player.GetFirstSongRequest().Id.ToString(), player.SongStartedAt).AppendLine().AppendLine()
                 Next
                 
                 If output.Length < 1950
