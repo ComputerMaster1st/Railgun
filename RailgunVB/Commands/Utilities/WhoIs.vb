@@ -66,38 +66,19 @@ Namespace Commands.Utilities
                     Case GuildPermission.Administrator
                         score += 214
                         Exit Select
-                    Case GuildPermission.ManageChannels
-                    Case GuildPermission.ManageEmojis
-                    Case GuildPermission.ManageGuild
-                    Case GuildPermission.ManageRoles
-                    Case GuildPermission.ManageWebhooks
-                    Case GuildPermission.ViewAuditLog
+                    Case GuildPermission.ManageChannels, GuildPermission.ManageEmojis, GuildPermission.ManageGuild, 
+                        GuildPermission.ManageRoles, GuildPermission.ManageWebhooks, GuildPermission.ViewAuditLog
                         score += 10
                         Exit Select
-                    Case GuildPermission.BanMembers
-                    Case GuildPermission.DeafenMembers
-                    Case GuildPermission.KickMembers
-                    Case GuildPermission.MoveMembers
-                    Case GuildPermission.MuteMembers
-                    Case GuildPermission.ManageMessages
-                    Case GuildPermission.ManageNicknames
-                    Case GuildPermission.PrioritySpeaker
-                    Case GuildPermission.MentionEveryone
+                    Case GuildPermission.BanMembers, GuildPermission.DeafenMembers, GuildPermission.KickMembers, 
+                        GuildPermission.MoveMembers, GuildPermission.MuteMembers, GuildPermission.ManageMessages, 
+                        GuildPermission.ManageNicknames, GuildPermission.PrioritySpeaker, GuildPermission.MentionEveryone
                         score += 5
                         Exit Select
-                    Case GuildPermission.AddReactions
-                    Case GuildPermission.AttachFiles
-                    Case GuildPermission.ChangeNickname
-                    Case GuildPermission.CreateInstantInvite
-                    Case GuildPermission.EmbedLinks
-                    Case GuildPermission.ReadMessageHistory
-                    Case GuildPermission.SendMessages
-                    Case GuildPermission.SendTTSMessages
-                    Case GuildPermission.UseExternalEmojis
-                    Case GuildPermission.ViewChannel
-                    Case GuildPermission.Connect
-                    Case GuildPermission.Speak
-                    Case GuildPermission.UseVAD
+                    Case GuildPermission.AddReactions, GuildPermission.AttachFiles, GuildPermission.ChangeNickname, 
+                        GuildPermission.CreateInstantInvite, GuildPermission.EmbedLinks, GuildPermission.ReadMessageHistory, 
+                        GuildPermission.SendMessages, GuildPermission.SendTTSMessages, GuildPermission.UseExternalEmojis, 
+                        GuildPermission.ViewChannel, GuildPermission.Connect, GuildPermission.Speak, GuildPermission.UseVAD
                         score += 1
                         Exit Select
                 End Select
