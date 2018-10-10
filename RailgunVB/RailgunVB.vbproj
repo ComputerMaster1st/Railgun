@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <RootNamespace>RailgunVB</RootNamespace>
         <TargetFramework>netcoreapp2.1</TargetFramework>
+        <TieredCompilation>true</TieredCompilation>
     </PropertyGroup>
 
     <ItemGroup>

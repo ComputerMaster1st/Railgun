@@ -103,7 +103,7 @@ Namespace Commands.Utilities
                 End Select
             Next
             
-            Dim percent As Integer = Math.Round((score / 214) * 100)
+            Dim percent As Double = Math.Round((score / 214) * 100)
             
             Select percent
                 Case Is >= 100
