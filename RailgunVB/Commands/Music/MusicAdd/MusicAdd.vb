@@ -44,7 +44,7 @@ Namespace Commands.Music
                     Dim song As ISong = await _musicService.Discord.DownloadAsync(attachment.ProxyUrl, 
                         $"{Context.User.Username}#{Context.User.DiscriminatorValue}", attachment.Id)
                     
-                    playlist.Songs.Add(song)
+                    playlist.Songs.Add(song.Id)
                     
                     Await _musicService.Playlist.UpdateAsync(playlist)
                     Await response.ModifyAsync(Function(c) c.Content = 
@@ -71,10 +71,10 @@ Namespace Commands.Music
                 Dim existingSongs = 0
                 
                 For Each song As ISong in repo
-                    If playlist.Songs.Contains(song)
+                    If playlist.Songs.Contains(song.Id)
                         existingSongs += 1
                     Else
-                        playlist.Songs.Add(song)
+                        playlist.Songs.Add(song.Id)
                     End If
                 Next
                 

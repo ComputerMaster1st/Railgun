@@ -103,7 +103,7 @@ Namespace Core.Managers
                     Dim song As ISong = Await output.Result
                     Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                     
-                    playlist.Songs.Add(song)
+                    playlist.Songs.Add(song.Id)
                     Await _musicService.Playlist.UpdateAsync(playlist)
                     Await tc.SendMessageAsync(
                         $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")

@@ -57,12 +57,12 @@ Namespace Commands.Music
                     For i = 0 To resolvingPlaylist.ExistingSongs - 1
                         Dim song As ISong = Await resolvingPlaylist.Songs(i)
                         
-                        If playlist.Songs.Contains(song)
+                        If playlist.Songs.Contains(song.Id)
                             alreadyInstalled += 1
                             Continue For
                         End If
                         
-                        playlist.Songs.Add(song)
+                        playlist.Songs.Add(song.Id)
                         installed += 1
                         playlistModified = True
                     Next
