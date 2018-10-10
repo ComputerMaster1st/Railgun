@@ -76,13 +76,18 @@ Namespace Commands.Music
             End If
             
             Dim output As new StringBuilder
-            
+            Dim removedSongs As New List(Of SongId)
+
             output.AppendFormat("{0} Music Playlist!", Context.Guild.Name).AppendLine() _ 
                 .AppendFormat("Total Songs : {0}", playlist.Songs.Count).AppendLine() _
                 .AppendLine()
             
             For Each songId As SongId in playlist.Songs
-                Dim song As ISong = Await _musicService.GetSongAsync(songId)
+                Dim song As ISong = Nothing
+                If Not (Await _musicService.TryGetSongAsync(songId, Sub(result) song = result))
+                    removedSongs.Add(songId)
+                    Continue For
+                End If
                 
                 output.AppendFormat("--       Id =>", song.Id.ToString()).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
@@ -93,6 +98,14 @@ Namespace Commands.Music
             Next
             
             output.AppendLine("End of Playlist.")
+            
+            If removedSongs.Count > 0
+                For Each songId As SongId In removedSongs
+                    playlist.Songs.Remove(songId)
+                Next
+                
+                Await _musicService.Playlist.UpdateAsync(playlist)
+            End If
             
             Dim filename As String = $"{Context.Guild.Name} Playlist.txt"
             

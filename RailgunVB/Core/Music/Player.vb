@@ -113,9 +113,17 @@ Namespace Core.Music
             
             If requestedSong IsNot Nothing Then Return requestedSong
             
+            Dim playlistModified = False
+            
             While request Is Nothing
                 Try
-                    request = Await _musicService.GetSongAsync(playlist.Songs(rand.Next(0, playlist.Songs.Count)))
+                    Dim songId As SongId = playlist.Songs(rand.Next(0, playlist.Songs.Count))
+                    
+                    If Not (Await _musicService.TryGetSongAsync(songId, Sub(song) request = song))
+                        playlist.Songs.Remove(songId)
+                        playlistModified = True
+                        Continue While
+                    End If
                     
                     If request IsNot Nothing AndAlso _playedSongs.Contains(request.Id) Then _
                         request = Nothing
@@ -123,6 +131,8 @@ Namespace Core.Music
                     request = Nothing
                 End Try
             End While
+            
+            If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
             
             Return request
         End Function
