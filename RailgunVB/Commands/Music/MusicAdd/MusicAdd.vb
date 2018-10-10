@@ -41,7 +41,7 @@ Namespace Commands.Music
                 Dim attachment As IAttachment = Context.Message.Attachments.FirstOrDefault()
                 
                 Try
-                    Dim song As ISong = await _musicService.Discord.DownloadAsync(attachment.ProxyUrl, 
+                    Dim song As ISong = await _musicService.Discord.DownloadAsync(attachment.Url, 
                         $"{Context.User.Username}#{Context.User.DiscriminatorValue}", attachment.Id)
                     
                     playlist.Songs.Add(song.Id)
