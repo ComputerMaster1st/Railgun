@@ -177,7 +177,7 @@ Namespace Commands.Server
         
         <Command("limit"), UserPerms(GuildPermission.ManageGuild)>
         Public Async Function WarnLimitAsync(Optional limit As Integer = 5) As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetOrCreateAsync(Context.Guild.Id)
             
             If limit < 0
                 await ReplyAsync("The limit entered is invalid. Must be 0 or higher.")
