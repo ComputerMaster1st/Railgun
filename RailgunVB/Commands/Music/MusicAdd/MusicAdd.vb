@@ -47,10 +47,10 @@ Namespace Commands.Music
                     playlist.Songs.Add(song.Id)
                     
                     Await _musicService.Playlist.UpdateAsync(playlist)
-                    Await response.ModifyAsync(Function(c) c.Content = 
+                    Await response.ModifyAsync(Sub(c) c.Content = 
                         $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} || ID : {Format.Bold(song.Id.ToString())}")
                 Catch ex As Exception
-                    response.ModifyAsync(Function(c) c.Content = 
+                    response.ModifyAsync(Sub(c) c.Content = 
                         $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}").GetAwaiter()
                     
                     Dim output As New StringBuilder
