@@ -84,7 +84,7 @@ Namespace Commands.Music
             For Each songId As SongId in playlist.Songs
                 Dim song As ISong = Await _musicService.GetSongAsync(songId)
                 
-                output.AppendFormat("--       Id =>", song.Id).AppendLine() _
+                output.AppendFormat("--       Id =>", song.Id.ToString()).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
                     .AppendFormat("--      Url => {0}", song.Metadata.Url).AppendLine() _
@@ -142,7 +142,7 @@ Namespace Commands.Music
                 .AppendLine()
             
             For Each song As ISong in repo
-                output.AppendFormat("--       Id =>", song.Id).AppendLine() _
+                output.AppendFormat("--       Id =>", song.Id.ToString()).AppendLine() _
                     .AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine() _
                     .AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine() _
                     .AppendFormat("--      Url => {0}", song.Metadata.Url).AppendLine() _
