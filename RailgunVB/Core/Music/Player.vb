@@ -111,7 +111,10 @@ Namespace Core.Music
             
             Dim requestedSong As ISong = GetFirstSongRequest()
             
-            If requestedSong IsNot Nothing Then Return requestedSong
+            If requestedSong IsNot Nothing
+                If Not (_playedSongs.Contains(request.Id)) Then _playedSongs.Add(requestedSong.Id)
+                Return requestedSong
+            End If
             
             Dim playlistModified = False
             
