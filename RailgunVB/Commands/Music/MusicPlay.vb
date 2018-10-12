@@ -37,7 +37,7 @@ Namespace Commands.Music
                 _musicService = musicService
             End Sub
             
-            Private Async Function QueueSongAsync(player As Player, playlist As Playlist, song As ISong, 
+            Private Async Function QueueSongAsync(playerContainer As PlayerContainer, playlist As Playlist, song As ISong, 
                                                   data As ServerMusic, response As IUserMessage) As Task
                 Dim nowInstalled = False
                 
@@ -52,17 +52,21 @@ Namespace Commands.Music
                 output.AppendFormat("{0} Queued {1} as requested by {2}. {3}", 
                     If(nowInstalled, "Installed &", ""), Format.Bold(song.Metadata.Name), 
                     Format.Bold(await _commandUtils.GetUsernameOrMentionAsync(Context.User)), 
-                    If(player Is Nothing, "Now starting music player...", "")).AppendLine()
+                    If(playerContainer Is Nothing, "Now starting music player...", "")).AppendLine()
                 
                 Dim user As IGuildUser = Context.User
                 Dim vc As IVoiceChannel = user.VoiceChannel
                 
-                If player Is Nothing
+                If playerContainer Is Nothing
                     Await response.ModifyAsync(Sub(x) x.Content = output.ToString())
                     Await _playerManager.CreatePlayerAsync(user, vc, Context.Channel, 
                                                            preRequestedSong := song)
                     Return
-                ElseIf player.VoiceChannel.Id <> vc.Id
+                EndIf 
+                
+                Dim player As Player = playerContainer.Player
+                
+                If player.VoiceChannel.Id <> vc.Id
                     Await response.ModifyAsync(Sub(x) x.Content = 
                         "Please be in the same voice channel as me when requesting a song to play.")
                     Return
@@ -89,24 +93,24 @@ Namespace Commands.Music
                     Return
                 End If
                 
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+                Dim playerContainer As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Await _dbContext.SaveChangesAsync()
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                 Dim response As IUserMessage = await ReplyAsync("Standby...")
                 
                 If Context.Message.Attachments.Count > 0
-                    Await UploadAsync(player, playlist, data, response)
+                    Await UploadAsync(playerContainer, playlist, data, response)
                 ElseIf input.Contains("YOUTUBE#") OrElse input.Contains("DISCORD#")
-                    Await AddByIdAsync(input, player, playlist, data, response)
+                    Await AddByIdAsync(input, playerContainer, playlist, data, response)
                 ElseIf input.Contains("http://") OrElse input.Contains("https//")
-                    Await AddByUrlAsync(input.Trim("<"c, ">"c), player, playlist, data, response)
+                    Await AddByUrlAsync(input.Trim("<"c, ">"c), playerContainer, playlist, data, response)
                 Else
-                    await SearchAsync(input, player, playlist, data, response)
+                    await SearchAsync(input, playerContainer, playlist, data, response)
                 End If
             End Function
             
-            Private Async Function UploadAsync(player As Player, playlist As Playlist, data As ServerMusic, 
+            Private Async Function UploadAsync(playerContainer As PlayerContainer, playlist As Playlist, data As ServerMusic, 
                                                response As IUserMessage) As Task
                 Try
                     Dim attachment As IAttachment = Context.Message.Attachments.FirstOrDefault()
@@ -114,7 +118,7 @@ Namespace Commands.Music
                         attachment.ProxyUrl, $"{Context.Message.Author.Username}#{Context.Message.Author.DiscriminatorValue}",
                         attachment.Id)
                     
-                    Await QueueSongAsync(player, playlist, song, data, response)
+                    Await QueueSongAsync(playerContainer, playlist, song, data, response)
                 Catch ex As Exception
                     response.ModifyAsync(Sub(x) x.Content = 
                         $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}").GetAwaiter()
@@ -129,12 +133,12 @@ Namespace Commands.Music
                 End Try
             End Function
             
-            Private Async Function AddByIdAsync(input As String, player As Player, playlist As Playlist, 
+            Private Async Function AddByIdAsync(input As String, playerContainer As PlayerContainer, playlist As Playlist, 
                                                 data As ServerMusic, response As IUserMessage) As Task
                 Dim song As ISong = Nothing
                 
                 If Await _musicService.TryGetSongAsync(SongId.Parse(input), Sub(songOut) song = songOut)
-                    Await QueueSongAsync(player, playlist, song, data, response)
+                    Await QueueSongAsync(playerContainer, playlist, song, data, response)
                     Return
                 ElseIf Not (input.Contains("YOUTUBE#"))
                     Await response.ModifyAsync(Sub(x) x.Content = "Specified song does not exist.")
@@ -142,10 +146,10 @@ Namespace Commands.Music
                 End If
                 
                 Dim ytUrl = $"https://youtu.be/{input.Split("#"c, 2).LastOrDefault()}"
-                Await AddByUrlAsync(ytUrl, player, playlist, data, response)
+                Await AddByUrlAsync(ytUrl, playerContainer, playlist, data, response)
             End Function
             
-            Private Async Function AddByUrlAsync(input As String, player As Player, playlist As Playlist, 
+            Private Async Function AddByUrlAsync(input As String, playerContainer As PlayerContainer, playlist As Playlist, 
                                                  data As ServerMusic, response As IUserMessage) As Task
                 Dim videoId As String = String.Empty
                 Dim song As ISong = Nothing
@@ -158,7 +162,7 @@ Namespace Commands.Music
                     Return
                 ElseIf Await _musicService.TryGetSongAsync(New SongId("YOUTUBE", videoId), Sub(songOut) song = songOut)
                     If playlist.Songs.Contains(song.Id)
-                        Await QueueSongAsync(player, playlist, song, data, response)
+                        Await QueueSongAsync(playerContainer, playlist, song, data, response)
                         Return
                     ElseIf Not (data.AutoDownload)
                         Await response.ModifyAsync(
@@ -169,7 +173,7 @@ Namespace Commands.Music
                 
                 Try
                     song = Await _musicService.Youtube.DownloadAsync(New Uri(input))
-                    Await QueueSongAsync(player, playlist, song, data, response)
+                    Await QueueSongAsync(playerContainer, playlist, song, data, response)
                 Catch ex As Exception
                     response.ModifyAsync(Sub(x) _
                         x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}").GetAwaiter()
@@ -183,7 +187,7 @@ Namespace Commands.Music
                 End Try
             End Function
             
-            Private Async Function SearchAsync(input As String, player As Player, playlist As Playlist, 
+            Private Async Function SearchAsync(input As String, playerContainer As PlayerContainer, playlist As Playlist, 
                                                data As ServerMusic, response As IUserMessage) As Task
                 If String.IsNullOrEmpty(_config.GoogleApiToken)
                     Await response.ModifyAsync(Sub(x) x.Content = 
@@ -202,7 +206,7 @@ Namespace Commands.Music
                     Return
                 End If
                 
-                await AddByUrlAsync($"https://youtu.be/{video.Id}", player, playlist, data, response)
+                await AddByUrlAsync($"https://youtu.be/{video.Id}", playerContainer, playlist, data, response)
             End Function
             
         End Class
