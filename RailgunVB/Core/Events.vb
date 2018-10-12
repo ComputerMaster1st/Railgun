@@ -45,7 +45,7 @@ Namespace Core
         End Function
         
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
-            If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).CancelStream()
+            If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).Player.CancelStream()
             
             Using scope As IServiceScope = _services.CreateScope()
                 Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
@@ -140,9 +140,9 @@ Namespace Core
         End Function
         
         Private Async Function ShardReadyAsync(sClient As DiscordSocketClient) As Task Handles _client.ShardReady
-            If _playerManager.ActivePlayers.Count > 0
-                For Each player In _playerManager.ActivePlayers
-                    player.Value.Item2.CancelStream()
+            If _playerManager.PlayerContainers.Count > 0
+                For Each player In _playerManager.PlayerContainers
+                    player.Player.CancelStream()
                 Next
             End If
             

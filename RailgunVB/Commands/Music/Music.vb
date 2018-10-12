@@ -116,7 +116,7 @@ Namespace Commands.Music
         
         <Command("repeat")>
         Public Async Function RepeatAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
             
             If player Is Nothing
                 await ReplyAsync("I'm not playing anything at this time.")
@@ -129,7 +129,7 @@ Namespace Commands.Music
         
         <Command("np")>
         Public Async Function NowPlayingAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
             
             If player Is Nothing
                 await ReplyAsync("I'm not playing anything at this time.")
@@ -174,7 +174,7 @@ Namespace Commands.Music
         
         <Command("ping")>
         Public Async Function PingAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
             
             Await ReplyAsync(If(player Is Nothing, "Can not check ping due to not being in voice channel.", 
                                 $"Ping to Discord Voice: {Format.Bold(player.Latency.ToString())}ms"))
@@ -182,7 +182,7 @@ Namespace Commands.Music
         
         <Command("queue")>
         Public Async Function QueueAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
             
             If player Is Nothing
                 await ReplyAsync("I'm not playing anything at this time.")

@@ -78,7 +78,7 @@ Namespace Commands.Utilities
                                   self.StartTime).TotalSeconds, 4)).AppendLine() _
                 .AppendFormat("  Commands Available : {0}", installedCommands).AppendLine() _
                 .AppendFormat("   Commands Executed : {0}", commandsExecuted).AppendLine() _
-                .AppendFormat("       Music Streams : {0}", _playerManager.ActivePlayers.Count).AppendLine() _
+                .AppendFormat("       Music Streams : {0}", _playerManager.PlayerContainers.Count).AppendLine() _
                 .AppendLine() _
                 .AppendFormat("      Client Latency : {0}ms", _client.Latency).AppendLine() _
                 .AppendFormat("    Connected Shards : {0}", _client.Shards.Count).AppendLine() _

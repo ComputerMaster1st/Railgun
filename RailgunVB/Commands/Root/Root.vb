@@ -175,19 +175,19 @@ Namespace Commands.Root
         Public Async Function DcAsync(<Remainder> Optional msg As String = Nothing) As Task
             await ReplyAsync("Disconnecting ...")
             
-            If _playerManager.ActivePlayers.Count > 0
+            If _playerManager.PlayerContainers.Count > 0
                 Dim output As New StringBuilder
                 
                 output.AppendFormat("{0} : Stopping music stream due to the following reason... {1}", 
                     Format.Bold("WARNING"), If(string.IsNullOrWhiteSpace(msg), Format.Bold("System Restart"), Format.Bold(msg)))
                 
-                For Each playerInfo In _playerManager.ActivePlayers
-                    Await playerInfo.Value.Item1.SendMessageAsync(output.ToString())
-                    playerInfo.Value.Item2.CancelStream()
+                For Each playerInfo In _playerManager.PlayerContainers
+                    Await playerInfo.TextChannel.SendMessageAsync(output.ToString())
+                    playerInfo.Player.CancelStream()
                 Next
             End If
             
-            While _playerManager.ActivePlayers.Count > 0
+            While _playerManager.PlayerContainers.Count > 0
                 Await Task.Delay(1000)
             End While
             

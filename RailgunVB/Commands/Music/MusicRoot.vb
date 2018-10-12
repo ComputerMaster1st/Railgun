@@ -22,7 +22,7 @@ Namespace Commands.Music
             
             <Command("active"), BotPerms(ChannelPermission.AttachFiles)>
             Public Async Function ActiveAsync() As Task
-                If _playerManager.ActivePlayers.Count < 1
+                If _playerManager.PlayerContainers.Count < 1
                     await ReplyAsync("There are no active music streams at this time.")
                     Return
                 End If
@@ -30,12 +30,12 @@ Namespace Commands.Music
                 Dim output As New StringBuilder
                 
                 output.AppendFormat("Active Music Streams ({0} Total):", 
-                                    _playerManager.ActivePlayers.Count).AppendLine().AppendLine()
+                                    _playerManager.PlayerContainers.Count).AppendLine().AppendLine()
                 
-                For Each info In _playerManager.ActivePlayers
-                    Dim player As Player = info.Value.Item2
+                For Each info In _playerManager.PlayerContainers
+                    Dim player As Player = info.Player
                     
-                    output.AppendFormat("Id : {0} || Spawned At : {1} || Status : {2}", info.Key, player.CreatedAt, 
+                    output.AppendFormat("Id : {0} || Spawned At : {1} || Status : {2}", info.GuildId, player.CreatedAt, 
                                         player.Status).AppendLine() _ 
                         .AppendFormat("\\--> Latency : {0}ms || Playing : {1} || Since : {2}", player.Latency, 
                                       player.GetFirstSongRequest().Id.ToString(), player.SongStartedAt).AppendLine().AppendLine()

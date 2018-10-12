@@ -89,7 +89,7 @@ Namespace Commands.Music
                     Return
                 End If
                 
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Await _dbContext.SaveChangesAsync()
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)

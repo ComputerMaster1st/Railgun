@@ -55,7 +55,7 @@ Namespace Commands.Music
             
             <Command("current"), Priority(1)>
             Public Async Function CurrentAsync() As Task
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id)
+                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
                 Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty OrElse player Is Nothing
