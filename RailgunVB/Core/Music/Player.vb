@@ -101,7 +101,6 @@ Namespace Core.Music
         Private Async Function QueueSongAsync() As Task(Of ISong)
             Dim rand As New Random()
             Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
-            Dim request As ISong = Nothing
             
             If playlist Is Nothing OrElse playlist.Songs.Count < 1
                 Return Nothing
@@ -109,7 +108,7 @@ Namespace Core.Music
                 _playedSongs.Clear()
             End If
             
-            request = GetFirstSongRequest()
+            Dim request As ISong = GetFirstSongRequest()
             
             If request IsNot Nothing
                 If Not (_playedSongs.Contains(request.Id)) Then _playedSongs.Add(request.Id)
@@ -128,8 +127,7 @@ Namespace Core.Music
                         Continue While
                     End If
                     
-                    If request IsNot Nothing AndAlso _playedSongs.Contains(request.Id) Then _
-                        request = Nothing
+                    If _playedSongs.Contains(request.Id) Then request = Nothing
                 Catch
                     request = Nothing
                 End Try
