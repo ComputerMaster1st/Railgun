@@ -62,7 +62,7 @@ Namespace Commands.Music
                     Await _playerManager.CreatePlayerAsync(user, vc, Context.Channel, 
                                                            preRequestedSong := song)
                     Return
-                EndIf 
+                End If 
                 
                 Dim player As Player = playerContainer.Player
                 

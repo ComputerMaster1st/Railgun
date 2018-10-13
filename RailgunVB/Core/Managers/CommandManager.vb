@@ -72,8 +72,11 @@ Namespace Core.Managers
                 Dim msg As IUserMessage = sMessage
                 dim tc As ITextChannel = msg.Channel
                 Dim guild As IGuild = tc.Guild
-                Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
+                Dim self As IGuildUser = Await guild.GetCurrentUserAsync()
                 
+                If Not (self.GetPermissions(tc).SendMessages) Then Return
+                
+                Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 If filterMsg IsNot Nothing
                     Await Task.Run(New Action(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg)))
                     Return
