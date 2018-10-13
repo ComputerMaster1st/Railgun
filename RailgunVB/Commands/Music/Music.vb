@@ -75,6 +75,7 @@ Namespace Commands.Music
                 Return
             End If
             
+            Dim response = Await ReplyAsync("Generating playlist file, standby...")
             Dim output As new StringBuilder
             Dim removedSongs As New List(Of SongId)
 
@@ -111,6 +112,7 @@ Namespace Commands.Music
             
             await File.WriteAllTextAsync(filename, output.ToString())
             await Context.Channel.SendFileAsync(filename, $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)")
+            Await response.DeleteAsync()
             File.Delete(filename)
         End Function
         
@@ -147,6 +149,7 @@ Namespace Commands.Music
         
         <Command("repo"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function RepositoryAsync() As Task
+            Dim response = Await ReplyAsync("Generating repository list, standby...")
             Dim repo = (Await _musicService.GetAllSongsAsync()).ToList()
             Dim output As New StringBuilder
             
@@ -169,6 +172,7 @@ Namespace Commands.Music
             
             await File.WriteAllTextAsync(filename, output.ToString())
             await Context.Channel.SendFileAsync(filename, $"Music Repository ({repo.Count()} songs)")
+            Await response.DeleteAsync()
             File.Delete(filename)
         End Function
         
