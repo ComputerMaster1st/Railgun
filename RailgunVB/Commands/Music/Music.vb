@@ -129,24 +129,6 @@ Namespace Commands.Music
             await ReplyAsync("Repeating song after finishing.")
         End Function
         
-        <Command("np")>
-        Public Async Function NowPlayingAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
-            
-            If player Is Nothing
-                await ReplyAsync("I'm not playing anything at this time.")
-                Return
-            End If
-            
-            Dim meta As SongMetadata = player.GetFirstSongRequest().Metadata
-            Dim output As New StringBuilder
-            
-            output.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine() _
-                .AppendFormat("Url: {0} || Length: {1}", Format.Bold($"<{meta.Url}>"), Format.Bold(meta.Length.ToString()))
-            
-            await ReplyAsync(output.ToString())
-        End Function
-        
         <Command("repo"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function RepositoryAsync() As Task
             Dim response = Await ReplyAsync("Generating repository list, standby...")
@@ -229,9 +211,11 @@ Namespace Commands.Music
             End If
             
             Dim vc As IVoiceChannel = If(data.AutoVoiceChannel <> 0, 
-                                         await Context.Guild.GetVoiceChannelAsync(data.AutoVoiceChannel), Nothing)
+                Await Context.Guild.GetVoiceChannelAsync(data.AutoVoiceChannel), Nothing)
             Dim tc As ITextChannel = If(data.AutoTextChannel <> 0, 
-                                        await Context.Guild.GetTextChannelAsync(data.AutoTextChannel), Nothing)
+                Await Context.Guild.GetTextChannelAsync(data.AutoTextChannel), Nothing)
+            Dim npTc As ITextChannel = If(data.NowPlayingChannel <> 0, 
+                Await Context.Guild.GetTextChannelAsync(data.NowPlayingChannel), Nothing)
             Dim output As New StringBuilder
             
             output.AppendLine("Music Settings") _
@@ -244,7 +228,9 @@ Namespace Commands.Music
                 .AppendFormat("      Auto-Skip : {0}", If(data.AutoSkip, "Enabled", "Disabled")).AppendLine() _
                 .AppendLine() _
                 .AppendFormat(" Silent Running : {0}", If(data.SilentNowPlaying, "Enabled", "Disabled")).AppendLine() _
-                .AppendFormat(" Silent Install : {0}", If(data.SilentSongProcessing, "Enabled", "Disabled")).AppendLine()
+                .AppendFormat(" Silent Install : {0}", If(data.SilentSongProcessing, "Enabled", "Disabled")).AppendLine() _
+                .AppendLine() _
+                .AppendFormat("NP Dedi Channel : {0}", If(npTc IsNot Nothing, $"#{npTc.Name}", "None"))
             
             await ReplyAsync(Format.Code(output.ToString()))
         End Function
