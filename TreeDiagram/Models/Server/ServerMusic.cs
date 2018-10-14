@@ -13,6 +13,7 @@ namespace TreeDiagram.Models.Server
         public int VoteSkipLimit { get; set; } = 50;
         public bool SilentNowPlaying { get; set; } = false;
         public bool SilentSongProcessing { get; set; } = false;
+        public ulong NowPlayingChannel { get; set; } = 0;
 
         public ServerMusic(ulong id) : base(id) { }
     }
