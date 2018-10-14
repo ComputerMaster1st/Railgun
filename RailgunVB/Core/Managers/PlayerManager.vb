@@ -14,6 +14,7 @@ Namespace Core.Managers
     Public Class PlayerManager
         
         Private ReadOnly _log As Log
+        Private ReadOnly _client As IDiscordClient
         Private ReadOnly _commandUtils As CommandUtils
         Private ReadOnly _services As IServiceProvider
         Private ReadOnly _musicService As MusicService
@@ -22,6 +23,7 @@ Namespace Core.Managers
         
         Public Sub New(services As IServiceProvider)
             _log = services.GetService(Of Log)
+            _client = services.GetService(Of IDiscordClient)
             _commandUtils = services.GetService(Of CommandUtils)
             _musicService = services.GetService(Of MusicService)
             _services = services
@@ -36,14 +38,19 @@ Namespace Core.Managers
         Private Async Function PlayerCurrentlyPlayingAsync(args As PlayerCurrentlyPlayingEventArgs) As Task
             Try
                 Dim data As ServerMusic
+                Dim tc As ITextChannel
                 
                 Using scope As IServiceScope = _services.CreateScope()
                     data = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
                         .ServerMusics.GetAsync(args.GuildId)
                 End Using
                 
-                Dim tc As ITextChannel = PlayerContainers.First(
-                    Function(container) container.GuildId = args.GuildId).TextChannel
+                If data.NowPlayingChannel <> 0
+                    Dim guild As IGuild = Await _client.GetGuildAsync(args.GuildId)
+                    tc = Await guild.GetTextChannelAsync(data.NowPlayingChannel)
+                Else 
+                    tc = PlayerContainers.First(Function(container) container.GuildId = args.GuildId).TextChannel
+                End If
                 
                 If Not (data.SilentNowPlaying)
                     Dim output As New StringBuilder
