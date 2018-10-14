@@ -20,7 +20,7 @@ Namespace Core.Music
         Private _musicCancelled As Boolean = False
         Private _streamCancelled As Boolean = False
         
-        Private ReadOnly _playedSongs As New List(Of SongId)
+        Private ReadOnly _playedSongs As New List(Of String)
         
         Public Property AutoSkipped As Boolean = False
         Public ReadOnly Property CreatedAt As DateTime = DateTime.Now
@@ -111,7 +111,7 @@ Namespace Core.Music
             Dim request As ISong = GetFirstSongRequest()
             
             If request IsNot Nothing
-                If Not (_playedSongs.Contains(request.Id)) Then _playedSongs.Add(request.Id)
+                If Not (_playedSongs.Contains(request.Id.ToString())) Then _playedSongs.Add(request.Id.ToString())
                 Return request
             End If
             
@@ -127,7 +127,7 @@ Namespace Core.Music
                         Continue While
                     End If
                     
-                    If _playedSongs.Contains(request.Id) Then request = Nothing
+                    If _playedSongs.Contains(songId.ToString()) Then request = Nothing
                 Catch
                     request = Nothing
                 End Try
