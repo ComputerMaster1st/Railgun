@@ -48,17 +48,6 @@ Namespace Commands.Music
             Await _playerManager.CreatePlayerAsync(user, vc, Context.Channel)
         End Function
         
-        <Command("leave")>
-        Public Async Function LeaveAsync() As Task
-            If Not (_playerManager.IsCreated(Context.Guild.Id))
-                await ReplyAsync("I'm not streaming any music at this time.")
-                Return
-            End If
-            
-            await ReplyAsync("Stopping Music Stream...")
-            _playerManager.DisconnectPlayer(Context.Guild.Id)
-        End Function
-        
         <Command("playlist"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function PlaylistAsync() As Task
             Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
