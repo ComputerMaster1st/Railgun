@@ -31,6 +31,7 @@ Namespace Core.Music
         Public ReadOnly Property Task As Task = Nothing
         Public ReadOnly Property VoiceChannel As IVoiceChannel
         Public ReadOnly Property VoteSkipped As New List(Of ULong)
+        Public Property LeaveAfterSong As Boolean = False
         
         Public Event Connected As EventHandler(Of PlayerConnectedEventArgs)
         Public Event Playing As EventHandler(Of PlayerCurrentlyPlayingEventArgs)
@@ -183,7 +184,7 @@ Namespace Core.Music
                     _Status = PlayerStatus.Connected
                     
                     While Not (_streamCancelled)
-                        If Await IsAloneAsync()
+                        If (Await IsAloneAsync()) OrElse LeaveAfterSong
                             _autoDisconnected = True
                             Exit While
                         ElseIf _musicCancelled
