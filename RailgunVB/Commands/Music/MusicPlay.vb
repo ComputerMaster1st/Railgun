@@ -25,6 +25,7 @@ Namespace Commands.Music
             Private ReadOnly _playerManager As PlayerManager
             Private ReadOnly _dbContext As TreeDiagramContext
             Private ReadOnly _musicService As MusicService
+            Private _playOneTimeOnly As Boolean = False
 
             Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, 
                            playerManager As PlayerManager, dbContext As TreeDiagramContext, 
@@ -41,7 +42,7 @@ Namespace Commands.Music
                                                   data As ServerMusic, response As IUserMessage) As Task
                 Dim nowInstalled = False
                 
-                If Not (playlist.Songs.Contains(song.Id))
+                If Not (playlist.Songs.Contains(song.Id)) AndAlso Not (_playOneTimeOnly)
                     playlist.Songs.Add(song.Id)
                     Await _musicService.Playlist.UpdateAsync(playlist)
                     nowInstalled = True
@@ -50,7 +51,7 @@ Namespace Commands.Music
                 Dim output As New StringBuilder
                 
                 output.AppendFormat("{0} Queued {1} as requested by {2}. {3}", 
-                    If(nowInstalled, "Installed &", ""), Format.Bold(song.Metadata.Name), 
+                    If(nowInstalled, "Installed &", If(_playOneTimeOnly, "One-Time Only &", "")), Format.Bold(song.Metadata.Name), 
                     Format.Bold(await _commandUtils.GetUsernameOrMentionAsync(Context.User)), 
                     If(playerContainer Is Nothing, "Now starting music player...", "")).AppendLine()
                 
@@ -83,7 +84,7 @@ Namespace Commands.Music
                 Await response.ModifyAsync(Sub(x) x.Content = output.ToString())
             End Function
             
-            <Command>
+            <Command, Priority(0)>
             Public Async Function PlayAsync(<Remainder> Optional input As String = Nothing) As Task
                 If String.IsNullOrWhiteSpace(input) AndAlso Context.Message.Attachments.Count < 1
                     await ReplyAsync("Please specify either a YouTube Link, Music Id, Search Query or upload an audio file.")
@@ -108,6 +109,12 @@ Namespace Commands.Music
                 Else
                     await SearchAsync(input, playerContainer, playlist, data, response)
                 End If
+            End Function
+            
+            <Command("onetime"), Priority(1)>
+            Public Async Function PlayOneTimeAsync(<Remainder> Optional input As String = Nothing) As Task
+                _playOneTimeOnly = True
+                Await PlayAsync(input)
             End Function
             
             Private Async Function UploadAsync(playerContainer As PlayerContainer, playlist As Playlist, data As ServerMusic, 
