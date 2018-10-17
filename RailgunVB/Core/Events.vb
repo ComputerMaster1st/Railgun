@@ -89,7 +89,7 @@ Namespace Core
             Dim notification As String = sJoinLeave.GetMessage(MsgType.Leave)
             
             If Not (String.IsNullOrEmpty(notification)) Then notification = notification _
-                .Replace("<user>", Await _commandUtils.GetUsernameOrMentionAsync(sUser))
+                .Replace("<user>", sUser.Username)
             
             Await SendJoinLeaveMessageAsync(sJoinLeave, sUser, notification)
         End Function
