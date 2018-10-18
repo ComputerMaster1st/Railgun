@@ -3,6 +3,7 @@ Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core.Managers
+Imports RailgunVB.Core.Preconditions
 Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
@@ -40,7 +41,7 @@ Namespace Commands.Music
                             Context.Guild.Id, urlList, Context.Channel)))
                 End Function
                 
-                <Command("playlist")>
+                <Command("playlist"), UserPerms(GuildPermission.ManageGuild)>
                 Public Async Function AddPlaylistAsync(url As String) As Task
                     Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                     DIm playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
