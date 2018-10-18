@@ -55,18 +55,20 @@ Namespace Commands.Music
                     Dim alreadyInstalled = 0
                     Dim installed = 0
                     
-                    For i = 0 To resolvingPlaylist.ExistingSongs - 1
-                        Dim song As ISong = Await resolvingPlaylist.Songs(i)
+                    If resolvingPlaylist.ExistingSongs > 0
+                        For i = 0 To resolvingPlaylist.ExistingSongs - 1
+                            Dim song As ISong = Await resolvingPlaylist.Songs(i)
                         
-                        If playlist.Songs.Contains(song.Id)
-                            alreadyInstalled += 1
-                            Continue For
-                        End If
+                            If playlist.Songs.Contains(song.Id)
+                                alreadyInstalled += 1
+                                Continue For
+                            End If
                         
-                        playlist.Songs.Add(song.Id)
-                        installed += 1
-                        playlistModified = True
-                    Next
+                            playlist.Songs.Add(song.Id)
+                            installed += 1
+                            playlistModified = True
+                        Next
+                    End If
                     
                     If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
                     
