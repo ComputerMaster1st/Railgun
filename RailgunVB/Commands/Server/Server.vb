@@ -28,8 +28,8 @@ Namespace Commands.Server
             await Context.Guild.LeaveAsync()
         End Function
         
-        <Command("clear"), UserPerms(GuildPermission.ManageMessages), 
-            BotPerms(GuildPermission.ManageMessages And GuildPermission.ReadMessageHistory)>
+        <Command("clear"), UserPerms(GuildPermission.ManageMessages), BotPerms(ChannelPermission.ManageMessages), 
+            BotPerms(GuildPermission.ReadMessageHistory)>
         Public Async Function ClearAsync(Optional count As Integer = 100) As Task
             Dim deleted = 0
             
