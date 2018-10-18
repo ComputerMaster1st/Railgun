@@ -97,7 +97,7 @@ Namespace Commands.Music
                 Await _musicService.Playlist.UpdateAsync(playlist)
             End If
             
-            Dim filename As String = $"{Context.Guild.Name} Playlist.txt"
+            Dim filename As String = ($"{Context.Guild.Name} Playlist.txt").Replace(" "c, "-"c)
             
             await File.WriteAllTextAsync(filename, output.ToString())
             await Context.Channel.SendFileAsync(filename, $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)")
