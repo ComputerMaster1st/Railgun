@@ -29,7 +29,7 @@ Namespace Commands.Filters
             
             data.IsEnabled = Not (data.IsEnabled)
             
-            Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
+            Await ReplyAsync($"Anti-Caps is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
         End Function
         
         <Command("includebots")>
@@ -38,7 +38,7 @@ Namespace Commands.Filters
             
             data.IncludeBots = Not (data.IncludeBots)
             
-            Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
+            Await ReplyAsync($"Anti-Caps is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
         End Function
         
         <Command("percent")>
