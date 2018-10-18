@@ -13,8 +13,8 @@ Namespace Commands.Utilities
         Public Function SendHelpAsync() As Task
             Dim output As New StringBuilder
             
-            output.AppendFormat("For the list of commands, please visit our wiki @ <{0}>", 
-                    Format.Bold("https://github.com/ComputerMaster1st/RailgunVB/wiki")).AppendLine() _
+            output.AppendFormat("For the list of commands, please visit our wiki @ {0}", 
+                    Format.Bold("<https://github.com/ComputerMaster1st/RailgunVB/wiki>")).AppendLine() _
                 .AppendFormat("If you have any questions or need help, contact the developer via the developer's Discord: {0}", 
                     Format.Bold("<https://discord.gg/Czw5ffx>")).AppendLine() _
                 .AppendLine() _ 
