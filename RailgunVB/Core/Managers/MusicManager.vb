@@ -84,7 +84,7 @@ Namespace Core.Managers
         Public Async Function ProcessYoutubePlaylistAsync(playlist As Playlist, resolvingPlaylist As ResolvingPlaylist, 
                                                           tc As ITextChannel) As Task
             Dim alreadyInstalled = 0
-            Dim encoded = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs
+            Dim failed = 0
             
             For Each songTask In resolvingPlaylist.Songs
                 Try
@@ -99,7 +99,7 @@ Namespace Core.Managers
                     
                     Await _musicService.Playlist.UpdateAsync(playlist)
                 Catch
-                    encoded -= 1
+                    failed += 1
                 End Try
             Next
             
@@ -110,8 +110,8 @@ Namespace Core.Managers
                 "Already Installed : {0} || Imported From Repository : {1} || Newly Encoded : {2} || Failed : {3}",
                     Format.Bold(alreadyInstalled),
                     Format.Bold(resolvingPlaylist.ExistingSongs),
-                    Format.Bold(encoded),
-                    Format.Bold(resolvingPlaylist.Songs.Count - encoded)
+                    Format.Bold(resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs - failed),
+                    Format.Bold(failed)
                 )
             
             Await tc.SendMessageAsync(output.ToString())
