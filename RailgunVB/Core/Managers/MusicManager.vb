@@ -81,19 +81,40 @@ Namespace Core.Managers
             
         End Function
         
-        Public Async Function ProcessYoutubePlaylistAsync(playlist As Playlist, resolvingPlaylist As ResolvingPlaylist) As Task
+        Public Async Function ProcessYoutubePlaylistAsync(playlist As Playlist, resolvingPlaylist As ResolvingPlaylist, 
+                                                          tc As ITextChannel) As Task
+            Dim alreadyInstalled = 0
+            Dim encoded = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs
+            
             For Each songTask In resolvingPlaylist.Songs
                 Try
                     Dim song As ISong = songTask.Result
                             
-                    If playlist.Songs.Contains(song.Id) Then Continue For
-                        
+                    If playlist.Songs.Contains(song.Id)
+                        alreadyInstalled += 1
+                        Continue For
+                    End If
+                    
                     playlist.Songs.Add(song.Id)
                     
                     Await _musicService.Playlist.UpdateAsync(playlist)
                 Catch
+                    encoded -= 1
                 End Try
             Next
+            
+            Dim output As New StringBuilder
+            
+            output.AppendLine("Finished Processing YouTube Playlist! Results...") _
+                .AppendFormat(
+                "Already Installed : {0} || Imported From Repository : {1} || Newly Encoded : {2} || Failed : {3}",
+                    Format.Bold(alreadyInstalled),
+                    Format.Bold(resolvingPlaylist.ExistingSongs),
+                    Format.Bold(encoded),
+                    Format.Bold(resolvingPlaylist.Songs.Count - encoded)
+                )
+            
+            Await tc.SendMessageAsync(output.ToString())
         End Function
         
         Public Async Function YoutubePlaylistStatusUpdatedAsync(tc As ITextChannel, status As SongProcessStatus, 

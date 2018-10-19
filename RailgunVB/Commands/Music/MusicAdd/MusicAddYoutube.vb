@@ -56,16 +56,18 @@ Namespace Commands.Music
                     Dim queued As Integer = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs
                     
                     output.AppendFormat(
-                        "Importing From Repository : {0}",
+                        "Found In Repository : {0}",
                         Format.Bold(resolvingPlaylist.ExistingSongs))
                     
                     If queued > 0
-                        output.AppendFormat(" || Queued For Installation : {0}", Format.Bold(queued)).AppendLine() _
-                            .AppendLine("Processing of queued songs may take some time... Just to let you know.")
+                        output.AppendFormat(" || Queued For Installation : {0}", Format.Bold(queued)).AppendLine()
                     End If
                     
+                    output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.")
+                    
                     Await Task.Run(New Action(
-                        Async Sub() Await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist)))
+                        Async Sub() Await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, 
+                                                                                    Context.Channel)))
                     Await ReplyAsync(output.ToString())
                 End Function
 
