@@ -51,39 +51,21 @@ Namespace Commands.Music
                     Dim resolvingPlaylist As ResolvingPlaylist = 
                         Await _musicService.Youtube.DownloadPlaylistAsync(
                             New Uri(url.Trim(" "c, "<"c, ">"c)), reporter)
-                    Dim playlistModified = False
-                    Dim alreadyInstalled = 0
-                    Dim installed = 0
-                    
-                    If resolvingPlaylist.ExistingSongs > 0
-                        For i = 0 To resolvingPlaylist.ExistingSongs - 1
-                            Dim song As ISong = Await resolvingPlaylist.Songs(i)
-                        
-                            If playlist.Songs.Contains(song.Id)
-                                alreadyInstalled += 1
-                                Continue For
-                            End If
-                        
-                            playlist.Songs.Add(song.Id)
-                            installed += 1
-                            playlistModified = True
-                        Next
-                    End If
-                    
-                    If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
-                    
+
                     Dim output As New StringBuilder
-                    Dim queued As Integer = resolvingPlaylist.Songs.Count - (alreadyInstalled + installed)
+                    Dim queued As Integer = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs
                     
                     output.AppendFormat(
-                        "Already Installed : {0} || Imported From Repository : {1}",
-                        Format.Bold(alreadyInstalled), Format.Bold(installed))
+                        "Importing From Repository : {0}",
+                        Format.Bold(resolvingPlaylist.ExistingSongs))
                     
                     If queued > 0
                         output.AppendFormat(" || Queued For Installation : {0}", Format.Bold(queued)).AppendLine() _
                             .AppendLine("Processing of queued songs may take some time... Just to let you know.")
                     End If
                     
+                    Await Task.Run(New Action(
+                        Async Sub() Await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist)))
                     Await ReplyAsync(output.ToString())
                 End Function
 

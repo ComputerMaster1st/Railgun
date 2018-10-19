@@ -81,6 +81,21 @@ Namespace Core.Managers
             
         End Function
         
+        Public Async Function ProcessYoutubePlaylistAsync(playlist As Playlist, resolvingPlaylist As ResolvingPlaylist) As Task
+            For Each songTask In resolvingPlaylist.Songs
+                Try
+                    Dim song As ISong = songTask.Result
+                            
+                    If playlist.Songs.Contains(song.Id) Then Continue For
+                        
+                    playlist.Songs.Add(song.Id)
+                    
+                    Await _musicService.Playlist.UpdateAsync(playlist)
+                Catch
+                End Try
+            Next
+        End Function
+        
         Public Async Function YoutubePlaylistStatusUpdatedAsync(tc As ITextChannel, status As SongProcessStatus, 
                                                                 data As ServerMusic) As Task
             Select status.Status
