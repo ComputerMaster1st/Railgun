@@ -64,6 +64,7 @@ Namespace Commands.Music
                     
                     output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.")
                     
+                    Await _dbContext.SaveChangesAsync()
                     Await ReplyAsync(output.ToString())
                     Await Task.Run(New Action(
                         Async Sub() Await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, 
