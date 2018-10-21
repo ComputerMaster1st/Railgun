@@ -23,11 +23,11 @@ Namespace Core.Managers
             _services = services
         End Sub
         
-        Public Async Function AddYoutubeSongsAsync(guildId As ULong, urlList As List(Of String), 
+        Public Async Function AddYoutubeSongsAsync(urlList As List(Of String), 
                                                    tc As ITextChannel) As Task
             Using scope As IServiceScope = _services.CreateScope()
                 Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                Dim data As ServerMusic = Await context.ServerMusics.GetOrCreateAsync(guildId)
+                Dim data As ServerMusic = Await context.ServerMusics.GetOrCreateAsync(tc.GuildId)
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                 Dim response As IUserMessage
                 Dim playlistModified = False

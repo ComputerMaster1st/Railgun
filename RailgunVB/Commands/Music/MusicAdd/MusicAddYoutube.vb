@@ -37,8 +37,7 @@ Namespace Commands.Music
                             Where Not (String.IsNullOrWhiteSpace(url)) Select url.Trim(" "c, "<"c, ">"c)).ToList()
                     
                     Await Task.Run(New Action(
-                        Async Sub() Await _musicManager.AddYoutubeSongsAsync(
-                            Context.Guild.Id, urlList, Context.Channel)))
+                        Async Sub() Await _musicManager.AddYoutubeSongsAsync(urlList, Context.Channel)))
                 End Function
                 
                 <Command("playlist"), UserPerms(GuildPermission.ManageGuild)>
