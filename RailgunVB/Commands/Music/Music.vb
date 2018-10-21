@@ -106,7 +106,7 @@ Namespace Commands.Music
         End Function
         
         <Command("repeat")>
-        Public Async Function RepeatAsync() As Task
+        Public Async Function RepeatAsync(Optional count As Integer = 0) As Task
             Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
             
             If player Is Nothing
@@ -114,7 +114,7 @@ Namespace Commands.Music
                 Return
             End If
             
-            player.RepeatSong = True
+            player.RepeatSong = count
             await ReplyAsync("Repeating song after finishing.")
         End Function
         

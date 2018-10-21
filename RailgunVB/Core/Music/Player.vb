@@ -24,7 +24,7 @@ Namespace Core.Music
         
         Public Property AutoSkipped As Boolean = False
         Public ReadOnly Property CreatedAt As DateTime = DateTime.Now
-        Public Property RepeatSong As Boolean = False
+        Public Property RepeatSong As Integer = 0
         Public ReadOnly Property Requests As New List(Of ISong)
         Public ReadOnly Property SongStartedAt As DateTime = Nothing
         Public ReadOnly Property Status As PlayerStatus = PlayerStatus.Idle
@@ -215,8 +215,8 @@ Namespace Core.Music
                             Await TimeoutAsync(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!")
                         End Using
                         
-                        If RepeatSong 
-                            RepeatSong = False
+                        If RepeatSong > 0
+                            RepeatSong -= 1
                         Else
                             RemoveSongRequest(song)
                         End If
