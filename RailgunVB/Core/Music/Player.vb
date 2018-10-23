@@ -112,7 +112,9 @@ Namespace Core.Music
             Dim request As ISong = GetFirstSongRequest()
             
             If request IsNot Nothing
-                If Not (_playedSongs.Contains(request.Id.ToString())) Then _playedSongs.Add(request.Id.ToString())
+                If Not (_playedSongs.Contains(request.Id.ToString())) 
+                    _playedSongs.Add(request.Id.ToString())
+                End If
                 Return request
             End If
             
@@ -128,7 +130,9 @@ Namespace Core.Music
                         Continue While
                     End If
                     
-                    If _playedSongs.Contains(songId.ToString()) Then request = Nothing
+                    If _playedSongs.Contains(songId.ToString())
+                        request = Nothing
+                    End If
                 Catch
                     request = Nothing
                 End Try
