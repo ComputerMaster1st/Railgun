@@ -56,7 +56,8 @@ Namespace Core
                                   postgreConfig.Username, 
                                   postgreConfig.Password)) _
                     .EnableSensitiveDataLogging _
-                    .UseLazyLoadingProxies
+                    .UseLazyLoadingProxies, 
+                    ServiceLifetime.Transient
                 ) _
                 .AddSingleton(New MusicService(New MusicServiceConfig() With {
                     .Hostname = mongoConfig.Hostname,
