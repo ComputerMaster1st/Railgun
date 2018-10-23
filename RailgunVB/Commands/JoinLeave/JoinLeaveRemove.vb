@@ -19,12 +19,12 @@ Namespace Commands.JoinLeave
             End Sub
             
             <Command("joinmsg")>
-            Public Async Function JoinAsync(<Remainder()> msg As String) As Task
+            Public Async Function JoinAsync(msg As Integer) As Task
                 Await MsgHandlerAsync(msg, MsgType.Join)
             End Function
             
             <Command("leavemsg")>
-            Public Async Function LeaveAsync(<Remainder()> msg As String) As Task
+            Public Async Function LeaveAsync(msg As Integer) As Task
                 Await MsgHandlerAsync(msg, MsgType.Leave)
             End Function
             
@@ -36,6 +36,10 @@ Namespace Commands.JoinLeave
                 
                 Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(Context.Guild.Id)
                 
+                If data Is Nothing
+                    Await ReplyAsync("Join/Leave has yet to be configured.")
+                    Return
+                End If
                 If (type = MsgType.Join AndAlso data.JoinMessages.Count <= index) OrElse 
                    (type = MsgType.Leave AndAlso data.LeaveMessages.Count <= index)
                     await ReplyAsync("Specified message is not listed.")

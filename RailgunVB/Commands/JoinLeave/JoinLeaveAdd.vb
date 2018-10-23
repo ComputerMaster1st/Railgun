@@ -19,12 +19,12 @@ Namespace Commands.JoinLeave
             End Sub
             
             <Command("joinmsg")>
-            Public Async Function JoinAsync(<Remainder()> msg As String) As Task
+            Public Async Function JoinAsync(<Remainder> msg As String) As Task
                 Await MsgHandlerAsync(msg, MsgType.Join)
             End Function
             
             <Command("leavemsg")>
-            Public Async Function LeaveAsync(<Remainder()> msg As String) As Task
+            Public Async Function LeaveAsync(<Remainder> msg As String) As Task
                 Await MsgHandlerAsync(msg, MsgType.Leave)
             End Function
             
