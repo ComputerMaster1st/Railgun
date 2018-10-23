@@ -4,6 +4,7 @@ Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports MongoDB.Bson
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
@@ -15,18 +16,15 @@ Namespace Commands.Music
     
     <Group("music")>
     Partial Public Class Music
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _playerManager As PlayerManager
-        Private ReadOnly _dbContext As TreeDiagramContext
         Private ReadOnly _musicService As MusicService
 
-        Public Sub New(config As MasterConfig, playerManager As PlayerManager, dbContext As TreeDiagramContext, 
-                       musicService As MusicService)
+        Public Sub New(config As MasterConfig, playerManager As PlayerManager, musicService As MusicService)
             _config = config
             _playerManager = playerManager
-            _dbContext = dbContext
             _musicService = musicService
         End Sub
         
@@ -50,7 +48,7 @@ Namespace Commands.Music
         
         <Command("playlist"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function PlaylistAsync() As Task
-            Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
+            Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty
                 await ReplyAsync("Server playlist is currently empty.")
@@ -192,7 +190,7 @@ Namespace Commands.Music
         
         <Command("show")>
         Public Async Function ShowAsync() As Task
-            Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.ID)
+            Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.ID)
             Dim songCount = 0
             
             If data Is Nothing

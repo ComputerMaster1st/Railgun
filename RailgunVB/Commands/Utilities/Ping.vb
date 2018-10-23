@@ -1,12 +1,13 @@
 Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
+Imports RailgunVB.Core
 
 Namespace Commands.Utilities
     
     <Group("ping")>
     Public Class Ping
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _client As DiscordShardedClient
         

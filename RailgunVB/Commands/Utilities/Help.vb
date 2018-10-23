@@ -1,13 +1,14 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Preconditions
 
 Namespace Commands.Utilities
     
     <Group("help")>
     Public Class Help
-        Inherits ModuleBase
+        Inherits SystemBase
         
         <Command>
         Public Function SendHelpAsync() As Task

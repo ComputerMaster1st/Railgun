@@ -1,12 +1,13 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 
 Namespace Commands.Utilities
     
     <Group("donate")>
     Public Class Donate
-        Inherits ModuleBase
+        Inherits SystemBase
         
         <Command>
         Public Function SendCoffeeAsync() As Task

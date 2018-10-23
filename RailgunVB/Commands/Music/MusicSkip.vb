@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Preconditions
@@ -13,22 +14,19 @@ Namespace Commands.Music
         
         <Group("skip")>
         Public Class MusicSkip
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _commandUtils As CommandUtils
             Private ReadOnly _playerManager AS PlayerManager
-            Private ReadOnly _dbContext As TreeDiagramContext
 
-            Public Sub New(commandUtils As CommandUtils, playerManager As PlayerManager, 
-                           dbContext As TreeDiagramContext)
+            Public Sub New(commandUtils As CommandUtils, playerManager As PlayerManager)
                 _commandUtils = commandUtils
                 _playerManager = playerManager
-                _dbContext = dbContext
             End Sub
             
             <Command>
             Public Async Function SkipAsync As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
                 
                 If data Is Nothing OrElse player Is Nothing
@@ -59,7 +57,7 @@ Namespace Commands.Music
             
             <Command("force"), UserPerms(GuildPermission.ManageGuild)>
             Public Async Function ForceAsync() As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
                 
                 If data Is Nothing OrElse Not (data.VoteSkipEnabled)

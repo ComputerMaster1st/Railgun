@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
@@ -10,40 +11,28 @@ Namespace Commands.JoinLeave
     
     <Group("joinleave"), UserPerms(GuildPermission.ManageGuild)>
     Partial Public Class JoinLeave
-        Inherits ModuleBase
-        
-        Private ReadOnly _dbContext As TreeDiagramContext
-
-        Public Sub New(dbContext As TreeDiagramContext)
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
-        End Sub
+        Inherits SystemBase
         
         <Command>
         Public Async Function EnableAsync() As Task
-            Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id)
             
             If data.ChannelId = Context.Channel.Id
                 data.ChannelId = 0
                 
-                await ReplyAsync($"Join/Leave Notifications is now {Format.Bold("Disabled")}.")
-                Await _dbContext.SaveChangesAsync()
+                Await ReplyAsync($"Join/Leave Notifications is now {Format.Bold("Disabled")}.")
                 Return
             End If
             
             data.ChannelId = Context.Channel.Id
             
-            await ReplyAsync($"Join/Leave Notifications is now {Format.Bold(
-                If(data.ChannelId = 0, "Enabled & Set", "Set"))} to this channel.")
+            Await ReplyAsync($"Join/Leave Notifications is now {Format.Bold(If(data.ChannelId = 0, "Enabled & Set", 
+                                                                               "Set"))} to this channel.")
         End Function
         
         <Command("sendtodm")>
-        Public Async Function DMAsync() As Task
-            Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(Context.Guild.Id)
+        Public Async Function DmAsync() As Task
+            Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse data.ChannelId = 0
                 Await ReplyAsync("Join/Leave Notifications is currently turned off. Please turn on before using this command.")
@@ -52,13 +41,13 @@ Namespace Commands.JoinLeave
             
             data.SendToDM = Not (data.SendToDM)
             
-            await ReplyAsync($"Join/Leave Notification will {Format.Bold(
-                If(data.SendToDM, "Now", "No Longer"))} be sent via DMs.")
+            Await ReplyAsync($"Join/Leave Notification will {Format.Bold(If(data.SendToDM, "Now", "No Longer")) _ 
+                                } be sent via DMs.")
         End Function
         
         <Command("show"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function ShowAsync() As Task
-            Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(Context.Guild.Id)
+            Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync("Join/Leave Notifications has not been configured!")
@@ -108,16 +97,16 @@ Namespace Commands.JoinLeave
         
         <Command("reset")>
         Public Async Function ResetAsync() As Task
-            Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(Context.Guild.Id)
+            Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
-                await ReplyAsync("Join/Leave Notifications has no data to reset.")
+                Await ReplyAsync("Join/Leave Notifications has no data to reset.")
                 Return
             End If
             
-            _dbContext.ServerJoinLeaves.Remove(data)
+            Context.Database.ServerJoinLeaves.Remove(data)
             
-            await ReplyAsync("Join/Leave Notifications has been reset & disabled.")
+            Await ReplyAsync("Join/Leave Notifications has been reset & disabled.")
         End Function
         
     End Class

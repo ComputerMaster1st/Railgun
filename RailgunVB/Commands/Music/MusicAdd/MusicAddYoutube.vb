@@ -2,6 +2,8 @@ Imports System.Text
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
+Imports Microsoft.Extensions.DependencyInjection
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Preconditions
 Imports RailgunVB.Core.Utilities
@@ -16,18 +18,15 @@ Namespace Commands.Music
             
             <Group("youtube")>
             Public Class MusicAddYoutube
-                Inherits ModuleBase
+                Inherits SystemBase
             
                 Private ReadOnly _commandUtils As CommandUtils
                 Private ReadOnly _musicManager As MusicManager
-                Private ReadOnly _dbContext As TreeDiagramContext
                 Private ReadOnly _musicService As MusicService
 
-                Public Sub New(commandUtils As CommandUtils, musicManager As MusicManager, 
-                               dbContext As TreeDiagramContext, musicService As MusicService)
+                Public Sub New(commandUtils As CommandUtils, musicManager As MusicManager, musicService As MusicService)
                     _commandUtils = commandUtils
                     _musicManager = musicManager
-                    _dbContext = dbContext
                     _musicService = musicService
                 End Sub
                 
@@ -42,8 +41,9 @@ Namespace Commands.Music
                 
                 <Command("playlist"), UserPerms(GuildPermission.ManageGuild)>
                 Public Async Function AddPlaylistAsync(url As String) As Task
-                    Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
-                    DIm playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                    Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                    Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                    
                     Dim reporter As New Progress(Of SongProcessStatus)(
                         Async Sub(status) Await _musicManager.YoutubePlaylistStatusUpdatedAsync(
                             Context.Channel, status, data))
@@ -64,7 +64,6 @@ Namespace Commands.Music
                     
                     output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.")
                     
-                    Await _dbContext.SaveChangesAsync()
                     Await ReplyAsync(output.ToString())
                     Await Task.Run(New Action(
                         Async Sub() Await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, 

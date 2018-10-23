@@ -2,6 +2,7 @@ Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports MongoDB.Bson
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Preconditions
@@ -14,22 +15,19 @@ Namespace Commands.Music
     
         <Group("remove"), UserPerms(GuildPermission.ManageGuild)>
         Public Class MusicRemove
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _playerManager As PlayerManager
-            Private ReadOnly _dbContext As TreeDiagramContext
             Private ReadOnly _musicService As MusicService
 
-            Public Sub New(playerManager As PlayerManager, dbContext As TreeDiagramContext, 
-                           musicService As MusicService)
+            Public Sub New(playerManager As PlayerManager, musicService As MusicService)
                 _playerManager = playerManager
-                _dbContext = dbContext
                 _musicService = musicService
             End Sub
             
             <Command, Priority(0)>
             Public Async Function RemoveAsync(id As String) As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty
                     await ReplyAsync("Unknown Music Id Given!")
@@ -56,7 +54,7 @@ Namespace Commands.Music
             <Command("current"), Priority(1)>
             Public Async Function CurrentAsync() As Task
                 Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty OrElse player Is Nothing
                     Await ReplyAsync("Can not remove current song because I am not in voice channel.")

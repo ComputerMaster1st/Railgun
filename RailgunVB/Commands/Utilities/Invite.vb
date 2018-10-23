@@ -1,10 +1,11 @@
 Imports Discord.Commands
+Imports RailgunVB.Core
 
 Namespace Commands.Utilities
     
     <Group("invite")>
     Public Class Invite
-        Inherits ModuleBase
+        Inherits SystemBase
     
         <Command>
         Public Function SendInviteAsync() As Task

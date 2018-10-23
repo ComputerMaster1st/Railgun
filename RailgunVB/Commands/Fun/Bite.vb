@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Preconditions
 Imports RailgunVB.Core.Utilities
@@ -12,26 +13,19 @@ Namespace Commands.Fun
     
     <Group("bite")>
     Public Class Bite
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _commandUtils As CommandUtils
-        Private ReadOnly _dbContext As TreeDiagramContext
 
-        Public Sub New(config As MasterConfig, commandUtils As CommandUtils, dbContext As TreeDiagramContext)
+        Public Sub New(config As MasterConfig, commandUtils As CommandUtils)
             _config = config
             _commandUtils = commandUtils
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
         End Sub
         
         <Command>
         Public Async Function BiteAsync(Optional user As IUser = Nothing) As Task
-            Dim data As FunBite = Await _dbContext.FunBites.GetAsync(Context.Guild.Id)
+            Dim data As FunBite = Await Context.Database.FunBites.GetAsync(Context.Guild.Id)
             
             If Data Is Nothing OrElse data.Bites.Count < 1
                 Dim output As New StringBuilder
@@ -101,8 +95,8 @@ Namespace Commands.Fun
                 Return
             End If
             
-            Dim data As FunBite = Await _dbContext.FunBites.GetOrCreateAsync(Context.Guild.Id)
-            
+            Dim data As FunBite = Await Context.Database.FunBites.GetOrCreateAsync(Context.Guild.Id)
+                
             If Not (data.IsEnabled)
                 await ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.")
                 Return
@@ -115,7 +109,7 @@ Namespace Commands.Fun
         
         <Command("list"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function ListAsync() As Task
-            Dim data As FunBite = Await _dbContext.FunBites.GetAsync(Context.Guild.Id)
+            Dim data As FunBite = Await Context.Database.FunBites.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync($"There are no bite sentences available. Use {Format.Code(
@@ -154,7 +148,7 @@ Namespace Commands.Fun
         
         <Command("remove"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function RemoveAsync(index As Integer) As Task
-            Dim data As FunBite = Await _dbContext.FunBites.GetAsync(Context.Guild.Id)
+            Dim data As FunBite = Await Context.Database.FunBites.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse data.Bites.Count < 1
                 await ReplyAsync("The list of bite sentences is already empty.")
@@ -174,7 +168,7 @@ Namespace Commands.Fun
         
         <Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function AllowDenyAsync() As Task
-            Dim data As FunBite = Await _dbContext.FunBites.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FunBite = Await Context.Database.FunBites.GetOrCreateAsync(Context.Guild.Id)
             
             data.IsEnabled = Not (data.IsEnabled)
             
@@ -183,14 +177,14 @@ Namespace Commands.Fun
         
         <Command("reset"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function ResetAsync() As Task
-            Dim data As FunBite = Await _dbContext.FunBites.GetAsync(Context.Guild.Id)
+            Dim data As FunBite = Await Context.Database.FunBites.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync("Bites has no data to reset.")
                 Return
             End If
             
-            _dbContext.FunBites.Remove(data)
+            Context.Database.FunBites.Remove(data)
             
             await ReplyAsync("Bites has been reset.")
         End Function

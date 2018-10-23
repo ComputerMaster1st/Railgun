@@ -4,6 +4,7 @@ Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.CodeAnalysis.CSharp.Scripting
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Preconditions
@@ -14,7 +15,7 @@ Namespace Commands.Root
     
     <Group("root"), BotAdmin>
     Public Class Root
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _client As DiscordShardedClient

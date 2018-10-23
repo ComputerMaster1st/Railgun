@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Api
 Imports RailgunVB.Core.Preconditions
 
@@ -7,7 +8,7 @@ Namespace Commands.Fun
     
     <Group("cat")>
     Public Class Cat
-        Inherits ModuleBase
+        Inherits SystemBase
     
         Private ReadOnly _randomCat As RandomCat
 

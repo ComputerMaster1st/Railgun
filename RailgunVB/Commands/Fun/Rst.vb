@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
@@ -11,24 +12,17 @@ Namespace Commands.Fun
     
     <Group("rst")>
     Public Class Rst
-        Inherits ModuleBase
+        Inherits SystemBase
     
         Private ReadOnly _config As MasterConfig
-        Private ReadOnly _dbContext As TreeDiagramContext
 
-        Public Sub New(config As MasterConfig, dbContext As TreeDiagramContext)
+        Public Sub New(config As MasterConfig)
             _config = config
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
         End Sub
         
         <Command>
         Public Async Function RstAsync() As Task
-            Dim data As FunRst = Await _dbContext.FunRsts.GetAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code(
@@ -50,14 +44,14 @@ Namespace Commands.Fun
         <Command("add")>
         Public Async Function AddAsync(<Remainder> msg As String) As Task
             If String.IsNullOrWhiteSpace(msg)
-                await ReplyAsync("Your message was empty. Please add a message to add.")
+                Await ReplyAsync("Your message was empty. Please add a message to add.")
                 Return
             End If
             
-            Dim data As FunRst = Await _dbContext.FunRsts.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetOrCreateAsync(Context.Guild.Id)
             
             If Not (data.IsEnabled)
-                await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.")
+                Await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.")
                 Return
             End If
             
@@ -68,7 +62,7 @@ Namespace Commands.Fun
         
         <Command("remove"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function RemoveAsync(index As Integer) As Task
-            Dim data As FunRst = Await _dbContext.FunRsts.GetAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code(
@@ -89,7 +83,7 @@ Namespace Commands.Fun
         
         <Command("list"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function ListAsync() As Task
-            Dim data As FunRst = Await _dbContext.FunRsts.GetAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code(
@@ -123,7 +117,7 @@ Namespace Commands.Fun
         
         <Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function AllowDenyAsync() As Task
-            Dim data As FunRst = Await _dbContext.FunRsts.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetOrCreateAsync(Context.Guild.Id)
             
             data.IsEnabled = Not (data.IsEnabled)
             
@@ -132,14 +126,14 @@ Namespace Commands.Fun
         
         <Command("reset"), UserPerms(GuildPermission.ManageMessages)>
         Public Async Function ResetAsync() As Task
-            Dim data As FunRst = Await _dbContext.FunRsts.GetAsync(Context.Guild.Id)
+            Dim data As FunRst = Await Context.Database.FunRsts.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync("RST has no data to reset.")
                 Return
             End If
             
-            _dbContext.FunRsts.Remove(data)
+            Context.Database.FunRsts.Remove(data)
             
             await ReplyAsync("RST has been reset.")
         End Function

@@ -4,31 +4,30 @@ Imports Discord
 Imports Discord.Commands
 Imports Discord.WebSocket
 Imports Microsoft.EntityFrameworkCore
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Utilities
-Imports TreeDiagram
 
 Namespace Commands.Utilities
     
     <Group("info")>
     Public Class Info
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _config As MasterConfig
         Private ReadOnly _client As DiscordShardedClient
         Private ReadOnly _commandService As CommandService
-        Private ReadOnly _dbContext As TreeDiagramContext
         Private ReadOnly _musicService As MusicService
         
         Private ReadOnly _analytics As Analytics
         Private ReadOnly _playerManager As PlayerManager
 
-        Public Sub New(config As MasterConfig, client As DiscordShardedClient, commandService As CommandService, dbContext As TreeDiagramContext, musicService As MusicService, analytics As Analytics, playerManager As PlayerManager)
+        Public Sub New(config As MasterConfig, client As DiscordShardedClient, commandService As CommandService, 
+                       musicService As MusicService, analytics As Analytics, playerManager As PlayerManager)
             _config = config
             _client = client
             _commandService = commandService
-            _dbContext = dbContext
             _musicService = musicService
             _analytics = analytics
             _playerManager = playerManager
@@ -115,18 +114,18 @@ Namespace Commands.Utilities
             
             output.AppendLine("TreeDiagram Configuration Report") _
                 .AppendLine().AppendLine("Server/Guild Configurations :") _
-                .AppendFormat("Anti-Caps : {0}", await _dbContext.FilterCapses.CountAsync()).AppendLine() _
-                .AppendFormat(" Anti-Url : {0}", await _dbContext.FilterUrls.CountAsync()).AppendLine() _
-                .AppendFormat("     Bite : {0}", await _dbContext.FunBites.CountAsync()).AppendLine() _
-                .AppendFormat("      RST : {0}", await _dbContext.FunRsts.CountAsync()).AppendLine() _
-                .AppendFormat("  Command : {0}", await _dbContext.ServerCommands.CountAsync()) _
-                .AppendFormat("JoinLeave : {0}", await _dbContext.ServerJoinLeaves.CountAsync()).AppendLine() _
-                .AppendFormat("  Mention : {0}", await _dbContext.ServerMentions.CountAsync()).AppendLine() _
-                .AppendFormat("    Music : {0}", await _dbContext.ServerMusics.CountAsync()).AppendLine() _
-                .AppendFormat("  Warning : {0}", await _dbContext.ServerWarnings.CountAsync()).AppendLine() _
+                .AppendFormat("Anti-Caps : {0}", await Context.Database.FilterCapses.CountAsync()).AppendLine() _
+                .AppendFormat(" Anti-Url : {0}", await Context.Database.FilterUrls.CountAsync()).AppendLine() _
+                .AppendFormat("     Bite : {0}", await Context.Database.FunBites.CountAsync()).AppendLine() _
+                .AppendFormat("      RST : {0}", await Context.Database.FunRsts.CountAsync()).AppendLine() _
+                .AppendFormat("  Command : {0}", await Context.Database.ServerCommands.CountAsync()) _
+                .AppendFormat("JoinLeave : {0}", await Context.Database.ServerJoinLeaves.CountAsync()).AppendLine() _
+                .AppendFormat("  Mention : {0}", await Context.Database.ServerMentions.CountAsync()).AppendLine() _
+                .AppendFormat("    Music : {0}", await Context.Database.ServerMusics.CountAsync()).AppendLine() _
+                .AppendFormat("  Warning : {0}", await Context.Database.ServerWarnings.CountAsync()).AppendLine() _
                 .AppendLine().AppendLine("User Configurations :") _
-                .AppendFormat("  Mention : {0}", await _dbContext.UserMentions.CountAsync()).AppendLine() _
-                .AppendFormat("  Command : {0}", await _dbContext.UserCommands.CountAsync()).AppendLine() _
+                .AppendFormat("  Mention : {0}", await Context.Database.UserMentions.CountAsync()).AppendLine() _
+                .AppendFormat("  Command : {0}", await Context.Database.UserCommands.CountAsync()).AppendLine() _
                 .AppendLine() _
                 .AppendLine("End of Report!")
             
@@ -197,7 +196,7 @@ Namespace Commands.Utilities
             
             output.AppendLine("TreeDiagram Timers Status") _
                 .AppendLine() _
-                .AppendFormat("Remind Me : {0}", _dbContext.TimerRemindMes.CountAsync())
+                .AppendFormat("Remind Me : {0}", Context.Database.TimerRemindMes.CountAsync())
             
             await ReplyAsync(Format.Code(output.ToString()))
         End Function

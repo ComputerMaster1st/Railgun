@@ -1,12 +1,13 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 
 Namespace Commands.Utilities
     
     <Group("whois")>
     Public Class WhoIs
-        Inherits ModuleBase
+        Inherits SystemBase
         
         <Command>
         Public Async Function WhoisAsync(userId As ULong) As Task

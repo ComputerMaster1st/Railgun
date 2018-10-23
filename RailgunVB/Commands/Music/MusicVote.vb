@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
@@ -10,22 +11,11 @@ Namespace Commands.Music
         
         <Group("voteskip"), UserPerms(GuildPermission.ManageGuild)>
         Public Class MusicVote
-            Inherits ModuleBase
-            
-            Private ReadOnly _dbContext As TreeDiagramContext
-
-            Public Sub New(dbContext As TreeDiagramContext)
-                _dbContext = dbContext
-            End Sub
-            
-            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-                Await _dbContext.SaveChangesAsync()
-                MyBase.AfterExecute(command)
-            End Sub
+            Inherits SystemBase
             
             <Command>
             Public Async Function EnableAsync() As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 
                 data.VoteSkipEnabled = Not (data.VoteSkipEnabled)
                 
@@ -40,7 +30,7 @@ Namespace Commands.Music
                     Return
                 End If
                 
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 
                 data.VoteSkipLimit = percent
                 

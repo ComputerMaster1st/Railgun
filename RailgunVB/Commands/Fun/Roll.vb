@@ -1,12 +1,13 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Utilities
 
 Namespace Commands.Fun
     
     <Group("roll")>
     Public Class Roll
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _commandUtils As CommandUtils
 

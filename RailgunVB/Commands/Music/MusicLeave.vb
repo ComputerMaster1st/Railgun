@@ -1,4 +1,5 @@
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 
@@ -8,7 +9,7 @@ Namespace Commands.Music
     
         <Group("leave")>
         Public Class MusicLeave
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _playerManager As PlayerManager
             

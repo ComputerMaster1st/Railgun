@@ -1,6 +1,7 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server
@@ -11,30 +12,19 @@ Namespace Commands.Server
     
         <Group("config"), UserPerms(GuildPermission.ManageGuild)>
         Public Class ServerConfig
-            Inherits ModuleBase
-        
-            Private ReadOnly _dbContext As TreeDiagramContext
-
-            Public Sub New(dbContext As TreeDiagramContext)
-                _dbContext = dbContext
-            End Sub
-            
-            Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-                Await _dbContext.SaveChangesAsync()
-                MyBase.AfterExecute(command)
-            End Sub
+            Inherits SystemBase
         
             <Command("mention")>
             Public Async Function MentionAsync() As Task
-                Dim data As ServerMention = Await _dbContext.ServerMentions.GetAsync(Context.Guild.Id)
+                Dim data As ServerMention = Await Context.Database.ServerMentions.GetAsync(Context.Guild.Id)
             
                 If data IsNot Nothing
-                    _dbContext.ServerMentions.Remove(data)
+                    Context.Database.ServerMentions.Remove(data)
                     await ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.")
                     Return
                 End If
             
-                data = Await _dbContext.ServerMentions.GetOrCreateAsync(Context.Guild.Id)
+                data = Await Context.Database.ServerMentions.GetOrCreateAsync(Context.Guild.Id)
                 data.DisableMentions = True
             
                 await ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.")
@@ -42,7 +32,7 @@ Namespace Commands.Server
         
             <Command("prefix")>
             Public Async Function PrefixAsync(<Remainder> Optional input As String = Nothing) As Task
-                Dim data As ServerCommand = Await _dbContext.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerCommand = Await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
             
                 If String.IsNullOrWhiteSpace(input) AndAlso String.IsNullOrEmpty(data.Prefix)
                     await ReplyAsync("No prefix has been specified. Please specify a prefix.")
@@ -60,7 +50,7 @@ Namespace Commands.Server
         
             <Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)>
             Public Async Function DeleteCmdAsync() As Task
-                Dim data As ServerCommand = Await _dbContext.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerCommand = Await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
             
                 data.DeleteCmdAfterUse = Not (data.DeleteCmdAfterUse)
             
@@ -70,7 +60,7 @@ Namespace Commands.Server
         
             <Command("respondtobots")>
             Public Async Function RespondAsync() As Task
-                Dim data As ServerCommand = Await _dbContext.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerCommand = Await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id)
             
                 data.RespondToBots = Not (data.RespondToBots)
             
@@ -80,8 +70,8 @@ Namespace Commands.Server
             
             <Command("show")>
             Public Async Function ShowAsync() As Task
-                Dim command As ServerCommand = Await _dbContext.ServerCommands.GetAsync(Context.Guild.Id)
-                Dim mention As ServerMention = Await _dbContext.ServerMentions.GetAsync(Context.Guild.Id)
+                Dim command As ServerCommand = Await Context.Database.ServerCommands.GetAsync(Context.Guild.Id)
+                Dim mention As ServerMention = Await Context.Database.ServerMentions.GetAsync(Context.Guild.Id)
                 Dim output As New StringBuilder
                 
                 output.AppendLine("Railgun Server Configuration").AppendLine() _

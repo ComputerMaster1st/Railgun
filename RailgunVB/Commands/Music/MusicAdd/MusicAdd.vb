@@ -2,6 +2,7 @@ Imports System.Text
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Preconditions
 Imports RailgunVB.Core.Utilities
@@ -13,18 +14,15 @@ Namespace Commands.Music
         
         <Group("add")>
         Partial Public Class MusicAdd
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _log As Log
             Private ReadOnly _commandUtils As CommandUtils
-            Private ReadOnly _dbContext As TreeDiagramContext
             Private ReadOnly _musicService As MusicService
 
-            Public Sub New(log As Log, commandUtils As CommandUtils, dbContext As TreeDiagramContext, 
-                           musicService As MusicService)
+            Public Sub New(log As Log, commandUtils As CommandUtils, musicService As MusicService)
                 _log = log
                 _commandUtils = commandUtils
-                _dbContext = dbContext
                 _musicService = musicService
             End Sub
             
@@ -35,9 +33,9 @@ Namespace Commands.Music
                     Return
                 End If
                 
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                 Dim response As IUserMessage = await ReplyAsync("Processing Attachment! Standby...")
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
-                Dim playlist As Playlist = await _commandUtils.GetPlaylistAsync(data)
                 Dim attachment As IAttachment = Context.Message.Attachments.FirstOrDefault()
                 
                 Try
@@ -65,9 +63,9 @@ Namespace Commands.Music
             
             <Command("repo"), UserPerms(GuildPermission.ManageGuild)>
             Public Async Function ImportRepoAsync() As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
-                Dim repo = (Await _musicService.GetAllSongsAsync()).ToList()
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                Dim repo = (Await _musicService.GetAllSongsAsync()).ToList()
                 Dim existingSongs = 0
                 
                 For Each song As ISong in repo

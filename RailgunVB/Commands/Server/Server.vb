@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
@@ -11,14 +12,12 @@ Namespace Commands.Server
     
     <Group("server")>
     Partial Public Class Server
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _log As Log
-        Private ReadOnly _dbContext As TreeDiagramContext
 
-        Public Sub New(log As Log, dbContext As TreeDiagramContext)
+        Public Sub New(log As Log)
             _log = log
-            _dbContext = dbContext
         End Sub
         
         <Command("leave"), UserPerms(GuildPermission.ManageGuild)>
@@ -77,13 +76,12 @@ Namespace Commands.Server
         <Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)>
         Public Async Function BanAsync(user As IUser, 
                                        <Remainder> Optional reason As String = "No Reason Specified") As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             Await Context.Guild.AddBanAsync(user, 7, reason)
             
             If data IsNot Nothing AndAlso data.Warnings.Where(Function (find) find.UserId = user.Id).Count > 0
                 data.ResetWarnings(user.Id)
-                Await _dbContext.SaveChangesAsync()
             End If
             
             await ReplyAsync(

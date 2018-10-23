@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 
 Namespace Commands.Root
@@ -7,7 +8,7 @@ Namespace Commands.Root
     
         <Group("admin")>
         Public Class RootAdmin
-            Inherits ModuleBase
+            Inherits SystemBase
         
             Private ReadOnly _config As MasterConfig
 

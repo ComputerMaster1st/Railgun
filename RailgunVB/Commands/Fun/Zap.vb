@@ -1,12 +1,13 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Utilities
 
 Namespace Commands.Fun
     
     <Group("zap")>
     Public Class Zap
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _client As IDiscordClient
         Private ReadOnly _commandUtils As CommandUtils

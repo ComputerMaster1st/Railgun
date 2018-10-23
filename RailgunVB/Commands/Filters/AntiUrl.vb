@@ -2,6 +2,8 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports Microsoft.Extensions.DependencyInjection
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Filter
@@ -11,23 +13,12 @@ Namespace Commands.Filters
     <Group("antiurl"), UserPerms(GuildPermission.ManageMessages), 
         BotPerms(GuildPermission.ManageMessages)>
     Public Class AntiUrl
-        Inherits ModuleBase
-    
-        Private ReadOnly _dbContext As TreeDiagramContext
-
-        Public Sub New(dbContext As TreeDiagramContext)
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
-        End Sub
+        Inherits SystemBase
         
         <Command>
         Public Async Function EnableAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
-            
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+                
             data.IsEnabled = Not (data.IsEnabled)
             
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IsEnabled, "Enabled", "Disabled"))}.")
@@ -35,8 +26,8 @@ Namespace Commands.Filters
         
         <Command("includebots")>
         Public Async Function IncludeBotsAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
-            
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+                
             data.IncludeBots = Not (data.IncludeBots)
             
             Await ReplyAsync($"Anti-Url is now {Format.Bold(If(data.IncludeBots, "Enabled", "Disabled"))}.")
@@ -44,7 +35,7 @@ Namespace Commands.Filters
         
         <Command("invites")>
         Public Async Function InvitesAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
             
             data.BlockServerInvites = Not (data.BlockServerInvites)
             
@@ -54,10 +45,10 @@ Namespace Commands.Filters
         <Command("add")>
         Public Async Function AddAsync(url As String) As Task
             Dim newUrl As String = ProcessUrl(url)
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
-            
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+                
             If data.BannedUrls.Contains(newUrl)
-                await ReplyAsync("The Url specified is already listed.")
+                Await ReplyAsync("The Url specified is already listed.")
                 Return
             End If
             
@@ -71,7 +62,7 @@ Namespace Commands.Filters
         <Command("remove")>
         Public Async Function RemoveAsync(url As String) As Task
             Dim newUrl As String = ProcessUrl(url)
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetAsync(Context.Guild.Id)
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse Not (data.BannedUrls.Contains(newUrl))
                 await ReplyAsync("The Url specified is not listed.")
@@ -86,7 +77,7 @@ Namespace Commands.Filters
         <Command("ignore")>
         Public Async Function IgnoreAsync(Optional pChannel As ITextChannel = Nothing) As Task
             Dim tc As ITextChannel = If(pChannel, Context.Channel)
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
             
             If data.IgnoredChannels.Where(Function(f) f.ChannelId = tc.Id).Count > 0
                 data.IgnoredChannels.RemoveAll(Function(f) f.ChannelId = tc.Id)
@@ -99,7 +90,7 @@ Namespace Commands.Filters
         
         <Command("mode")>
         Public Async Function ModeAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id)
             
             data.DenyMode = Not (data.DenyMode)
             
@@ -111,7 +102,7 @@ Namespace Commands.Filters
         
         <Command("show"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function ShowAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetAsync(Context.Guild.Id)
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync("There are no settings available for Anti-Url. Currently disabled.")
@@ -180,14 +171,14 @@ Namespace Commands.Filters
         
         <Command("reset")>
         Public Async Function ResetAsync() As Task
-            Dim data As FilterUrl = Await _dbContext.FilterUrls.GetAsync(Context.Guild.Id)
-            
+            Dim data As FilterUrl = Await Context.Database.FilterUrls.GetAsync(Context.Guild.Id)
+                
             If data Is Nothing
                 await ReplyAsync("Anti-Url has no data to reset.")
                 Return
             End If
             
-            _dbContext.FilterUrls.Remove(data)
+            Context.Database.FilterUrls.Remove(data)
             
             await ReplyAsync("Anti-Url has been reset & disabled.")
         End Function

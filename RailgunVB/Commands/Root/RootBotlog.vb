@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
 
@@ -9,7 +10,7 @@ Namespace Commands.Root
     
         <Group("botlog")>
         Public Class RootBotlog
-            Inherits  ModuleBase
+            Inherits SystemBase
         
             Private ReadOnly _config As MasterConfig
 

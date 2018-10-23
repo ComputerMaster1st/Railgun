@@ -1,6 +1,7 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports TreeDiagram
 Imports TreeDiagram.Models.User
 
@@ -8,25 +9,14 @@ Namespace Commands.User
     
     <Group("myself"), [Alias]("self")>
     Public Class Myself
-        Inherits ModuleBase
-        
-        Private ReadOnly _dbContext As TreeDiagramContext
-
-        Public Sub New(dbContext As TreeDiagramContext)
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
-        End Sub
+        Inherits SystemBase
         
         <Command("mention")>
         Public Async Function MentionsAsync() As Task
-            Dim data As UserMention = Await _dbContext.UserMentions.GetOrCreateAsync(Context.User.Id)
+            Dim data As UserMention = Await Context.Database.UserMentions.GetOrCreateAsync(Context.User.Id)
             
             If data.DisableMentions
-                _dbContext.UserMentions.Remove(data)
+                Context.Database.UserMentions.Remove(data)
                 await ReplyAsync($"Personal mentions are now {Format.Bold("Enabled")}.")
                 Return
             End If
@@ -38,18 +28,18 @@ Namespace Commands.User
         
         <Command("prefix")>
         Public Async Function PrefixAsync(<Remainder> Optional input As String = Nothing) As Task
-            Dim data As UserCommand = Await _dbContext.UserCommands.GetAsync(Context.User.Id)
+            Dim data As UserCommand = Await Context.Database.UserCommands.GetAsync(Context.User.Id)
             
             If String.IsNullOrWhiteSpace(input) AndAlso data Is Nothing
                 await ReplyAsync("No prefix has been specified. Please specify a prefix.")
                 Return
             ElseIf String.IsNullOrWhiteSpace(input) AndAlso data IsNot Nothing
-                _dbContext.UserCommands.Remove(data)
+                Context.Database.UserCommands.Remove(data)
                 await ReplyAsync("Personal prefix has been removed.")
                 Return
             End If
             
-            data = Await _dbContext.UserCommands.GetOrCreateAsync(Context.User.Id)
+            data = Await Context.Database.UserCommands.GetOrCreateAsync(Context.User.Id)
             data.Prefix = input
             
             await ReplyAsync($"Personal prefix has been set! `{input} <command>`!")
@@ -57,8 +47,8 @@ Namespace Commands.User
         
         <Command("show")>
         Public Async Function SHowAsync() As Task
-            Dim prefix As UserCommand = Await _dbContext.UserCommands.GetAsync(Context.User.Id)
-            Dim mention As UserMention = Await _dbContext.UserMentions.GetAsync(Context.User.Id)
+            Dim prefix As UserCommand = Await Context.Database.UserCommands.GetAsync(Context.User.Id)
+            Dim mention As UserMention = Await Context.Database.UserMentions.GetAsync(Context.User.Id)
             Dim output As New StringBuilder
             
             output.AppendLine("Railgun User Configuration:").AppendLine() _ 

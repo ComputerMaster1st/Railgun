@@ -2,6 +2,7 @@ Imports System.Text
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Api.Youtube
 Imports RailgunVB.Core.Configuration
 Imports RailgunVB.Core.Logging
@@ -17,24 +18,21 @@ Namespace Commands.Music
     
         <Group("play")>
         Public Class MusicPlay
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _config As MasterConfig
             Private ReadOnly _log As Log
             Private ReadOnly _commandUtils As CommandUtils
             Private ReadOnly _playerManager As PlayerManager
-            Private ReadOnly _dbContext As TreeDiagramContext
             Private ReadOnly _musicService As MusicService
             Private _playOneTimeOnly As Boolean = False
 
             Public Sub New(config As MasterConfig, log As Log, commandUtils As CommandUtils, 
-                           playerManager As PlayerManager, dbContext As TreeDiagramContext, 
-                           musicService As MusicService)
+                           playerManager As PlayerManager, musicService As MusicService)
                 _config = config
                 _log = log
                 _commandUtils = commandUtils
                 _playerManager = playerManager
-                _dbContext = dbContext
                 _musicService = musicService
             End Sub
             
@@ -95,9 +93,9 @@ Namespace Commands.Music
                 End If
                 
                 Dim playerContainer As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
-                Await _dbContext.SaveChangesAsync()
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                
                 Dim response As IUserMessage = await ReplyAsync("Standby...")
                 
                 If Context.Message.Attachments.Count > 0

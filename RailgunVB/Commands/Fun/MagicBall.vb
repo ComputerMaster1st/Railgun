@@ -1,10 +1,11 @@
 Imports Discord.Commands
+Imports RailgunVB.Core
 
 Namespace Commands.Fun
     
     <Group("8ball")>
     Public Class MagicBall
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _responses As String() = {
             "It is certain.",

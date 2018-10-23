@@ -2,6 +2,7 @@ Imports System.Text
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Preconditions
@@ -14,14 +15,12 @@ Namespace Commands.Music
         
         <Group("np")>
         Public Class MusicNp
-            Inherits ModuleBase
+            Inherits SystemBase
         
             Private ReadOnly _playerManager As PlayerManager
-            Private ReadOnly _dbContext As TreeDiagramContext
             
-            Public Sub New(playerManager As PlayerManager, dbContext As TreeDiagramContext)
+            Public Sub New(playerManager As PlayerManager)
                 _playerManager = playerManager
-                _dbContext = dbContext
             End Sub
             
             <Command>
@@ -44,21 +43,20 @@ Namespace Commands.Music
             
             <Command("channel"), UserPerms(GuildPermission.ManageGuild)>
             Public Async Function SetNpChannelAsync(Optional tcParam As ITextChannel = Nothing) As Task
-                Dim data As ServerMusic = Await _dbContext.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
+                Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Dim tc As ITextChannel = If(tcParam, Context.Channel)
-                
+                    
                 If data.NowPlayingChannel <> 0 AndAlso tc.Id = data.NowPlayingChannel
                     Await SetNpChannelAsync(data, tc)
                     Return
                 End If
-                    
+                        
                 Await SetNpChannelAsync(data, tc, True)
             End Function
             
             Private Async Function SetNpChannelAsync(data As ServerMusic, tc As ITextChannel, 
                                                               Optional locked As Boolean = False) As Task
                 data.NowPlayingChannel = If(locked, tc.Id, 0)
-                Await _dbContext.SaveChangesAsync()
                 Await ReplyAsync($"{Format.Bold("Now Playing")} messages are {Format.Bold(
                     If(locked, "Now", "No Longer"))} locked to #{tc.Name}.")
             End Function

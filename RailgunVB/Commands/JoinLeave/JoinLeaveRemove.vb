@@ -1,5 +1,6 @@
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports TreeDiagram
 Imports TreeDiagram.Enums
 Imports TreeDiagram.Models.Server
@@ -10,13 +11,7 @@ Namespace Commands.JoinLeave
     
         <Group("remove")>
         Public Class JoinLeaveRemove
-            Inherits ModuleBase
-            
-            Private ReadOnly _dbContext As TreeDiagramContext
-    
-            Public Sub New(dbContext As TreeDiagramContext)
-                _dbContext = dbContext
-            End Sub
+            Inherits SystemBase
             
             <Command("joinmsg")>
             Public Async Function JoinAsync(msg As Integer) As Task
@@ -34,22 +29,20 @@ Namespace Commands.JoinLeave
                     Return
                 End If
                 
-                Dim data As ServerJoinLeave = Await _dbContext.ServerJoinLeaves.GetAsync(Context.Guild.Id)
+                Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing
                     Await ReplyAsync("Join/Leave has yet to be configured.")
                     Return
-                End If
-                If (type = MsgType.Join AndAlso data.JoinMessages.Count <= index) OrElse 
-                   (type = MsgType.Leave AndAlso data.LeaveMessages.Count <= index)
-                    await ReplyAsync("Specified message is not listed.")
+                ElseIf (type = MsgType.Join AndAlso data.JoinMessages.Count <= index) OrElse 
+                       (type = MsgType.Leave AndAlso data.LeaveMessages.Count <= index)
+                    Await ReplyAsync("Specified message is not listed.")
                     Return
                 End If
                 
                 data.RemoveMessage(index, type)
                 
-                Await _dbContext.SaveChangesAsync()
-                await ReplyAsync($"Successfully removed from {Format.Bold(type.ToString())} messages.")
+                Await ReplyAsync($"Successfully removed from {Format.Bold(type.ToString())} messages.")
             End Function
             
         End Class

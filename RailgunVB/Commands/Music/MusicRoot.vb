@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Preconditions
@@ -12,7 +13,7 @@ Namespace Commands.Music
     
         <Group("root"), BotAdmin>
         Public Class MusicRoot
-            Inherits ModuleBase
+            Inherits SystemBase
             
             Private ReadOnly _playerManager As PlayerManager
 

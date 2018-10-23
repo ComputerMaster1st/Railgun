@@ -1,6 +1,7 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Preconditions
 Imports TreeDiagram
@@ -10,19 +11,12 @@ Namespace Commands.Server
     
     <Group("warn")>
     Public Class Warn
-        Inherits ModuleBase
+        Inherits SystemBase
     
         Private ReadOnly _log As Log
-        Private ReadOnly _dbContext As TreeDiagramContext
 
-        Public Sub New(log As Log, dbContext As TreeDiagramContext)
+        Public Sub New(log As Log)
             _log = log
-            _dbContext = dbContext
-        End Sub
-        
-        Protected Overrides Async Sub AfterExecute(command As CommandInfo)
-            Await _dbContext.SaveChangesAsync()
-            MyBase.AfterExecute(command)
         End Sub
         
         Private Async Function WarnUserAsync(data As ServerWarning, user As IUser, reason As String) As Task
@@ -38,7 +32,7 @@ Namespace Commands.Server
                 Return
             End If
             
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetOrCreateAsync(Context.Guild.Id)
             Dim userWarnings As List(Of String) = data.GetWarnings(user.Id)
             
             If data.WarnLimit < 1
@@ -70,7 +64,7 @@ Namespace Commands.Server
         
         <Command("list"), UserPerms(GuildPermission.BanMembers)>
         Public Async Function ListAsync() As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             If data is Nothing OrElse data.Warnings.Count < 1
                 await ReplyAsync("There are currently no users with warnings.")
@@ -114,7 +108,7 @@ Namespace Commands.Server
         
         <Command("mylist")>
         Public Async Function MyListAsync() As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             If data is Nothing OrElse data.Warnings.Count < 1
                 await ReplyAsync("There are currently no users with warnings.")
@@ -142,7 +136,7 @@ Namespace Commands.Server
         
         <Command("clear"), UserPerms(GuildPermission.BanMembers)>
         Public Async Function ClearAsync(user As IUser) As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse data.Warnings.Count < 1
                 await ReplyAsync($"There are no warnings currently issued to {user.Mention}.")
@@ -163,7 +157,7 @@ Namespace Commands.Server
         
         <Command("empty"), UserPerms(GuildPermission.ManageGuild)>
         Public Async Function EmptyAsync() As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             If data Is Nothing OrElse data.Warnings.Count < 1
                 await ReplyAsync("Warnings list is already empty.")
@@ -177,7 +171,7 @@ Namespace Commands.Server
         
         <Command("limit"), UserPerms(GuildPermission.ManageGuild)>
         Public Async Function WarnLimitAsync(Optional limit As Integer = 5) As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetOrCreateAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetOrCreateAsync(Context.Guild.Id)
             
             If limit < 0
                 await ReplyAsync("The limit entered is invalid. Must be 0 or higher.")
@@ -199,14 +193,14 @@ Namespace Commands.Server
         
         <Command("reset"), UserPerms(GuildPermission.ManageGuild)>
         Public Async Function ResetAsync() As Task
-            Dim data As ServerWarning = Await _dbContext.ServerWarnings.GetAsync(Context.Guild.Id)
+            Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
             If data Is Nothing
                 await ReplyAsync("Warnings has no data to reset.")
                 Return
             End If
             
-            _dbContext.ServerWarnings.Remove(data)
+            Context.Database.ServerWarnings.Remove(data)
             
             await ReplyAsync("Warnings has been reset & disabled.")
         End Function

@@ -1,6 +1,7 @@
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
+Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports TreeDiagram
 Imports TreeDiagram.Models.TreeTimer
@@ -9,14 +10,12 @@ Namespace Commands.Utilities
     
     <Group("remindme")>
     Public Class RemindMe
-        Inherits ModuleBase
+        Inherits SystemBase
         
         Private ReadOnly _timerManager As TimerManager
-        Private ReadOnly _dbContext As TreeDiagramContext
 
-        Public Sub New(timerManager As TimerManager, dbContext As TreeDiagramContext)
+        Public Sub New(timerManager As TimerManager)
             _timerManager = timerManager
-            _dbContext = dbContext
         End Sub
         
         <Command>
@@ -78,7 +77,7 @@ Namespace Commands.Utilities
                 Return
             End If
             
-            Dim data As TimerRemindMe = Await _dbContext.TimerRemindMes.CreateAsync()
+            Dim data As TimerRemindMe = Await Context.Database.TimerRemindMes.CreateAsync()
             
             data.GuildId = Context.Guild.Id
             data.TextChannelId = Context.Channel.Id
@@ -86,7 +85,6 @@ Namespace Commands.Utilities
             data.Message = message
             data.TimerExpire = expireTime
             
-            Await _dbContext.SaveChangesAsync()
             Await _timerManager.CreateAndStartRemindMeContainer(data, True)
             Await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(
                 data.TimerExpire.ToString())} UTC.")
