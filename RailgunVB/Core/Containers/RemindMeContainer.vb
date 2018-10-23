@@ -101,10 +101,7 @@ Namespace Core.Containers
             End If
             
             Using scope As IServiceScope = _services.CreateScope()
-                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                
-                context.TimerRemindMes.Remove(Data)
-                Await context.SaveChangesAsync()
+                scope.ServiceProvider.GetService(Of TreeDiagramContext).TimerRemindMes.Remove(Data)
             End Using
         End Function
         
