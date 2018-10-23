@@ -4,6 +4,7 @@ Imports Discord.Commands
 Imports RailgunVB.Core
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Preconditions
+Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Warning
 
@@ -14,9 +15,11 @@ Namespace Commands.Server
         Inherits SystemBase
     
         Private ReadOnly _log As Log
+        Private ReadOnly _commandUtils As CommandUtils
 
-        Public Sub New(log As Log)
+        Public Sub New(log As Log, commandUtils As CommandUtils)
             _log = log
+            _commandUtils = commandUtils
         End Sub
         
         Private Async Function WarnUserAsync(data As ServerWarning, user As IUser, reason As String) As Task
@@ -37,6 +40,9 @@ Namespace Commands.Server
             
             If data.WarnLimit < 1
                 await ReplyAsync("User Warnings are currently disabled. You can enable it by changing the warning limit.")
+                Return
+            ElseIf (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+                Await ReplyAsync($"Unable to warn {user.Username} as my role isn't high enough to auto-ban the user.")
                 Return
             ElseIf userWarnings Is Nothing OrElse userWarnings.Count < data.WarnLimit
                 await WarnUserAsync(data, user, reason)

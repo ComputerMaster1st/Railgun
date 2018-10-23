@@ -50,6 +50,23 @@ Namespace Core.Utilities
             Return playlist
         End Function
         
+        Public Async Function CheckIfSelfIsHigherRole(guild As IGuild, user As IGuildUser) As Task(Of Boolean)
+            Dim selfRolePosition = 0
+            Dim self As IGuildUser = Await guild.GetCurrentUserAsync()
+            
+            For Each roleId As ULong In self.RoleIds
+                Dim role As IRole = Guild.GetRole(roleId)
+                If role.Position > selfRolePosition Then selfRolePosition = role.Position
+            Next
+            
+            For Each roleId As ULong In user.RoleIds
+                Dim role As IRole = Guild.GetRole(roleId)
+                If selfRolePosition < role.Position Then Return False
+            Next
+            
+            Return True
+        End Function
+        
     End Class
     
 End NameSpace

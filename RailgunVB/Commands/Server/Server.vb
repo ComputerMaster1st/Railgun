@@ -5,6 +5,7 @@ Imports Discord.Commands
 Imports RailgunVB.Core
 Imports RailgunVB.Core.Logging
 Imports RailgunVB.Core.Preconditions
+Imports RailgunVB.Core.Utilities
 Imports TreeDiagram
 Imports TreeDiagram.Models.Server.Warning
 
@@ -15,9 +16,11 @@ Namespace Commands.Server
         Inherits SystemBase
         
         Private ReadOnly _log As Log
+        Private ReadOnly _commandUtils As CommandUtils
 
-        Public Sub New(log As Log)
+        Public Sub New(log As Log, commandUtils As CommandUtils)
             _log = log
+            _commandUtils = commandUtils
         End Sub
         
         <Command("leave"), UserPerms(GuildPermission.ManageGuild)>
@@ -58,11 +61,14 @@ Namespace Commands.Server
         End Function
         
         <Command("kick"), UserPerms(GuildPermission.KickMembers), BotPerms(GuildPermission.KickMembers)>
-        Public Async Function KickAsync(user As IUser, 
+        Public Async Function KickAsync(user As IGuildUser, 
                                         <Remainder> Optional reason As String = "No Reason Specified") As Task
-            Dim gUser As IGuildUser = Await Context.Guild.GetUserAsync(user.Id)
+            If (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+                Await ReplyAsync($"Unable to kick {user.Username} as my role isn't high enough.")
+                Return
+            End If
             
-            Await gUser.KickAsync(reason)
+            Await user.KickAsync(reason)
             await ReplyAsync(
                 $"{Format.Bold(user.Username)} has been kicked from the server. Reason: {Format.Bold(reason)}")
             
@@ -74,9 +80,14 @@ Namespace Commands.Server
         End Function
         
         <Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)>
-        Public Async Function BanAsync(user As IUser, 
+        Public Async Function BanAsync(user As IGuildUser, 
                                        <Remainder> Optional reason As String = "No Reason Specified") As Task
             Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
+            
+            If (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+                Await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.")
+                Return
+            End If
             
             Await Context.Guild.AddBanAsync(user, 7, reason)
             
