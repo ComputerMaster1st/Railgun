@@ -47,10 +47,6 @@ Namespace Core.Utilities
             
             Await _musicService.Playlist.UpdateAsync(playlist)
             
-            Using scope As IServiceScope = _services.CreateScope()
-                Await scope.ServiceProvider.GetService(Of TreeDiagramContext).SaveChangesAsync()
-            End Using
-            
             Return playlist
         End Function
         
