@@ -69,5 +69,11 @@ namespace TreeDiagram
 
             await SaveChangesAsync();
         }
+
+        public override void Dispose()
+        {
+            SaveChangesAsync().ConfigureAwait(false).GetAwaiter();
+            base.Dispose();
+        }
     }
 }
