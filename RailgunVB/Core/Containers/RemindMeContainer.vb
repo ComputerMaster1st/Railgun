@@ -67,14 +67,14 @@ Namespace Core.Containers
                 
                 _IsCompleted = True
                 
-                Await Dispose()
+                Dispose()
                 Await _log.LogToBotLogAsync(
                     $"Remind Me || Timer ID {Data.Id.ToString()} has completed! Awaiting final cleanup.", 
                     BotLogType.TimerManager)
             Catch ex As NullReferenceException
                 _HasCrashed = True
                 
-                Dispose.GetAwaiter()
+                Dispose()
                 _log.LogToConsoleAsync(new LogMessage(
                     LogSeverity.Warning, "Timers", 
                     $"Timer ID |{Data.Id.ToString()}| RemindMe Container Exception!", ex)).GetAwaiter()
@@ -85,7 +85,7 @@ Namespace Core.Containers
                     Return
                 ElseIf Data.Timer Is Nothing AndAlso Not (IsCompleted)
                     _HasCrashed = True
-                    Dispose.GetAwaiter()
+                    Dispose()
                 End If
                 
                 _log.LogToConsoleAsync(new LogMessage(
@@ -94,7 +94,7 @@ Namespace Core.Containers
             End Try
         End Function
         
-        Private Async Function Dispose() As Task
+        Private Sub Dispose()
             If Data.Timer IsNot Nothing
                 Data.Timer.Dispose()
                 Data.Timer = Nothing
@@ -103,7 +103,7 @@ Namespace Core.Containers
             Using scope As IServiceScope = _services.CreateScope()
                 scope.ServiceProvider.GetService(Of TreeDiagramContext).TimerRemindMes.Remove(Data)
             End Using
-        End Function
+        End Sub
         
     End Class
 
