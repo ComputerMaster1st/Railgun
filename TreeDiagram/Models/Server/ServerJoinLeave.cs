@@ -8,6 +8,7 @@ namespace TreeDiagram.Models.Server
     {
         public bool SendToDM { get; set; } = false;
         public ulong ChannelId { get; set; } = 0;
+        public int DeleteAfterMinutes { get; set; } = 0;
 
         public List<string> JoinMessages { get; private set; } = new List<string>() { "Welcome to **<server>**, **<user>**!" };
         public List<string> LeaveMessages { get; private set; } = new List<string>() { "Goodbye, **<user>**." };

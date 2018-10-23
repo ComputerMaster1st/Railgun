@@ -100,15 +100,23 @@ Namespace Core
                 Return
             ElseIf data.SendToDM
                 Try
-                    Dim dm As IDMChannel = Await user.GetOrCreateDMChannelAsync()
-                    
-                    Await dm.SendMessageAsync(message)
+                    Await (Await user.GetOrCreateDMChannelAsync()).SendMessageAsync(message)
                 Catch
                 End Try
             ElseIf data.ChannelId <> 0
                 Dim tc As ITextChannel = Await user.Guild.GetTextChannelAsync(data.ChannelId)
+                Dim msg As IUserMessage = Nothing
                 
-                If tc IsNot Nothing Then Await tc.SendMessageAsync(message)
+                If tc IsNot Nothing
+                    msg = Await tc.SendMessageAsync(message)
+                End If
+                
+                If data.DeleteAfterMinutes > 0
+                    Await Task.Run(New Action(Async Sub()
+                        Await Task.Delay(TimeSpan.FromMinutes(data.DeleteAfterMinutes).TotalMilliseconds)
+                        Await msg.DeleteAsync()
+                    End Sub))
+                End If
             End If
         End Function
         

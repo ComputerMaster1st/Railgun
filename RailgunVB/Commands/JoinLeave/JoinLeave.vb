@@ -30,6 +30,29 @@ Namespace Commands.JoinLeave
                                                                                "Set"))} to this channel.")
         End Function
         
+        <Command("deleteafter"), BotPerms(ChannelPermission.ManageMessages)>
+        Public Async Function DeleteAfterAsync(Optional minutes As Integer = 0) As Task
+            If minutes < 0
+                Await ReplyAsync("Minutes can not be less than 0.")
+                Return
+            End If
+            
+            Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id)
+            
+            If minutes = 0 AndAlso data.DeleteAfterMinutes = 0
+                Await ReplyAsync("Already set to not delete Join/Leave notifications.")
+                Return
+            ElseIf minutes = 0 AndAlso data.DeleteAfterMinutes <> 0
+                data.DeleteAfterMinutes = 0
+                Await ReplyAsync("No longer deleting Join/Leave notifications.")
+                Return
+            End If
+            
+            data.DeleteAfterMinutes = minutes
+            
+            Await ReplyAsync($"Join/Leave notifications will now be deleted after {minutes} minutes.")
+        End Function
+        
         <Command("sendtodm")>
         Public Async Function DmAsync() As Task
             Dim data As ServerJoinLeave = Await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id)
