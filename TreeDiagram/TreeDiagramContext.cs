@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
-using TreeDiagram.Configuration;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.Server.Filter;
 using TreeDiagram.Models.Server.Fun;
@@ -72,7 +71,7 @@ namespace TreeDiagram
 
         public override void Dispose()
         {
-            SaveChangesAsync().ConfigureAwait(false).GetAwaiter();
+            SaveChanges();
             base.Dispose();
         }
     }
