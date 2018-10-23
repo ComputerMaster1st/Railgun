@@ -157,12 +157,16 @@ Namespace Commands.Music
         
         <Command("queue")>
         Public Async Function QueueAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+            Dim playerContainer As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
             
-            If player Is Nothing
+            If playerContainer Is Nothing
                 await ReplyAsync("I'm not playing anything at this time.")
                 Return
-            ElseIf player.Requests.Count < 2
+            End If
+
+            Dim player As Player = playerContainer.Player
+            
+            If player.Requests.Count < 2
                 await ReplyAsync("There are currently no music requests in the queue.")
                 Return
             End If
