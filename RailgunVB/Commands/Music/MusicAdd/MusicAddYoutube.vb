@@ -1,4 +1,5 @@
 Imports System.Text
+Imports System.Threading
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
@@ -49,7 +50,7 @@ Namespace Commands.Music
                             Context.Channel, status, data))
                     Dim resolvingPlaylist As ResolvingPlaylist = 
                         Await _musicService.Youtube.DownloadPlaylistAsync(
-                            New Uri(url.Trim(" "c, "<"c, ">"c)), reporter)
+                            New Uri(url.Trim(" "c, "<"c, ">"c)), reporter, CancellationToken.None)
 
                     Dim output As New StringBuilder
                     Dim queued As Integer = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs
