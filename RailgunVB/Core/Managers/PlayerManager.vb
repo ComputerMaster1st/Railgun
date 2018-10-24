@@ -137,9 +137,8 @@ Namespace Core.Managers
                                                 Optional preRequestedSong As ISong = Nothing) As Task
             Dim playlist As Playlist
             
-            Using scope As IServiceScope = _services.CreateScope(),
-                db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 Dim data As ServerMusic = Await db.ServerMusics.GetOrCreateAsync(tc.GuildId)
                 playlist = Await _commandUtils.GetPlaylistAsync(data)
             End Using
