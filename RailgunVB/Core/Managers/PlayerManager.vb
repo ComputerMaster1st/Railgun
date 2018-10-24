@@ -135,13 +135,14 @@ Namespace Core.Managers
         Public Async Function CreatePlayerAsync(user As IGuildUser, vc As IVoiceChannel, tc As ITextChannel, 
                                                 Optional autoJoin As Boolean = False, 
                                                 Optional preRequestedSong As ISong = Nothing) As Task
-            Dim data As ServerMusic
+            Dim playlist As Playlist
+            
+            Using scope As IServiceScope = _services.CreateScope(),
+                db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 
-            Using scope As IServiceScope = _services.CreateScope()
-                data = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
-                    .ServerMusics.GetOrCreateAsync(tc.GuildId)
+                Dim data As ServerMusic = Await db.ServerMusics.GetOrCreateAsync(tc.GuildId)
+                playlist = Await _commandUtils.GetPlaylistAsync(data)
             End Using
-            Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
             
             If playlist.Songs.Count < 1
                 If preRequestedSong IsNot Nothing AndAlso Not (playlist.Songs.Contains(preRequestedSong.Id)) Then _ 
