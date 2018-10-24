@@ -53,7 +53,14 @@ Namespace Commands.Music
             
             <Command("current"), Priority(1)>
             Public Async Function CurrentAsync() As Task
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+                Dim playerContainer As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
+                
+                If playerContainer Is Nothing
+                    Await ReplyAsync("Cannot use this command if there's no active music stream at this time.")
+                    Return
+                End If
+                
+                Dim player As Player = playerContainer.Player
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty OrElse player Is Nothing
