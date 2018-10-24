@@ -109,13 +109,13 @@ Namespace Core
                 
                 If tc IsNot Nothing
                     msg = Await tc.SendMessageAsync(message)
-                End If
-                
-                If data.DeleteAfterMinutes > 0
-                    Await Task.Run(New Action(Async Sub()
-                        Await Task.Delay(TimeSpan.FromMinutes(data.DeleteAfterMinutes).TotalMilliseconds)
-                        Await msg.DeleteAsync()
-                    End Sub))
+                    
+                    If data.DeleteAfterMinutes > 0
+                        Await Task.Run(New Action(Async Sub()
+                            Await Task.Delay(TimeSpan.FromMinutes(data.DeleteAfterMinutes).TotalMilliseconds)
+                            Await msg.DeleteAsync()
+                        End Sub))
+                    End If
                 End If
             End If
         End Function
