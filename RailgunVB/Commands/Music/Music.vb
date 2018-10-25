@@ -172,7 +172,7 @@ Namespace Commands.Music
             Dim output As New StringBuilder
             Dim i = 0
             
-            output.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), (player.Requests.Count - 1)).AppendLine() _
+            output.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), player.Requests.Count).AppendLine() _
                 .AppendLine()
             
             While player.Requests.Count > i
@@ -181,13 +181,13 @@ Namespace Commands.Music
                 
                 Select i
                     Case 0
-                        output.AppendFormat("Now : {1} || Length : {2}", 
+                        output.AppendFormat("Now : {0} || Length : {1}", 
                                             Format.Bold(meta.Name), 
                                             Format.Bold(meta.Length.ToString())) _
                             .AppendLine()
                         Exit Select
                     Case 1
-                        output.AppendFormat("Next : {0} || Length : {0}", 
+                        output.AppendFormat("Next : {0} || Length : {1}", 
                                             Format.Bold(meta.Name), 
                                             Format.Bold(meta.Length.ToString()))
                         Exit Select
