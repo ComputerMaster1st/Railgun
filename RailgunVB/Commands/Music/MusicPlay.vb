@@ -75,10 +75,10 @@ Namespace Commands.Music
                 
                 If data.AutoSkip AndAlso Not (player.AutoSkipped)
                     output.AppendLine("Auto-Skipping current song as requested.")
-                    player.AutoSkipped = True
                     player.CancelMusic()
                 End If
                 
+                player.AutoSkipped = True
                 Await response.ModifyAsync(Sub(x) x.Content = output.ToString())
             End Function
             
