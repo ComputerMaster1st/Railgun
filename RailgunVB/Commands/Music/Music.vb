@@ -164,24 +164,42 @@ Namespace Commands.Music
 
             Dim player As Player = playerContainer.Player
             
-            If player.Requests.Count < 2
+            If Not (player.AutoSkipped) AndAlso player.Requests.Count < 2
                 await ReplyAsync("There are currently no music requests in the queue.")
                 Return
             End If
             
             Dim output As New StringBuilder
+            Dim i = 0
             
             output.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), (player.Requests.Count - 1)).AppendLine() _
                 .AppendLine()
             
-            Dim i = 1
             While player.Requests.Count > i
                 Dim song As ISong = player.Requests(i)
                 Dim meta As SongMetadata = song.Metadata
                 
-                output.AppendFormat("{0} : {1} || Length : {2}", If(i = 1, "Next", Format.Code($"[{i}]")), 
-                                    Format.Bold(meta.Name), Format.Bold(meta.Length.ToString())).AppendLine()
+                Select i
+                    Case 0
+                        output.AppendFormat("Now : {1} || Length : {2}", 
+                                            Format.Bold(meta.Name), 
+                                            Format.Bold(meta.Length.ToString())) _
+                            .AppendLine()
+                        Exit Select
+                    Case 1
+                        output.AppendFormat("Next : {0} || Length : {0}", 
+                                            Format.Bold(meta.Name), 
+                                            Format.Bold(meta.Length.ToString()))
+                        Exit Select
+                    Case Else
+                        output.AppendFormat("{0} : {1} || Length : {2}", 
+                                            Format.Code($"[{i}]"), 
+                                            Format.Bold(meta.Name), 
+                                            Format.Bold(meta.Length.ToString()))
+                        Exit Select
+                End Select
                 
+                output.AppendLine()
                 i += 1
             End While
             
@@ -207,21 +225,30 @@ Namespace Commands.Music
                 Await Context.Guild.GetTextChannelAsync(data.AutoTextChannel), Nothing)
             Dim npTc As ITextChannel = If(data.NowPlayingChannel <> 0, 
                 Await Context.Guild.GetTextChannelAsync(data.NowPlayingChannel), Nothing)
+            Dim autoJoinOutput As String = String.Format("{0} {1}", 
+                If(vc IsNot Nothing, vc.Name, "Disabled"), 
+                If(tc IsNot Nothing, $"(#{tc.Name})", ""))
+            Dim autoDownloadOutput As String = If(data.AutoDownload, "Enabled", "Disabled")
+            Dim autoSkipOutput As String = If(data.AutoSkip, "Enabled", "Disabled")
+            Dim silentPlayingOutput As String = If(data.SilentNowPlaying, "Enabled", "Disabled")
+            Dim silentInstallOutput As String = If(data.SilentSongProcessing, "Enabled", "Disabled")
+            Dim npTcName As String = If(npTc IsNot Nothing, $"#{npTc.Name}", "None")
+            Dim voteskipOutput As String = If(data.VoteSkipEnabled, $"Enabled @ {data.VoteSkipLimit}% Users", "Disabled")
             Dim output As New StringBuilder
             
             output.AppendLine("Music Settings") _
                 .AppendLine() _
                 .AppendFormat("Number Of Songs : {0}", songCount).AppendLine() _
                 .AppendLine() _
-                .AppendFormat("      Auto-Join : {0} {1}", If(vc IsNot Nothing, vc.Name, "Disabled"), 
-                              If(tc IsNot Nothing, $"(#{tc.Name})", "")).AppendLine() _
-                .AppendFormat("  Auto-Download : {0}", If(data.AutoDownload, "Enabled", "Disabled")).AppendLine() _
-                .AppendFormat("      Auto-Skip : {0}", If(data.AutoSkip, "Enabled", "Disabled")).AppendLine() _
+                .AppendFormat("      Auto-Join : {0}", autoJoinOutput).AppendLine() _
+                .AppendFormat("  Auto-Download : {0}", autoDownloadOutput).AppendLine() _
+                .AppendFormat("      Auto-Skip : {0}", autoSkipOutput).AppendLine() _
                 .AppendLine() _
-                .AppendFormat(" Silent Running : {0}", If(data.SilentNowPlaying, "Enabled", "Disabled")).AppendLine() _
-                .AppendFormat(" Silent Install : {0}", If(data.SilentSongProcessing, "Enabled", "Disabled")).AppendLine() _
+                .AppendFormat(" Silent Running : {0}", silentPlayingOutput).AppendLine() _
+                .AppendFormat(" Silent Install : {0}", silentInstallOutput).AppendLine() _
                 .AppendLine() _
-                .AppendFormat("NP Dedi Channel : {0}", If(npTc IsNot Nothing, $"#{npTc.Name}", "None"))
+                .AppendFormat("NP Dedi Channel : {0}", npTcName) _ 
+                .AppendFormat("      Vote-Skip : {0}", voteskipOutput)
             
             await ReplyAsync(Format.Code(output.ToString()))
         End Function
