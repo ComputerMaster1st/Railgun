@@ -86,12 +86,12 @@ Namespace Core.Managers
                 Dim sCommand As ServerCommand
                 Dim uCommand As UserCommand
                 
-                Using scope As IServiceScope = _services.CreateScope()
-                    Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                
+                Using context As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
                     sCommand = Await context.ServerCommands.GetAsync(guild.Id)
                 
-                    If ((sCommand Is Nothing OrElse Not (sCommand.RespondToBots)) AndAlso msg.Author.IsBot) OrElse 
+                    If ((sCommand Is Nothing OrElse 
+                         Not (sCommand.RespondToBots)) AndAlso 
+                        msg.Author.IsBot) OrElse 
                        msg.Author.IsWebhook Then Return
                 
                     uCommand = Await context.UserCommands.GetAsync(msg.Author.Id)

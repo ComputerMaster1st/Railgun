@@ -47,14 +47,12 @@ Namespace Core
         Private Async Function LeftGuildAsync(sGuild As SocketGuild) As Task Handles _client.LeftGuild
             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).Player.CancelStream()
             
-            Using scope As IServiceScope = _services.CreateScope()
-                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                
-                Dim sMusic As ServerMusic = Await context.ServerMusics.GetAsync(sGuild.Id)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                Dim sMusic As ServerMusic = Await db.ServerMusics.GetAsync(sGuild.Id)
                 If sMusic IsNot Nothing AndAlso sMusic.PlaylistId <> ObjectId.Empty Then _ 
                     Await _musicService.Playlist.DeleteAsync(sMusic.PlaylistId)
                 
-                Await context.DeleteGuildDataAsync(sGuild.Id)
+                Await db.DeleteGuildDataAsync(sGuild.Id)
             End Using
 
             Await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Left", BotLogType.GuildManager)
@@ -63,9 +61,8 @@ Namespace Core
         Private Async Function UserJoinedAsync(sUser As SocketGuildUser) As Task Handles _client.UserJoined
             Dim sJoinLeave As ServerJoinLeave
             
-            Using scope As IServiceScope = _services.CreateScope()
-                sJoinLeave = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
-                    .ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                sJoinLeave = Await db.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
             End Using
             
             If sJoinLeave Is Nothing Then Return
@@ -79,9 +76,8 @@ Namespace Core
         Private Async Function UserLeaveAsync(sUser As SocketGuildUser) As Task Handles _client.UserLeft
             Dim sJoinLeave As ServerJoinLeave
             
-            Using scope As IServiceScope = _services.CreateScope()
-                sJoinLeave = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
-                    .ServerJoinLeaves.GetAsync(sUser.Guild.Id)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                sJoinLeave = Await db.ServerJoinLeaves.GetAsync(sUser.Guild.Id)
             End Using
             
             If sJoinLeave Is Nothing Then Return
@@ -105,7 +101,7 @@ Namespace Core
                 End Try
             ElseIf data.ChannelId <> 0
                 Dim tc As ITextChannel = Await user.Guild.GetTextChannelAsync(data.ChannelId)
-                Dim msg As IUserMessage = Nothing
+                Dim msg As IUserMessage
                 
                 If tc IsNot Nothing
                     msg = Await tc.SendMessageAsync(message)
@@ -133,9 +129,8 @@ Namespace Core
             If _playerManager.IsCreated(guild.Id) OrElse user.VoiceChannel Is Nothing Then Return
             
             Dim sMusic As ServerMusic
-            Using scope As IServiceScope = _services.CreateScope()
-                sMusic = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
-                    .ServerMusics.GetAsync(guild.Id)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                sMusic = Await db.ServerMusics.GetAsync(guild.Id)
             End Using
             
             If sMusic Is Nothing Then Return

@@ -27,9 +27,8 @@ Namespace Core.Managers
                                                    tc As ITextChannel) As Task
             Dim playlist As Playlist
             
-            Using scope As IServiceScope = _services.CreateScope()
-                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                Dim data As ServerMusic = Await context.ServerMusics.GetOrCreateAsync(tc.GuildId)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                Dim data As ServerMusic = Await db.ServerMusics.GetOrCreateAsync(tc.GuildId)
                 playlist = Await _commandUtils.GetPlaylistAsync(data)
             End Using
             

@@ -22,11 +22,9 @@ Namespace Core.Utilities
             Dim sMention As ServerMention
             Dim uMention As UserMention
             
-            Using scope As IServiceScope = _services.CreateScope()
-                Dim context As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
-                
-                sMention = await context.ServerMentions.GetAsync(user.GuildId)
-                uMention = await context.UserMentions.GetAsync(user.Id)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                sMention = await db.ServerMentions.GetAsync(user.GuildId)
+                uMention = await db.UserMentions.GetAsync(user.Id)
             End Using
             
             If (sMention IsNot Nothing AndAlso sMention.DisableMentions) OrElse 

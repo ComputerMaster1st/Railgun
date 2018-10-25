@@ -19,7 +19,7 @@ Namespace Core.Managers
         Private ReadOnly _services As IServiceProvider
         Private ReadOnly _musicService As MusicService
 
-        Public ReadOnly Property PlayerContainers As New List(Of PlayerContainer)
+        Public ReadOnly Property PlayerContainers As List(Of PlayerContainer) =  New List(Of PlayerContainer)
         
         Public Sub New(services As IServiceProvider)
             _log = services.GetService(Of Log)
@@ -40,9 +40,8 @@ Namespace Core.Managers
                 Dim data As ServerMusic
                 Dim tc As ITextChannel
                 
-                Using scope As IServiceScope = _services.CreateScope()
-                    data = Await scope.ServiceProvider.GetService(Of TreeDiagramContext) _ 
-                        .ServerMusics.GetAsync(args.GuildId)
+                Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+                    data = Await db.ServerMusics.GetAsync(args.GuildId)
                 End Using
                 
                 If data.NowPlayingChannel <> 0
@@ -137,8 +136,7 @@ Namespace Core.Managers
                                                 Optional preRequestedSong As ISong = Nothing) As Task
             Dim playlist As Playlist
             
-            Using scope As IServiceScope = _services.CreateScope()
-                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
                 Dim data As ServerMusic = Await db.ServerMusics.GetOrCreateAsync(tc.GuildId)
                 playlist = Await _commandUtils.GetPlaylistAsync(data)
             End Using
