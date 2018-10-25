@@ -116,25 +116,22 @@ Namespace Core.Music
                 Return request
             End If
             
-            Dim playlistModified = False
-            
             While True
                 Try
                     Dim songId As SongId = playlist.Songs(rand.Next(0, playlist.Songs.Count))
                     
                     If _playedSongs.Contains(songId.ToString()) 
                         Continue While
-                    ElseIf Not (Await _musicService.TryGetSongAsync(songId, Sub(song) request = song))
-                        playlist.Songs.Remove(songId)
-                        playlistModified = True
+                    ElseIf Await _musicService.TryGetSongAsync(songId, Sub(song) request = song)
+                        _playedSongs.Add(songId.ToString())
+                        Exit While
                     End If
                     
-                    Exit While
+                    playlist.Songs.Remove(songId)
+                    Await _musicService.Playlist.UpdateAsync(playlist)
                 Catch
                 End Try
             End While
-            
-            If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
             
             Return request
         End Function
