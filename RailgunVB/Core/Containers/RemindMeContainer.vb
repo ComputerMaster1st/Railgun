@@ -100,7 +100,8 @@ Namespace Core.Containers
                 Data.Timer = Nothing
             End If
             
-            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 db.TimerRemindMes.Remove(Data)
             End Using
         End Sub

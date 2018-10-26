@@ -22,7 +22,8 @@ Namespace Core.Utilities
             Dim sMention As ServerMention
             Dim uMention As UserMention
             
-            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 sMention = await db.ServerMentions.GetAsync(user.GuildId)
                 uMention = await db.UserMentions.GetAsync(user.Id)
             End Using

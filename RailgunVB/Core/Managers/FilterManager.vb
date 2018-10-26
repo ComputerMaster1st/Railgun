@@ -21,7 +21,8 @@ Namespace Core.Managers
         Public Async Function ApplyFilterAsync(msg As IUserMessage) As Task(Of IUserMessage)
             Dim result As IUserMessage = Nothing
             
-            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 For Each filter As IMessageFilter In _filters
                     result = Await filter.FilterAsync(msg, db)
                 

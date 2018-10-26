@@ -86,15 +86,16 @@ Namespace Core.Managers
                 Dim sCommand As ServerCommand
                 Dim uCommand As UserCommand
                 
-                Using context As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
-                    sCommand = Await context.ServerCommands.GetAsync(guild.Id)
+                Using scope As IServiceScope = _services.CreateScope()
+                    Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
+                    sCommand = Await db.ServerCommands.GetAsync(guild.Id)
                 
                     If ((sCommand Is Nothing OrElse 
                          Not (sCommand.RespondToBots)) AndAlso 
                         msg.Author.IsBot) OrElse 
                        msg.Author.IsWebhook Then Return
                 
-                    uCommand = Await context.UserCommands.GetAsync(msg.Author.Id)
+                    uCommand = Await db.UserCommands.GetAsync(msg.Author.Id)
                 End Using
                 
                 If msg.HasStringPrefix(_config.DiscordConfig.Prefix, argPos)

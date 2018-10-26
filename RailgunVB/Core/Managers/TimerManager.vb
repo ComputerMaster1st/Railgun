@@ -44,7 +44,8 @@ Namespace Core.Managers
             Dim crashedTimers = 0
             Dim completedTimers = 0
             
-            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 For Each data As TimerRemindMe In db.TimerRemindMes
                     If data.TimerExpire < DateTime.UtcNow
                         Dim container As New RemindMeContainer(_services, data)
@@ -99,7 +100,8 @@ Namespace Core.Managers
                 index += 1
             End While
             
-            Using db As TreeDiagramContext = _services.GetService(Of TreeDiagramContext)
+            Using scope As IServiceScope = _services.CreateScope()
+                Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 For Each data As TimerRemindMe In db.TimerRemindMes
                     If Await CreateAndStartRemindMeContainer(data) Then newTimers += 1
                 Next
