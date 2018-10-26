@@ -116,6 +116,8 @@ Namespace Core.Music
                 Return request
             End If
             
+            Dim playlistModified = False
+            
             While True
                 Try
                     Dim songId As SongId = playlist.Songs(rand.Next(0, playlist.Songs.Count))
@@ -128,10 +130,12 @@ Namespace Core.Music
                     End If
                     
                     playlist.Songs.Remove(songId)
-                    Await _musicService.Playlist.UpdateAsync(playlist)
+                    playlistModified = True
                 Catch
                 End Try
             End While
+            
+            If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
             
             Return request
         End Function
