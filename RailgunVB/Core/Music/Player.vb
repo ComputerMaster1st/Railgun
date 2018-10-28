@@ -103,11 +103,7 @@ Namespace Core.Music
             Dim rand As New Random()
             Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
             
-            If playlist Is Nothing OrElse playlist.Songs.Count < 1
-                Return Nothing
-            ElseIf _playedSongs.Count >= playlist.Songs.Count
-                _playedSongs.Clear()
-            End If
+            If playlist Is Nothing OrElse playlist.Songs.Count < 1 Then Return Nothing
             
             Dim request As ISong = GetFirstSongRequest()
             
@@ -120,6 +116,8 @@ Namespace Core.Music
             
             While True
                 Try
+                    If _playedSongs.Count >= playlist.Songs.Count Then _playedSongs.Clear()
+                    
                     Dim songId As SongId = playlist.Songs(rand.Next(0, playlist.Songs.Count))
                     
                     If _playedSongs.Contains(songId.ToString()) 
