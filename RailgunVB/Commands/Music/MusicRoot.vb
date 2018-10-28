@@ -1,5 +1,6 @@
 Imports System.IO
 Imports System.Text
+Imports AudioChord
 Imports Discord
 Imports Discord.Commands
 Imports RailgunVB.Core
@@ -35,11 +36,14 @@ Namespace Commands.Music
                 
                 For Each info In _playerManager.PlayerContainers
                     Dim player As Player = info.Player
+                    Dim song As ISong = player.GetFirstSongRequest()
                     
                     output.AppendFormat("Id : {0} || Spawned At : {1} || Status : {2}", info.GuildId, player.CreatedAt, 
                                         player.Status).AppendLine() _ 
-                        .AppendFormat("\\--> Latency : {0}ms || Playing : {1} || Since : {2}", player.Latency, 
-                                      player.GetFirstSongRequest().Id.ToString(), player.SongStartedAt).AppendLine().AppendLine()
+                        .AppendFormat("\\--> Latency : {0}ms || Playing : {1} || Since : {2}", 
+                                      player.Latency, 
+                                      If(song Is Nothing, "Searching...", song.Id.ToString()), 
+                                      player.SongStartedAt).AppendLine().AppendLine()
                 Next
                 
                 If output.Length < 1950
