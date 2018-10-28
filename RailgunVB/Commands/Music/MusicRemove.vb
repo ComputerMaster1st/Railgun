@@ -1,3 +1,4 @@
+Imports System.Text
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
@@ -26,7 +27,7 @@ Namespace Commands.Music
             End Sub
             
             <Command, Priority(0)>
-            Public Async Function RemoveAsync(id As String) As Task
+            Public Async Function RemoveAsync(<Remainder> ids As String) As Task
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 
                 If data Is Nothing OrElse data.PlaylistId = ObjectId.Empty
@@ -35,20 +36,27 @@ Namespace Commands.Music
                 End If
                 
                 Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
-                Dim song As ISong = Nothing
+                Dim output As New StringBuilder
                 
-                If Not (Await _musicService.TryGetSongAsync(SongId.Parse(id), Sub(output) song = output))
-                    Await ReplyAsync("Unknown Music Id Given!")
-                    Return
-                ElseIf Not (playlist.Songs.Contains(song.Id))
-                    Await ReplyAsync("Unknown Music Id Given!")
-                    Return
-                End If
+                For Each id As String In ids.Split(","c, " "c)
+                    If Not (id.Contains("#"c)) Then Continue For
+                    
+                    Dim song As ISong = Nothing
+                    
+                    If Not (Await _musicService.TryGetSongAsync(SongId.Parse(id), Sub(songOutput) song = songOutput))
+                        output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine()
+                        Continue For
+                    ElseIf Not (playlist.Songs.Contains(song.Id))
+                        output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine()
+                        Continue For
+                    End If
                 
-                playlist.Songs.Remove(song.Id)
+                    playlist.Songs.Remove(song.Id)
+                    output.AppendFormat("{0} - Song Removed", id)
+                Next
                 
                 Await _musicService.Playlist.UpdateAsync(playlist)
-                await ReplyAsync("Music removed from playlist.")
+                await ReplyAsync(output.ToString())
             End Function
             
             <Command("current"), Priority(1)>
