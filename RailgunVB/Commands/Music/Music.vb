@@ -259,7 +259,7 @@ Namespace Commands.Music
                 .AppendFormat(" Silent Install : {0}", silentInstallOutput).AppendLine() _
                 .AppendLine() _
                 .AppendFormat("NP Dedi Channel : {0}", npTcName).AppendLine() _ 
-                .AppendFormat("      Vote-Skip : {0}", voteskipOutput) _ 
+                .AppendFormat("      Vote-Skip : {0}", voteskipOutput).AppendLine() _ 
                 .AppendFormat("    Role-Locked : {0}", roleLock.ToString())
             
             await ReplyAsync(Format.Code(output.ToString()))
