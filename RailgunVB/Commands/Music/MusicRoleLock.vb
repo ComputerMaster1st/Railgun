@@ -15,7 +15,7 @@ Namespace Commands.Music
             Inherits SystemBase
             
             <Command("add")>
-            Public Async Function AddRoleAsync(roleName As String) As Task
+            Public Async Function AddRoleAsync(<Remainder> roleName As String) As Task
                 For Each role As IRole In Context.Guild.Roles
                     If role.Name.Contains(roleName)
                         Await AddRoleAsync(role)
@@ -41,7 +41,7 @@ Namespace Commands.Music
             End Function
             
             <Command("remove")>
-            Public Async Function RemoveRoleAsync(roleName As String) As Task
+            Public Async Function RemoveRoleAsync(<Remainder> roleName As String) As Task
                 For Each role As IRole In Context.Guild.Roles
                     If role.Name.Contains(roleName)
                         Await RemoveRoleAsync(role)
