@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MongoDB.Bson;
 
 namespace TreeDiagram.Models.Server
@@ -14,6 +15,7 @@ namespace TreeDiagram.Models.Server
         public bool SilentNowPlaying { get; set; } = false;
         public bool SilentSongProcessing { get; set; } = false;
         public ulong NowPlayingChannel { get; set; } = 0;
+        public virtual List<AllowedRole> AllowedRoles { get; private set; } = new List<AllowedRole>();
 
         public ServerMusic(ulong id) : base(id) { }
     }

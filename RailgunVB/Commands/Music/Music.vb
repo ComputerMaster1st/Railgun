@@ -6,6 +6,7 @@ Imports Discord.Commands
 Imports MongoDB.Bson
 Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration
+Imports RailgunVB.Core.Enums
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Music
 Imports RailgunVB.Core.Preconditions
@@ -14,7 +15,7 @@ Imports TreeDiagram.Models.Server
 
 Namespace Commands.Music
     
-    <Group("music")>
+    <Group("music"), RoleLock(ModuleType.Music)>
     Partial Public Class Music
         Inherits SystemBase
         
@@ -235,6 +236,16 @@ Namespace Commands.Music
             Dim npTcName As String = If(npTc IsNot Nothing, $"#{npTc.Name}", "None")
             Dim voteskipOutput As String = If(data.VoteSkipEnabled, $"Enabled @ {data.VoteSkipLimit}% Users", "Disabled")
             Dim output As New StringBuilder
+            Dim roleLock As New StringBuilder
+            
+            If data.AllowedRoles.Count > 0
+                For Each allowedRole As AllowedRole In data.AllowedRoles
+                    Dim role As IRole = Context.Guild.GetRole(allowedRole.RoleId)
+                    roleLock.AppendFormat("| {0} |", role.Name)
+                Next
+            Else
+                roleLock.AppendFormat("None.")
+            End If
             
             output.AppendLine("Music Settings") _
                 .AppendLine() _
@@ -247,8 +258,9 @@ Namespace Commands.Music
                 .AppendFormat(" Silent Running : {0}", silentPlayingOutput).AppendLine() _
                 .AppendFormat(" Silent Install : {0}", silentInstallOutput).AppendLine() _
                 .AppendLine() _
-                .AppendFormat("NP Dedi Channel : {0}", npTcName) _ 
-                .AppendFormat("      Vote-Skip : {0}", voteskipOutput)
+                .AppendFormat("NP Dedi Channel : {0}", npTcName).AppendLine() _ 
+                .AppendFormat("      Vote-Skip : {0}", voteskipOutput) _ 
+                .AppendFormat("    Role-Locked : {0}", roleLock.ToString())
             
             await ReplyAsync(Format.Code(output.ToString()))
         End Function

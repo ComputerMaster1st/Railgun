@@ -37,6 +37,7 @@ namespace TreeDiagram
             {
                 x.Property(y => y.PlaylistId)
                     .HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+                x.HasMany(f => f.AllowedRoles).WithOne().OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
