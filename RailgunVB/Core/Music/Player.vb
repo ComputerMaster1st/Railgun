@@ -100,7 +100,6 @@ Namespace Core.Music
         End Function
         
         Private Async Function QueueSongAsync() As Task(Of ISong)
-            Dim rand As New Random()
             Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
             
             If playlist Is Nothing OrElse playlist.Songs.Count < 1 Then Return Nothing
@@ -112,22 +111,30 @@ Namespace Core.Music
                 Return request
             End If
             
+            Dim rand As New Random()
             Dim playlistModified = False
+            Dim remainingSongs As New List(Of SongId)(playlist)
             
+            For Each id As String In _playedSongs
+                remainingSongs.Remove(SongId.Parse(id))
+            Next
+
             While True
+                If remainingSongs.Count < 1 
+                    _playedSongs.Clear()
+                    remainingSongs = New List(Of SongId)(playlist)
+                End If
+                
                 Try
-                    If _playedSongs.Count >= playlist.Songs.Count Then _playedSongs.Clear()
+                    Dim songId As SongId = remainingSongs(rand.Next(0, remainingSongs.Count))
                     
-                    Dim songId As SongId = playlist.Songs(rand.Next(0, playlist.Songs.Count))
-                    
-                    If _playedSongs.Contains(songId.ToString()) 
-                        Continue While
-                    ElseIf Await _musicService.TryGetSongAsync(songId, Sub(song) request = song)
+                    If Await _musicService.TryGetSongAsync(songId, Sub(song) request = song)
                         _playedSongs.Add(songId.ToString())
                         Exit While
                     End If
                     
                     playlist.Songs.Remove(songId)
+                    remainingSongs.Remove(songId)
                     playlistModified = True
                 Catch
                 End Try
