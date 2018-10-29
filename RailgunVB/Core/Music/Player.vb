@@ -113,7 +113,7 @@ Namespace Core.Music
             
             Dim rand As New Random()
             Dim playlistModified = False
-            Dim remainingSongs As New List(Of SongId)(playlist)
+            Dim remainingSongs As New List(Of SongId)(playlist.Songs)
             
             For Each id As String In _playedSongs
                 remainingSongs.Remove(SongId.Parse(id))
@@ -122,7 +122,7 @@ Namespace Core.Music
             While True
                 If remainingSongs.Count < 1 
                     _playedSongs.Clear()
-                    remainingSongs = New List(Of SongId)(playlist)
+                    remainingSongs = New List(Of SongId)(playlist.Songs)
                 End If
                 
                 Try
