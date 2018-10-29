@@ -26,6 +26,8 @@ Namespace Commands.Utilities
             Dim user As IUser = If(pUser Is Nothing, Context.User, pUser)
             Dim username As String = $"{user.Username}#{user.DiscriminatorValue}"
             Dim isHuman As String = If(user.IsBot Or user.IsWebhook, "Bot", "User")
+            Dim guilds As IReadOnlyCollection(Of IGuild) = Await Context.Client.GetGuildsAsync()
+            Dim locatedOn = 0
             Dim builder As New EmbedBuilder With {
                     .Title = $"Who is {Format.Bold(username)}?",
                     .Color = Color.Blue,
@@ -35,14 +37,18 @@ Namespace Commands.Utilities
                     }
                 }
             
-            builder.AddField("User Type:", isHuman, true) _
-                .AddField("Registered:", user.CreatedAt, true)
+            For Each guild As IGuild In guilds
+                If (Await guild.GetUserAsync(user.Id)) IsNot Nothing Then locatedOn += 1
+            Next
+            
+            builder.AddField("User Type:", isHuman, True) _
+                .AddField("Registered:", user.CreatedAt, True) _
+                .AddField("Located On:", locatedOn, True)
             
             Dim gUser As IGuildUser = Await Context.Guild.GetUserAsync(user.Id)
             
             If gUser IsNot Nothing
                 Dim roles As New StringBuilder
-                Dim esperLevel As Integer = GetEsperLevel(gUser)
                 
                 For Each roleId As ULong In gUser.RoleIds
                     roles.AppendFormat("| {0} |", Context.Guild.GetRole(roleId).Mention)
@@ -51,7 +57,7 @@ Namespace Commands.Utilities
                 builder.AddField("Server Nickname:", If(gUser.Nickname, "N/A"), true) _
                     .AddField("Joined Server At:", gUser.JoinedAt, true) _
                     .AddField("Current Server Roles:", If(roles.ToString(), "N/A")) _
-                    .AddField("ESPer Level:", esperLevel)
+                    .AddField("ESPer Level:", GetEsperLevel(gUser))
             End If
             
             Await ReplyAsync("", embed := builder.Build())
@@ -65,41 +71,42 @@ Namespace Commands.Utilities
             For Each perm As GuildPermission In gUser.GuildPermissions.ToList()
                 Select perm
                     Case GuildPermission.Administrator
-                        score += 214
-                        Exit Select
+                        Return 5
                     Case GuildPermission.ManageChannels, GuildPermission.ManageEmojis, GuildPermission.ManageGuild, 
-                        GuildPermission.ManageRoles, GuildPermission.ManageWebhooks, GuildPermission.ViewAuditLog
+                        GuildPermission.ManageRoles, GuildPermission.ManageWebhooks, GuildPermission.ViewAuditLog,
+                        GuildPermission.ManageNicknames, GuildPermission.ManageMessages
                         score += 10
                         Exit Select
                     Case GuildPermission.BanMembers, GuildPermission.DeafenMembers, GuildPermission.KickMembers, 
-                        GuildPermission.MoveMembers, GuildPermission.MuteMembers, GuildPermission.ManageMessages, 
-                        GuildPermission.ManageNicknames, GuildPermission.PrioritySpeaker, GuildPermission.MentionEveryone
+                        GuildPermission.MoveMembers, GuildPermission.MuteMembers, GuildPermission.MentionEveryone, 
+                        GuildPermission.SendTTSMessages, GuildPermission.PrioritySpeaker
                         score += 5
                         Exit Select
-                    Case GuildPermission.AddReactions, GuildPermission.AttachFiles, GuildPermission.ChangeNickname, 
-                        GuildPermission.CreateInstantInvite, GuildPermission.EmbedLinks, GuildPermission.ReadMessageHistory, 
-                        GuildPermission.SendMessages, GuildPermission.SendTTSMessages, GuildPermission.UseExternalEmojis, 
-                        GuildPermission.ViewChannel, GuildPermission.Connect, GuildPermission.Speak, GuildPermission.UseVAD
+                    Case GuildPermission.UseVAD, GuildPermission.UseExternalEmojis, GuildPermission.AttachFiles, 
+                        GuildPermission.CreateInstantInvite, GuildPermission.AddReactions, GuildPermission.ChangeNickname,
+                        GuildPermission.EmbedLinks, GuildPermission.ReadMessageHistory
+                        score += 2
+                        Exit Select
+                    Case GuildPermission.SendMessages, GuildPermission.ViewChannel, GuildPermission.Connect, 
+                        GuildPermission.Speak
                         score += 1
                         Exit Select
                 End Select
             Next
             
-            Dim percent As Double = Math.Round((score / 214) * 100)
+            Dim percent As Double = Math.Round((score / 140) * 100)
             
             Select percent
-                Case Is >= 100
-                    Return 5
-                Case Is >= 80
-                    Return 4
-                Case Is >= 60
-                    Return 3
-                Case Is >= 40
-                    Return 2
-                Case Is >= 20
-                    Return 1
-                Case Else
+                Case Is < 10
                     Return 0
+                Case Is < 20
+                    Return 1
+                Case Is < 40
+                    Return 2
+                Case Is < 60
+                    Return 3
+                Case Else
+                    Return 4
             End Select
         End Function
     
