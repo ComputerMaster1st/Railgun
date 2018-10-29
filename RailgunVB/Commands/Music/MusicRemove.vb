@@ -77,11 +77,17 @@ Namespace Commands.Music
                 End If
                 
                 Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
+                Dim song As ISong = player.GetFirstSongRequest()
                 
-                playlist.Songs.Remove(player.GetFirstSongRequest().Id)
+                If song Is Nothing
+                    Await ReplyAsync("No song has been selected yet. Try this command again once a song starts playing.")
+                    Return
+                End If
+                
+                playlist.Songs.Remove(song.Id)
                 
                 Await _musicService.Playlist.UpdateAsync(playlist)
-                await ReplyAsync("Removed from playlist. Skipping to next song...")
+                Await ReplyAsync("Removed from playlist. Skipping to next song...")
                 
                 player.CancelMusic()
             End Function
