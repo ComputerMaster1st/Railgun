@@ -46,19 +46,26 @@ namespace TreeDiagram.Models.Server
             string message = null;
 
             while (string.IsNullOrEmpty(message))
-                switch (type) {
-                    case MsgType.Join:
-                        message = JoinMessages[(rand.Next(0, JoinMessages.Count))];
-                        break;
-                    case MsgType.Leave:
-                        if (LeaveMessages.Count < 1) return null;
+            {
+                try
+                {
+                    switch (type)
+                    {
+                        case MsgType.Join:
+                            message = JoinMessages[(rand.Next(0, JoinMessages.Count))];
+                            break;
+                        case MsgType.Leave:
+                            if (LeaveMessages.Count < 1) return null;
 
-                        message = LeaveMessages[(rand.Next(0, LeaveMessages.Count))];
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                            message = LeaveMessages[(rand.Next(0, LeaveMessages.Count))];
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    }
                 }
-            
+                catch { }
+            }
+
             return message;
         }
     }
