@@ -1,4 +1,5 @@
 Imports System.IO
+Imports System.Net.Http
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -235,6 +236,24 @@ Namespace Commands.Root
         Public Async Function TimerRestartAsync() As Task
             await _timerManager.Initialize()
             await ReplyAsync("Timer Manager Restarted!")
+        End Function
+        
+        <Command("avatar")>
+        Public Async Function AvatarAsync(Optional url As String = Nothing) As Task
+            If String.IsNullOrWhiteSpace(url) AndAlso Context.Message.Attachments.Count < 1
+                Await ReplyAsync("Please specify a url or upload an image.")
+                Return
+            End If
+            
+            Dim imageUrl As String = If(Not (String.IsNullOrWhiteSpace(url)), url, 
+                                        Context.Message.Attachments.FirstOrDefault.Url)
+            Dim webclient As New HttpClient
+            Dim imageStream As Stream = Await webclient.GetStreamAsync(imageUrl)
+            
+            Await _client.CurrentUser.ModifyAsync(Sub(x) x.Avatar = New Image(imageStream))
+            Await ReplyAsync("Applied Avatar!")
+            
+            webclient.Dispose()
         End Function
         
     End Class
