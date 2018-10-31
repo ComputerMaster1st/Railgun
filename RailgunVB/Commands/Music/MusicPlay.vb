@@ -96,6 +96,8 @@ Namespace Commands.Music
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                 Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                 
+                Await Context.Database.SaveChangesAsync()
+                
                 Dim response As IUserMessage = await ReplyAsync("Standby...")
                 
                 If Context.Message.Attachments.Count > 0
