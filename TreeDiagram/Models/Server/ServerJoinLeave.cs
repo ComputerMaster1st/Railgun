@@ -52,6 +52,8 @@ namespace TreeDiagram.Models.Server
                     switch (type)
                     {
                         case MsgType.Join:
+                            if (JoinMessages.Count < 1) return null;
+                            
                             message = JoinMessages[(rand.Next(0, JoinMessages.Count))];
                             break;
                         case MsgType.Leave:

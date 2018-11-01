@@ -69,7 +69,11 @@ Namespace Core
             
             If sJoinLeave Is Nothing Then Return
             
-            Dim notification As String = sJoinLeave.GetMessage(MsgType.Join).Replace("<server>", sUser.Guild.Name) _
+            Dim notification As String = sJoinLeave.GetMessage(MsgType.Join)
+            
+            If String.IsNullOrEmpty(notification) Then Return
+            
+            notification = notification.Replace("<server>", sUser.Guild.Name) _
                 .Replace("<user>", Await _commandUtils.GetUsernameOrMentionAsync(sUser))
             
             Await SendJoinLeaveMessageAsync(sJoinLeave, sUser, notification)
