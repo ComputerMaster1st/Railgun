@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="CSharpScriptSerializer" Version="1.5.0" />
-      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.36.0.1226" />
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.36.1.1226" />
     </ItemGroup>
 
     <ItemGroup>
