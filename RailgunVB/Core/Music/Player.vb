@@ -20,7 +20,7 @@ Namespace Core.Music
         Private _musicCancelled As Boolean = False
         Private _streamCancelled As Boolean = False
         
-        Private ReadOnly _playedSongs As New List(Of String)
+        Private ReadOnly _playedSongs As New List(Of SongId)
         
         Public Property AutoSkipped As Boolean = False
         Public ReadOnly Property CreatedAt As DateTime = DateTime.Now
@@ -107,7 +107,7 @@ Namespace Core.Music
             Dim request As ISong = GetFirstSongRequest()
             
             If request IsNot Nothing
-                If Not (_playedSongs.Contains(request.Id.ToString())) Then _playedSongs.Add(request.Id.ToString())
+                If Not (_playedSongs.Contains(request.Id)) Then _playedSongs.Add(request.Id)
                 Return request
             End If
             
@@ -115,8 +115,8 @@ Namespace Core.Music
             Dim playlistModified = False
             Dim remainingSongs As New List(Of SongId)(playlist.Songs)
             
-            For Each id As String In _playedSongs
-                remainingSongs.Remove(SongId.Parse(id))
+            For Each id As SongId In _playedSongs
+                If remainingSongs.Contains(id) Then remainingSongs.Remove(id)
             Next
 
             While True
@@ -129,7 +129,7 @@ Namespace Core.Music
                     Dim songId As SongId = remainingSongs(rand.Next(0, remainingSongs.Count))
                     
                     If Await _musicService.TryGetSongAsync(songId, Sub(song) request = song)
-                        _playedSongs.Add(songId.ToString())
+                        _playedSongs.Add(songId)
                         Exit While
                     End If
                     
