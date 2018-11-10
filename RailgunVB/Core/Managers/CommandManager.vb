@@ -123,7 +123,7 @@ Namespace Core.Managers
                 argPos += 1
             End If
             
-            Dim cmdContext As New SystemContext(_client, msg, _services.GetService(Of TreeDiagramContext))
+            Dim cmdContext As New SystemContext(_client, msg, _services)
             Dim result As IResult = Await _commandService.ExecuteAsync(cmdContext, argPos, _services)
             
             If data IsNot Nothing AndAlso data.DeleteCmdAfterUse Then Await msg.DeleteAsync()
