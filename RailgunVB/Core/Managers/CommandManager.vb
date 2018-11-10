@@ -165,8 +165,14 @@ Namespace Core.Managers
             End If
             
             Await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager, true)
-            Await cmdContext.Channel.SendMessageAsync($"{Format.Bold("OH NO!") _
-                    } Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!")
+            
+            Dim tcOutput As New StringBuilder
+            
+            tcOutput.AppendFormat("{0} Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!", Format.Bold("OH NO!")).AppendLine() _
+                .AppendLine() _
+                .AppendFormat("{0} {1}", Format.Bold("ERROR :"), cmdEx.Message)
+            
+            Await cmdContext.Channel.SendMessageAsync(tcOutput.ToString())
         End Function
         
     End Class
