@@ -54,9 +54,9 @@ Namespace Commands.Utilities
                     roles.AppendFormat("| {0} |", Context.Guild.GetRole(roleId).Mention)
                 Next
                 
-                builder.AddField("Server Nickname:", If(gUser.Nickname, "N/A"), true) _
-                    .AddField("Joined Server At:", If(gUser.JoinedAt, "UNKNOWN"), true) _
-                    .AddField("Current Server Roles:", If(roles.ToString(), "N/A")) _
+                builder.AddField("Server Nickname:", If(gUser.Nickname, Format.Bold("N/A")), true) _
+                    .AddField("Joined Server At:", If(gUser.JoinedAt, Format.Bold("Recently")), true) _
+                    .AddField("Current Server Roles:", If(roles.ToString(), Format.Bold("N/A"))) _
                     .AddField("ESPer Level:", GetEsperLevel(gUser))
             End If
             
