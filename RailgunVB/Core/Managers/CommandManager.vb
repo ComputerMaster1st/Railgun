@@ -170,7 +170,7 @@ Namespace Core.Managers
             
             tcOutput.AppendFormat("{0} Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!", Format.Bold("OH NO!")).AppendLine() _
                 .AppendLine() _
-                .AppendFormat("{0} {1}", Format.Bold("ERROR :"), cmdEx.Message)
+                .AppendFormat("{0} {1}", Format.Bold("ERROR :"), cmdEx.InnerException.Message)
             
             Await cmdContext.Channel.SendMessageAsync(tcOutput.ToString())
         End Function
