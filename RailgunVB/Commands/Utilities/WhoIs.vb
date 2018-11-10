@@ -55,7 +55,7 @@ Namespace Commands.Utilities
                 Next
                 
                 builder.AddField("Server Nickname:", If(gUser.Nickname, Format.Bold("N/A")), true) _
-                    .AddField("Joined Server At:", If(gUser.JoinedAt, Format.Bold("Recently")), true) _
+                    .AddField("Joined Server At:", If(gUser.JoinedAt.ToString(), Format.Bold("Recently")), true) _
                     .AddField("Current Server Roles:", If(roles.ToString(), Format.Bold("N/A"))) _
                     .AddField("ESPer Level:", GetEsperLevel(gUser))
             End If
