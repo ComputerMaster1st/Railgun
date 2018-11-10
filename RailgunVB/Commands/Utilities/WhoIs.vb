@@ -43,7 +43,7 @@ Namespace Commands.Utilities
             
             builder.AddField("User Type:", isHuman, True) _
                 .AddField("Registered:", user.CreatedAt, True) _
-                .AddField("Located On:", locatedOn, True)
+                .AddField("Located On:", $"{locatedOn} servers", True)
             
             Dim gUser As IGuildUser = Await Context.Guild.GetUserAsync(user.Id)
             
