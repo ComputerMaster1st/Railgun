@@ -37,6 +37,7 @@ Namespace Commands.Music
                 
                 Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId)
                 Dim output As New StringBuilder
+                Dim playlistUpdated = False
                 
                 For Each id As String In ids.Split(","c, " "c)
                     If Not (id.Contains("#"c)) Then Continue For
@@ -52,11 +53,12 @@ Namespace Commands.Music
                     End If
                 
                     playlist.Songs.Remove(song.Id)
+                    playlistUpdated = True
                     output.AppendFormat("{0} - Song Removed", id)
                 Next
                 
-                Await _musicService.Playlist.UpdateAsync(playlist)
-                await ReplyAsync(output.ToString())
+                If playlistUpdated Then Await _musicService.Playlist.UpdateAsync(playlist)
+                Await ReplyAsync(output.ToString())
             End Function
             
             <Command("current"), Priority(1)>
