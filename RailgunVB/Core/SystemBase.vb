@@ -6,7 +6,7 @@ Namespace Core
         Inherits ModuleBase(Of SystemContext)
 
         Protected Overrides Sub AfterExecute(command As CommandInfo)
-            Context.Database = Nothing
+            Context.DisposeDatabase()
             MyBase.AfterExecute(command)
         End Sub
     End Class
