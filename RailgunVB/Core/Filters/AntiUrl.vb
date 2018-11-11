@@ -31,6 +31,7 @@ Namespace Core.Filters
             End If
             
             Dim self As IGuildUser = Await tc.Guild.GetCurrentUserAsync()
+            Dim user As IUser = message.Author
             
             If message.Author.Id = self.Id 
                 Return Nothing
@@ -40,7 +41,6 @@ Namespace Core.Filters
                 Return Nothing
             End If
             
-            Dim user As IGuildUser = Await tc.Guild.GetUserAsync(message.Author.Id)
             Dim content As String = message.Content.ToLower()
             Dim output As New StringBuilder
             
