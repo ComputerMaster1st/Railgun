@@ -47,24 +47,24 @@ Namespace Core.Managers
             End Try
         End Function
         
-        Private Async Function ReceiveMessageAsync(sMessage As SocketMessage) As Task Handles _client.MessageReceived
+        Private Function ReceiveMessageAsync(sMessage As SocketMessage) As Task Handles _client.MessageReceived
             If sMessage Is Nothing OrElse TypeOf sMessage IsNot SocketUserMessage OrElse 
                 TypeOf sMessage.Channel IsNot SocketGuildChannel
-                Return
+                Return Task.CompletedTask
             End If
             
-            Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(sMessage)))
+            Return Task.Run(Async Sub() Await ProcessMessageAsync(sMessage))
         End Function
         
-        Private Async Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
+        Private Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
                                                   newMessage As SocketMessage, channel As ISocketMessageChannel
                                                  ) As Task Handles _client.MessageUpdated
             If newMessage Is Nothing OrElse TypeOf newMessage IsNot SocketUserMessage OrElse 
                TypeOf newMessage.Channel IsNot SocketGuildChannel
-                Return
+                Return Task.CompletedTask
             End If
             
-            Await Task.Run(New Action(Async Sub() Await ProcessMessageAsync(newMessage)))
+            Return Task.Run(Async Sub() Await ProcessMessageAsync(newMessage))
         End Function
         
         Private Async Function ProcessMessageAsync(sMessage As SocketMessage) As Task
@@ -78,7 +78,7 @@ Namespace Core.Managers
                 
                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 If filterMsg IsNot Nothing
-                    Await Task.Run(New Action(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg)))
+                    Await Task.Run(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg))
                     Return
                 End If
                 
