@@ -53,7 +53,7 @@ Namespace Core.Managers
                 Return Task.CompletedTask
             End If
             
-            Return Task.Run(Async Sub() Await ProcessMessageAsync(sMessage))
+            Return Task.Run(New Action(Async Sub() Await ProcessMessageAsync(sMessage)))
         End Function
         
         Private Function UpdateMessageAsync(oldMessage As Cacheable(Of IMessage, ULong), 
@@ -64,7 +64,7 @@ Namespace Core.Managers
                 Return Task.CompletedTask
             End If
             
-            Return Task.Run(Async Sub() Await ProcessMessageAsync(newMessage))
+            Return Task.Run(New Action(Async Sub() Await ProcessMessageAsync(newMessage)))
         End Function
         
         Private Async Function ProcessMessageAsync(sMessage As SocketMessage) As Task
@@ -78,7 +78,7 @@ Namespace Core.Managers
                 
                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
                 If filterMsg IsNot Nothing
-                    Await Task.Run(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg))
+                    Await Task.Run(New Action(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg)))
                     Return
                 End If
                 
