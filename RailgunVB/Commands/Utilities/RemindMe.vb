@@ -77,7 +77,7 @@ Namespace Commands.Utilities
                 Return
             End If
             
-            Dim data As TimerRemindMe = Await Context.Database.TimerRemindMes.CreateAsync()
+            Dim data As TimerRemindMe = Await Context.Database.TimerRemindMes.CreateTimerAsync()
             
             data.GuildId = Context.Guild.Id
             data.TextChannelId = Context.Channel.Id
