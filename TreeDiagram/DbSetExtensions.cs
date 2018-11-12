@@ -8,7 +8,7 @@ namespace TreeDiagram
     public static class DbSetExtensions
     {
         public static async Task<TEntity> CreateTimerAsync<TEntity>(this DbSet<TEntity> set) 
-            where TEntity : class, ITimerModel 
+            where TEntity : class, ITreeModel 
         {
             var data = (TEntity)Activator.CreateInstance(typeof(TEntity));
             await set.AddAsync(data);
