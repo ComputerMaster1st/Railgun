@@ -41,7 +41,7 @@ Namespace Commands.Server
             If data.WarnLimit < 1
                 await ReplyAsync("User Warnings are currently disabled. You can enable it by changing the warning limit.")
                 Return
-            ElseIf (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+            ElseIf Not (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
                 Await ReplyAsync($"Unable to warn {user.Username} as my role isn't high enough to auto-ban the user.")
                 Return
             ElseIf userWarnings Is Nothing OrElse userWarnings.Count < data.WarnLimit

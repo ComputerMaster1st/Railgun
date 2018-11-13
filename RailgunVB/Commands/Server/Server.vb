@@ -63,7 +63,7 @@ Namespace Commands.Server
         <Command("kick"), UserPerms(GuildPermission.KickMembers), BotPerms(GuildPermission.KickMembers)>
         Public Async Function KickAsync(user As IGuildUser, 
                                         <Remainder> Optional reason As String = "No Reason Specified") As Task
-            If (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+            If Not (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
                 Await ReplyAsync($"Unable to kick {user.Username} as my role isn't high enough.")
                 Return
             End If
@@ -84,7 +84,7 @@ Namespace Commands.Server
                                        <Remainder> Optional reason As String = "No Reason Specified") As Task
             Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
-            If (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
+            If Not (Await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user))
                 Await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.")
                 Return
             End If
