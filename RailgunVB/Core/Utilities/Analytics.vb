@@ -30,7 +30,7 @@ Namespace Core.Utilities
             Return Task.CompletedTask
         End Function
         
-        Private Function MessageReceived(oldMessage As Cacheable(Of IMessage, ULong), 
+        Private Function MessageUpdated(oldMessage As Cacheable(Of IMessage, ULong), 
                                          newMessage As SocketMessage,  channel As ISocketMessageChannel
                                         ) As Task Handles _client.MessageUpdated
             _UpdatedMessages += 1
@@ -46,7 +46,7 @@ Namespace Core.Utilities
             Dim output As New StringBuilder
             
             If UsedCommands.ContainsKey(cmdString) Then 
-                UsedCommands(cmdString) += 1
+                UsedCommands.Item(cmdString) += 1
             Else 
                 UsedCommands.Add(cmdString, 1)
             End If
