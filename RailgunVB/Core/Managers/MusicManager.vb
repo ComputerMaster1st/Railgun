@@ -31,6 +31,7 @@ Namespace Core.Managers
                 Dim db As TreeDiagramContext = scope.ServiceProvider.GetService(Of TreeDiagramContext)
                 Dim data As ServerMusic = Await db.ServerMusics.GetOrCreateAsync(tc.GuildId)
                 playlist = Await _commandUtils.GetPlaylistAsync(data)
+                Await db.SaveChangesAsync()
             End Using
             
             Dim response As IUserMessage

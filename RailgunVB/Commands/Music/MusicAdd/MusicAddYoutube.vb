@@ -45,6 +45,8 @@ Namespace Commands.Music
                     Dim data As ServerMusic = Await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id)
                     Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
                     
+                    Await Context.Database.SaveChangesAsync()
+                    
                     Dim reporter As New Progress(Of SongProcessStatus)(
                         Async Sub(status) Await _musicManager.YoutubePlaylistStatusUpdatedAsync(
                             Context.Channel, status, data))
