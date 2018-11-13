@@ -60,7 +60,7 @@ Namespace Core.Utilities
                    role.Position > selfRolePosition Then selfRolePosition = role.Position
             Next
             
-            For Each roleId As ULong In self.RoleIds
+            For Each roleId As ULong In user.RoleIds
                 Dim role As IRole = Guild.GetRole(roleId)
                 If role.Position > userRolePosition Then userRolePosition = role.Position
             Next
