@@ -27,7 +27,8 @@ Namespace Commands.Music
             <Command>
             Public Async Function SkipAsync As Task
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+                Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
+                Dim player As Player = container.Player
                 
                 If data Is Nothing OrElse player Is Nothing
                     await ReplyAsync("Can not skip current song because I am not in voice channel.")
@@ -58,7 +59,8 @@ Namespace Commands.Music
             <Command("force"), UserPerms(GuildPermission.ManageGuild)>
             Public Async Function ForceAsync() As Task
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+                Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
+                Dim player As Player = container.Player
                 
                 If data Is Nothing OrElse Not (data.VoteSkipEnabled)
                     await ReplyAsync("This command is not available due to Music Vote-Skip being disabled.")
