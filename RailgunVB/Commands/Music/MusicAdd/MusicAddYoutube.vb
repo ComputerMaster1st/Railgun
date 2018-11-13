@@ -3,7 +3,6 @@ Imports System.Threading
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
-Imports Microsoft.Extensions.DependencyInjection
 Imports RailgunVB.Core
 Imports RailgunVB.Core.Managers
 Imports RailgunVB.Core.Preconditions
