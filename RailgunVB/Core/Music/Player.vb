@@ -100,10 +100,6 @@ Namespace Core.Music
         End Function
         
         Private Async Function QueueSongAsync() As Task(Of ISong)
-            Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
-            
-            If playlist Is Nothing OrElse playlist.Songs.Count < 1 Then Return Nothing
-            
             Dim request As ISong = GetFirstSongRequest()
             
             If request IsNot Nothing
@@ -115,35 +111,44 @@ Namespace Core.Music
             End If
             
             Dim rand As New Random()
-            Dim playlistModified = False
+            Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
             Dim remainingSongs As New List(Of SongId)(playlist.Songs)
+            Dim retry = 10
+            
+            If playlist Is Nothing OrElse playlist.Songs.Count < 1 
+                Return Nothing
+            End If
             
             For Each id As SongId In _playedSongs
-                If remainingSongs.Contains(id) Then remainingSongs.Remove(id)
+                If remainingSongs.Contains(id)
+                    remainingSongs.Remove(id)
+                End If
             Next
 
-            While True
-                If remainingSongs.Count < 1 
+            While request Is Nothing
+                If remainingSongs.Count < 1 OrElse retry < 1
                     _playedSongs.Clear()
                     remainingSongs = New List(Of SongId)(playlist.Songs)
                 End If
                 
                 Try
                     Dim songId As SongId = remainingSongs(rand.Next(0, remainingSongs.Count))
-                    
-                    If Await _musicService.TryGetSongAsync(songId, Sub(song) request = song)
-                        _playedSongs.Add(songId)
-                        Exit While
+
+                    If Not Await _musicService.TryGetSongAsync(songId, Sub(song) request = song) Then
+                        playlist.Songs.Remove(songId)
+                        remainingSongs.Remove(songId)
+                        
+                        Await _musicService.Playlist.UpdateAsync(playlist)
+                        
+                        Continue While
                     End If
                     
-                    playlist.Songs.Remove(songId)
-                    remainingSongs.Remove(songId)
-                    playlistModified = True
+                    _playedSongs.Add(songId)
                 Catch
                 End Try
+                
+                retry -= 1
             End While
-            
-            If playlistModified Then Await _musicService.Playlist.UpdateAsync(playlist)
             
             Return request
         End Function
