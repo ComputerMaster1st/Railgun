@@ -113,9 +113,8 @@ Namespace Core.Music
             Dim rand As New Random()
             Dim playlist As Playlist = Await _musicService.Playlist.GetPlaylistAsync(_playlistId)
             Dim remainingSongs As New List(Of SongId)(playlist.Songs)
-            Dim retry = 10
             
-            If playlist Is Nothing OrElse playlist.Songs.Count < 1 
+            If playlist Is Nothing
                 Return Nothing
             End If
             
@@ -126,7 +125,11 @@ Namespace Core.Music
             Next
 
             While request Is Nothing
-                If remainingSongs.Count < 1 OrElse retry < 1
+                If remainingSongs.Count < 1
+                    If playlist.Songs.Count < 1
+                        Return Nothing
+                    End If
+                    
                     _playedSongs.Clear()
                     remainingSongs = New List(Of SongId)(playlist.Songs)
                 End If
@@ -146,8 +149,6 @@ Namespace Core.Music
                     _playedSongs.Add(songId)
                 Catch
                 End Try
-                
-                retry -= 1
             End While
             
             Return request
@@ -207,9 +208,13 @@ Namespace Core.Music
                         
                         _Status = PlayerStatus.Queuing
                         
-                        If Requests.Count < 1 Then AddSongRequest(Await QueueSongAsync())
+                        Dim song As ISong = Await QueueSongAsync()
                         
-                        Dim song As ISong = GetFirstSongRequest()
+                        If song Is Nothing
+                            _autoDisconnected = True
+                            Exit While
+                        End If
+                        
                         PlayingEvent?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id.ToString(), song.Metadata))
                         
                         Using databaseStream As Stream = Await song.GetMusicStreamAsync(), 
