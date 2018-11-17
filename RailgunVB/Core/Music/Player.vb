@@ -215,6 +215,7 @@ Namespace Core.Music
                             Exit While
                         End If
                         
+                        AddSongRequest(song)
                         PlayingEvent?.Invoke(Me, New PlayerCurrentlyPlayingEventArgs(_guildId, song.Id.ToString(), song.Metadata))
                         
                         Using databaseStream As Stream = Await song.GetMusicStreamAsync(), 
