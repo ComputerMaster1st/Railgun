@@ -28,17 +28,17 @@ Namespace Commands.Music
             Public Async Function SkipAsync As Task
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
-                Dim player As Player = container.Player
                 
-                If data Is Nothing OrElse player Is Nothing
+                If data Is Nothing OrElse container Is Nothing
                     await ReplyAsync("Can not skip current song because I am not in voice channel.")
                     Return
                 ElseIf Not (data.VoteSkipEnabled)
                     await ReplyAsync("Skipping music now...")
-                    player.CancelMusic()
+                    container.Player.CancelMusic()
                     Return
                 End If
                 
+                Dim player As Player = container.Player
                 Dim userCount As Integer = await player.GetUserCountAsync()
                 Dim voteSkipResult As Integer = player.VoteSkip(Context.User.Id)
                 Dim percent As Integer = (player.VoteSkipped.Count / userCount) * 100
@@ -60,18 +60,17 @@ Namespace Commands.Music
             Public Async Function ForceAsync() As Task
                 Dim data As ServerMusic = Await Context.Database.ServerMusics.GetAsync(Context.Guild.Id)
                 Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
-                Dim player As Player = container.Player
                 
                 If data Is Nothing OrElse Not (data.VoteSkipEnabled)
                     await ReplyAsync("This command is not available due to Music Vote-Skip being disabled.")
                     Return
-                ElseIf player Is Nothing
+                ElseIf container Is Nothing
                     await ReplyAsync("Can not skip current song because I am not in voice channel.")
                     Return
                 End If
                 
                 await ReplyAsync("Force-Skipping music now...")
-                player.CancelMusic()
+                container.Player.CancelMusic()
             End Function
 
         End Class

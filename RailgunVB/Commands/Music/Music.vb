@@ -106,12 +106,14 @@ Namespace Commands.Music
         
         <Command("repeat")>
         Public Async Function RepeatAsync(Optional count As Integer = 1) As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+            Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
             
-            If player Is Nothing
+            If container Is Nothing
                 await ReplyAsync("I'm not playing anything at this time.")
                 Return
             End If
+            
+            Dim player As Player = container.Player
             
             player.RepeatSong = count
             await ReplyAsync("Repeating song after finishing.")
@@ -148,10 +150,10 @@ Namespace Commands.Music
         
         <Command("ping")>
         Public Async Function PingAsync() As Task
-            Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+            Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
             
-            Await ReplyAsync(If(player Is Nothing, "Can not check ping due to not being in voice channel.", 
-                                $"Ping to Discord Voice: {Format.Bold(player.Latency.ToString())}ms"))
+            Await ReplyAsync(If(container Is Nothing, "Can not check ping due to not being in voice channel.", 
+                                $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms"))
         End Function
         
         <Command("queue")>

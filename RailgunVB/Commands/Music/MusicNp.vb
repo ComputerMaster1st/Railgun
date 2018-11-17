@@ -25,14 +25,14 @@ Namespace Commands.Music
             
             <Command>
             Public Async Function NowPlayingAsync() As Task
-                Dim player As Player = _playerManager.GetPlayer(Context.Guild.Id).Player
+                Dim container As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
             
-                If player Is Nothing
+                If container Is Nothing
                     await ReplyAsync("I'm not playing anything at this time.")
                     Return
                 End If
             
-                Dim meta As SongMetadata = player.GetFirstSongRequest().Metadata
+                Dim meta As SongMetadata = container.Player.GetFirstSongRequest().Metadata
                 Dim output As New StringBuilder
             
                 output.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine() _
