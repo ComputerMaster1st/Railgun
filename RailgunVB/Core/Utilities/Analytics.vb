@@ -37,18 +37,20 @@ Namespace Core.Utilities
             Return Task.CompletedTask
         End Function
         
-        Private Async Function ExecutedCommandAsync(command As CommandInfo,  context As ICommandContext, 
+        Private Async Function ExecutedCommandAsync(command As [Optional](Of CommandInfo),  context As ICommandContext, 
                                                     result As IResult) As Task Handles _commandService.CommandExecuted
             If Not (result.IsSuccess) Then Return
             
-            Dim cmdString As String = command.Aliases(0)
+            Dim cmdString As String = If(command.IsSpecified, command.Value.Aliases(0), "N/A")
             Dim guild As IGuild = context.Guild
             Dim output As New StringBuilder
             
-            If UsedCommands.ContainsKey(cmdString) Then 
-                UsedCommands.Item(cmdString) += 1
-            Else 
-                UsedCommands.Add(cmdString, 1)
+            If Not (cmdString = "N/A")
+                If UsedCommands.ContainsKey(cmdString) Then 
+                    UsedCommands.Item(cmdString) += 1
+                Else 
+                    UsedCommands.Add(cmdString, 1)
+                End If
             End If
             
             output.AppendFormat("<{0} <{1}>>", guild.Name, guild.Id).AppendLine() _
