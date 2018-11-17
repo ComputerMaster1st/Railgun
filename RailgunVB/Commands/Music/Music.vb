@@ -15,7 +15,7 @@ Imports TreeDiagram.Models.Server
 
 Namespace Commands.Music
     
-    <Group("music"), RoleLock(ModuleType.Music)>
+    <Group("music"), [Alias]("m"), RoleLock(ModuleType.Music)>
     Partial Public Class Music
         Inherits SystemBase
         
