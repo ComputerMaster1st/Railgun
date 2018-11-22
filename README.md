@@ -5,9 +5,9 @@
 Railgun is a multi-purpose Discord bot who is capable of performing various tasks. She is powered by .NETCore v2.1.0, Discord.Net Library & coded using C# & VB.Net.
 
 ## Can I download Railgun's Source Code?
-It is best to not download the source code. The reason being is due to Railgun utilizing a library called AudioChord which has been developed by myself & mrspits4ever and requires additional parts which will not be mentioned.
+It is best to not download the source code. The reason being is due to Railgun utilizing a library called AudioChord which has been developed by myself & mrspits4ever and requires additional parts such as FFMPEG & MongoDB as this library manages the interaction with the database.
 
-You may review the code and use different pieces, however please do not straight up copy it.
+You may review the code and use different pieces, however please do not straight up copy it. For further info, please contact us via [CM1's Bot Development Studio](https://discord.gg/Czw5ffx).
 
 ## How to Invite Railgun
 You may invite Railgun via [This OAuth2 Link](https://discordapp.com/api/oauth2/authorize?client_id=261878358625746964&scope=bot).
