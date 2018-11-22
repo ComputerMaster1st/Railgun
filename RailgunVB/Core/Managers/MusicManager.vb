@@ -135,18 +135,26 @@ Namespace Core.Managers
                 Case SongStatus.Processed
                     Dim output As SongProcessResult = status
                     Dim song As ISong = Await output.Result
-                    Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
-                    
-                    playlist.Songs.Add(song.Id)
-                    Await _musicService.Playlist.UpdateAsync(playlist)
-                    Await tc.SendMessageAsync(
-                        $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
-                    
                     Dim logOutput As New StringBuilder
                     
                     logOutput.AppendFormat("<{0} ({1})> Processed Song!", tc.Guild.Name, tc.GuildId).AppendLine() _ 
                         .AppendFormat("{0} <{1}> - {2}", song.Id.ToString(), song.Metadata.Length.ToString(), 
                                       song.Metadata.Name)
+                    
+                    Try
+                        Dim playlist As Playlist = Await _commandUtils.GetPlaylistAsync(data)
+                        
+                        playlist.Songs.Add(song.Id)
+                        Await _musicService.Playlist.UpdateAsync(playlist)
+                        Await tc.SendMessageAsync(
+                            $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}")
+                    Catch ex As ArgumentException
+                        _log.LogToConsoleAsync(new LogMessage(
+                            LogSeverity.Warning, "Music Manager", "Missing Playlist", ex)).GetAwaiter()
+                    Catch ex As Exception
+                        _log.LogToConsoleAsync(new LogMessage(
+                            LogSeverity.Warning, "Music Manager", "Missing TC", ex)).GetAwaiter()
+                    End Try
                     
                     Await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord)
                     Exit Select
