@@ -9,12 +9,11 @@
 
     <ItemGroup>
       <PackageReference Include="CSharpScriptSerializer" Version="1.5.0" />
+      <PackageReference Include="Discord.Net" Version="2.0.0-beta2-01026" />
       <PackageReference Include="Google.Apis.YouTube.v3" Version="1.36.1.1226" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj" />
-      <ProjectReference Include="..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj" />
       <ProjectReference Include="..\Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj" />
       <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
     </ItemGroup>

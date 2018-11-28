@@ -1,7 +1,6 @@
 Imports AudioChord
 Imports Discord
 Imports Discord.Commands
-Imports Microsoft.Extensions.DependencyInjection
 Imports MongoDB.Bson
 Imports RailgunVB.Core
 Imports RailgunVB.Core.Configuration

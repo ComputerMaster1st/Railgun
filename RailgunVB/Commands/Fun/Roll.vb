@@ -18,7 +18,7 @@ Namespace Commands.Fun
         <Command>
         Public Async Function RollAsync(Optional num1 As Integer = 0, Optional num2 As Integer = 100) As Task
             Dim rand As New Random
-            Dim rng = 0
+            Dim rng As Integer
             
             If num1 > num2
                 rng = rand.Next(num2, num1)

@@ -1,6 +1,3 @@
-[submodule "Discord.Net"]
-	path = Discord.Net
-	url = https://github.com/ComputerMaster1st/Discord.Net.git
 [submodule "Shared.Music"]
 	path = Shared.Music
 	url = https://github.com/ComputerMaster1st/Shared.Music.git

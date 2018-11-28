@@ -19,7 +19,7 @@ Namespace Core.Managers
         Private ReadOnly _services As IServiceProvider
         Private ReadOnly _musicService As MusicService
 
-        Public ReadOnly Property PlayerContainers As List(Of PlayerContainer) =  New List(Of PlayerContainer)
+        Public ReadOnly Property PlayerContainers As New List(Of PlayerContainer)
         
         Public Sub New(services As IServiceProvider)
             _log = services.GetService(Of Log)
