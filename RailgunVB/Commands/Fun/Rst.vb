@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -107,12 +106,7 @@ Namespace Commands.Fun
                 Return
             End If
             
-            Dim filename As String = $"{Context.Guild.Id}_RST.txt"
-            
-            Await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename)
-            
-            File.Delete(filename)
+            Await SendStringAsFileAsync(Context.Channel, "RST.txt", output.ToString())
         End Function
         
         <Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)>

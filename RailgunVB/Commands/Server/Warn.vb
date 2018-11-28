@@ -68,7 +68,7 @@ Namespace Commands.Server
             End Try
         End Function
         
-        <Command("list"), UserPerms(GuildPermission.BanMembers)>
+        <Command("list"), UserPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function ListAsync() As Task
             Dim data As ServerWarning = Await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id)
             
@@ -107,6 +107,11 @@ Namespace Commands.Server
                 Next
                 
                 output.AppendFormat("Detected {0} unknown user(s)! These user(s) have been automatically removed from the list.", UnknownUsers.Count).AppendLine()
+            End If
+            
+            If output.Length > 1950
+                Await SendStringAsFileAsync(Context.Channel, "Warnings.txt", output.ToString())
+                Return
             End If
             
             await ReplyAsync(output.ToString())

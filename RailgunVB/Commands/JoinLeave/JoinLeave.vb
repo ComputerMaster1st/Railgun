@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -111,11 +110,7 @@ Namespace Commands.JoinLeave
                 Return
             End If
             
-            Dim filename As String = $"{Context.Guild.Id}-JoinLeave Notifications.txt"
-            
-            await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename)
-            File.Delete(filename)
+            Await SendStringAsFileAsync(Context.Channel, "JoinLeave Notifications.txt", output.ToString())
         End Function
         
         <Command("reset")>

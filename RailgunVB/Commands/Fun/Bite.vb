@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -138,12 +137,8 @@ Namespace Commands.Fun
                 Return
             End If
             
-            Dim filename As String = $"{Context.Guild.Id} Bites.txt"
-            
-            await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename, 
+            Await SendStringAsFileAsync(Context.Channel, "Bites.txt", output.ToString(), 
                 $"List of {Format.Bold(data.Bites.Count.ToString())} Bite Sentences")
-            File.Delete(filename)
         End Function
         
         <Command("remove"), UserPerms(GuildPermission.ManageMessages)>

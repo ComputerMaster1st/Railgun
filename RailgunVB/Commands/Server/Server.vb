@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -136,10 +135,7 @@ Namespace Commands.Server
                 Return
             End If
             
-            Dim filename As String = $"{Context.Guild.Name}-Banlist.txt"
-            await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename, "Ban List")
-            File.Delete(filename)
+            Await SendStringAsFileAsync(Context.Channel, "Banlist.txt", output.ToString(), "Ban List")
         End Function
         
     End Class

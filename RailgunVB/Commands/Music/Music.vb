@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports AudioChord
 Imports Discord
@@ -96,12 +95,9 @@ Namespace Commands.Music
                 Await _musicService.Playlist.UpdateAsync(playlist)
             End If
             
-            Dim filename As String = ($"{Context.Guild.Name} Playlist.txt").Replace(" "c, "-"c).Trim("/"c)
-            
-            await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename, $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)")
+            Await SendStringAsFileAsync(Context.Channel, "Playlist.txt", output.ToString(), 
+                $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)")
             Await response.DeleteAsync()
-            File.Delete(filename)
         End Function
         
         <Command("repeat")>
@@ -140,12 +136,9 @@ Namespace Commands.Music
             
             output.AppendLine("End of Repository.")
             
-            Const filename = "MusicRepo.txt"
-            
-            await File.WriteAllTextAsync(filename, output.ToString())
-            await Context.Channel.SendFileAsync(filename, $"Music Repository ({repo.Count()} songs)")
+            Await SendStringAsFileAsync(Context.Channel, "MusicRepo.txt", output.ToString(), 
+                $"Music Repository ({repo.Count()} songs)", includeGuildName := False)
             Await response.DeleteAsync()
-            File.Delete(filename)
         End Function
         
         <Command("ping")>
@@ -156,7 +149,7 @@ Namespace Commands.Music
                                 $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms"))
         End Function
         
-        <Command("queue")>
+        <Command("queue"), BotPerms(ChannelPermission.AttachFiles)>
         Public Async Function QueueAsync() As Task
             Dim playerContainer As PlayerContainer = _playerManager.GetPlayer(Context.Guild.Id)
             
@@ -205,6 +198,12 @@ Namespace Commands.Music
                 output.AppendLine()
                 i += 1
             End While
+            
+            If output.Length > 1950
+                Await SendStringAsFileAsync(Context.Channel, "Queue.txt", output.ToString(), 
+                                                          $"Queued Music Requests ({player.Requests.Count})")
+                Return
+            End If
             
             await ReplyAsync(output.ToString())
         End Function

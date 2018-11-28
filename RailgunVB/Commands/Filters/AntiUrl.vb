@@ -1,4 +1,3 @@
-Imports System.IO
 Imports System.Text
 Imports Discord
 Imports Discord.Commands
@@ -158,11 +157,7 @@ Namespace Commands.Filters
             End If
             
             If output.Length > 1900
-                Dim filename As String = $"{Context.Guild.Id}-filter.txt"
-                
-                await File.WriteAllTextAsync(filename, output.ToString())
-                await Context.Channel.SendFileAsync(filename)
-                File.Delete(filename)
+                Await SendStringAsFileAsync(Context.Channel, "AntiUrl.txt", output.ToString())
             Else
                 await ReplyAsync(Format.Code(output.ToString()))
             End If
