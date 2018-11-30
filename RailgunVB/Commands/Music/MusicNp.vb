@@ -35,11 +35,12 @@ Namespace Commands.Music
                 Dim player As Player = container.Player
                 Dim meta As SongMetadata = player.GetFirstSongRequest().Metadata
                 Dim output As New StringBuilder
+                Dim currentTime As TimeSpan = DateTime.Now - player.SongStartedAt
             
                 output.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine() _
                     .AppendFormat("Url: {0} || Length: {1}/{2}", Format.Bold($"<{meta.Url}>"), 
-                                  Format.Bold((DateTime.Now - player.SongStartedAt).ToString()), 
-                                  Format.Bold(meta.Length.ToString()))
+                                  Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"), 
+                                  Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"))
             
                 await ReplyAsync(output.ToString())
             End Function
