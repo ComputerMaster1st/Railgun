@@ -177,8 +177,9 @@ Namespace Commands.Music
                 
                 Select i
                     Case 0
-                        output.AppendFormat("Now : {0} || Length : {1}", 
-                                            Format.Bold(meta.Name), 
+                        output.AppendFormat("Now : {0} || Length : {1}/{2}", 
+                                            Format.Bold(meta.Name),
+                                            Format.Bold((DateTime.Now - player.SongStartedAt).ToString()),
                                             Format.Bold(meta.Length.ToString())) _
                             .AppendLine()
                         Exit Select
