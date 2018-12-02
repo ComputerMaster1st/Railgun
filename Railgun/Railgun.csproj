@@ -2,7 +2,20 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+      <RootNamespace>Railgun</RootNamespace>
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <TieredCompilation>true</TieredCompilation>
   </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="CSharpScriptSerializer" Version="1.5.0" />
+      <PackageReference Include="Discord.Net" Version="2.0.0-beta2-01039" />
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.36.1.1226" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj" />
+      <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
+    </ItemGroup>
 
 </Project>
