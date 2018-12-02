@@ -9,9 +9,10 @@ It is best to not download the source code. The reason being is due to Railgun u
 
 You may review the code and use different pieces, however please do not straight up copy it. For further info, please contact us via [CM1's Bot Development Studio](https://discord.gg/Czw5ffx).
 
+@LewisTehMinerz is the first person to have ever successfully cloned Railgun after much effort.
+
 ## How to Invite Railgun
 You may invite Railgun via [This OAuth2 Link](https://discordapp.com/api/oauth2/authorize?client_id=261878358625746964&scope=bot).
 
 ## Contacting The Developer
 You may contact the developer of Railgun via [CM1's Bot Development Studio](https://discord.gg/Czw5ffx).
- 
