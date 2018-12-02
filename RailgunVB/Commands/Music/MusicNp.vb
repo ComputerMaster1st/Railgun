@@ -31,12 +31,16 @@ Namespace Commands.Music
                     await ReplyAsync("I'm not playing anything at this time.")
                     Return
                 End If
-            
-                Dim meta As SongMetadata = container.Player.GetFirstSongRequest().Metadata
+                
+                Dim player As Player = container.Player
+                Dim meta As SongMetadata = player.GetFirstSongRequest().Metadata
                 Dim output As New StringBuilder
+                Dim currentTime As TimeSpan = DateTime.Now - player.SongStartedAt
             
                 output.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine() _
-                    .AppendFormat("Url: {0} || Length: {1}", Format.Bold($"<{meta.Url}>"), Format.Bold(meta.Length.ToString()))
+                    .AppendFormat("Url: {0} || Length: {1}/{2}", Format.Bold($"<{meta.Url}>"), 
+                                  Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"), 
+                                  Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"))
             
                 await ReplyAsync(output.ToString())
             End Function

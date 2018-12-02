@@ -177,9 +177,12 @@ Namespace Commands.Music
                 
                 Select i
                     Case 0
-                        output.AppendFormat("Now : {0} || Length : {1}", 
-                                            Format.Bold(meta.Name), 
-                                            Format.Bold(meta.Length.ToString())) _
+                        Dim currentTime As TimeSpan = DateTime.Now - player.SongStartedAt
+                        
+                        output.AppendFormat("Now : {0} || Length : {1}/{2}", 
+                                            Format.Bold(meta.Name),
+                                            Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
+                                            Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}")) _
                             .AppendLine()
                         Exit Select
                     Case 1
