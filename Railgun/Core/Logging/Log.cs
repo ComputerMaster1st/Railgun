@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core.Configuration;
+using Railgun.Core.Utilities;
 
 namespace Railgun.Core.Logging
 {
@@ -48,9 +49,8 @@ namespace Railgun.Core.Logging
                 var pingMasterStr = pingMaster ? $"<@!{_config.DiscordConfig.MasterAdminId}>": string.Empty;
 
                 if (output.Length > 1950) {
-                    await tc.SendFileAsync(new MemoryStream(Encoding.UTF8.GetBytes(output.ToString())),
-                        "UnobservedTask.log",
-                        $"Error! Refer to file {pingMasterStr}!");
+                    await CommandUtils.SendStringAsFileAsync(tc, "UnobservedTask.log", $"Error! Refer to file {pingMasterStr}!", includeGuildName:false);
+                    
                     return;
                 }
 
