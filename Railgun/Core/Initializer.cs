@@ -60,6 +60,7 @@ namespace Railgun.Core
                     Password = mongoConfig.Password,
                     EnableResync = true
                 }))
+                .AddSingleton<Analytics>()
                 .BuildServiceProvider();
 //                 .AddSingleton(Of Analytics) _
 //                 .AddTransient(Of CommandUtils) _
@@ -79,7 +80,7 @@ namespace Railgun.Core
         }
 
         public async Task InitializeCommandsAsync() {
-            
+            _services.GetService<Analytics>();
 //             _services.GetService(Of Analytics)()
 //             _services.GetService(Of Events)()
 //             _services.GetService(Of CommandManager)()
