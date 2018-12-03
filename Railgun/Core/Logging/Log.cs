@@ -20,6 +20,8 @@ namespace Railgun.Core.Logging
             _client = client;
 
             if (!Directory.Exists(LogDirectory)) Directory.CreateDirectory(LogDirectory);
+
+            _client.Log += LogToConsoleAsync;
         }
 
         private async Task WriteToLogFileAsync(string entry) {
