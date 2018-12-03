@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Api;
+using Railgun.Core.Api.Youtube;
 using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
 using Railgun.Core.Managers;
@@ -68,13 +69,13 @@ namespace Railgun.Core
                 .AddTransient<RandomCat>()
                 .AddSingleton<CommandManager>()
                 .AddSingleton<FilterManager>()
+                .AddSingleton<YoutubeSearch>()
                 .BuildServiceProvider();
 //                 .AddSingleton(Of MusicManager) _
 //                 .AddSingleton(Of PlayerManager) _
 //                 .AddSingleton(Of TimerManager) _
 //                 .AddSingleton(Of AntiCaps) _
-//                 .AddSingleton(Of AntiUrl) _
-//                 .AddTransient(Of YoutubeSearch) 
+//                 .AddSingleton(Of AntiUrl)
             
             TaskScheduler.UnobservedTaskException += async (sender, e) => await UnobservedTaskAsync(e);
         }
