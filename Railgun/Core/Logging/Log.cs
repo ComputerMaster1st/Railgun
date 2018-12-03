@@ -48,9 +48,9 @@ namespace Railgun.Core.Logging
                 var pingMasterStr = pingMaster ? $"<@!{_config.DiscordConfig.MasterAdminId}>": string.Empty;
 
                 if (output.Length > 1950) {
-                    await tc.SendFileAsync(
-                        new MemoryStream(Encoding.UTF8.GetBytes(output.ToString())),
-                        $"Error! Refer to file, {pingMasterStr}!");
+                    await tc.SendFileAsync(new MemoryStream(Encoding.UTF8.GetBytes(output.ToString())),
+                        "UnobservedTask.log",
+                        $"Error! Refer to file {pingMasterStr}!");
                     return;
                 }
 
