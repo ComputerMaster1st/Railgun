@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Railgun.Core;
 using Railgun.Core.Configuration;
 
 namespace Railgun {
@@ -14,19 +15,18 @@ namespace Railgun {
         private async Task StartAsync() {
             Console.WriteLine("Starting TreeDiagram Operating System...");
 
-            var masterConfig = MasterConfig.LoadAsync();
+            var masterConfig = await MasterConfig.LoadAsync();
             var client = new DiscordShardedClient(new DiscordSocketConfig() {
                 LogLevel = LogSeverity.Info,
                 DefaultRetryMode = RetryMode.AlwaysRetry
             });
-            
+            var initializer = new Initializer(masterConfig, client);
 
-        //     _sysManager = New Initializer(_config, _client)
-        // Await _sysManager.InitializeCommandsAsync()
-        
-        // Await _client.LoginAsync(TokenType.Bot, _config.DiscordConfig.Token)
-        // Await _client.StartAsync()
-        // Await Task.Delay(-1)
+            await initializer.InitializeCommandsAsync();
+            await client.LoginAsync(TokenType.Bot, masterConfig.DiscordConfig.Token);
+            await client.StartAsync();
+
+            await Task.Delay(-1);
         }
     }
 }
