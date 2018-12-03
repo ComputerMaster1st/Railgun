@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Api;
 using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
+using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
@@ -65,8 +66,8 @@ namespace Railgun.Core
                 .AddTransient<CommandUtils>()
                 .AddSingleton<Events>()
                 .AddTransient<RandomCat>()
+                .AddSingleton<CommandManager>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of CommandManager) _
 //                 .AddSingleton(Of FilterManager) _
 //                 .AddSingleton(Of MusicManager) _
 //                 .AddSingleton(Of PlayerManager) _
@@ -81,7 +82,7 @@ namespace Railgun.Core
         public async Task InitializeCommandsAsync() {
             _services.GetService<Analytics>();
             _services.GetService<Events>();
-//             _services.GetService(Of CommandManager)()
+            _services.GetService<CommandManager>();
 //             _services.GetService(Of AntiCaps)()
 //             _services.GetService(Of AntiUrl)()
 
