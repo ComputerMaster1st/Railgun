@@ -6,6 +6,6 @@ namespace Railgun.Core.Filters
 {
     public interface IMessageFilter
     {
-        Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext content);
+        Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext context);
     }
 }

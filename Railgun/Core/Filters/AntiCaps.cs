@@ -11,11 +11,11 @@ namespace Railgun.Core.Filters
     {
         public AntiCaps(FilterManager manager) => manager.RegisterFilter(this);
 
-        public async Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext content) {
+        public async Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext context) {
             if (string.IsNullOrWhiteSpace(message.Content)) return null;
 
             var tc = (ITextChannel)message.Channel;
-            var data = await content.FilterCapses.GetAsync(tc.GuildId);
+            var data = await context.FilterCapses.GetAsync(tc.GuildId);
 
             if ((data == null || !data.IsEnabled) || 
                 (!data.IncludeBots && (message.Author.IsBot | message.Author.IsWebhook)) || 

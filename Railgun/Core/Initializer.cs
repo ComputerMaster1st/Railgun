@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Api;
 using Railgun.Core.Api.Youtube;
 using Railgun.Core.Configuration;
+using Railgun.Core.Filters;
 using Railgun.Core.Logging;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
@@ -69,13 +70,13 @@ namespace Railgun.Core
                 .AddTransient<RandomCat>()
                 .AddSingleton<CommandManager>()
                 .AddSingleton<FilterManager>()
+                .AddSingleton<AntiCaps>()
+                .AddSingleton<AntiUrl>()
                 .AddSingleton<YoutubeSearch>()
                 .BuildServiceProvider();
 //                 .AddSingleton(Of MusicManager) _
 //                 .AddSingleton(Of PlayerManager) _
-//                 .AddSingleton(Of TimerManager) _
-//                 .AddSingleton(Of AntiCaps) _
-//                 .AddSingleton(Of AntiUrl)
+//                 .AddSingleton(Of TimerManager)
             
             TaskScheduler.UnobservedTaskException += async (sender, e) => await UnobservedTaskAsync(e);
         }
@@ -84,8 +85,8 @@ namespace Railgun.Core
             _services.GetService<Analytics>();
             _services.GetService<Events>();
             _services.GetService<CommandManager>();
-//             _services.GetService(Of AntiCaps)()
-//             _services.GetService(Of AntiUrl)()
+            _services.GetService<AntiCaps>();
+            _services.GetService<AntiUrl>();
 
             await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", "TreeDiagram Ready!"));
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
