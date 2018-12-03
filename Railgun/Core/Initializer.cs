@@ -61,9 +61,8 @@ namespace Railgun.Core
                     EnableResync = true
                 }))
                 .AddSingleton<Analytics>()
+                .AddTransient<CommandUtils>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of Analytics) _
-//                 .AddTransient(Of CommandUtils) _
 //                 .AddSingleton(Of Events) _
 //                 .AddTransient(Of RandomCat) _
 //                 .AddSingleton(Of CommandManager) _
@@ -81,7 +80,6 @@ namespace Railgun.Core
 
         public async Task InitializeCommandsAsync() {
             _services.GetService<Analytics>();
-//             _services.GetService(Of Analytics)()
 //             _services.GetService(Of Events)()
 //             _services.GetService(Of CommandManager)()
 //             _services.GetService(Of AntiCaps)()
