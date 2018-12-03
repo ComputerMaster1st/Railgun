@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Railgun.Core
+namespace Railgun.Core.Logging
 {
     [JsonObject(MemberSerialization.Fields)]
     public class BotLogChannels
