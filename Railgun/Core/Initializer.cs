@@ -62,8 +62,8 @@ namespace Railgun.Core
                 }))
                 .AddSingleton<Analytics>()
                 .AddTransient<CommandUtils>()
+                .AddSingleton<Events>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of Events) _
 //                 .AddTransient(Of RandomCat) _
 //                 .AddSingleton(Of CommandManager) _
 //                 .AddSingleton(Of FilterManager) _
@@ -72,15 +72,14 @@ namespace Railgun.Core
 //                 .AddSingleton(Of TimerManager) _
 //                 .AddSingleton(Of AntiCaps) _
 //                 .AddSingleton(Of AntiUrl) _
-//                 .AddTransient(Of YoutubeSearch) _
-//                 .BuildServiceProvider()
+//                 .AddTransient(Of YoutubeSearch) 
             
             TaskScheduler.UnobservedTaskException += async (sender, e) => await UnobservedTaskAsync(e);
         }
 
         public async Task InitializeCommandsAsync() {
             _services.GetService<Analytics>();
-//             _services.GetService(Of Events)()
+            _services.GetService<Events>();
 //             _services.GetService(Of CommandManager)()
 //             _services.GetService(Of AntiCaps)()
 //             _services.GetService(Of AntiUrl)()
