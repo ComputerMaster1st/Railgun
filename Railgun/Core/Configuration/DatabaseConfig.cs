@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Core.Configuration
+namespace Railgun.Core.Configuration
 {
     [JsonObject(MemberSerialization.Fields)]
     public class DatabaseConfig

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-      <RootNamespace>Railgun</RootNamespace>
       <TargetFramework>netcoreapp2.1</TargetFramework>
       <TieredCompilation>true</TieredCompilation>
   </PropertyGroup>

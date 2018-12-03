@@ -8,33 +8,45 @@ namespace Railgun.Core.Configuration
     {
         public string Token { get; }
         public string Prefix { get; set; }
-        public ulong MasterAdminId { get; set; } = 0;
+        public ulong MasterAdminId { get; }
         public ulong MasterGuildId { get; set; } = 0;
         public List<ulong> OtherAdmins { get; } = new List<ulong>();
-        // public BotLogChannels BotLogChannels { get; } = new BotLogChannels();
+        public BotLogChannels BotLogChannels { get; } = new BotLogChannels();
+
+        public DiscordConfig(string token, string prefix, ulong masterAdminId) {
+            Token = token;
+            Prefix = prefix;
+            MasterAdminId = masterAdminId;
+        }
+
+        [JsonConstructor]
+        private DiscordConfig(string token, string prefix, ulong masterAdminId, ulong masterGuildId, BotLogChannels botLogChannels, List<ulong> otherAdmins) {
+            Token = token;
+            Prefix = prefix;
+            MasterAdminId = masterAdminId;
+            MasterGuildId = masterGuildId;
+            BotLogChannels = botLogChannels;
+            OtherAdmins = otherAdmins;
+        }
+
+        public void AssignMasterGuild(ulong guildId)
+            => MasterGuildId = guildId;
+        
+        public bool AssignAdmin(ulong userId) {
+            if (OtherAdmins.Contains(userId)) return false;
+
+            OtherAdmins.Add(userId);
+            return true;
+        }
+
+        public bool RemoveAdmin(ulong userId) {
+            if (!OtherAdmins.Contains(userId)) return false;
+
+            OtherAdmins.Remove(userId);
+            return true;
+        }
     }
 }
-        
-//         Public Sub New(token As String, prefix As String, masterAdminId As ULong)
-//             Me.Token = token
-//             Me.Prefix = prefix
-//             Me.MasterAdminId = masterAdminId
-//         End Sub
-        
-//         <JsonConstructor>
-//         Private Sub New(token As String, prefix As String, masterAdminId As ULong, masterGuildId As ULong, 
-//                         botLogChannels As BotLogChannels, otherAdmins As List(Of ULong))
-//             Me.Token = token
-//             Me.Prefix = prefix
-//             Me.MasterAdminId = masterAdminId
-//             Me.MasterGuildId = masterGuildId
-//             Me.BotLogChannels = botLogChannels
-//             Me.OtherAdmins = otherAdmins
-//         End Sub
-        
-//         Public Sub AssignMasterGuild(guildId As ULong)
-//             _MasterGuildId = guildId
-//         End Sub
         
 //         Public Sub AssignBotLogChannel(channelId As ULong, botLogType As BotLogType)
 //             Select botLogType
@@ -64,20 +76,6 @@ namespace Railgun.Core.Configuration
 //                     Exit Select
 //             End Select
 //         End Sub
-        
-//         Public Function AssignAdmin(userId As ULong) As Boolean
-//             If _OtherAdmins.Contains(userId) Then Return False
-            
-//             _OtherAdmins.Add(userId)
-//             Return True
-//         End Function
-        
-//         Public Function RemoveAdmin(userId As ULong) As Boolean
-//             If Not (_OtherAdmins.Contains(userId)) Then Return False
-            
-//             _OtherAdmins.Remove(userId)
-//             Return True
-//         End Function
         
 //     End Class
     
