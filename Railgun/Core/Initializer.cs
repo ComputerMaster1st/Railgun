@@ -67,8 +67,8 @@ namespace Railgun.Core
                 .AddSingleton<Events>()
                 .AddTransient<RandomCat>()
                 .AddSingleton<CommandManager>()
+                .AddSingleton<FilterManager>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of FilterManager) _
 //                 .AddSingleton(Of MusicManager) _
 //                 .AddSingleton(Of PlayerManager) _
 //                 .AddSingleton(Of TimerManager) _

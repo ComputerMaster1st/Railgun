@@ -23,7 +23,7 @@ namespace Railgun.Core.Managers
         private readonly CommandService _commands;
         private readonly Log _log;
         private readonly Analytics _analytics;
-//         Private ReadOnly _filterManager As FilterManager
+        private readonly FilterManager _filterManager;
 
         public CommandManager(IServiceProvider services) {
             _services = services;
@@ -33,7 +33,7 @@ namespace Railgun.Core.Managers
             _commands = _services.GetService<CommandService>();
             _log = _services.GetService<Log>();
             _analytics = _services.GetService<Analytics>();
-//             _filterManager = services.GetService(Of FilterManager)
+            _filterManager = _services.GetService<FilterManager>();
 
             _client.MessageReceived += MessageReceivedAsync;
             _client.MessageUpdated += async (oldMsg, newMsg, channel) => await MessageReceivedAsync(newMsg);
@@ -70,22 +70,20 @@ namespace Railgun.Core.Managers
 
                 if (!self.GetPermissions(tc).SendMessages) return;
 
-//                 Dim filterMsg As IUserMessage = Await _filterManager.ApplyFilterAsync(msg)
-//                 If filterMsg IsNot Nothing
-//                     Await Task.Run(New Action(Async Sub() Await AutoDeleteFilterMsgAsync(msg, filterMsg)))
+                var filterMsg = await _filterManager.ApplyFilterAsync(msg);
 
-            //         Private Async Function AutoDeleteFilterMsgAsync(userMsg As IUserMessage, filterMsg As IUserMessage) As Task
-            //             Try
-            //                 Await userMsg.DeleteAsync()
-            //                 _analytics.DeletedMessages += 1
-            //                 Await Task.Delay(5000)
-            //                 Await filterMsg.DeleteAsync()
-            //             Catch
-            //             End Try
-            //         End Function
+                if (filterMsg != null) {
+                    await Task.Run(() => {
+                        try {
+                            msg.DeleteAsync();
+                            
+                            _analytics.DeletedMessages++;
 
-//                     Return
-//                 End If
+                            Task.Delay(5000);
+                            filterMsg.DeleteAsync();
+                        } catch { }
+                    });
+                }
 
                 var argPos = 0;
                 ServerCommand sCommand;
