@@ -9,6 +9,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Api;
 using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
@@ -63,8 +64,8 @@ namespace Railgun.Core
                 .AddSingleton<Analytics>()
                 .AddTransient<CommandUtils>()
                 .AddSingleton<Events>()
+                .AddTransient<RandomCat>()
                 .BuildServiceProvider();
-//                 .AddTransient(Of RandomCat) _
 //                 .AddSingleton(Of CommandManager) _
 //                 .AddSingleton(Of FilterManager) _
 //                 .AddSingleton(Of MusicManager) _
