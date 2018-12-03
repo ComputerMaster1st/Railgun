@@ -46,38 +46,34 @@ namespace Railgun.Core.Configuration
             OtherAdmins.Remove(userId);
             return true;
         }
+
+        public void AssignBotLogChannel(ulong channelId, BotLogType logType) {
+            switch (logType) {
+                case BotLogType.Common:
+                    BotLogChannels.Common = channelId;
+                    break;
+                case BotLogType.CommandManager:
+                    BotLogChannels.CommandMngr = channelId;
+                    break;
+                case BotLogType.GuildManager:
+                    BotLogChannels.GuildMngr = channelId;
+                    break;
+                case BotLogType.MusicManager:
+                    BotLogChannels.MusicMngr = channelId;
+                    break;
+                case BotLogType.MusicPlayer:
+                    BotLogChannels.MusicPlayer = channelId;
+                    break;
+                case BotLogType.AudioChord:
+                    BotLogChannels.AudioChord = channelId;
+                    break;
+                case BotLogType.TaskScheduler:
+                    BotLogChannels.TaskSch = channelId;
+                    break;
+                case BotLogType.TimerManager:
+                    BotLogChannels.TimerMngr = channelId;
+                    break;
+            }
+        }
     }
 }
-        
-//         Public Sub AssignBotLogChannel(channelId As ULong, botLogType As BotLogType)
-//             Select botLogType
-//                 Case BotLogType.Common:
-//                     _BotLogChannels.Common = channelId
-//                     Exit Select
-//                 Case BotLogType.CommandManager:
-//                     _BotLogChannels.CommandMngr = channelId
-//                     Exit Select
-//                 Case BotLogType.GuildManager:
-//                     _BotLogChannels.GuildMngr = channelId
-//                     Exit Select
-//                 Case BotLogType.MusicManager:
-//                     _BotLogChannels.MusicMngr = channelId
-//                     Exit Select
-//                 Case BotLogType.MusicPlayer:
-//                     _BotLogChannels.MusicPlayer = channelId
-//                     Exit Select
-//                 Case BotLogType.AudioChord:
-//                     _BotLogChannels.AudioChord = channelId
-//                     Exit Select
-//                 Case BotLogType.TaskScheduler:
-//                     _BotLogChannels.TaskSch = channelId
-//                     Exit Select
-//                 Case BotLogType.TimerManager:
-//                     _BotLogChannels.TimerMngr = channelId
-//                     Exit Select
-//             End Select
-//         End Sub
-        
-//     End Class
-    
-// End NameSpace
