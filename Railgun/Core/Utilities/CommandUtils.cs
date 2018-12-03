@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
@@ -70,6 +72,13 @@ namespace Railgun.Core.Utilities
 
             if (selfRolePosition > userRolePosition) return true;
             else return false;
+        }
+
+        public static async Task SendStringAsFileAsync(ITextChannel tc, string filename, string output, string msgText = null, bool includeGuildName = true) {
+            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(output));
+            var outputFilename = (includeGuildName ? $"{tc.Guild.Name}-" : "") + filename;
+
+            await tc.SendFileAsync(outputStream, outputFilename, msgText);
         }
     }
 }
