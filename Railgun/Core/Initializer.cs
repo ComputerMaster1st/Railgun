@@ -70,11 +70,11 @@ namespace Railgun.Core
                 .AddTransient<RandomCat>()
                 .AddSingleton<CommandManager>()
                 .AddSingleton<FilterManager>()
+                .AddSingleton<MusicManager>()
                 .AddSingleton<AntiCaps>()
                 .AddSingleton<AntiUrl>()
                 .AddSingleton<YoutubeSearch>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of MusicManager) _
 //                 .AddSingleton(Of PlayerManager) _
 //                 .AddSingleton(Of TimerManager)
             
