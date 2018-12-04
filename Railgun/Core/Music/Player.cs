@@ -195,7 +195,7 @@ namespace Railgun.Core.Music
 
                         AddSongRequest(song);
 
-                        Playing?.Invoke(this, new CurrentSongPlayerEventArgs(VoiceChannel.GuildId, song.Id.ToString(), song.Metadata));
+                        Playing?.Invoke(this, new CurrentSongPlayerEventArgs(VoiceChannel.GuildId, song));
 
                         using (var databaseStream = await song.GetMusicStreamAsync())
                         using (var opusStream =  new OpusOggReadStream(databaseStream)) {
