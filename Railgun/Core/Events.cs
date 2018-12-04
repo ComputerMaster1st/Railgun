@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
+using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Enums;
@@ -24,7 +25,7 @@ namespace Railgun.Core
         private readonly CommandUtils _commandUtils;
         private readonly ServerCount _serverCount;
         private readonly MusicService _musicService;
-//         Private ReadOnly _playerManager As PlayerManager
+        private readonly PlayerManager _playerManager;
 //         Private ReadOnly _timerManager As TimerManager
 
         private bool _initialized = false;
@@ -39,7 +40,7 @@ namespace Railgun.Core
             _serverCount = _services.GetService<ServerCount>();
             _client = _services.GetService<DiscordShardedClient>();
             _musicService = _services.GetService<MusicService>();
-//             _playerManager = services.GetService(Of PlayerManager)
+            _playerManager =  _services.GetService<PlayerManager>();
 //             _timerManager = services.GetService(Of TimerManager)
 
             _client.JoinedGuild += JoinedGuildAsync;
@@ -79,14 +80,14 @@ namespace Railgun.Core
             => await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager);
 
         private async Task LeftGuildAsync(SocketGuild guild) {
-//             If _playerManager.IsCreated(sGuild.Id) Then _playerManager.GetPlayer(sGuild.Id).Player.CancelStream()
+            if (_playerManager.IsCreated(guild.Id)) _playerManager.GetPlayer(guild.Id).Player.CancelStream();
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var data = await db.ServerMusics.GetAsync(guild.Id);
 
-//                 If sMusic IsNot Nothing AndAlso sMusic.PlaylistId <> ObjectId.Empty Then _ 
-//                     Await _musicService.Playlist.DeleteAsync(sMusic.PlaylistId)
+                if (data != null && data.PlaylistId != ObjectId.Empty)
+                    await _musicService.Playlist.DeleteAsync(data.PlaylistId);
 
                 await db.DeleteGuildDataAsync(guild.Id);
             }
@@ -135,7 +136,7 @@ namespace Railgun.Core
             var guild = (IGuild)after.VoiceChannel.Guild;
             var user = await guild.GetUserAsync(sUser.Id);
 
-//             If _playerManager.IsCreated(guild.Id) OrElse user.VoiceChannel Is Nothing Then Return
+            if (_playerManager.IsCreated(guild.Id) || user.VoiceChannel == null) return;
 
             ServerMusic data;
 
@@ -148,16 +149,12 @@ namespace Railgun.Core
             var tc = data.AutoTextChannel != 0 ? await guild.GetTextChannelAsync(data.AutoTextChannel) : null;
             var vc = user.VoiceChannel;
 
-//             If vc.Id = sMusic.AutoVoiceChannel AndAlso tc IsNot Nothing Then _ 
-//                 Await _playerManager.CreatePlayerAsync(user, vc, tc, True)
+            if (vc.Id == data.AutoVoiceChannel && tc != null) await _playerManager.CreatePlayerAsync(user, vc, tc, true);
         }
 
         private async Task ShardReadyAsync(DiscordSocketClient sClient) {
-//             If _playerManager.PlayerContainers.Count > 0
-//                 For Each player In _playerManager.PlayerContainers
-//                     player.Player.CancelStream()
-//                 Next
-//             End If
+            if (_playerManager.PlayerContainers.Count > 0)
+                foreach (var player in _playerManager.PlayerContainers) player.Player.CancelStream();
 
             if (!_shardsReady.ContainsKey(sClient.ShardId)) _shardsReady.Add(sClient.ShardId, false);
             else _shardsReady[sClient.ShardId] = true;
