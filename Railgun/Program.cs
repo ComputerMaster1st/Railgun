@@ -13,8 +13,6 @@ namespace Railgun {
             => new Program().StartAsync().GetAwaiter().GetResult();
 
         private async Task StartAsync() {
-            Console.WriteLine("Starting TreeDiagram Operating System...");
-
             var masterConfig = await MasterConfig.LoadAsync();
             var client = new DiscordShardedClient(new DiscordSocketConfig() {
                 LogLevel = LogSeverity.Info,
@@ -22,7 +20,7 @@ namespace Railgun {
             });
             var initializer = new Initializer(masterConfig, client);
 
-            await initializer.InitializeCommandsAsync();
+            await initializer.InitializeAsync();
             await client.LoginAsync(TokenType.Bot, masterConfig.DiscordConfig.Token);
             await client.StartAsync();
 
