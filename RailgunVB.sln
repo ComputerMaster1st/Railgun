@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # 
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RailgunVB", "RailgunVB\RailgunVB.vbproj", "{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord", "Shared.Music\src\AudioChord\AudioChord.csproj", "{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord.Parsers", "Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj", "{B15A8668-4E34-4949-A289-AFA2F407A370}"
