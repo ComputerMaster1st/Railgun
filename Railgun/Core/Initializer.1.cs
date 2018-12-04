@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Api;
 using Railgun.Core.Api.Youtube;
+using Railgun.Core.Commands;
 using Railgun.Core.Configuration;
 using Railgun.Core.Filters;
 using Railgun.Core.Logging;
@@ -47,6 +48,7 @@ namespace Railgun.Core
 
             _commandService = new CommandServiceBuilder<SocketCommandContext>()
                 .AddModules(Assembly.GetEntryAssembly())
+                .AddPipeline<PrefixPipeline>()
                 .BuildCommandService();
 
             await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", $"{_commandService.GetAllCommands().Count()} Commands Loaded!"));
