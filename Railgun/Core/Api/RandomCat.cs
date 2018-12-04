@@ -14,7 +14,7 @@ namespace Railgun.Core.Api
         public RandomCat(MasterConfig config)
             => _apiKey = config.RandomCatApiToken;
 
-        public async Task<Stream> GetRandomCatAsync()
-            => await _client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med");
+        public Task<Stream> GetRandomCatAsync()
+            => _client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med");
     }
 }

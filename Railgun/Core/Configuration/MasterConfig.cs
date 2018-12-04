@@ -77,19 +77,19 @@ namespace Railgun.Core.Configuration
             return masterConfig;
         }
 
-        private async Task SaveAsync()
-            => await File.WriteAllTextAsync(Filename, JsonConvert.SerializeObject(this, Formatting.Indented));
+        private Task SaveAsync()
+            => File.WriteAllTextAsync(Filename, JsonConvert.SerializeObject(this, Formatting.Indented));
         
-        public async Task AssignMasterGuildAsync(ulong guildId) {
+        public Task AssignMasterGuildAsync(ulong guildId) {
             DiscordConfig.AssignMasterGuild(guildId);
 
-            await SaveAsync();
+            return SaveAsync();
         }
 
-        public async Task AssignBotLogChannelAsync(ulong channelId, BotLogType logType) {
+        public Task AssignBotLogChannelAsync(ulong channelId, BotLogType logType) {
             DiscordConfig.AssignBotLogChannel(channelId, logType);
 
-            await SaveAsync();
+            return SaveAsync();
         }
 
         public async Task AssignPrefixAsync(string prefix) {
