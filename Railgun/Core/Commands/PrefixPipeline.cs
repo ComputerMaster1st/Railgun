@@ -30,7 +30,7 @@ namespace Railgun.Core.Commands
             if (((sCommand == null || !sCommand.RespondToBots) && msg.Author.IsBot) || msg.Author.IsWebhook) 
                 return new PrefixResult();
 
-            UserCommand uCommand = await _db.UserCommands.GetAsync(msg.Author.Id);
+            var uCommand = await _db.UserCommands.GetAsync(msg.Author.Id);
 
             if (content.StartsWith(_config.DiscordConfig.Prefix)) {
                 context.PrefixLength = _config.DiscordConfig.Prefix.Length;
