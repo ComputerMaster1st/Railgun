@@ -86,6 +86,8 @@ namespace Railgun.Core.Managers
                 using (var scope = _services.CreateScope()) {
                     var context = new SystemContext(_client, sMessage);
                     var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
+
+                    if (result.IsSuccess) return;
                 }
             } catch (Exception e) {
                 await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Command", "Unexpected Exception!", e));

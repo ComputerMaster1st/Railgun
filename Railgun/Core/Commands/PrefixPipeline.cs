@@ -28,19 +28,23 @@ namespace Railgun.Core.Commands
 
             var uCommand = await _db.UserCommands.GetAsync(msg.Author.Id);
 
-            if (content.StartsWith(_config.DiscordConfig.Prefix)) {
-                context.PrefixLength = _config.DiscordConfig.Prefix.Length;
-                return await next();
-            } else if (content.StartsWith(ctx.Client.CurrentUser.Mention)) {
-                context.PrefixLength = ctx.Client.CurrentUser.Mention.Length;
-                return await next();
-            } else if ((sCommand != null && !string.IsNullOrEmpty(sCommand.Prefix)) && content.StartsWith(sCommand.Prefix)) {
-                context.PrefixLength = sCommand.Prefix.Length;
-                return await next();
-            } else if ((uCommand != null && !string.IsNullOrEmpty(uCommand.Prefix)) && content.StartsWith(uCommand.Prefix)) {
-                context.PrefixLength = uCommand.Prefix.Length;
-                return await next();
-            } else return new PrefixResult();
+            if (content.StartsWith(_config.DiscordConfig.Prefix)) 
+                return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+            else if (content.StartsWith(ctx.Client.CurrentUser.Mention))
+                return await ValidPrefixExecuteAsync(context, ctx.Client.CurrentUser.Mention.Length, sCommand.DeleteCmdAfterUse, msg, next);
+            else if ((sCommand != null && !string.IsNullOrEmpty(sCommand.Prefix)) && content.StartsWith(sCommand.Prefix))
+                return await ValidPrefixExecuteAsync(context, sCommand.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+            else if ((uCommand != null && !string.IsNullOrEmpty(uCommand.Prefix)) && content.StartsWith(uCommand.Prefix)) 
+                return await ValidPrefixExecuteAsync(context, uCommand.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+            else return new PrefixResult();
+        }
+
+        private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext ctx, int prefixLength, bool deleteCmd, IUserMessage msg, Func<Task<IResult>> next) {
+            ctx.PrefixLength = prefixLength;
+            
+            if (deleteCmd) await msg.DeleteAsync();
+            
+            return await next();
         }
     }
 } 
