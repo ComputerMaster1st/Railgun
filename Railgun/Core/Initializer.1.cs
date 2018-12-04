@@ -48,6 +48,8 @@ namespace Railgun.Core
             _commandService = new CommandServiceBuilder<SystemContext>()
                 .AddModules(Assembly.GetEntryAssembly())
                 .AddPipeline<PrefixPipeline>()
+                .AddCommandParser<DefaultCommandParser<SystemContext>>()
+                .AddTypeReaderFactory<NullTypeReaderFactory>()
                 .BuildCommandService();
 
             await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", $"{_commandService.GetAllCommands().Count()} Commands Loaded!"));
