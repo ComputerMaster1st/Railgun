@@ -11,6 +11,7 @@ namespace Railgun.Core.Commands
     {
         private readonly MasterConfig _config;
         private readonly TreeDiagramContext _db;
+        private SystemContext _ctx = null;
 
         public PrefixPipeline(MasterConfig config, TreeDiagramContext db) {
             _config = config;
@@ -18,10 +19,10 @@ namespace Railgun.Core.Commands
         }
 
         public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
-            var ctx = context.Context as SystemContext;
-            var msg = (IUserMessage)ctx.Message;
+            _ctx = context.Context as SystemContext;
+            var msg = (IUserMessage)_ctx.Message;
             var content = msg.Content;
-            var sCommand = await _db.ServerCommands.GetAsync(ctx.Guild.Id);
+            var sCommand = await _db.ServerCommands.GetAsync(_ctx.Guild.Id);
 
             if (((sCommand == null || !sCommand.RespondToBots) && msg.Author.IsBot) || msg.Author.IsWebhook) 
                 return new PrefixResult();
@@ -30,8 +31,8 @@ namespace Railgun.Core.Commands
 
             if (content.StartsWith(_config.DiscordConfig.Prefix)) 
                 return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
-            else if (content.StartsWith(ctx.Client.CurrentUser.Mention))
-                return await ValidPrefixExecuteAsync(context, ctx.Client.CurrentUser.Mention.Length, sCommand.DeleteCmdAfterUse, msg, next);
+            else if (content.StartsWith(_ctx.Client.CurrentUser.Mention))
+                return await ValidPrefixExecuteAsync(context, _ctx.Client.CurrentUser.Mention.Length, sCommand.DeleteCmdAfterUse, msg, next);
             else if ((sCommand != null && !string.IsNullOrEmpty(sCommand.Prefix)) && content.StartsWith(sCommand.Prefix))
                 return await ValidPrefixExecuteAsync(context, sCommand.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
             else if ((uCommand != null && !string.IsNullOrEmpty(uCommand.Prefix)) && content.StartsWith(uCommand.Prefix)) 
@@ -39,10 +40,13 @@ namespace Railgun.Core.Commands
             else return new PrefixResult();
         }
 
-        private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext ctx, int prefixLength, bool deleteCmd, IUserMessage msg, Func<Task<IResult>> next) {
-            ctx.PrefixLength = prefixLength;
+        private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext context, int prefixLength, bool deleteCmd, IUserMessage msg, Func<Task<IResult>> next) {
+            context.PrefixLength = prefixLength;
+
+            var self = await ((IGuild)_ctx.Guild).GetCurrentUserAsync();
+            var perms = self.GetPermissions((IGuildChannel)_ctx.Channel);
             
-            if (deleteCmd) await msg.DeleteAsync();
+            if (deleteCmd && perms.ManageMessages) await msg.DeleteAsync();
             
             return await next();
         }
