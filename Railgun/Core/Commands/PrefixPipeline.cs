@@ -1,13 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Addons.Finite.Commands;
 using Finite.Commands;
-using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Configuration;
 using TreeDiagram;
-using TreeDiagram.Models.Server;
-using TreeDiagram.Models.User;
 
 namespace Railgun.Core.Commands
 {
@@ -22,7 +18,7 @@ namespace Railgun.Core.Commands
         }
 
         public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
-            var ctx = context.Context as SocketCommandContext;
+            var ctx = context.Context as SystemContext;
             var msg = (IUserMessage)ctx.Message;
             var content = msg.Content;
             var sCommand = await _db.ServerCommands.GetAsync(ctx.Guild.Id);
