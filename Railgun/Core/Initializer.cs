@@ -72,11 +72,11 @@ namespace Railgun.Core
                 .AddSingleton<FilterManager>()
                 .AddSingleton<MusicManager>()
                 .AddSingleton<PlayerManager>()
+                .AddSingleton<TimerManager>()
                 .AddSingleton<AntiCaps>()
                 .AddSingleton<AntiUrl>()
                 .AddSingleton<YoutubeSearch>()
                 .BuildServiceProvider();
-//                 .AddSingleton(Of TimerManager)
             
             TaskScheduler.UnobservedTaskException += async (sender, e) => await UnobservedTaskAsync(e);
         }
