@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
-using Discord.Addons.Finite.Commands;
 using Discord.WebSocket;
 using Finite.Commands;
 using Finite.Commands.Extensions;
@@ -27,7 +26,7 @@ namespace Railgun.Core
     {
         private readonly MasterConfig _masterConfig;
         private readonly DiscordShardedClient _client;
-        private CommandService<SocketCommandContext> _commandService;
+        private CommandService<SystemContext> _commandService;
         private IServiceProvider _services;
         private Log _log;
         private ServerCount _serverCount;
@@ -46,7 +45,7 @@ namespace Railgun.Core
 
             await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "System", "Loading Commands..."));
 
-            _commandService = new CommandServiceBuilder<SocketCommandContext>()
+            _commandService = new CommandServiceBuilder<SystemContext>()
                 .AddModules(Assembly.GetEntryAssembly())
                 .AddPipeline<PrefixPipeline>()
                 .BuildCommandService();

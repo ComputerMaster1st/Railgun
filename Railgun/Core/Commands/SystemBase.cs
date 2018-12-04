@@ -1,12 +1,12 @@
-using Discord.Commands;
+using Finite.Commands;
 
 namespace Railgun.Core.Commands
 {
     public class SystemBase : ModuleBase<SystemContext>
     {
-        protected override void AfterExecute(CommandInfo command) {
-            Context.DisposeDatabase();
-            base.AfterExecute(command);
-        }
+        // protected override void AfterExecute(CommandInfo command) {
+        //     Context.DisposeDatabase();
+        //     base.AfterExecute(command);
+        // }
     }
 }

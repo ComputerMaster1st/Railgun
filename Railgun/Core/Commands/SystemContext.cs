@@ -1,28 +1,29 @@
 using System;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using TreeDiagram;
+using Finite.Commands;
 
 namespace Railgun.Core.Commands
 {
-    public class SystemContext : CommandContext
+    public class SystemContext : ICommandContext
     {
-        private readonly IServiceProvider _services;
-        private TreeDiagramContext _database = null;
+        public DiscordShardedClient Client { get; }
+        public SocketMessage Message { get; }
+        public ISocketMessageChannel Channel { get; }
+        public SocketUser Author { get; }
+        public SocketGuild Guild { get; }
+        public bool IsPrivate => Channel is IPrivateChannel;
 
-        public TreeDiagramContext Database { get {
-            if (_database == null) _database = _services.GetService<TreeDiagramContext>();
-
-            return _database;
-        }}
-
-        public SystemContext(DiscordSocketClient client, IUserMessage msg, IServiceProvider services) : base(client, msg)
-            => _services = services;
-        
-        public void DisposeDatabase() {
-            if (_database != null) _database.Dispose();
+        public SystemContext(DiscordShardedClient client, SocketMessage message) {
+            Client = client;
+            Message = message;
+            Channel = message.Channel;
+            Author = message.Author;
+            Guild = (Channel as SocketGuildChannel)?.Guild;
         }
+
+        string ICommandContext.Message => Message.Content;
+
+        string ICommandContext.Author => Author.ToString();
     }
 }
