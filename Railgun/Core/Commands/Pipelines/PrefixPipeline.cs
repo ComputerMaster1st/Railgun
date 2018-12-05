@@ -42,6 +42,8 @@ namespace Railgun.Core.Commands.Pipelines
         }
 
         private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext context, int prefixLength, bool deleteCmd, IUserMessage msg, Func<Task<IResult>> next) {
+            if (msg.Content.Length <= prefixLength) return new PrefixResult();
+
             context.PrefixLength = prefixLength;
 
             var self = await ((IGuild)_ctx.Guild).GetCurrentUserAsync();
