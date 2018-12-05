@@ -47,6 +47,7 @@ namespace Railgun.Core.Managers
                 var tc = (ITextChannel)msg.Channel;
                 var guild = tc.Guild;
                 var self = await guild.GetCurrentUserAsync();
+                var perms = self.GetPermissions(tc);
 
                 if (!self.GetPermissions(tc).SendMessages) return;
 
@@ -71,6 +72,11 @@ namespace Railgun.Core.Managers
 
                     if (result.IsSuccess) {
                         await _analytics.ExecutedCommandAsync(result as CommandResult);
+
+                        var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                        var data = await db.ServerCommands.GetAsync(guild.Id);
+                        
+                        if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
                         return;
                     }
 

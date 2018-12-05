@@ -31,25 +31,20 @@ namespace Railgun.Core.Commands.Pipelines
             var uCommand = await _db.UserCommands.GetAsync(msg.Author.Id);
 
             if (content.StartsWith(_config.DiscordConfig.Prefix)) 
-                return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+                return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, msg, next);
             else if (content.StartsWith(_ctx.Client.CurrentUser.Mention))
-                return await ValidPrefixExecuteAsync(context, _ctx.Client.CurrentUser.Mention.Length, sCommand.DeleteCmdAfterUse, msg, next);
+                return await ValidPrefixExecuteAsync(context, _ctx.Client.CurrentUser.Mention.Length, msg, next);
             else if ((sCommand != null && !string.IsNullOrEmpty(sCommand.Prefix)) && content.StartsWith(sCommand.Prefix))
-                return await ValidPrefixExecuteAsync(context, sCommand.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+                return await ValidPrefixExecuteAsync(context, sCommand.Prefix.Length, msg, next);
             else if ((uCommand != null && !string.IsNullOrEmpty(uCommand.Prefix)) && content.StartsWith(uCommand.Prefix)) 
-                return await ValidPrefixExecuteAsync(context, uCommand.Prefix.Length, sCommand.DeleteCmdAfterUse, msg, next);
+                return await ValidPrefixExecuteAsync(context, uCommand.Prefix.Length, msg, next);
             else return new PrefixResult();
         }
 
-        private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext context, int prefixLength, bool deleteCmd, IUserMessage msg, Func<Task<IResult>> next) {
+        private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext context, int prefixLength, IUserMessage msg, Func<Task<IResult>> next) {
             if (msg.Content.Length <= prefixLength) return new PrefixResult();
 
             context.PrefixLength = prefixLength;
-
-            var self = await ((IGuild)_ctx.Guild).GetCurrentUserAsync();
-            var perms = self.GetPermissions((IGuildChannel)_ctx.Channel);
-            
-            if (deleteCmd && perms.ManageMessages) await msg.DeleteAsync();
             
             return await next();
         }
