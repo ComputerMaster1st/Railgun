@@ -51,7 +51,12 @@ namespace Railgun.Core.Utilities
         }
 
         public async Task ExecutedCommandAsync(CommandResult result) {
-            var cmdString = result.Command.Aliases.ToList()[0];
+            string cmdString;
+
+            if (result.Command.Aliases.ToList().Count < 1)
+                cmdString = result.Command.Module.Aliases.ToList()[0];
+            else cmdString = result.Command.Aliases.ToList()[0];
+
             var ctx = result.Context;
             var guild = ctx.Guild;
 
