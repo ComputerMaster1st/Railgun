@@ -7,14 +7,14 @@ namespace Railgun.Core.Commands
 {
     public class SystemContext : ICommandContext
     {
-        public DiscordShardedClient Client { get; }
+        public IDiscordClient Client { get; }
         public SocketMessage Message { get; }
         public ISocketMessageChannel Channel { get; }
         public IUser Author { get; }
         public IGuild Guild { get; }
         public bool IsPrivate => Channel is IPrivateChannel;
 
-        public SystemContext(DiscordShardedClient client, SocketMessage message) {
+        public SystemContext(IDiscordClient client, SocketMessage message) {
             Client = client;
             Message = message;
             Channel = message.Channel;
