@@ -13,6 +13,8 @@ namespace Railgun.Core.Commands.Pipelines
             PreconditionResult result;
 
             foreach (IPreconditionAttribute precondition in context.Command.Attributes) {
+                if (precondition == null) continue;
+
                 result = await precondition.CheckPermissionsAsync(ctx, context.Command, context.ServiceProvider);
 
                 if (!result.IsSuccess) return result;
