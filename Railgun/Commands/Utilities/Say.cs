@@ -9,13 +9,10 @@ namespace Railgun.Commands.Utilities
     [Alias("say"), BotAdmin]
     public class Say : SystemBase
     {
-        [Command]
-        public async Task SayAsync([Remainder] string test) {
-            var output = new StringBuilder().AppendFormat("{0}", test);
-            
-            // if (args != null) foreach (var other in args) output.AppendFormat(" {0}", other);
+        [Command("remain")]
+        public Task SayAsync([Remainder] string test) => ReplyAsync(test);
 
-            await ReplyAsync(output.ToString());
-        }
+        [Command("non-remain")]
+        public Task Say2Async(string test) => ReplyAsync(test);
     }
 }

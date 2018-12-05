@@ -92,8 +92,7 @@ namespace Railgun.Core.Commands
                             i);
                     // case TokenizerState.Normal
                     //     when IsQuoteCharacter(c):
-                    //     return Failure(
-                    //         TokenizerFailureReason.UnexpectedQuote, i);
+                    //     return Failure(TokenizerFailureReason.UnexpectedQuote, i);
                     case TokenizerState.Normal
                         when IsEscapeCharacter(c):
                         state = TokenizerState.EscapeCharacter;
@@ -109,8 +108,7 @@ namespace Railgun.Core.Commands
 
                     // case TokenizerState.ParameterSeparator
                     //     when IsQuoteCharacter(c) && isLastCharacter:
-                    //     return Failure(
-                    //         TokenizerFailureReason.UnfinishedQuotedString, i);
+                    //     return Failure(TokenizerFailureReason.UnfinishedQuotedString, i);
                     // case TokenizerState.ParameterSeparator
                     //     when IsQuoteCharacter(c):
                     //     state = TokenizerState.QuotedString;
@@ -127,10 +125,9 @@ namespace Railgun.Core.Commands
                     //     when IsCompletedQuote(beginQuote, c):
                     //     state = TokenizerState.Normal;
                     //     break;
-                    case TokenizerState.QuotedString
-                        when isLastCharacter:
-                        return Failure(
-                            TokenizerFailureReason.UnfinishedQuotedString, i);
+                    // case TokenizerState.QuotedString
+                    //     when isLastCharacter:
+                    //     return Failure(TokenizerFailureReason.UnfinishedQuotedString, i);
 
                     default:
                         paramBuilder.Append(c);
