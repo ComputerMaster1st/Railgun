@@ -1,15 +1,24 @@
 using System;
 using System.Threading.Tasks;
 using Finite.Commands;
+using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Commands.Results;
 
 namespace Railgun.Core.Commands.Pipelines
 {
     public class PreconditionPipeline : IPipeline
     {
-        public Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
-            var attributes = context.Command.Attributes;
+        public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
+            var ctx = context.Context as SystemContext;
+            PreconditionResult result;
 
-            return null;
+            foreach (IPreconditionAttribute precondition in context.Command.Attributes) {
+                result = await precondition.CheckPermissionsAsync(ctx, context.Command, context.ServiceProvider);
+
+                if (!result.IsSuccess) return result;
+            }
+
+            return await next();
         }
     }
 }

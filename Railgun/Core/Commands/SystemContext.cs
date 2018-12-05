@@ -10,8 +10,8 @@ namespace Railgun.Core.Commands
         public DiscordShardedClient Client { get; }
         public SocketMessage Message { get; }
         public ISocketMessageChannel Channel { get; }
-        public SocketUser Author { get; }
-        public SocketGuild Guild { get; }
+        public IUser Author { get; }
+        public IGuild Guild { get; }
         public bool IsPrivate => Channel is IPrivateChannel;
 
         public SystemContext(DiscordShardedClient client, SocketMessage message) {
