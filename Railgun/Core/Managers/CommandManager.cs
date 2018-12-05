@@ -99,11 +99,10 @@ namespace Railgun.Core.Managers
 
         private async Task LogCommandErrorAsync(CommandResult result) {
             var context = result.Context;
-            var command = result.Command;
 
             var output = new StringBuilder()
                 .AppendFormat("<{0} <{1}>>", context.Guild.Name, context.Guild.Id).AppendLine()
-                .AppendFormat("---- Command : {0}", command.Aliases.ToList()[0]).AppendLine()
+                .AppendFormat("---- Command : {0}", result.CommandPath).AppendLine()
                 .AppendFormat("---- Content : {0}", context.Message.Content).AppendLine()
                 .AppendLine("---- Result  : FAILURE").AppendLine()
                 .AppendLine(result.ToString());
