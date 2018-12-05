@@ -2,10 +2,11 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
+using Railgun.Core.Commands.Results;
 using Railgun.Core.Configuration;
 using TreeDiagram;
 
-namespace Railgun.Core.Commands
+namespace Railgun.Core.Commands.Pipelines
 {
     public class PrefixPipeline : IPipeline
     {

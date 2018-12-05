@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Api;
 using Railgun.Core.Api.Youtube;
 using Railgun.Core.Commands;
+using Railgun.Core.Commands.Pipelines;
 using Railgun.Core.Configuration;
 using Railgun.Core.Filters;
 using Railgun.Core.Logging;

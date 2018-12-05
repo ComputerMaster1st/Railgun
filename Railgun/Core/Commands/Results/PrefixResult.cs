@@ -1,6 +1,6 @@
 using Finite.Commands;
 
-namespace Railgun.Core.Commands
+namespace Railgun.Core.Commands.Results
 {
     public class PrefixResult : IResult
     {
