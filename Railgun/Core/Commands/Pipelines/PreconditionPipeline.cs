@@ -12,12 +12,16 @@ namespace Railgun.Core.Commands.Pipelines
             var ctx = context.Context as SystemContext;
             PreconditionResult result;
 
-            foreach (IPreconditionAttribute precondition in context.Command.Attributes) {
-                if (precondition == null) continue;
+            foreach (var attribute in context.Command.Attributes) {
+                try {
+                    var precondition = attribute as IPreconditionAttribute;
+                    
+                    if (precondition == null) continue;
 
-                result = await precondition.CheckPermissionsAsync(ctx, context.Command, context.ServiceProvider);
+                    result = await precondition.CheckPermissionsAsync(ctx, context.Command, context.ServiceProvider);
 
-                if (!result.IsSuccess) return result;
+                    if (!result.IsSuccess) return result;
+                } catch { }                
             }
 
             return await next();
