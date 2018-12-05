@@ -16,12 +16,5 @@ namespace Railgun.Commands.Utilities
         [Command]
         public Task PingAsync()
             => ReplyAsync($"Discord Client Latency : {Format.Bold(_client.Latency.ToString())}ms");
-
-        [Alias("hello")]
-        public class Hello : SystemBase {
-            [Command]
-            public Task HelloAsync()
-            => ReplyAsync($"Hellew!");
-        }
     }
 }
