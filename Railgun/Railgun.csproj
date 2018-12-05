@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+      <OutputType>Exe</OutputType>
       <TargetFramework>netcoreapp2.1</TargetFramework>
       <TieredCompilation>true</TieredCompilation>
+      <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

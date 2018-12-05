@@ -7,13 +7,13 @@ namespace Railgun.Core.Commands
     {
         public bool TryGetTypeReader<T>(out ITypeReader<T> reader)
         {
-            reader = null;
+            reader = default;
             return false;
         }
 
         public bool TryGetTypeReader(Type valueType, out ITypeReader reader)
         {
-            reader = null;
+            reader = default;
             return false;
         }
     }
