@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Commands;
+using Railgun.Core.Commands.Results;
 using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
@@ -39,26 +40,6 @@ namespace Railgun.Core.Managers
             _client.MessageUpdated += async (oldMsg, newMsg, channel) => await MessageReceivedAsync(newMsg);
         }
 
-        // private async Task ExecuteCommandAsync(string prefix, IUserMessage msg, int argPos, ServerCommand data) {
-        //     if (msg.Content.Length <= prefix.Length) return;
-        //     else if (msg.Content[argPos] == ' ') argPos++;
-
-        //     var context = new SystemContext(_client, msg, _services);
-        //     var result = await _commands.ExecuteAsync(context, argPos, _services);
-
-        //     if (data != null && data.DeleteCmdAfterUse) await msg.DeleteAsync();
-        //     if (result.IsSuccess) return;
-
-        //     var error = $"Command Error: {result.ErrorReason}";
-        //     var tc = context.Channel;
-
-        //     switch (result.Error) {
-        //         case CommandError.UnmetPrecondition:
-        //             await tc.SendMessageAsync(error);
-        //             break;
-        //     }
-        // }
-
         private async Task ProcessMessageAsync(SocketMessage sMessage) {
             try {
                 var msg = (IUserMessage)sMessage;
@@ -88,6 +69,14 @@ namespace Railgun.Core.Managers
                     var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
 
                     if (result.IsSuccess) return;
+
+                    switch (result) {
+                        case PreconditionResult r:
+                            await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } catch (Exception e) {
                 await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Command", "Unexpected Exception!", e));
