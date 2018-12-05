@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
 using Railgun.Core.Commands;
+using Railgun.Core.Commands.Results;
 using Railgun.Core.Logging;
 
 namespace Railgun.Core.Utilities
@@ -13,7 +15,6 @@ namespace Railgun.Core.Utilities
     public class Analytics
     {
         private readonly DiscordShardedClient _client;
-        // private readonly CommandService<SystemContext> _commands;
         private readonly Log _log;
 
         public uint ReceivedMessages { get; private set; } = 0;
@@ -25,13 +26,10 @@ namespace Railgun.Core.Utilities
         public Analytics(Log log, DiscordShardedClient client) {
             _log = log;
             _client = client;
-            // _commands = commands;
 
             _client.MessageReceived += MessageReceivedAsync;
             _client.MessageUpdated += MessageUpdatedAsync;
             _client.MessageDeleted += MessageDeletedAsync;
-
-            // _commands.CommandExecuted += ExecutedCommandAsync;
         }
 
         private Task MessageReceivedAsync(SocketMessage message) {
@@ -52,27 +50,26 @@ namespace Railgun.Core.Utilities
             return Task.CompletedTask;
         }
 
-        // private async Task ExecutedCommandAsync(Optional<CommandInfo> command, ICommandContext context, IResult result) {
-        //     if (!result.IsSuccess) return;
+        public async Task ExecutedCommandAsync(CommandResult result) {
+            var cmdString = result.Command.Aliases.ToList()[0];
+            var ctx = result.Context;
+            var guild = ctx.Guild;
 
-        //     var cmdString = command.IsSpecified ? command.Value.Aliases[0] : "N/A";
-        //     var guild = context.Guild;
+            if (cmdString != "N/A") {
+                if (UsedCommands.ContainsKey(cmdString)) UsedCommands[cmdString]++;
+                else UsedCommands.Add(cmdString, 1);
+            }
 
-        //     if (cmdString != "N/A") {
-        //         if (UsedCommands.ContainsKey(cmdString)) UsedCommands[cmdString]++;
-        //         else UsedCommands.Add(cmdString, 1);
-        //     }
-
-        //     var output = new StringBuilder()
-        //         .AppendFormat("<{0} <{1}>>", guild.Name, guild.Id).AppendLine()
-        //         .AppendFormat("---- Command : {0}", cmdString).AppendLine();
+            var output = new StringBuilder()
+                .AppendFormat("<{0} <{1}>>", guild.Name, guild.Id).AppendLine()
+                .AppendFormat("---- Command : {0}", cmdString).AppendLine();
             
-        //     if (context.Message.Content.Length < 250)
-        //         output.AppendFormat("---- Content : {0}", context.Message.Content).AppendLine();
+            if (ctx.Message.Content.Length < 250)
+                output.AppendFormat("---- Content : {0}", ctx.Message.Content).AppendLine();
 
-        //     output.AppendLine("---- Result  : Completed");
+            output.AppendLine("---- Result  : Completed");
 
-        //     await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager);
-        // }
+            await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -68,11 +69,17 @@ namespace Railgun.Core.Managers
                     var context = new SystemContext(_client, sMessage);
                     var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
 
-                    if (result.IsSuccess) return;
+                    if (result.IsSuccess) {
+                        await _analytics.ExecutedCommandAsync(result as CommandResult);
+                        return;
+                    }
 
                     switch (result) {
                         case PreconditionResult r:
                             await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
+                            break;
+                        case CommandResult c:
+                            await LogCommandErrorAsync(c);
                             break;
                         default:
                             break;
@@ -90,29 +97,25 @@ namespace Railgun.Core.Managers
             return Task.Run(() => ProcessMessageAsync(sMessage));
         }
 
-        // private async Task LogAsync(LogMessage msg) {
-        //     var cmdEx = (CommandException)msg.Exception;
+        private async Task LogCommandErrorAsync(CommandResult result) {
+            var context = result.Context;
+            var command = result.Command;
 
-        //     if (cmdEx == null) return;
-
-        //     var context = cmdEx.Context;
-        //     var command = cmdEx.Command;
-
-        //     var output = new StringBuilder()
-        //         .AppendFormat("<{0} <{1}>>", context.Guild.Name, context.Guild.Id).AppendLine()
-        //         .AppendFormat("---- Command : {0}", command.Aliases[0]).AppendLine()
-        //         .AppendFormat("---- Content : {0}", context.Message.Content).AppendLine()
-        //         .AppendLine("---- Result  : FAILURE").AppendLine()
-        //         .AppendLine(cmdEx.ToString());
+            var output = new StringBuilder()
+                .AppendFormat("<{0} <{1}>>", context.Guild.Name, context.Guild.Id).AppendLine()
+                .AppendFormat("---- Command : {0}", command.Aliases.ToList()[0]).AppendLine()
+                .AppendFormat("---- Content : {0}", context.Message.Content).AppendLine()
+                .AppendLine("---- Result  : FAILURE").AppendLine()
+                .AppendLine(result.ToString());
             
-        //     await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager, true);
+            await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager, true);
 
-        //     var tcOutput = new StringBuilder()
-        //         .AppendFormat("{0} Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!", Format.Bold("OH NO!")).AppendLine()
-        //         .AppendLine()
-        //         .AppendFormat("{0} {1}", Format.Bold("ERROR :"), cmdEx.InnerException.Message);
+            var tcOutput = new StringBuilder()
+                .AppendFormat("{0} Something bad has happened inside of me! I've alerted my developer about the problem. I hope they'll get me all patched up soon!", Format.Bold("OH NO!")).AppendLine()
+                .AppendLine()
+                .AppendFormat("{0} {1}", Format.Bold("ERROR :"), result.Exception.Message);
             
-        //     await context.Channel.SendMessageAsync(tcOutput.ToString());
-        // }
+            await context.Channel.SendMessageAsync(tcOutput.ToString());
+        }
     }
 }
