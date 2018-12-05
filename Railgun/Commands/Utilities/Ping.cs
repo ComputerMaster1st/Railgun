@@ -6,14 +6,13 @@ using Railgun.Core.Commands;
 
 namespace Railgun.Commands.Utilities
 {
-    [Alias("ping")]
     public class Ping : SystemBase
     {
         private readonly DiscordShardedClient _client;
 
         public Ping(DiscordShardedClient client) => _client = client;
 
-        [Command]
+        [Command("ping")]
         public Task PingAsync()
             => ReplyAsync($"Discord Client Latency : {Format.Bold(_client.Latency.ToString())}ms");
     }
