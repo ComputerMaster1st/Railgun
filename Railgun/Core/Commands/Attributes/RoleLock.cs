@@ -3,22 +3,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
+using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Commands.Results;
 using Railgun.Core.Enums;
 using TreeDiagram;
 
-namespace Railgun.Core.Preconditions
+namespace Railgun.Core.Commands.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class RoleLock : PreconditionAttribute
+    public class RoleLock : Attribute, IPreconditionAttribute
     {
         private readonly ModuleType _moduleType;
 
         public RoleLock(ModuleType modType) => _moduleType = modType;
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services) {
-            var user = (IGuildUser)context.User;
+        public async Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services) {
+            var user = (IGuildUser)context.Author;
             var output = new StringBuilder();
 
             using (var db = services.GetService<TreeDiagramContext>()) {
@@ -26,8 +27,7 @@ namespace Railgun.Core.Preconditions
                     case ModuleType.Music:
                         var data = await db.ServerMusics.GetAsync(context.Guild.Id);
 
-                        if (data == null || data.AllowedRoles.Count < 1) 
-                            return await Task.FromResult(PreconditionResult.FromSuccess());
+                        if (data == null || data.AllowedRoles.Count < 1) return PreconditionResult.FromSuccess();
 
                         var tempOutput = new StringBuilder();
 
@@ -36,8 +36,7 @@ namespace Railgun.Core.Preconditions
 
                             tempOutput.AppendLine($"| {role.Name} |");
 
-                            if (user.RoleIds.Contains(allowedRole.RoleId))
-                                return await Task.FromResult(PreconditionResult.FromSuccess());
+                            if (user.RoleIds.Contains(allowedRole.RoleId)) return PreconditionResult.FromSuccess();
                         }
 
                         output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")
@@ -47,7 +46,7 @@ namespace Railgun.Core.Preconditions
                 }
             }
 
-            return await Task.FromResult(PreconditionResult.FromError(output.ToString()));
+            return PreconditionResult.FromError(output.ToString());
         }
     }
 }

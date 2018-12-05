@@ -2,12 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Commands.Results;
 using Railgun.Core.Configuration;
 
-namespace Railgun.Core.Preconditions
+namespace Railgun.Core.Commands.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class BotAdmin : Attribute, IPreconditionAttribute
