@@ -50,7 +50,7 @@ namespace Railgun.Core
                 .AddModules(Assembly.GetEntryAssembly())
                 .AddTypeReaderFactory<NullTypeReaderFactory>()
                 .AddPipeline<PrefixPipeline>()
-                .AddCommandParser<DefaultCommandParser<SystemContext>>()
+                .AddCommandParser<SystemCommandParser<SystemContext>>()
                 .AddPipeline<PreconditionPipeline>()
                 .AddPipeline<FinalizePipeline>()
                 .BuildCommandService();

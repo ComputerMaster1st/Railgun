@@ -10,7 +10,7 @@ namespace Railgun.Commands.Utilities
     public class Say : SystemBase
     {
         [Command]
-        public async Task SayAsync(string test) {
+        public async Task SayAsync([Remainder] string test) {
             var output = new StringBuilder().AppendFormat("{0}", test);
             
             // if (args != null) foreach (var other in args) output.AppendFormat(" {0}", other);
