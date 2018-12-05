@@ -9,7 +9,7 @@ namespace Railgun {
 
     class Program 
     {
-        public static void main(string[] args)
+        public static void Main(string[] args)
             => new Program().StartAsync().GetAwaiter().GetResult();
 
         private async Task StartAsync() {
