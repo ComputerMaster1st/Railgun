@@ -15,6 +15,6 @@ namespace Railgun.Commands.Utilities
 
         [Command]
         public Task PingAsync()
-            => Context.Channel.SendMessageAsync($"Discord Client Latency : {Format.Bold(_client.Latency.ToString())}ms")
+            => ReplyAsync($"Discord Client Latency : {Format.Bold(_client.Latency.ToString())}ms");
     }
 }
