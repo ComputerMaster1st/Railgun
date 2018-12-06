@@ -1,6 +1,6 @@
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
+using Finite.Commands;
 using TreeDiagram;
 
 namespace Railgun.Core.Utilities
