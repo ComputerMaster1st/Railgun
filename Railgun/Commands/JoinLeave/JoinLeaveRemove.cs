@@ -10,7 +10,7 @@ namespace Railgun.Commands.JoinLeave
     public partial class JoinLeave : SystemBase
     {
         [Alias("remove")]
-        public partial class JoinLeaveRemove : SystemBase
+        public class JoinLeaveRemove : SystemBase
         {
             private readonly TreeDiagramContext _db;
 
