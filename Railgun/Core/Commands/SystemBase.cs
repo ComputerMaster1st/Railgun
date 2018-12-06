@@ -5,7 +5,7 @@ using Finite.Commands;
 namespace Railgun.Core.Commands
 {
     public class SystemBase : ModuleBase<SystemContext> { 
-        public async Task<IUserMessage> ReplyAsync(string msg) 
-            => await Context.Channel.SendMessageAsync(msg);
+        public async Task<IUserMessage> ReplyAsync(string msg = null, bool isTTS = false, Embed embed = null) 
+            => await Context.Channel.SendMessageAsync(msg, isTTS, embed);
     }
 }

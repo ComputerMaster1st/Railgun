@@ -112,7 +112,7 @@ namespace Railgun.Commands.Utilities
                     .AddField("ESPer Level:", GetEsperLevel(gUser));
             }
 
-            await Context.Channel.SendMessageAsync(embed:embedBuilder.Build());
+            await ReplyAsync(embed:embedBuilder.Build());
         }
     }
 }
