@@ -18,7 +18,7 @@ using TreeDiagram;
 namespace Railgun.Commands.Music
 {
     [Alias("music", "m"), RoleLock(ModuleType.Music)]
-    public class Music : SystemBase
+    public partial class Music : SystemBase
     {
         private readonly TreeDiagramContext _db;
         private readonly MasterConfig _config;
