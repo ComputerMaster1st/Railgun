@@ -20,6 +20,7 @@ namespace Railgun.Commands.Utilities
             _timerManager = timerManager;
         }
 
+        [Command]
         public async Task RemindMeAsync(string expireIn, [Remainder] string message) {
             if (string.IsNullOrWhiteSpace(message)) {
                 await ReplyAsync("You didn't specify a message to remind you about.");
