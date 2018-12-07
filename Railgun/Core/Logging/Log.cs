@@ -49,7 +49,7 @@ namespace Railgun.Core.Logging
                 var pingMasterStr = pingMaster ? $"<@!{_config.DiscordConfig.MasterAdminId}>": string.Empty;
 
                 if (output.Length > 1950) {
-                    await CommandUtils.SendStringAsFileAsync(tc, $"{logType}.log", $"Error! Refer to file {pingMasterStr}!", includeGuildName:false);
+                    await CommandUtils.SendStringAsFileAsync(tc, $"{logType}.log", output.ToString(), $"Error! Refer to file {pingMasterStr}!", includeGuildName:false);
                     
                     return;
                 }
