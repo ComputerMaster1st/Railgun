@@ -100,11 +100,11 @@ namespace Railgun.Core.Managers
             }
         }
 
-        private async Task MessageReceivedAsync(SocketMessage sMessage) {
+        private Task MessageReceivedAsync(SocketMessage sMessage) {
             if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel))
-                return;
+                return Task.CompletedTask;
             
-            await Task.Run(async () => await ProcessMessageAsync(sMessage));
+            return Task.Factory.StartNew(async () => await ProcessMessageAsync(sMessage));
         }
 
         private async Task LogCommandErrorAsync(CommandResult result) {
