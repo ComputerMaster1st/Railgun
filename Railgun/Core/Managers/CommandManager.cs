@@ -101,7 +101,7 @@ namespace Railgun.Core.Managers
         }
 
         private Task MessageReceivedAsync(SocketMessage sMessage) {
-            if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel))
+            if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
                 return Task.CompletedTask;
             
             return Task.Factory.StartNew(async () => await ProcessMessageAsync(sMessage));
