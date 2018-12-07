@@ -7,7 +7,7 @@ using TreeDiagram;
 
 namespace Railgun.Core.Commands
 {
-    public class SystemContext : ICommandContext, IDisposable
+    public class SystemContext : ICommandContext
     {
         private IServiceProvider _services;
         private TreeDiagramContext _database = null;
@@ -39,7 +39,7 @@ namespace Railgun.Core.Commands
 
         string ICommandContext.Author => Author.ToString();
 
-        public void Dispose() {
+        public void DatabaseDispose() {
             if (_database != null) _database.Dispose();
         }
     }

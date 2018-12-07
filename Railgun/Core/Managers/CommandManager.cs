@@ -67,11 +67,11 @@ namespace Railgun.Core.Managers
                 }
 
                 
-                IResult result;
+                
+                var context = new SystemContext(_client, sMessage, _services);
+                var result = await _commands.ExecuteAsync(context, _services);
 
-                using (var context = new SystemContext(_client, sMessage, _services)) {
-                    result = await _commands.ExecuteAsync(context, _services);
-                }
+                context.DatabaseDispose();
 
                 if (result.IsSuccess) {
                     await _analytics.ExecutedCommandAsync(result as CommandResult);
