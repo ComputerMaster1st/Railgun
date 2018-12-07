@@ -182,7 +182,7 @@ namespace Railgun.Core.Music
                         if (await IsAloneAsync() || LeaveAfterSong) {
                             _autoDisconnected = true;
                             break;
-                        } else if (_musicCancelled) _musicCancelled = true;
+                        } else if (_musicCancelled) _musicCancelled = false;
 
                         Status = PlayerStatus.Queuing;
 
