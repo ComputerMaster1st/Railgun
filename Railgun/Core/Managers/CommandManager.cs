@@ -66,30 +66,30 @@ namespace Railgun.Core.Managers
                     });
                 }
 
-                using (var scope = _services.CreateScope()) {
-                    var context = new SystemContext(_client, sMessage);
-                    var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
+                var context = new SystemContext(_client, sMessage);
+                var result = await _commands.ExecuteAsync(context, _services);
 
-                    if (result.IsSuccess) {
-                        await _analytics.ExecutedCommandAsync(result as CommandResult);
+                if (result.IsSuccess) {
+                    await _analytics.ExecutedCommandAsync(result as CommandResult);
 
-                        var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                        var data = await db.ServerCommands.GetAsync(guild.Id);
+                    using (var scope = _services.CreateScope()) {
+                        var data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerCommands.GetAsync(guild.Id);
                         
                         if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
-                        return;
                     }
+                    
+                    return;
+                }
 
-                    switch (result) {
-                        case PreconditionResult r:
-                            await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
-                            break;
-                        case CommandResult c:
-                            await LogCommandErrorAsync(c);
-                            break;
-                        default:
-                            break;
-                    }
+                switch (result) {
+                    case PreconditionResult r:
+                        await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
+                        break;
+                    case CommandResult c:
+                        await LogCommandErrorAsync(c);
+                        break;
+                    default:
+                        break;
                 }
             } catch (Exception e) {
                 await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Command", "Unexpected Exception!", e));
@@ -111,7 +111,7 @@ namespace Railgun.Core.Managers
                 .AppendFormat("---- Command : {0}", result.CommandPath).AppendLine()
                 .AppendFormat("---- Content : {0}", context.Message.Content).AppendLine()
                 .AppendLine("---- Result  : FAILURE").AppendLine()
-                .AppendLine(result.ToString());
+                .AppendLine(result.Exception.ToString());
             
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.CommandManager, true);
 
