@@ -54,7 +54,8 @@ namespace Railgun.Core.Managers
                 var repository = (await _musicService.GetAllSongsAsync()).ToList();
                 var rand = new Random();
 
-                while (playlist.Songs.Count < 100) {
+                if (repository.Count < 100) foreach (var song in repository) playlist.Songs.Add(song.Id);
+                else while (playlist.Songs.Count < 100) {
                     var i = rand.Next(0, repository.Count());
                     var song = repository.ElementAtOrDefault(i);
 
