@@ -66,8 +66,12 @@ namespace Railgun.Core.Managers
                     });
                 }
 
-                var context = new SystemContext(_client, sMessage);
-                var result = await _commands.ExecuteAsync(context, _services);
+                
+                IResult result;
+
+                using (var context = new SystemContext(_client, sMessage, _services)) {
+                    result = await _commands.ExecuteAsync(context, _services);
+                }
 
                 if (result.IsSuccess) {
                     await _analytics.ExecutedCommandAsync(result as CommandResult);
@@ -96,11 +100,11 @@ namespace Railgun.Core.Managers
             }
         }
 
-        private Task MessageReceivedAsync(SocketMessage sMessage) {
+        private async Task MessageReceivedAsync(SocketMessage sMessage) {
             if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel))
-                return Task.CompletedTask;
+                return;
             
-            return Task.Run(() => ProcessMessageAsync(sMessage));
+            await Task.Run(() => ProcessMessageAsync(sMessage));
         }
 
         private async Task LogCommandErrorAsync(CommandResult result) {
