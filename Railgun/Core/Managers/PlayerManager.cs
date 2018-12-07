@@ -149,7 +149,9 @@ namespace Railgun.Core.Managers
             } catch {
                 await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 
-                PlayerContainers.First(container => container.GuildId == args.GuildId).Player.CancelStream();
+                var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
+
+                if (container != null) container.Player.CancelStream(); 
             }
         }
 
