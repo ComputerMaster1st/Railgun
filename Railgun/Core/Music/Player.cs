@@ -60,7 +60,7 @@ namespace Railgun.Core.Music
         public void CancelStream(bool audioDisconnected = false) {
             _musicCancelled = true;
             _streamCancelled = true;
-            _audioDisconnected = true;
+            _audioDisconnected = audioDisconnected;
         }
 
         public bool AddSongRequest(ISong song) {
