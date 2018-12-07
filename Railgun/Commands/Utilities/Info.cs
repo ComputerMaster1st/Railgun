@@ -19,7 +19,6 @@ namespace Railgun.Commands.Utilities
     [Alias("info")]
     public class Info : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
         private readonly CommandService<SystemContext> _commandService;
@@ -27,8 +26,7 @@ namespace Railgun.Commands.Utilities
         private readonly PlayerManager _playerManager;
         private readonly Analytics _analytics;
 
-        public Info(TreeDiagramContext db, MasterConfig config, DiscordShardedClient client, CommandService<SystemContext> commandService, MusicService musicService, PlayerManager playerManager, Analytics analytics) {
-            _db = db;
+        public Info(MasterConfig config, DiscordShardedClient client, CommandService<SystemContext> commandService, MusicService musicService, PlayerManager playerManager, Analytics analytics) {
             _config = config;
             _client = client;
             _commandService = commandService;
@@ -101,18 +99,18 @@ namespace Railgun.Commands.Utilities
 
             output.AppendLine("TreeDiagram Configuration Report")
                 .AppendLine().AppendLine("Server/Guild Configurations :")
-                .AppendFormat("Anti-Caps : {0}", await _db.FilterCapses.CountAsync()).AppendLine()
-                .AppendFormat(" Anti-Url : {0}", await _db.FilterUrls.CountAsync()).AppendLine()
-                .AppendFormat("     Bite : {0}", await _db.FunBites.CountAsync()).AppendLine()
-                .AppendFormat("      RST : {0}", await _db.FunRsts.CountAsync()).AppendLine()
-                .AppendFormat("  Command : {0}", await _db.ServerCommands.CountAsync())
-                .AppendFormat("JoinLeave : {0}", await _db.ServerJoinLeaves.CountAsync()).AppendLine()
-                .AppendFormat("  Mention : {0}", await _db.ServerMentions.CountAsync()).AppendLine()
-                .AppendFormat("    Music : {0}", await _db.ServerMusics.CountAsync()).AppendLine()
-                .AppendFormat("  Warning : {0}", await _db.ServerWarnings.CountAsync()).AppendLine()
+                .AppendFormat("Anti-Caps : {0}", await Context.Database.FilterCapses.CountAsync()).AppendLine()
+                .AppendFormat(" Anti-Url : {0}", await Context.Database.FilterUrls.CountAsync()).AppendLine()
+                .AppendFormat("     Bite : {0}", await Context.Database.FunBites.CountAsync()).AppendLine()
+                .AppendFormat("      RST : {0}", await Context.Database.FunRsts.CountAsync()).AppendLine()
+                .AppendFormat("  Command : {0}", await Context.Database.ServerCommands.CountAsync())
+                .AppendFormat("JoinLeave : {0}", await Context.Database.ServerJoinLeaves.CountAsync()).AppendLine()
+                .AppendFormat("  Mention : {0}", await Context.Database.ServerMentions.CountAsync()).AppendLine()
+                .AppendFormat("    Music : {0}", await Context.Database.ServerMusics.CountAsync()).AppendLine()
+                .AppendFormat("  Warning : {0}", await Context.Database.ServerWarnings.CountAsync()).AppendLine()
                 .AppendLine().AppendLine("User Configurations :")
-                .AppendFormat("  Mention : {0}", await _db.UserMentions.CountAsync()).AppendLine()
-                .AppendFormat("  Command : {0}", await _db.UserCommands.CountAsync()).AppendLine()
+                .AppendFormat("  Mention : {0}", await Context.Database.UserMentions.CountAsync()).AppendLine()
+                .AppendFormat("  Command : {0}", await Context.Database.UserCommands.CountAsync()).AppendLine()
                 .AppendLine()
                 .AppendLine("End of Report!");
             
@@ -171,7 +169,7 @@ namespace Railgun.Commands.Utilities
             var output = new StringBuilder()
                 .AppendLine("TreeDiagram Timers Status")
                 .AppendLine()
-                .AppendFormat("Remind Me : {0}", _db.TimerRemindMes.CountAsync());
+                .AppendFormat("Remind Me : {0}", Context.Database.TimerRemindMes.CountAsync());
             
             await ReplyAsync(Format.Code(output.ToString()));
         }

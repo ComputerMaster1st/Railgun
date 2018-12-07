@@ -21,13 +21,11 @@ namespace Railgun.Commands.Music.MusicAdd
             [Alias("youtube", "yt")]
             public class MusicAddYoutube : SystemBase
             {
-                private readonly TreeDiagramContext _db;
                 private readonly CommandUtils _commandUtils;
                 private readonly MusicManager _musicManager;
                 private readonly MusicService _musicService;
 
-                public MusicAddYoutube(TreeDiagramContext db, CommandUtils commandUtils, MusicManager musicManager, MusicService musicService) {
-                    _db = db;
+                public MusicAddYoutube(CommandUtils commandUtils, MusicManager musicManager, MusicService musicService) {
                     _commandUtils = commandUtils;
                     _musicManager = musicManager;
                     _musicService = musicService;
@@ -45,10 +43,10 @@ namespace Railgun.Commands.Music.MusicAdd
                 
                 [Command("playlist"), UserPerms(GuildPermission.ManageGuild)]
                 public async Task AddPlaylistAsync(string url) {
-                    var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                    var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                     var playlist = await _commandUtils.GetPlaylistAsync(data);
                     
-                    await _db.SaveChangesAsync();
+                    await Context.Database.SaveChangesAsync();
                     
                     var reporter = new Progress<SongProcessStatus>(async (status) => await _musicManager.YoutubePlaylistStatusUpdatedAsync((ITextChannel)Context.Channel, status, data));
                     var resolvingPlaylist = await _musicService.Youtube.DownloadPlaylistAsync(new Uri(url.Trim(' ', '<', '>')), reporter, CancellationToken.None);

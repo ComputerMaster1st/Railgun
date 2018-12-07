@@ -23,7 +23,6 @@ namespace Railgun.Commands.Music
         [Alias("play")]
         public class MusicPlay : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly MasterConfig _config;
             private readonly Log _log;
             private readonly CommandUtils _commandUtils;
@@ -31,8 +30,7 @@ namespace Railgun.Commands.Music
             private readonly MusicService _musicService;
             private bool _playOneTimeOnly = false;
 
-            public MusicPlay(TreeDiagramContext db, MasterConfig config, Log log, CommandUtils commandUtils, PlayerManager playerManager, MusicService musicService) {
-                _db = db;
+            public MusicPlay(MasterConfig config, Log log, CommandUtils commandUtils, PlayerManager playerManager, MusicService musicService) {
                 _config = config;
                 _log = log;
                 _commandUtils = commandUtils;
@@ -101,10 +99,10 @@ namespace Railgun.Commands.Music
                 }
                 
                 var playerContainer = _playerManager.GetPlayer(Context.Guild.Id);
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var playlist = await _commandUtils.GetPlaylistAsync(data);
                 
-                await _db.SaveChangesAsync();
+                await Context.Database.SaveChangesAsync();
                 
                 var response = await ReplyAsync("Standby...");
                 

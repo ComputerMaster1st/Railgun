@@ -15,10 +15,6 @@ namespace Railgun.Commands.Filters
     [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
     public class AntiUrl : SystemBase
     {
-        private readonly TreeDiagramContext _db;
-
-        public AntiUrl(TreeDiagramContext db) => _db = db;
-
         private string ProcessUrl(string url) {
             var cleanUrl = url;
             var parts = new string[] { "http://", "https://", "www." };
@@ -31,7 +27,7 @@ namespace Railgun.Commands.Filters
 
         [Command]
         public async Task EnableAsync() {
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
                 
             data.IsEnabled = !data.IsEnabled;
             
@@ -40,7 +36,7 @@ namespace Railgun.Commands.Filters
 
         [Command("includebots")]
         public async Task IncludeBotsAsync() {
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
                 
             data.IncludeBots = !data.IncludeBots;
             
@@ -49,7 +45,7 @@ namespace Railgun.Commands.Filters
 
         [Command("invites")]
         public async Task InvitesAsync() {
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
             
             data.BlockServerInvites = !data.BlockServerInvites;
             
@@ -59,7 +55,7 @@ namespace Railgun.Commands.Filters
         [Command("add")]
         public async Task AddAsync(string url) {
             var newUrl = ProcessUrl(url);
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
                 
             if (data.BannedUrls.Contains(newUrl)) {
                 await ReplyAsync("The Url specified is already listed.");
@@ -76,7 +72,7 @@ namespace Railgun.Commands.Filters
         [Command("remove")]
         public async Task RemoveAsync(string url) {
             var newUrl = ProcessUrl(url);
-            var data = await _db.FilterUrls.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetAsync(Context.Guild.Id);
             
             if (data == null || !data.BannedUrls.Contains(newUrl)) {
                 await ReplyAsync("The Url specified is not listed.");
@@ -91,7 +87,7 @@ namespace Railgun.Commands.Filters
         [Command("ignore")]
         public async Task IgnoreAsync(ITextChannel pChannel = null) {
             var tc = pChannel ?? (ITextChannel)Context.Channel;
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
             
             if (data.IgnoredChannels.Where(f => f.ChannelId == tc.Id).Count() > 0) {
                 data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
@@ -106,7 +102,7 @@ namespace Railgun.Commands.Filters
         
         [Command("mode")]
         public async Task ModeAsync() {
-            var data = await _db.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetOrCreateAsync(Context.Guild.Id);
             
             data.DenyMode = !data.DenyMode;
             
@@ -117,7 +113,7 @@ namespace Railgun.Commands.Filters
         
         [Command("show"), BotPerms(ChannelPermission.AttachFiles)]
         public async Task ShowAsync() {
-            var data = await _db.FilterUrls.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync("There are no settings available for Anti-Url. Currently disabled.");
@@ -170,14 +166,14 @@ namespace Railgun.Commands.Filters
 
         [Command("reset")]
         public async Task ResetAsync() {
-            var data = await _db.FilterUrls.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterUrls.GetAsync(Context.Guild.Id);
                 
             if (data == null) {
                 await ReplyAsync("Anti-Url has no data to reset.");
                 return;
             }
             
-            _db.FilterUrls.Remove(data);
+            Context.Database.FilterUrls.Remove(data);
             
             await ReplyAsync("Anti-Url has been reset & disabled.");
         }

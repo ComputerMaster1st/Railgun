@@ -14,7 +14,6 @@ namespace Railgun.Commands.Fun
     [Alias("bite")]
     public class Bite : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly MasterConfig _config;
         private readonly CommandUtils _commandUtils;
 
@@ -25,7 +24,7 @@ namespace Railgun.Commands.Fun
         
         [Command]
         public async Task BiteAsync(IUser user = null) {
-            var data = await _db.FunBites.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Bites.Count < 1) {
                 var output = new StringBuilder()
@@ -94,7 +93,7 @@ namespace Railgun.Commands.Fun
                 return;
             }
             
-            var data = await _db.FunBites.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetOrCreateAsync(Context.Guild.Id);
                 
             if (!data.IsEnabled) {
                 await ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
@@ -109,7 +108,7 @@ namespace Railgun.Commands.Fun
         
         [Command("list"), BotPerms(ChannelPermission.AttachFiles)]
         public async Task ListAsync() {
-            var data = await _db.FunBites.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync($"There are no bite sentences available. Use {Format.Code($"{_config.DiscordConfig.Prefix}bite add <message>")} to add some.");
@@ -142,7 +141,7 @@ namespace Railgun.Commands.Fun
         
         [Command("remove"), UserPerms(GuildPermission.ManageMessages)]
         public async Task RemoveAsync(int index) {
-            var data = await _db.FunBites.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Bites.Count < 1) {
                 await ReplyAsync("The list of bite sentences is already empty.");
@@ -165,7 +164,7 @@ namespace Railgun.Commands.Fun
         
         [Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
         public async Task AllowDenyAsync() {
-            var data = await _db.FunBites.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetOrCreateAsync(Context.Guild.Id);
             
             data.IsEnabled = !data.IsEnabled;
             
@@ -174,7 +173,7 @@ namespace Railgun.Commands.Fun
         
         [Command("reset"), UserPerms(GuildPermission.ManageMessages)]
         public async Task ResetAsync() {
-            var data = await _db.FunBites.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunBites.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync("Bites has no data to reset.");
@@ -182,7 +181,7 @@ namespace Railgun.Commands.Fun
                 return;
             }
             
-            _db.FunBites.Remove(data);
+            Context.Database.FunBites.Remove(data);
             
             await ReplyAsync("Bites has been reset.");
         }

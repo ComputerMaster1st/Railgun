@@ -16,12 +16,10 @@ namespace Railgun.Commands.Server
     [Alias("warn")]
     public class Warning : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly Log _log;
         private readonly CommandUtils _commandUtils;
 
-        public Warning(TreeDiagramContext db, Log log, CommandUtils commandUtils) {
-            _db = db;
+        public Warning(Log log, CommandUtils commandUtils) {
             _log = log;
             _commandUtils = commandUtils;
         }
@@ -40,7 +38,7 @@ namespace Railgun.Commands.Server
                 return;
             }
             
-            var data = await _db.ServerWarnings.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetOrCreateAsync(Context.Guild.Id);
             var userWarnings = data.GetWarnings(user.Id);
             
             if (data.WarnLimit < 1) {
@@ -76,7 +74,7 @@ namespace Railgun.Commands.Server
         
         [Command("list"), UserPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)]
         public async Task ListAsync() {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Warnings.Count < 1) {
                 await ReplyAsync("There are currently no users with warnings.");
@@ -121,7 +119,7 @@ namespace Railgun.Commands.Server
         
         [Command("mylist")]
         public async Task MyListAsync() {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Warnings.Count < 1) {
                 await ReplyAsync("There are currently no users with warnings.");
@@ -147,7 +145,7 @@ namespace Railgun.Commands.Server
         
         [Command("clear"), UserPerms(GuildPermission.BanMembers)]
         public async Task ClearAsync(IUser user) {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Warnings.Count < 1) {
                 await ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
@@ -170,7 +168,7 @@ namespace Railgun.Commands.Server
         
         [Command("empty"), UserPerms(GuildPermission.ManageGuild)]
         public async Task EmptyAsync() {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (data == null || data.Warnings.Count < 1) {
                 await ReplyAsync("Warnings list is already empty.");
@@ -185,7 +183,7 @@ namespace Railgun.Commands.Server
         
         [Command("limit"), UserPerms(GuildPermission.ManageGuild)]
         public async Task WarnLimitAsync(int limit = 5) {
-            var data = await _db.ServerWarnings.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetOrCreateAsync(Context.Guild.Id);
             
             if (limit < 0) {
                 await ReplyAsync("The limit entered is invalid. Must be 0 or higher.");
@@ -208,7 +206,7 @@ namespace Railgun.Commands.Server
         
         [Command("reset"), UserPerms(GuildPermission.ManageGuild)]
         public async Task ResetAsync() {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync("Warnings has no data to reset.");
@@ -216,7 +214,7 @@ namespace Railgun.Commands.Server
                 return;
             }
             
-            _db.ServerWarnings.Remove(data);
+            Context.Database.ServerWarnings.Remove(data);
             
             await ReplyAsync("Warnings has been reset & disabled.");
         }

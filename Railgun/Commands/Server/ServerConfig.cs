@@ -13,23 +13,19 @@ namespace Railgun.Commands.Server
         [Alias("config"), UserPerms(GuildPermission.ManageGuild)]
         public class ServerConfig : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public ServerConfig(TreeDiagramContext db) => _db = db;
-
             [Command("mention")]
             public async Task MentionAsync() {
-                var data = await _db.ServerMentions.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMentions.GetAsync(Context.Guild.Id);
             
                 if (data != null) {
-                    _db.ServerMentions.Remove(data);
+                    Context.Database.ServerMentions.Remove(data);
 
                     await ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.");
                     
                     return;
                 }
             
-                data = await _db.ServerMentions.GetOrCreateAsync(Context.Guild.Id);
+                data = await Context.Database.ServerMentions.GetOrCreateAsync(Context.Guild.Id);
                 data.DisableMentions = true;
             
                 await ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.");
@@ -37,7 +33,7 @@ namespace Railgun.Commands.Server
         
             [Command("prefix")]
             public async Task PrefixAsync([Remainder] string input = null) {
-                var data = await _db.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
             
                 if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Prefix)) {
                     await ReplyAsync("No prefix has been specified. Please specify a prefix.");
@@ -58,7 +54,7 @@ namespace Railgun.Commands.Server
         
             [Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)]
             public async Task DeleteCmdAsync() {
-                var data = await _db.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
             
                 data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
             
@@ -67,7 +63,7 @@ namespace Railgun.Commands.Server
         
             [Command("respondtobots")]
             public async Task RespondAsync() {
-                var data = await _db.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerCommands.GetOrCreateAsync(Context.Guild.Id);
             
                 data.RespondToBots = !data.RespondToBots;
             
@@ -76,8 +72,8 @@ namespace Railgun.Commands.Server
             
             [Command("show")]
             public async Task ShowAsync() {
-                var command = await _db.ServerCommands.GetAsync(Context.Guild.Id);
-                var mention = await _db.ServerMentions.GetAsync(Context.Guild.Id);
+                var command = await Context.Database.ServerCommands.GetAsync(Context.Guild.Id);
+                var mention = await Context.Database.ServerMentions.GetAsync(Context.Guild.Id);
                 var output = new StringBuilder()
                     .AppendLine("Railgun Server Configuration").AppendLine()
                     .AppendFormat("    Server Name : {0}", Context.Guild.Name).AppendLine()

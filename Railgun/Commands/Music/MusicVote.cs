@@ -12,13 +12,9 @@ namespace Railgun.Commands.Music
         [Alias("vote"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicVote : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public MusicVote(TreeDiagramContext db) => _db = db;
-
             [Command]
             public async Task EnableAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.VoteSkipEnabled = !data.VoteSkipEnabled;
                 
@@ -33,7 +29,7 @@ namespace Railgun.Commands.Music
                     return;
                 }
                 
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.VoteSkipLimit = percent;
                 

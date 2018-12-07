@@ -16,14 +16,10 @@ namespace Railgun.Commands.Music
         [Alias("np")]
         public class MusicNp : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly PlayerManager _playerManager;
-            
-            public MusicNp(TreeDiagramContext db, PlayerManager playerManager) {
-                _db = db;
-                _playerManager = playerManager;
-            }
-            
+
+            public MusicNp(PlayerManager playerManager) => _playerManager = playerManager;
+
             private Task SetNpChannelAsync(ServerMusic data, ITextChannel tc, bool locked = false) {
                 data.NowPlayingChannel = locked ? tc.Id : 0;
 
@@ -50,7 +46,7 @@ namespace Railgun.Commands.Music
             
             [Command("channel"), UserPerms(GuildPermission.ManageGuild)]
             public async Task SetNpChannelAsync(ITextChannel tcParam = null) {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var tc = tcParam ?? (ITextChannel)Context.Channel;
                     
                 if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel) {

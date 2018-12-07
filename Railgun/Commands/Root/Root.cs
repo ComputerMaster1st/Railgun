@@ -19,14 +19,12 @@ namespace Railgun.Commands.Root
     [Alias("root"), BotAdmin]
     public partial class Root : SystemBase
     {
-        private readonly TreeDiagramContext _dbContext;
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
         private readonly PlayerManager _playerManager;
         private readonly TimerManager _timerManager;
 
-        public Root(TreeDiagramContext dbContext, MasterConfig config, DiscordShardedClient client, PlayerManager playerManager, TimerManager timerManager) {
-            _dbContext = dbContext;
+        public Root(MasterConfig config, DiscordShardedClient client, PlayerManager playerManager, TimerManager timerManager) {
             _config = config;
             _client = client;
             _playerManager = playerManager;
@@ -180,7 +178,7 @@ namespace Railgun.Commands.Root
         
         [Command("eval")]
         public async Task EvalAsync([Remainder] string code) {
-            var eval = new EvalUtils(_client, Context, _dbContext);
+            var eval = new EvalUtils(_client, Context, Context.Database);
             string output;
             
             try { output = (await CSharpScript.EvaluateAsync(code, globals:eval)).ToString(); }

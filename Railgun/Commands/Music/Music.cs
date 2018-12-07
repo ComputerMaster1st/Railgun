@@ -20,13 +20,11 @@ namespace Railgun.Commands.Music
     [Alias("music", "m"), RoleLock(ModuleType.Music)]
     public partial class Music : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly MasterConfig _config;
         private readonly PlayerManager _playerManager;
         private readonly MusicService _musicService;
 
-        public Music(TreeDiagramContext db, MasterConfig config, PlayerManager playerManager, MusicService musicService) {
-            _db = db;
+        public Music(MasterConfig config, PlayerManager playerManager, MusicService musicService) {
             _config = config;
             _playerManager = playerManager;
             _musicService = musicService;
@@ -54,7 +52,7 @@ namespace Railgun.Commands.Music
         
         [Command("playlist"), BotPerms(ChannelPermission.AttachFiles)]
         public async Task PlaylistAsync() {
-            var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
             
             if (data == null || data.PlaylistId == ObjectId.Empty) {
                 await ReplyAsync("Server playlist == currently empty.");
@@ -217,7 +215,7 @@ namespace Railgun.Commands.Music
         
         [Command("show")]
         public async Task ShowAsync() {
-            var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
             var songCount = 0;
             
             if (data == null) {

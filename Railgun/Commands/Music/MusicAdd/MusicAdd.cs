@@ -18,13 +18,11 @@ namespace Railgun.Commands.Music.MusicAdd
         [Alias("add")]
         public partial class MusicAdd : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly Log _log;
             private readonly CommandUtils _commandUtils;
             private readonly MusicService _musicService;
 
-            public MusicAdd(TreeDiagramContext db, Log log, CommandUtils commandUtils, MusicService musicService) {
-                _db = db;
+            public MusicAdd(Log log, CommandUtils commandUtils, MusicService musicService) {
                 _log = log;
                 _commandUtils = commandUtils;
                 _musicService = musicService;
@@ -38,7 +36,7 @@ namespace Railgun.Commands.Music.MusicAdd
                     return;
                 }
                 
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var playlist = await _commandUtils.GetPlaylistAsync(data);
                 var response = await ReplyAsync("Processing Attachment! Standby...");
                 var attachment = Context.Message.Attachments.FirstOrDefault();
@@ -63,7 +61,7 @@ namespace Railgun.Commands.Music.MusicAdd
             
             [Command("repo"), UserPerms(GuildPermission.ManageGuild)]
             public async Task ImportRepoAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var playlist = await _commandUtils.GetPlaylistAsync(data);
                 var repo = (await _musicService.GetAllSongsAsync()).ToList();
                 var existingSongs = 0;

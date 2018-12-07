@@ -16,12 +16,10 @@ namespace Railgun.Commands.Server
     [Alias("server")]
     public partial class Server : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly Log _log;
         private readonly CommandUtils _commandUtils;
 
-        public Server(TreeDiagramContext db, Log log, CommandUtils commandUtils) {
-            _db = db;
+        public Server(Log log, CommandUtils commandUtils) {
             _log = log;
             _commandUtils = commandUtils;
         }
@@ -80,7 +78,7 @@ namespace Railgun.Commands.Server
         
         [Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
         public async Task BanAsync(IGuildUser user, [Remainder] string reason = "No Reason Specified") {
-            var data = await _db.ServerWarnings.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.ServerWarnings.GetAsync(Context.Guild.Id);
             
             if (!await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user)) {
                 await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.");

@@ -14,10 +14,6 @@ namespace Railgun.Commands.Music
         [Alias("rolelock"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicRoleLock : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public MusicRoleLock(TreeDiagramContext db) => _db = db;
-
             [Command("add")]
             public async Task AddRoleAsync([Remainder] string roleName) {
                 foreach (var role in Context.Guild.Roles) 
@@ -32,7 +28,7 @@ namespace Railgun.Commands.Music
     
             [Command("add")]
             public async Task AddRoleAsync(IRole role) {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.AllowedRoles.Add(new AllowedRole(role.Id));
                 
@@ -59,7 +55,7 @@ namespace Railgun.Commands.Music
             
             [Command("remove")]
             public async Task RemoveRoleAsync(IRole role) {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole.RoleId == role.Id);
                 
                 if (count < 1) {

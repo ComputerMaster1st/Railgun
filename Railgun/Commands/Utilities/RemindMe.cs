@@ -13,12 +13,9 @@ namespace Railgun.Commands.Utilities
     [Alias("remindme")]
     public class RemindMe : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly TimerManager _timerManager;
 
-        public RemindMe(TreeDiagramContext db, TimerManager timerManager) {
-            _timerManager = timerManager;
-        }
+        public RemindMe(TimerManager timerManager) => _timerManager = timerManager;
 
         [Command]
         public async Task RemindMeAsync(string expireIn, [Remainder] string message) {
@@ -70,7 +67,7 @@ namespace Railgun.Commands.Utilities
                 return;
             }
 
-            var data = await _db.TimerRemindMes.CreateTimerAsync();
+            var data = await Context.Database.TimerRemindMes.CreateTimerAsync();
 
             data.GuildId = Context.Guild.Id;
             data.TextChannelId = Context.Channel.Id;

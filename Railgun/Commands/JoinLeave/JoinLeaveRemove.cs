@@ -12,10 +12,6 @@ namespace Railgun.Commands.JoinLeave
         [Alias("remove")]
         public class JoinLeaveRemove : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public JoinLeaveRemove(TreeDiagramContext db) => _db = db;
-
             private async Task MsgHandlerAsync(int index, MsgType type) {
                 if (index < 0) {
                     await ReplyAsync("The specified Id can not be lower than 0.");
@@ -23,7 +19,7 @@ namespace Railgun.Commands.JoinLeave
                     return;
                 }
                     
-                var data = await _db.ServerJoinLeaves.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerJoinLeaves.GetAsync(Context.Guild.Id);
                     
                 if (data == null) {
                     await ReplyAsync("Join/Leave has yet to be configured.");

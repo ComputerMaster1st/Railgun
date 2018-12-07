@@ -14,13 +14,9 @@ namespace Railgun.Commands.Filters
     [Alias("anticaps"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
     public class AntiCaps : SystemBase
     {
-        private readonly TreeDiagramContext _db;
-
-        public AntiCaps(TreeDiagramContext db) => _db = db;
-
         [Command]
         public async Task EnableAsync() {
-            var data = await _db.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
 
             data.IsEnabled = !data.IsEnabled;
 
@@ -29,7 +25,7 @@ namespace Railgun.Commands.Filters
 
         [Command("includebots")]
         public async Task IncludeBotsAsync() {
-            var data = await _db.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
 
             data.IncludeBots = !data.IncludeBots;
 
@@ -43,7 +39,7 @@ namespace Railgun.Commands.Filters
                 return;
             }
 
-            var data = await _db.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
 
             data.Percentage = percent;
 
@@ -59,7 +55,7 @@ namespace Railgun.Commands.Filters
                 return;
             }
 
-            var data = await _db.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
 
             data.Length = length;
 
@@ -71,7 +67,7 @@ namespace Railgun.Commands.Filters
         [Command("ignore")]
         public async Task IgnoreAsync(ITextChannel pChannel = null) {
             var tc = pChannel ?? (ITextChannel)Context.Channel;
-            var data = await _db.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetOrCreateAsync(Context.Guild.Id);
 
             if (data.IgnoredChannels.Where(f => f.ChannelId == tc.Id).Count() > 0) {
                 data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
@@ -86,7 +82,7 @@ namespace Railgun.Commands.Filters
 
         [Command("show")]
         public async Task ShowAsync() {
-            var data = await _db.FilterCapses.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetAsync(Context.Guild.Id);
 
             if (data == null) {
                 await ReplyAsync("There are no settings available for Anti-Caps. Currently disabled.");
@@ -126,14 +122,14 @@ namespace Railgun.Commands.Filters
 
         [Command("reset")]
         public async Task ResetAsync() {
-            var data = await _db.FilterCapses.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FilterCapses.GetAsync(Context.Guild.Id);
 
             if (data == null) {
                 await ReplyAsync("Anti-Caps has no data to reset.");
                 return;
             }
 
-            _db.FilterCapses.Remove(data);
+            Context.Database.FilterCapses.Remove(data);
 
             await ReplyAsync("Anti-Caps has been reset & disabled.");
         }

@@ -16,19 +16,17 @@ namespace Railgun.Commands.Music
         [Alias("remove"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicRemove : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly PlayerManager _playerManager;
             private readonly MusicService _musicService;
 
-            public MusicRemove(TreeDiagramContext db, PlayerManager playerManager, MusicService musicService) {
-                _db = db;
+            public MusicRemove(PlayerManager playerManager, MusicService musicService) {
                 _playerManager = playerManager;
                 _musicService = musicService;
             }
             
             [Command]
             public async Task RemoveAsync([Remainder] string ids) {
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                 
                 if (data == null || data.PlaylistId == ObjectId.Empty) {
                     await ReplyAsync("Unknown Music Id Given!");
@@ -74,7 +72,7 @@ namespace Railgun.Commands.Music
                 }
                 
                 var player = playerContainer.Player;
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                 
                 if (data == null || data.PlaylistId == ObjectId.Empty || player == null) {
                     await ReplyAsync("Can not remove current song because I am not in voice channel.");

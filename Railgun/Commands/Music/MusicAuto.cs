@@ -12,13 +12,9 @@ namespace Railgun.Commands.Music
         [Alias("auto"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicAuto : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public MusicAuto(TreeDiagramContext db) => _db = db;
-
             [Command("join")]
             public async Task JoinAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 var vc = ((IGuildUser)Context.Author).VoiceChannel;
                     
                 if (vc == null && data.AutoVoiceChannel == 0) {
@@ -42,7 +38,7 @@ namespace Railgun.Commands.Music
             
             [Command("skip")]
             public async Task SkipAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.AutoSkip = !data.AutoSkip;
                 
@@ -51,7 +47,7 @@ namespace Railgun.Commands.Music
             
             [Command("download")]
             public async Task DownloadAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.AutoDownload = !data.AutoDownload;
                 

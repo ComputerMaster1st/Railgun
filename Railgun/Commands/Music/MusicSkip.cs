@@ -14,19 +14,17 @@ namespace Railgun.Commands.Music
         [Alias("skip")]
         public class MusicSkip : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly CommandUtils _commandUtils;
             private readonly PlayerManager _playerManager;
 
-            public MusicSkip(TreeDiagramContext db, CommandUtils commandUtils, PlayerManager playerManager) {
-                _db = db;
+            public MusicSkip(CommandUtils commandUtils, PlayerManager playerManager) {
                 _commandUtils = commandUtils;
                 _playerManager = playerManager;
             }
             
             [Command]
             public async Task SkipAsync() {
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                 var container = _playerManager.GetPlayer(Context.Guild.Id);
                 
                 if (data == null || container == null) {
@@ -64,7 +62,7 @@ namespace Railgun.Commands.Music
             
             [Command("force"), UserPerms(GuildPermission.ManageGuild)]
             public async Task ForceAsync() {
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                 var container = _playerManager.GetPlayer(Context.Guild.Id);
                 
                 if (data == null || !data.VoteSkipEnabled) {

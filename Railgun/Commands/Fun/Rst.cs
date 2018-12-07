@@ -13,17 +13,13 @@ namespace Railgun.Commands.Fun
     [Alias("rst")]
     public class Rst : SystemBase
     {
-        private readonly TreeDiagramContext _db;
         private readonly MasterConfig _config;
 
-        public Rst(TreeDiagramContext db, MasterConfig config) {
-            _db = db;
-            _config = config;
-        }
-        
+        public Rst(MasterConfig config) => _config = config;
+
         [Command]
         public async Task RstAsync() {
-            var data = await _db.FunRsts.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
@@ -51,7 +47,7 @@ namespace Railgun.Commands.Fun
                 return;
             }
             
-            var data = await _db.FunRsts.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetOrCreateAsync(Context.Guild.Id);
             
             if (!data.IsEnabled) {
                 await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
@@ -66,7 +62,7 @@ namespace Railgun.Commands.Fun
         
         [Command("remove"), UserPerms(GuildPermission.ManageMessages)]
         public async Task RemoveAsync(int index) {
-            var data = await _db.FunRsts.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
@@ -89,7 +85,7 @@ namespace Railgun.Commands.Fun
         
         [Command("list"), BotPerms(ChannelPermission.AttachFiles)]
         public async Task ListAsync() {
-            var data = await _db.FunRsts.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
@@ -117,7 +113,7 @@ namespace Railgun.Commands.Fun
         
         [Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
         public async Task AllowDenyAsync() {
-            var data = await _db.FunRsts.GetOrCreateAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetOrCreateAsync(Context.Guild.Id);
             
             data.IsEnabled = !data.IsEnabled;
             
@@ -126,7 +122,7 @@ namespace Railgun.Commands.Fun
         
         [Command("reset"), UserPerms(GuildPermission.ManageMessages)]
         public async Task ResetAsync() {
-            var data = await _db.FunRsts.GetAsync(Context.Guild.Id);
+            var data = await Context.Database.FunRsts.GetAsync(Context.Guild.Id);
             
             if (data == null) {
                 await ReplyAsync("RST has no data to reset.");
@@ -134,7 +130,7 @@ namespace Railgun.Commands.Fun
                 return;
             }
             
-            _db.FunRsts.Remove(data);
+            Context.Database.FunRsts.Remove(data);
             
             await ReplyAsync("RST has been reset.");
         }

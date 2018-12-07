@@ -16,14 +16,12 @@ namespace Railgun.Commands.Music
         [Alias("reset"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicReset : SystemBase
         {
-            private readonly TreeDiagramContext _db;
             private readonly MasterConfig _config;
             private readonly PlayerManager _playerManager;
             private readonly MusicService _musicService;
             private bool _full = false;
 
-            public MusicReset(TreeDiagramContext db, MasterConfig config, PlayerManager playerManager, MusicService musicService) {
-                _db = db;
+            public MusicReset(MasterConfig config, PlayerManager playerManager, MusicService musicService) {
                 _config = config;
                 _playerManager = playerManager;
                 _musicService = musicService;
@@ -44,7 +42,7 @@ namespace Railgun.Commands.Music
             
             [Command("playlist")]
             public async Task PlaylistAsync() {
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                     
                 if (data == null || data.PlaylistId == ObjectId.Empty && !_full) {
                     await ReplyAsync("Server playlist is already empty.");
@@ -66,7 +64,7 @@ namespace Railgun.Commands.Music
                 
                 await PlaylistAsync();
                 
-                var data = await _db.ServerMusics.GetAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetAsync(Context.Guild.Id);
                 
                 if (data == null) {
                     await ReplyAsync("Music has no data to reset.");
@@ -74,7 +72,7 @@ namespace Railgun.Commands.Music
                     return;
                 }
                 
-                _db.ServerMusics.Remove(data);
+                Context.Database.ServerMusics.Remove(data);
 
                 await ReplyAsync("Music settings & playlist has been reset.");
             }

@@ -12,11 +12,7 @@ namespace Railgun.Commands.JoinLeave
     {
         [Alias("add")]
         public class JoinLeaveAdd : SystemBase
-        {
-            private readonly TreeDiagramContext _db;
-
-            public JoinLeaveAdd(TreeDiagramContext db) => _db = db;
-            
+        {            
             private async Task MsgHandlerAsync(string msg, MsgType type) {
                 if (string.IsNullOrWhiteSpace(msg)) {
                     await ReplyAsync("Please specify a message to add.");
@@ -24,7 +20,7 @@ namespace Railgun.Commands.JoinLeave
                     return;
                 }
                     
-                var data = await _db.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerJoinLeaves.GetOrCreateAsync(Context.Guild.Id);
                     
                 if ((type == MsgType.Join && data.JoinMessages.Contains(msg)) || (type == MsgType.Leave && data.LeaveMessages.Contains(msg))) {
                     await ReplyAsync("Specified message is already listed.");

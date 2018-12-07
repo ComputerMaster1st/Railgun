@@ -12,13 +12,9 @@ namespace Railgun.Commands.Music
         [Alias("silent"), UserPerms(GuildPermission.ManageGuild)]
         public class MusicSilent : SystemBase
         {
-            private readonly TreeDiagramContext _db;
-
-            public MusicSilent(TreeDiagramContext db) => _db = db;
-
             [Command("running")]
             public async Task RunningAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                     
                 data.SilentNowPlaying = !data.SilentNowPlaying;
                     
@@ -27,7 +23,7 @@ namespace Railgun.Commands.Music
             
             [Command("install")]
             public async Task InstallAsync() {
-                var data = await _db.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+                var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
                 
                 data.SilentSongProcessing = !data.SilentSongProcessing;
                 
