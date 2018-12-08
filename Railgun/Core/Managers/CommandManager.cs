@@ -104,7 +104,7 @@ namespace Railgun.Core.Managers
             if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
                 return Task.CompletedTask;
             
-            return Task.Factory.StartNew(async () => await ProcessMessageAsync(sMessage));
+            return ProcessMessageAsync(sMessage);
         }
 
         private async Task LogCommandErrorAsync(CommandResult result) {
