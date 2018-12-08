@@ -80,7 +80,7 @@ namespace Railgun.Core.Managers
 
                                 var data = await context.Database.ServerCommands.GetAsync(guild.Id);
                                     
-                                if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
+                                if (data != null && (data.DeleteCmdAfterUse && perms.ManageMessages)) await msg.DeleteAsync();
                                 
                                 return;
                             } else await LogCommandErrorAsync(context, c);
