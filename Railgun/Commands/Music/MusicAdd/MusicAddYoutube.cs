@@ -38,7 +38,7 @@ namespace Railgun.Commands.Music
                     foreach (var url in urls.Split(new char[] { ' ', ',' })) if (!string.IsNullOrWhiteSpace(url))
                         urlList.Add(url.Trim(' ', '<', '>'));
                     
-                    return Task.Run(() => _musicManager.AddYoutubeSongsAsync(urlList, (ITextChannel)Context.Channel));
+                    return Task.Factory.StartNew(async () => await _musicManager.AddYoutubeSongsAsync(urlList, (ITextChannel)Context.Channel));
                 }
                 
                 [Command("playlist"), UserPerms(GuildPermission.ManageGuild)]
@@ -60,7 +60,7 @@ namespace Railgun.Commands.Music
                     output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.");
                     
                     await ReplyAsync(output.ToString());
-                    await Task.Run(async () => await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
+                    await Task.Factory.StartNew(async () => await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
                 }
             }
         }
