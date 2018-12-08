@@ -16,9 +16,12 @@ namespace Railgun.Commands.Fun
             _client = client;
             _commandUtils = commandUtils;
         }
+
+        [Command]
+        public Task ZapAsync() => ZapAsync((IGuildUser)Context.Author);
         
         [Command]
-        public async Task ZapAsync(IGuildUser user = null) {
+        public async Task ZapAsync(IGuildUser user) {
             if (user != null && user.Id == _client.CurrentUser.Id) {
                 await ReplyAsync("I'm immune to electricity, BAKA!");
                 return;
