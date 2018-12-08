@@ -116,12 +116,17 @@ namespace Railgun.Core.Managers
                     {
                         var output = (SongProcessError)status;
                         var url = "https://youtu.be/" + output.Id.SourceId;
-
-                        await tc.SendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
-
                         var logOutput = new StringBuilder()
-                            .AppendFormat("<{0} <{1}>> Process Failure!", tc.Guild.Name, tc.GuildId).AppendLine()
-                            .AppendFormat("{0} - {1}", url, output.Exceptions.Message);
+                                .AppendFormat("<{0} <{1}>> Process Failure!", tc.Guild.Name, tc.GuildId).AppendLine()
+                                .AppendFormat("{0} - {1}", url, output.Exceptions.Message);
+
+                        try {
+                            await tc.SendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
+                        } catch (ArgumentException ex) {
+                            await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
+                        } catch (Exception ex) {
+                            await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing TC", ex));
+                        }
 
                         await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord);
                     }
