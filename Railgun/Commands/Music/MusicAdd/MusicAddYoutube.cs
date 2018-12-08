@@ -60,7 +60,7 @@ namespace Railgun.Commands.Music.MusicAdd
                     output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.");
                     
                     await ReplyAsync(output.ToString());
-                    await Task.Run(() => _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
+                    await Task.Run(async () => await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
                 }
             }
         }
