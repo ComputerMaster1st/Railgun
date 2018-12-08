@@ -22,29 +22,27 @@ namespace Railgun.Core.Commands.Attributes
             var user = (IGuildUser)context.Author;
             var output = new StringBuilder();
 
-            using (var db = services.GetService<TreeDiagramContext>()) {
-                switch (_moduleType) {
-                    case ModuleType.Music:
-                        var data = await db.ServerMusics.GetAsync(context.Guild.Id);
+            switch (_moduleType) {
+                case ModuleType.Music:
+                    var data = await context.Database.ServerMusics.GetAsync(context.Guild.Id);
 
-                        if (data == null || data.AllowedRoles.Count < 1) return PreconditionResult.FromSuccess();
+                    if (data == null || data.AllowedRoles.Count < 1) return PreconditionResult.FromSuccess();
 
-                        var tempOutput = new StringBuilder();
+                    var tempOutput = new StringBuilder();
 
-                        foreach (var allowedRole in data.AllowedRoles) {
-                            var role = context.Guild.GetRole(allowedRole.RoleId);
+                    foreach (var allowedRole in data.AllowedRoles) {
+                        var role = context.Guild.GetRole(allowedRole.RoleId);
 
-                            tempOutput.AppendLine($"| {role.Name} |");
+                        tempOutput.AppendLine($"| {role.Name} |");
 
-                            if (user.RoleIds.Contains(allowedRole.RoleId)) return PreconditionResult.FromSuccess();
-                        }
+                        if (user.RoleIds.Contains(allowedRole.RoleId)) return PreconditionResult.FromSuccess();
+                    }
 
-                        output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")
-                            .AppendLine()
-                            .AppendLine(tempOutput.ToString());
-                        break;
+                    output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")
+                        .AppendLine()
+                        .AppendLine(tempOutput.ToString());
+                    break;
                 }
-            }
 
             return PreconditionResult.FromError(output.ToString());
         }

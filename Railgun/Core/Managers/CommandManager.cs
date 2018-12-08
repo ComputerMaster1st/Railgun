@@ -71,24 +71,23 @@ namespace Railgun.Core.Managers
 
                 context.DatabaseDispose();
 
-                if (result.IsSuccess) {
-                    await _analytics.ExecutedCommandAsync(result as CommandResult);
-
-                    using (var scope = _services.CreateScope()) {
-                        var data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerCommands.GetAsync(guild.Id);
-                        
-                        if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
-                    }
-                    
-                    return;
-                }
-
                 switch (result) {
                     case PreconditionResult r:
                         await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
                         break;
                     case CommandResult c:
-                        await LogCommandErrorAsync(c);
+                        if (result.IsSuccess) {
+                            await _analytics.ExecutedCommandAsync(result as CommandResult);
+
+                            using (var scope = _services.CreateScope()) {
+                                var data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerCommands.GetAsync(guild.Id);
+                                
+                                if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
+                            }
+                            
+                            return;
+                        } else await LogCommandErrorAsync(c);
+
                         break;
                     default:
                         break;

@@ -11,24 +11,20 @@ namespace Railgun.Core.Commands.Pipelines
     public class PrefixPipeline : IPipeline
     {
         private readonly MasterConfig _config;
-        private readonly TreeDiagramContext _db;
         private SystemContext _ctx = null;
 
-        public PrefixPipeline(MasterConfig config, TreeDiagramContext db) {
-            _config = config;
-            _db = db;
-        }
+        public PrefixPipeline(MasterConfig config) => _config = config;
 
         public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
             _ctx = context.Context as SystemContext;
             var msg = (IUserMessage)_ctx.Message;
             var content = msg.Content;
-            var sCommand = await _db.ServerCommands.GetAsync(_ctx.Guild.Id);
+            var sCommand = await _ctx.Database.ServerCommands.GetAsync(_ctx.Guild.Id);
 
             if (((sCommand == null || !sCommand.RespondToBots) && msg.Author.IsBot) || msg.Author.IsWebhook) 
                 return new PrefixResult();
 
-            var uCommand = await _db.UserCommands.GetAsync(msg.Author.Id);
+            var uCommand = await _ctx.Database.UserCommands.GetAsync(msg.Author.Id);
 
             if (content.StartsWith(_config.DiscordConfig.Prefix)) 
                 return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, msg, next);
