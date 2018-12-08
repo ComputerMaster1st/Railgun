@@ -65,32 +65,30 @@ namespace Railgun.Core.Managers
                         } catch { }
                     });
                 }
-                
-                var context = new SystemContext(_client, sMessage, _services);
-                var result = await _commands.ExecuteAsync(context, _services);
 
-                context.DatabaseDispose();
+                using (var scope = _services.CreateScope())
+                using (var context = new SystemContext(_client, sMessage, scope.ServiceProvider)) {
+                    var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
 
-                switch (result) {
-                    case PreconditionResult r:
-                        await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
-                        break;
-                    case CommandResult c:
-                        if (result.IsSuccess) {
-                            await _analytics.ExecutedCommandAsync(result as CommandResult);
+                    switch (result) {
+                        case PreconditionResult r:
+                            await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
+                            break;
+                        case CommandResult c:
+                            if (result.IsSuccess) {
+                                await _analytics.ExecutedCommandAsync(context, result as CommandResult);
 
-                            using (var scope = _services.CreateScope()) {
-                                var data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerCommands.GetAsync(guild.Id);
-                                
+                                var data = await context.Database.ServerCommands.GetAsync(guild.Id);
+                                    
                                 if (data.DeleteCmdAfterUse && perms.ManageMessages) await msg.DeleteAsync();
-                            }
-                            
-                            return;
-                        } else await LogCommandErrorAsync(c);
+                                
+                                return;
+                            } else await LogCommandErrorAsync(context, c);
 
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } catch (Exception e) {
                 await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Command", "Unexpected Exception!", e));
@@ -104,9 +102,7 @@ namespace Railgun.Core.Managers
             return Task.Factory.StartNew(async () => await ProcessMessageAsync(sMessage));
         }
 
-        private async Task LogCommandErrorAsync(CommandResult result) {
-            var context = result.Context;
-
+        private async Task LogCommandErrorAsync(SystemContext context, CommandResult result) {
             var output = new StringBuilder()
                 .AppendFormat("<{0} <{1}>>", context.Guild.Name, context.Guild.Id).AppendLine()
                 .AppendFormat("---- Command : {0}", result.CommandPath).AppendLine()

@@ -51,9 +51,8 @@ namespace Railgun.Core.Utilities
             return Task.CompletedTask;
         }
 
-        public async Task ExecutedCommandAsync(CommandResult result) {
+        public async Task ExecutedCommandAsync(SystemContext ctx, CommandResult result) {
             var cmdString = result.CommandPath;
-            var ctx = result.Context;
             var guild = ctx.Guild;
 
             if (cmdString != "N/A") {

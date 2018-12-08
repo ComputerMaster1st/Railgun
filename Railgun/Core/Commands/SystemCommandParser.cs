@@ -87,12 +87,7 @@ namespace Railgun.Core.Commands
                         break;
                     case TokenizerState.Normal
                         when IsEscapeCharacter(c) && isLastCharacter:
-                        return Failure(
-                            TokenizerFailureReason.UnfinishedEscapeSequence,
-                            i);
-                    // case TokenizerState.Normal
-                    //     when IsQuoteCharacter(c):
-                    //     return Failure(TokenizerFailureReason.UnexpectedQuote, i);
+                        return Failure(TokenizerFailureReason.UnfinishedEscapeSequence, i);
                     case TokenizerState.Normal
                         when IsEscapeCharacter(c):
                         state = TokenizerState.EscapeCharacter;
@@ -103,32 +98,14 @@ namespace Railgun.Core.Commands
                         state = TokenizerState.Normal;
                         goto default;
                     case TokenizerState.EscapeCharacter:
-                        return Failure(
-                            TokenizerFailureReason.InvalidEscapeSequence, i);
+                        return Failure(TokenizerFailureReason.InvalidEscapeSequence, i);
 
-                    // case TokenizerState.ParameterSeparator
-                    //     when IsQuoteCharacter(c) && isLastCharacter:
-                    //     return Failure(TokenizerFailureReason.UnfinishedQuotedString, i);
-                    // case TokenizerState.ParameterSeparator
-                    //     when IsQuoteCharacter(c):
-                    //     state = TokenizerState.QuotedString;
-                    //     beginQuote = c;
-                    //     paramBuilder.Clear();
-                    //     break;
                     case TokenizerState.ParameterSeparator
                         when !char.IsWhiteSpace(c):
                         state = TokenizerState.Normal;
                         paramBuilder.Clear();
                         goto default;
-
-                    // case TokenizerState.QuotedString
-                    //     when IsCompletedQuote(beginQuote, c):
-                    //     state = TokenizerState.Normal;
-                    //     break;
-                    // case TokenizerState.QuotedString
-                    //     when isLastCharacter:
-                    //     return Failure(TokenizerFailureReason.UnfinishedQuotedString, i);
-
+                        
                     default:
                         paramBuilder.Append(c);
                         break;

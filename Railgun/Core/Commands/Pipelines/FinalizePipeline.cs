@@ -8,15 +8,14 @@ namespace Railgun.Core.Commands.Pipelines
     public class FinalizePipeline : IPipeline
     {
         public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next) {
-            var ctx = context.Context as SystemContext;
             var cmd = context.Command;
 
             try { 
                 await next(); 
 
-                return new CommandResult(true, ctx, cmd);
+                return new CommandResult(true, cmd);
             } 
-            catch (Exception e) { return new CommandResult(false, ctx, cmd, e); }
+            catch (Exception e) { return new CommandResult(false, cmd, e); }
         }
     }
 }
