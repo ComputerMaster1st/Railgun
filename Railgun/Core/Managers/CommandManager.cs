@@ -66,8 +66,8 @@ namespace Railgun.Core.Managers
                     });
                 }
 
-                using (var scope = _services.CreateScope())
-                using (var context = new SystemContext(_client, sMessage, scope.ServiceProvider)) {
+                using (var scope = _services.CreateScope()) {
+                    var context = new SystemContext(_client, sMessage, scope.ServiceProvider);
                     var result = await _commands.ExecuteAsync(context, scope.ServiceProvider);
 
                     switch (result) {
