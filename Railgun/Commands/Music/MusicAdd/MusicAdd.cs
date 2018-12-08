@@ -11,7 +11,7 @@ using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
-namespace Railgun.Commands.Music.MusicAdd
+namespace Railgun.Commands.Music
 {
     public partial class Music
     {
