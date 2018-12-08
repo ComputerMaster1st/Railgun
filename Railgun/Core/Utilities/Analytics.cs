@@ -20,6 +20,7 @@ namespace Railgun.Core.Utilities
         public uint ReceivedMessages { get; private set; } = 0;
         public uint UpdatedMessages { get; private set; } = 0;
         public uint DeletedMessages { get; set; } = 0;
+        public uint FilterDeletedMessages { get; set; } = 0;
 
         public Dictionary<string, int> UsedCommands { get; } = new Dictionary<string, int>();
 

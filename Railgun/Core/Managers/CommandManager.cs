@@ -58,15 +58,13 @@ namespace Railgun.Core.Managers
                         try {
                             msg.DeleteAsync();
                             
-                            _analytics.DeletedMessages++;
+                            _analytics.FilterDeletedMessages++;
 
                             Task.Delay(5000);
                             filterMsg.DeleteAsync();
                         } catch { }
                     });
                 }
-
-                
                 
                 var context = new SystemContext(_client, sMessage, _services);
                 var result = await _commands.ExecuteAsync(context, _services);
