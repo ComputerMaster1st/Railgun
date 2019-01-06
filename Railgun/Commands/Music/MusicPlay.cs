@@ -110,7 +110,7 @@ namespace Railgun.Commands.Music
                     await UploadAsync(playerContainer, playlist, data, response);
                 else if (input.Contains("YOUTUBE#") || input.Contains("DISCORD#"))
                     await AddByIdAsync(input, playerContainer, playlist, data, response);
-                else if (input.Contains("http://") || input.Contains("https//"))
+                else if (input.Contains("http://") || input.Contains("https://"))
                     await AddByUrlAsync(input.Trim('<', '>'), playerContainer, playlist, data, response);
                 else await SearchAsync(input, playerContainer, playlist, data, response);
             }
