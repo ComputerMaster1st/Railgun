@@ -1,10 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # 
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord", "Shared.Music\src\AudioChord\AudioChord.csproj", "{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord.Parsers", "Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj", "{B15A8668-4E34-4949-A289-AFA2F407A370}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeDiagram", "TreeDiagram\TreeDiagram.csproj", "{A5739A19-A24B-44A2-81FD-0ED64255C926}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railgun", "Railgun\Railgun.csproj", "{0AD77693-5A9C-445F-924F-30944A500810}"
