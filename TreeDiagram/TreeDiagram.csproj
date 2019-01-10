@@ -9,7 +9,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.1.4" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
-      <PackageReference Include="AudioChord" Version="1.0.1" />
+
+      <ProjectReference Include="../Shared.Music/src/AudioChord/AudioChord.csproj" />
     </ItemGroup>
 
 </Project>
