@@ -29,9 +29,12 @@ namespace Railgun.Commands.Server
 
             return ReplyAsync($"{user.Mention} has received a warning! Reason: {Format.Bold(reason)}");
         }
+
+        [Command, UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
+        public Task WarnAsync(IGuildUser user) => WarnAsync(user, "No Reason Specified");
         
         [Command, UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
-        public async Task WarnAsync(IUser user, [Remainder] string reason = "No Reason Specified") {
+        public async Task WarnAsync(IGuildUser user, [Remainder] string reason) {
             if (user.Id == Context.Client.CurrentUser.Id) {
                 await ReplyAsync("You can not warn me. Just No. Baka.");
 
