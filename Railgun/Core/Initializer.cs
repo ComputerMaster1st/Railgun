@@ -14,6 +14,7 @@ using Railgun.Core.Api;
 using Railgun.Core.Api.Youtube;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Pipelines;
+using Railgun.Core.Commands.Readers;
 using Railgun.Core.Configuration;
 using Railgun.Core.Filters;
 using Railgun.Core.Logging;
@@ -48,7 +49,10 @@ namespace Railgun.Core
 
             _commandService = new CommandServiceBuilder<SystemContext>()
                 .AddModules(Assembly.GetEntryAssembly())
-                .AddTypeReaderFactory<NullTypeReaderFactory>()
+                .AddTypeReaderFactory<DiscordTypeReaderFactory>(() => {
+                    return new DiscordTypeReaderFactory()
+                        .AddReader(new IUserTypeReader(_client));
+                })
                 .AddPipeline<PrefixPipeline>()
                 .AddCommandParser<SystemCommandParser<SystemContext>>()
                 .AddPipeline<PreconditionPipeline>()
