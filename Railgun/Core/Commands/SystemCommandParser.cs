@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Finite.Commands;
 using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Commands.Results;
 
 namespace Railgun.Core.Commands
 {
@@ -17,12 +18,40 @@ namespace Railgun.Core.Commands
             QuotedString
         }
 
-        protected override bool GetArgumentsForMatch(ICommandService commands, CommandMatch match, out object[] result) {
+        public override IResult Parse(CommandExecutionContext executionContext)
+        {
+            var result = Tokenize(executionContext.Context.Message,
+                executionContext.PrefixLength);
+
+            if (!result.IsSuccess)
+                return result;
+
+            string[] tokenStream = result.TokenStream;
+            var commands = executionContext.CommandService;
+
+            foreach (var match in commands.FindCommands(tokenStream))
+            {
+                if (GetArgumentsForMatch(executionContext.CommandService,
+                    match, out object[] arguments))
+                {
+                    // TODO: maybe I should migrate this to a parser result?
+                    executionContext.Command = match.Command;
+                    executionContext.Arguments = arguments;
+
+                    return SuccessResult.Instance;
+                }
+            }
+
+            return CommandNotFoundResult.Instance;
+        }
+
+
+        protected bool GetArgumentsForMatch(CommandExecutionContext execContext, CommandMatch match, out object[] result) {
             bool TryParseMultiple(ParameterInfo argument, int startPos, out object[] parsed) {
                 parsed = new object[match.Arguments.Length - startPos];
 
                 for (int i = startPos; i < match.Arguments.Length; i++) {
-                    var ok = TryParseObject(commands, argument, match.Arguments[i], out var value);
+                    var ok = TryParseObject(execContext.CommandService, argument, match.Arguments[i], out var value);
 
                     if (!ok) return false;
 
@@ -34,6 +63,8 @@ namespace Railgun.Core.Commands
 
             var parameters = match.Command.Parameters;
             result = new object[parameters.Count];
+            
+            if (match.Arguments.Length < 1) return false;
 
             for (int i = 0; i < parameters.Count; i++) {
                 var argument = parameters[i];
@@ -48,14 +79,13 @@ namespace Railgun.Core.Commands
                     for (int subIndex = i; subIndex < match.Arguments.Length; subIndex++)
                         output.AppendFormat("{0} ", match.Arguments[subIndex]);
                     
-                    var ok = TryParseObject(commands, argument, output.ToString().TrimEnd(' '), out var value);
+                    var ok = TryParseObject(execContext.CommandService, argument, output.ToString().TrimEnd(' '), out var value);
 
                     if (!ok) return false;
 
                     result[i] = value;
-                } else if (match.Arguments.Length < 1) return false;
-                else {
-                    var ok = TryParseObject(commands, argument, match.Arguments[i], out var value);
+                } else {
+                    var ok = TryParseObject(execContext.CommandService, argument, match.Arguments[i], out var value);
 
                     if (!ok) return false;
 
