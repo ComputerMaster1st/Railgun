@@ -53,7 +53,8 @@ namespace Railgun.Core
                     return new DiscordTypeReaderFactory()
                         .AddReader(new IUserTypeReader())
                         .AddReader(new IGuildUserTypeReader())
-                        .AddReader(new ITextChannelTypeReader());
+                        .AddReader(new ITextChannelTypeReader())
+                        .AddReader(new IRoleTypeReader());
                 })
                 .AddPipeline<PrefixPipeline>()
                 .AddCommandParser<SystemCommandParser<SystemContext>>()
