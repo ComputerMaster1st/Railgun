@@ -53,7 +53,8 @@ namespace Railgun.Core.Commands
                     if (!ok) return false;
 
                     result[i] = value;
-                } else {
+                } else if (match.Arguments.Length < 1) return false;
+                else {
                     var ok = TryParseObject(commands, argument, match.Arguments[i], out var value);
 
                     if (!ok) return false;
