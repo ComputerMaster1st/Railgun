@@ -18,6 +18,25 @@ namespace Railgun.Core.Commands
             QuotedString
         }
 
+        private readonly Dictionary<Type, Func<string, (bool, object)>>
+            _defaultParsers
+            = new Dictionary<Type, Func<string, (bool, object)>>()
+            {
+                [typeof(sbyte)] = (x) => (sbyte.TryParse(x, out var y), y),
+                [typeof(byte)] = (x) => (byte.TryParse(x, out var y), y),
+
+                [typeof(short)] = (x) => (short.TryParse(x, out var y), y),
+                [typeof(ushort)] = (x) => (ushort.TryParse(x, out var y), y),
+
+                [typeof(int)] = (x) => (int.TryParse(x, out var y), y),
+                [typeof(uint)] = (x) => (uint.TryParse(x, out var y), y),
+
+                [typeof(long)] = (x) => (long.TryParse(x, out var y), y),
+                [typeof(ulong)] = (x) => (ulong.TryParse(x, out var y), y),
+                [typeof(string)] = (x) => (true, x)
+            };
+
+
         public override IResult Parse(CommandExecutionContext executionContext)
         {
             var result = Tokenize(executionContext.Context.Message,
@@ -42,6 +61,25 @@ namespace Railgun.Core.Commands
             }
 
             return CommandNotFoundResult.Instance;
+        }
+
+        protected bool TryParseObject(CommandExecutionContext execContext,
+            ParameterInfo param, string value, out object result)
+        {
+            var factory = execContext.CommandService.TypeReaderFactory;
+            if (factory.TryGetTypeReader(param.Type, out var reader))
+            {
+                return reader.TryRead(value, out result);
+            }
+            else if (_defaultParsers.TryGetValue(param.Type, out var parser))
+            {
+                var (success, parsed) = parser(value);
+                result = parsed;
+                return success;
+            }
+
+            result = null;
+            return false;
         }
 
 
