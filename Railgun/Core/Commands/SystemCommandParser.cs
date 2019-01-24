@@ -87,7 +87,7 @@ namespace Railgun.Core.Commands
                 parsed = new object[match.Arguments.Length - startPos];
 
                 for (int i = startPos; i < match.Arguments.Length; i++) {
-                    var ok = TryParseObject(execContext.CommandService, argument, match.Arguments[i], out var value);
+                    var ok = TryParseObject(execContext, argument, match.Arguments[i], out var value);
 
                     if (!ok) return false;
 
@@ -99,8 +99,6 @@ namespace Railgun.Core.Commands
 
             var parameters = match.Command.Parameters;
             result = new object[parameters.Count];
-
-            if (match.Arguments.Length < 1) return false;
 
             for (int i = 0; i < parameters.Count; i++) {
                 var argument = parameters[i];
@@ -115,13 +113,14 @@ namespace Railgun.Core.Commands
                     for (int subIndex = i; subIndex < match.Arguments.Length; subIndex++)
                         output.AppendFormat("{0} ", match.Arguments[subIndex]);
                     
-                    var ok = TryParseObject(execContext.CommandService, argument, output.ToString().TrimEnd(' '), out var value);
+                    var ok = TryParseObject(execContext, argument, output.ToString().TrimEnd(' '), out var value);
 
                     if (!ok) return false;
 
                     result[i] = value;
-                } else {
-                    var ok = TryParseObject(execContext.CommandService, argument, match.Arguments[i], out var value);
+                } else if (match.Arguments.Length < 1) return false;
+                else {
+                    var ok = TryParseObject(execContext, argument, match.Arguments[i], out var value);
 
                     if (!ok) return false;
 
