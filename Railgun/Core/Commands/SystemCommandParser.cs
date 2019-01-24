@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using Finite.Commands;
 using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Commands.Readers;
 using Railgun.Core.Commands.Results;
 
 namespace Railgun.Core.Commands
 {
-    
     public class SystemCommandParser<TContext> : DefaultCommandParser<TContext> where TContext : class, ICommandContext
     {
         private enum TokenizerState {
@@ -69,7 +69,7 @@ namespace Railgun.Core.Commands
             var factory = execContext.CommandService.TypeReaderFactory;
             if (factory.TryGetTypeReader(param.Type, out var reader))
             {
-                return reader.TryRead(value, out result);
+                return ((ISystemTypeReader)reader).TryRead(value, execContext.Context, out result);
             }
             else if (_defaultParsers.TryGetValue(param.Type, out var parser))
             {
