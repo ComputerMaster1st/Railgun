@@ -4,19 +4,17 @@ using Finite.Commands;
 
 namespace Railgun.Core.Commands.Readers
 {
-    public abstract class DiscordTypeReader : ITypeReader
+    public abstract class DiscordTypeReader : ISystemTypeReader
     {
-        private IDiscordClient _client;
-
         public abstract Type SupportedType { get; }
 
-        public abstract bool TryParse(string value, IDiscordClient client, out object result);
+        public abstract bool TryParse(string value, SystemContext context, out object result);
 
-        public DiscordTypeReader(IDiscordClient client) => _client  = client;
+        public bool TryRead(string value, out object result) => throw new NotImplementedException();
 
-        public bool TryRead(string value, out object result)
+        public bool TryRead(string value, ICommandContext context, out object result)
         {
-            if (TryParse(value, _client, out object parseResult)) {
+            if (TryParse(value, (SystemContext)context, out object parseResult)) {
                 result = parseResult;
                 return true;
             }

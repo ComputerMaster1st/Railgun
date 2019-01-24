@@ -5,15 +5,12 @@ namespace Railgun.Core.Commands.Readers
 {
     public class ITextChannelTypeReader : DiscordTypeReader
     {
-        public ITextChannelTypeReader(IDiscordClient client) : base(client) { }
-
         public override Type SupportedType => typeof(ITextChannel);
 
-        public override bool TryParse(string value, IDiscordClient client, out object result)
+        public override bool TryParse(string value, SystemContext context, out object result)
         {
             if (MentionParser.TryParseChannel(value, out ulong id)) {
-                var channel = client.GetChannelAsync(id).GetAwaiter().GetResult();
-                result = (ITextChannel)channel;
+                result = context.Guild.GetTextChannelAsync(id).GetAwaiter().GetResult();
                 return true;
             }
 

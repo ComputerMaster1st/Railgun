@@ -82,7 +82,6 @@ namespace Railgun.Core.Commands
             return false;
         }
 
-
         protected bool GetArgumentsForMatch(CommandExecutionContext execContext, CommandMatch match, out object[] result) {
             bool TryParseMultiple(ParameterInfo argument, int startPos, out object[] parsed) {
                 parsed = new object[match.Arguments.Length - startPos];
