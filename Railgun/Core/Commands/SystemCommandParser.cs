@@ -31,8 +31,7 @@ namespace Railgun.Core.Commands
 
             foreach (var match in commands.FindCommands(tokenStream))
             {
-                if (GetArgumentsForMatch(executionContext.CommandService,
-                    match, out object[] arguments))
+                if (GetArgumentsForMatch(executionContext, match, out object[] arguments))
                 {
                     // TODO: maybe I should migrate this to a parser result?
                     executionContext.Command = match.Command;
@@ -63,7 +62,7 @@ namespace Railgun.Core.Commands
 
             var parameters = match.Command.Parameters;
             result = new object[parameters.Count];
-            
+
             if (match.Arguments.Length < 1) return false;
 
             for (int i = 0; i < parameters.Count; i++) {
