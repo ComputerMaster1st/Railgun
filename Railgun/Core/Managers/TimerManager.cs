@@ -7,6 +7,7 @@ using System.Timers;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Containers;
 using Railgun.Core.Logging;
+using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.TreeTimer;
 
@@ -42,11 +43,11 @@ namespace Railgun.Core.Managers
 
                 _remindMeContainers.Add(container);
 
-                if (isNew) await _log.LogToBotLogAsync($"Remind Me || Timer #{data.Id} Created & Started!", BotLogType.TimerManager);
+                if (isNew) await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created & Started!", BotLogType.TimerManager);
 
                 return true;
             } else if (isNew) {
-                await _log.LogToBotLogAsync($"Remind Me || Timer #{data.Id} Created!", BotLogType.TimerManager);
+                await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created!", BotLogType.TimerManager);
                 return false;
             } else return false;
         }

@@ -100,8 +100,9 @@ namespace Railgun.Core.Managers
             var output = new StringBuilder()
                 .AppendLine("Finished Processing YouTube Playlist! Results...")
                 .AppendFormat(
-                "Already Installed : {0} || Imported From Repository : {1} || Newly Encoded : {2} || Failed : {3}",
+                "Already Installed : {0} {1} Imported From Repository : {2} {1} Newly Encoded : {3} {1} Failed : {4}",
                     Format.Bold(alreadyInstalled.ToString()),
+                    Response.GetSeparator(),
                     Format.Bold(resolvingPlaylist.ExistingSongs.ToString()),
                     Format.Bold(((resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs) - failed).ToString()),
                     Format.Bold(failed.ToString())

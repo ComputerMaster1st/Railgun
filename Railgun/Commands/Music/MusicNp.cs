@@ -6,6 +6,7 @@ using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Managers;
+using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
@@ -37,7 +38,8 @@ namespace Railgun.Commands.Music
                 var currentTime = DateTime.Now - player.SongStartedAt;
                 var output = new StringBuilder()
                     .AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine()
-                    .AppendFormat("Url: {0} || Length: {1}/{2}", Format.Bold($"<{meta.Url}>"), 
+                    .AppendFormat("Url: {0} {1} Length: {2}/{3}", Format.Bold($"<{meta.Url}>"),
+                                  Response.GetSeparator(),
                                   Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"), 
                                   Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"));
             

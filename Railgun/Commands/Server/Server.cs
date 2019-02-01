@@ -71,7 +71,7 @@ namespace Railgun.Commands.Server
             await ReplyAsync($"{Format.Bold(user.Username)} has been kicked from the server. Reason: {Format.Bold(reason)}");
             
             var output = new StringBuilder()
-                .AppendFormat("User Kicked || <{0} ({1})> {2}#{3}", Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
+                .AppendFormat("User Kicked {0} <{1} ({2})> {3}#{4}", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
             
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
         }
@@ -94,7 +94,7 @@ namespace Railgun.Commands.Server
             await ReplyAsync($"{Format.Bold(user.Username)} has been banned from the server. Reason: {Format.Bold(reason)}");
             
             var output = new StringBuilder()
-                .AppendFormat("User Banned || <{0} ({1})> {2}#{3}", Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
+                .AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
             
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
         }
@@ -103,7 +103,7 @@ namespace Railgun.Commands.Server
         public async Task UnbanAsync(ulong user) {
             await Context.Guild.RemoveBanAsync(user);
             await ReplyAsync($"User ID {Format.Bold(user.ToString())} is now unbanned from the server.");
-            await _log.LogToBotLogAsync($"User Unbanned || <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}", BotLogType.Common);
+            await _log.LogToBotLogAsync($"User Unbanned {Response.GetSeparator()} <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}", BotLogType.Common);
         }
         
         [Command("banlist"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)]

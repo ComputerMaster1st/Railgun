@@ -111,7 +111,7 @@ namespace Railgun.Commands.Root
         
         [Command("updatestatus")]
         public async Task UpdateStatusAsync() {
-            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help || On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {Response.GetSeparator()} On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
             await ReplyAsync("Playing Status has been updated!");
         }
         

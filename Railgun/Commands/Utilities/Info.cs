@@ -54,9 +54,9 @@ namespace Railgun.Commands.Utilities
             var gcOutput = new StringBuilder();
 
             for (var i = 0; i <= GC.MaxGeneration; i++) 
-                gcOutput.AppendFormat("Gen {0} : {1} || ", i, GC.CollectionCount(i));
+                gcOutput.AppendFormat("Gen {0} : {1} {2} ", i, GC.CollectionCount(i), Response.GetSeparator());
             
-            gcOutput.Remove(gcOutput.Length - 3, 3);
+            gcOutput.Remove(gcOutput.Length - 2, 2);
 
             var output = new StringBuilder()
                 .AppendLine("Railgun System Status")

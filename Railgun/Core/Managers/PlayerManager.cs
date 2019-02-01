@@ -139,8 +139,8 @@ namespace Railgun.Core.Managers
 
                 if (!data.SilentNowPlaying) {
                     var output = new StringBuilder()
-                        .AppendFormat("Now Playing: {0} || ID: {1}", Format.Bold(args.Song.Metadata.Name), Format.Bold(args.Song.Id.ToString())).AppendLine()
-                        .AppendFormat("Time: {0} || Uploader: {1} || URL: {2}", Format.Bold(args.Song.Metadata.Length.ToString()), Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
+                        .AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Name), Response.GetSeparator(), Format.Bold(args.Song.Id.ToString())).AppendLine()
+                        .AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Length.ToString()), Response.GetSeparator(), Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
 
                     await tc.SendMessageAsync(output.ToString());
                 }
