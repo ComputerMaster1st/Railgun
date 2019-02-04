@@ -64,12 +64,12 @@ namespace Railgun.Commands.Server
                 data.ResetWarnings(user.Id);
                 
                 await ReplyAsync($"{Format.Bold(user.Username)} has been Auto-Banned from the server. Reason: {Format.Bold($"{reason} & Too many warnings!")}");
-                await _log.LogToBotLogAsync($"Auto Ban || <{Context.Guild.Name} ({Context.Guild.Id})> Successful! {user.Username}#{user.DiscriminatorValue}", BotLogType.Common);
+                await _log.LogToBotLogAsync($"Auto Ban {Response.GetSeparator()} <{Context.Guild.Name} ({Context.Guild.Id})> Successful! {user.Username}#{user.DiscriminatorValue}", BotLogType.Common);
             } catch (Exception e) {
                 await ReplyAsync("Unable to auto-ban user! Please be sure that I'm higher up on the role list.");
                 
                 var output = new StringBuilder()
-                    .AppendFormat("Auto Ban || <{0} ({1})> Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine() .AppendFormat("---- Reason : {0}", e.Message);
+                    .AppendFormat("Auto Ban {0} <{1} ({2})> Failure!", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id).AppendLine() .AppendFormat("---- Reason : {0}", e.Message);
                 
                 await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
             }

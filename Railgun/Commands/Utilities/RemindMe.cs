@@ -6,6 +6,7 @@ using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Managers;
+using Railgun.Core.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Utilities
@@ -31,9 +32,9 @@ namespace Railgun.Commands.Utilities
             var invalidFormat = new StringBuilder()
                 .AppendFormat("The time format given is {0}! Please use one of the following formats...", Format.Bold("INVALID")).AppendLine()
                 .AppendLine()
-                .AppendFormat("{0} << Minutes || 10 Minutes Example : {1}", Format.Code("m"), Format.Code("10 this is my msg.")).AppendLine()
-                .AppendFormat("{0} << Hours:Minutes || 1 Hour, 10 Minutes Example : {1}", Format.Code("h:m"), Format.Code("1:10 this is my msg.")).AppendLine()
-                .AppendFormat("{0} << Days:Hours:Minutes || 1 Day, 1 Hour, 10 Minutes Example : {1}", Format.Code("d:h:m"), Format.Code("1:1:10 this is my msg."));
+                .AppendFormat("{0} << Minutes {1} 10 Minutes Example : {2}", Format.Code("m"), Response.GetSeparator(), Format.Code("10 this is my msg.")).AppendLine()
+                .AppendFormat("{0} << Hours:Minutes {1} 1 Hour, 10 Minutes Example : {2}", Format.Code("h:m"), Response.GetSeparator(), Format.Code("1:10 this is my msg.")).AppendLine()
+                .AppendFormat("{0} << Days:Hours:Minutes {1} 1 Day, 1 Hour, 10 Minutes Example : {2}", Format.Code("d:h:m"), Response.GetSeparator(), Format.Code("1:1:10 this is my msg."));
 
             if (times.Length > 3) {
                 await ReplyAsync(invalidFormat.ToString());

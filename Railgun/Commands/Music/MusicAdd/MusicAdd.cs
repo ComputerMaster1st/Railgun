@@ -47,7 +47,7 @@ namespace Railgun.Commands.Music
                     playlist.Songs.Add(song.Id);
                     
                     await _musicService.Playlist.UpdateAsync(playlist);
-                    await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} || ID : {Format.Bold(song.Id.ToString())}");
+                    await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} {Response.GetSeparator()} ID : {Format.Bold(song.Id.ToString())}");
                 } catch (Exception ex) {
                     await response.ModifyAsync(c => c.Content = $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}");
                     
@@ -72,7 +72,7 @@ namespace Railgun.Commands.Music
                 }
                 
                 await _musicService.Playlist.UpdateAsync(playlist);
-                await ReplyAsync($"Processing Completed! || Accepted : {Format.Bold((repo.Count() - existingSongs).ToString())} || Already Installed : {Format.Bold(existingSongs.ToString())}");
+                await ReplyAsync($"Processing Completed! {Response.GetSeparator()} Accepted : {Format.Bold((repo.Count() - existingSongs).ToString())} {Response.GetSeparator()} Already Installed : {Format.Bold(existingSongs.ToString())}");
             }
         }
     }

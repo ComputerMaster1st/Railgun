@@ -169,7 +169,7 @@ namespace Railgun.Core
             _initialized = true;
             _serverCount.PreviousGuildCount = _client.Guilds.Count;
 
-            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help || {_client.Guilds.Count} Servers!", 
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {Response.GetSeparator()} {_client.Guilds.Count} Servers!", 
                 type:ActivityType.Watching);
         }
     }

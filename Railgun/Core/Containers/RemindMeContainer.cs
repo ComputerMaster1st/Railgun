@@ -5,6 +5,7 @@ using System.Timers;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Logging;
+using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.TreeTimer;
 
@@ -76,7 +77,7 @@ namespace Railgun.Core.Containers
 
                 Dispose();
 
-                await _log.LogToBotLogAsync($"Remind Me || Timer ID {Data.Id.ToString()} has completed! Awaiting final cleanup.", BotLogType.TimerManager);
+                await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer ID {Data.Id.ToString()} has completed! Awaiting final cleanup.", BotLogType.TimerManager);
             } catch (NullReferenceException ex) {
                 HasCrashed = true;
 

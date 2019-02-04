@@ -1,0 +1,1 @@
+dotnet publish -o Published -c Release --self-contained -r ubuntu.18.04-x64

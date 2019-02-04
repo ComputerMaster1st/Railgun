@@ -33,9 +33,10 @@ namespace Railgun.Core.Logging
 
         private async Task SendBotLogAsync(IGuild guild, BotLogType logType, ulong logChannelId, string entry, bool pingMaster) {
             var output = new StringBuilder()
-                .AppendFormat("[ {0} ] || {1} {2}", 
+                .AppendFormat("[ {0} ] {1} {2} {3}", 
                     DateTime.Now.ToString("HH:mm:ss"),
-                    logType != BotLogType.Common ? $"{logType} ||" : "",
+                    Response.GetSeparator(),
+                    logType != BotLogType.Common ? string.Format($"{0} {1}", logType, Response.GetSeparator()) : "",
                     entry);
 
             try {
