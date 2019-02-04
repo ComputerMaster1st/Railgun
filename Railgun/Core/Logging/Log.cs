@@ -36,7 +36,7 @@ namespace Railgun.Core.Logging
                 .AppendFormat("[ {0} ] {1} {2} {3}", 
                     DateTime.Now.ToString("HH:mm:ss"),
                     Response.GetSeparator(),
-                    logType != BotLogType.Common ? string.Format($"{0} {1}", logType, Response.GetSeparator()) : "",
+                    logType != BotLogType.Common ? string.Format("{0} {1}", logType, Response.GetSeparator()) : "",
                     entry);
 
             try {

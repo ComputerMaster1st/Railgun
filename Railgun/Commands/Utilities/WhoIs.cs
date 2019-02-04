@@ -104,7 +104,7 @@ namespace Railgun.Commands.Utilities
             if (gUser != null) {
                 var roles = new StringBuilder();
 
-                foreach (var roleId in gUser.RoleIds) roles.AppendFormat("| {0} |", Context.Guild.GetRole(roleId).Mention);
+                foreach (var roleId in gUser.RoleIds) roles.AppendFormat("{0} ", Context.Guild.GetRole(roleId).Mention);
 
                 embedBuilder.AddField("Server Nickname:", gUser.Nickname ?? Format.Bold("N/A"), true)
                     .AddField("Joined Server At:", gUser.JoinedAt.ToString() ?? Format.Bold("Recently"), true)

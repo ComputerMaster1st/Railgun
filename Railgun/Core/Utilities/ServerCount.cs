@@ -29,7 +29,7 @@ namespace Railgun.Core.Utilities
 
             PreviousGuildCount = _client.Guilds.Count;
 
-            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help || {PreviousGuildCount} Servers!", type:ActivityType.Watching);
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {Response.GetSeparator()} {PreviousGuildCount} Servers!", type:ActivityType.Watching);
         }
     }
 }
