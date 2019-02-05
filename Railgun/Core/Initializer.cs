@@ -121,7 +121,7 @@ namespace Railgun.Core
 
             var output = new StringBuilder()
                 .AppendLine("An unobserved task threw an exception!")
-                .AppendLine(e.Exception.ToString());
+                .AppendLine(e.Exception.InnerException.ToString());
             
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.TaskScheduler);
         }
