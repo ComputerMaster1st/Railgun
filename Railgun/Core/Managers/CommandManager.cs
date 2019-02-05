@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -8,19 +7,15 @@ using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Results;
-using Railgun.Core.Configuration;
 using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.Server;
-using TreeDiagram.Models.User;
 
 namespace Railgun.Core.Managers
 {
     public class CommandManager
     {
         private readonly IServiceProvider _services;
-        private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
         private readonly CommandService<SystemContext> _commands;
         private readonly Log _log;
@@ -30,7 +25,6 @@ namespace Railgun.Core.Managers
         public CommandManager(IServiceProvider services) {
             _services = services;
 
-            _config = _services.GetService<MasterConfig>();
             _client = _services.GetService<DiscordShardedClient>();
             _commands = _services.GetService<CommandService<SystemContext>>();
             _log = _services.GetService<Log>();
@@ -62,7 +56,8 @@ namespace Railgun.Core.Managers
 
                             Task.Delay(5000);
                             filterMsg.DeleteAsync();
-                        } catch { }
+                        } catch { // Ignored
+                        }
                     });
                 }
 
@@ -76,17 +71,16 @@ namespace Railgun.Core.Managers
                             break;
                         case CommandResult c:
                             if (result.IsSuccess) {
-                                await _analytics.ExecutedCommandAsync(context, result as CommandResult);
+                                if (!(result is CommandResult cmdResult)) return;
+                                if (cmdResult.CommandPath == "root dc") return;
+                                
+                                await _analytics.ExecutedCommandAsync(context, cmdResult);
 
                                 var data = await context.Database.ServerCommands.GetAsync(guild.Id);
                                     
                                 if (data != null && (data.DeleteCmdAfterUse && perms.ManageMessages)) await msg.DeleteAsync();
-                                
-                                return;
                             } else await LogCommandErrorAsync(context, c);
 
-                            break;
-                        default:
                             break;
                     }
                 }
@@ -96,7 +90,7 @@ namespace Railgun.Core.Managers
         }
 
         private Task MessageReceivedAsync(SocketMessage sMessage) {
-            if (sMessage == null || !(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
+            if (!(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
                 return Task.CompletedTask;
             
             return Task.Factory.StartNew(async () => await ProcessMessageAsync(sMessage));

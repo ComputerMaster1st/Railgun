@@ -22,6 +22,7 @@ namespace Railgun {
             await initializer.InitializeAsync();
             await client.LoginAsync(TokenType.Bot, masterConfig.DiscordConfig.Token);
             await client.StartAsync();
+            await client.SetStatusAsync(UserStatus.Idle);
             await client.SetGameAsync("Booting System...");
 
             await Task.Delay(-1);

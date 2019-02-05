@@ -55,10 +55,8 @@ namespace Railgun.Core.Utilities
             var cmdString = result.CommandPath;
             var guild = ctx.Guild;
 
-            if (cmdString != "N/A") {
-                if (UsedCommands.ContainsKey(cmdString)) UsedCommands[cmdString]++;
-                else UsedCommands.Add(cmdString, 1);
-            }
+            if (UsedCommands.ContainsKey(cmdString)) UsedCommands[cmdString]++;
+            else UsedCommands.Add(cmdString, 1);
 
             var output = new StringBuilder()
                 .AppendFormat("<{0} <{1}>>", guild.Name, guild.Id).AppendLine()

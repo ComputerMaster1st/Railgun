@@ -190,13 +190,14 @@ namespace Railgun.Core
             await _timerManager.InitializeAsync();
 
             if (_initialized) return;
-            else if (_shardsReady.Count < _client.Shards.Count) return;
+            if (_shardsReady.Count < _client.Shards.Count) return;
 
             _initialized = true;
             _serverCount.PreviousGuildCount = _client.Guilds.Count;
 
             await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {Response.GetSeparator()} {_client.Guilds.Count} Servers!", 
                 type:ActivityType.Watching);
+            await _client.SetStatusAsync(UserStatus.Online);
         }
     }
 }
