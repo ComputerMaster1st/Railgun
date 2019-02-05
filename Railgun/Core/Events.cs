@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
@@ -53,27 +54,52 @@ namespace Railgun.Core
 
         private async Task SendJoinLeaveMessageAsync(ServerJoinLeave data, IGuildUser user, string message) {
             if (string.IsNullOrEmpty(message)) return;
-            else if (data.ChannelId == 0) return;
-            else if (data.SendToDM) {
+            if (data.SendToDM) {
                 try {
                     await (await user.GetOrCreateDMChannelAsync()).SendMessageAsync(message);
-                } catch { }
+                } catch { // Ignored
+                }
+
+                return;
             }
+            if (data.ChannelId == 0 && !data.SendToDM) return;
 
             var tc = await user.Guild.GetTextChannelAsync(data.ChannelId);
             
             if (tc == null) return;
-            else if (data.DeleteAfterMinutes < 1) {
-                await tc.SendMessageAsync(message);
+
+            IUserMessage msg = null;
+
+            try {
+                msg = await tc.SendMessageAsync(message);
+            }
+            catch {
+                var output = new StringBuilder()
+                    .AppendFormat("<{0} <{1}>> Missing Send Message Permission!", tc.Guild.Name, tc.GuildId).AppendLine()
+                    .AppendFormat("---- Channel Name : {0}", tc.Name).AppendLine()
+                    .AppendFormat("---- Channel ID   : {0}", tc.Id).AppendLine();
+                
+                await _log.LogToBotLogAsync(output.ToString(), BotLogType.TaskScheduler);
                 return;
             }
+            
+            
+            if (data.DeleteAfterMinutes > 0) 
+                await Task.Run(async () => {
+                    await Task.Delay((int)TimeSpan.FromMinutes(data.DeleteAfterMinutes).TotalMilliseconds);
 
-            var msg = await tc.SendMessageAsync(message);
-
-            await Task.Run(action: () => {
-                Task.Delay((int)TimeSpan.FromMinutes(data.DeleteAfterMinutes).TotalMilliseconds);
-                msg.DeleteAsync();
-            });
+                    try {
+                        await msg.DeleteAsync();
+                    }
+                    catch {
+                        var output2 = new StringBuilder()
+                            .AppendFormat("<{0} <{1}>> Missing Delete Message Permission!", tc.Guild.Name, tc.GuildId).AppendLine()
+                            .AppendFormat("---- Channel Name : {0}", tc.Name).AppendLine()
+                            .AppendFormat("---- Channel ID   : {0}", tc.Id).AppendLine();
+                
+                        await _log.LogToBotLogAsync(output2.ToString(), BotLogType.TaskScheduler);
+                    }
+                });
         }
 
         private async Task JoinedGuildAsync(SocketGuild sGuild) 
