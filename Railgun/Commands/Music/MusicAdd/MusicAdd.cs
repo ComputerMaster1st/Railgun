@@ -40,6 +40,11 @@ namespace Railgun.Commands.Music
                 var playlist = await _commandUtils.GetPlaylistAsync(data);
                 var response = await ReplyAsync("Processing Attachment! Standby...");
                 var attachment = Context.Message.Attachments.FirstOrDefault();
+
+                if (attachment == null) {
+                    await ReplyAsync("Please specify a music file.");
+                    return;
+                }
                 
                 try {
                     var song = await _musicService.Discord.DownloadAsync(attachment.Url, $"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
