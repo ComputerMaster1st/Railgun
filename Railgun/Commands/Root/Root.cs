@@ -144,6 +144,7 @@ namespace Railgun.Commands.Root
         
         [Command("dc")]
         public async Task DcAsync([Remainder] string msg = null) {
+            await _client.SetGameAsync("Shutting Down ...");
             await ReplyAsync("Disconnecting ...");
             
             if (_playerManager.PlayerContainers.Count > 0) {
