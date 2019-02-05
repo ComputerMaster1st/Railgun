@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core;
@@ -23,6 +22,7 @@ namespace Railgun {
             await initializer.InitializeAsync();
             await client.LoginAsync(TokenType.Bot, masterConfig.DiscordConfig.Token);
             await client.StartAsync();
+            await client.SetGameAsync("Booting System...");
 
             await Task.Delay(-1);
         }
