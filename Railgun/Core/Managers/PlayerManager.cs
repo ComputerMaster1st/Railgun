@@ -16,195 +16,206 @@ using TreeDiagram.Models.Server;
 
 namespace Railgun.Core.Managers
 {
-    public class PlayerManager
-    {
-        private readonly IServiceProvider _services;
-        private readonly IDiscordClient _client;
-        private readonly Log _log;
-        private readonly CommandUtils _commandUtils;
-        private readonly MusicService _musicService;
+	public class PlayerManager
+	{
+		private readonly IServiceProvider _services;
+		private readonly IDiscordClient _client;
+		private readonly Log _log;
+		private readonly CommandUtils _commandUtils;
+		private readonly MusicService _musicService;
 
-        public List<PlayerContainer> PlayerContainers = new List<PlayerContainer>();
+		public List<PlayerContainer> PlayerContainers = new List<PlayerContainer>();
 
-        public PlayerManager(IServiceProvider services) {
-            _services = services;
+		public PlayerManager(IServiceProvider services)
+		{
+			_services = services;
 
-            _client = _services.GetService<IDiscordClient>();
-            _log = _services.GetService<Log>();
-            _commandUtils = _services.GetService<CommandUtils>();
-            _musicService = _services.GetService<MusicService>();
-        }
+			_client = _services.GetService<IDiscordClient>();
+			_log = _services.GetService<Log>();
+			_commandUtils = _services.GetService<CommandUtils>();
+			_musicService = _services.GetService<MusicService>();
+		}
 
-        public async Task CreatePlayerAsync(IGuildUser user, IVoiceChannel vc, ITextChannel tc, bool autoJoin = false, ISong preRequestedSong = null) {
-            Playlist playlist;
+		public async Task CreatePlayerAsync(IGuildUser user, IVoiceChannel vc, ITextChannel tc, bool autoJoin = false, ISong preRequestedSong = null)
+		{
+			Playlist playlist;
+			ServerMusic data;
 
-            using (var scope = _services.CreateScope()) {
-                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                var data = await db.ServerMusics.GetOrCreateAsync(tc.GuildId);
+			using (var scope = _services.CreateScope()) {
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				data = await db.ServerMusics.GetOrCreateAsync(tc.GuildId);
 
-                playlist = await _commandUtils.GetPlaylistAsync(data);
-            }
+				playlist = await _commandUtils.GetPlaylistAsync(data);
+			}
 
-            if (playlist.Songs.Count < 1) {
-                if (preRequestedSong != null && !playlist.Songs.Contains(preRequestedSong.Id))
-                    playlist.Songs.Add(preRequestedSong.Id);
-                
-                await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...");
+			if (playlist.Songs.Count < 1) {
+				if (preRequestedSong != null && !playlist.Songs.Contains(preRequestedSong.Id))
+					playlist.Songs.Add(preRequestedSong.Id);
 
-                var repository = (await _musicService.GetAllSongsAsync()).ToList();
-                var rand = new Random();
+				await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...");
 
-                if (repository.Count < 100) foreach (var song in repository) playlist.Songs.Add(song.Id);
-                else while (playlist.Songs.Count < 100) {
-                    var i = rand.Next(0, repository.Count());
-                    var song = repository.ElementAtOrDefault(i);
+				var repository = (await _musicService.GetAllSongsAsync()).ToList();
+				var rand = new Random();
 
-                    if (song != null && !playlist.Songs.Contains(song.Id)) playlist.Songs.Add(song.Id);
-                }
+				if (repository.Count < 100) foreach (var song in repository) playlist.Songs.Add(song.Id);
+				else while (playlist.Songs.Count < 100) {
+						var i = rand.Next(0, repository.Count());
+						var song = repository.ElementAtOrDefault(i);
 
-                await _musicService.Playlist.UpdateAsync(playlist);
-            }
+						if (song != null && !playlist.Songs.Contains(song.Id)) playlist.Songs.Add(song.Id);
+					}
 
-            var username = await _commandUtils.GetUsernameOrMentionAsync(user);
+				await _musicService.Playlist.UpdateAsync(playlist);
+			}
 
-            await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
+			var username = await _commandUtils.GetUsernameOrMentionAsync(user);
 
-            var player = new Player(_musicService, vc);
+			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
-            player.Connected += async (s, a) => await ConnectedAsync(a);
-            player.Playing += async (s, a) => await PlayingAsync(a);
-            player.Timeout += async (s, a) => await TimeoutAsync(a);
-            player.Finished += async (s, a) => await FinishedAsync(a);
+			var player = new Player(_musicService, vc) {
+				PlaylistAutoLoop = data.PlaylistAutoLoop
+			};
 
-            if (preRequestedSong != null) {
-                player.AddSongRequest(preRequestedSong);
-                player.AutoSkipped = true;
-            }
+			player.Connected += async (s, a) => await ConnectedAsync(a);
+			player.Playing += async (s, a) => await PlayingAsync(a);
+			player.Timeout += async (s, a) => await TimeoutAsync(a);
+			player.Finished += async (s, a) => await FinishedAsync(a);
 
-            player.StartPlayer(playlist.Id, autoJoin);
+			if (preRequestedSong != null) {
+				player.AddSongRequest(preRequestedSong);
+				player.AutoSkipped = true;
+			}
 
-            PlayerContainers.Add(new PlayerContainer(tc, player));
+			player.StartPlayer(playlist.Id, autoJoin);
 
-            var autoString = $"{(autoJoin ? "Auto-" : "")}Connecting...";
+			PlayerContainers.Add(new PlayerContainer(tc, player));
 
-            await _log.LogToBotLogAsync($"<{vc.Guild.Name} <{vc.GuildId}>> {autoString}", BotLogType.MusicPlayer);
-            await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", autoString));
-        }
+			var autoString = $"{(autoJoin ? "Auto-" : "")}Connecting...";
 
-        public PlayerContainer GetPlayer(ulong playerId)
-            => PlayerContainers.FirstOrDefault(container => container.GuildId == playerId);
-        
-        public bool IsCreated(ulong playerId) {
-            if (PlayerContainers.Where(container => container.GuildId == playerId).Count() > 0) return true;
-            else return false;
-        }
+			await _log.LogToBotLogAsync($"<{vc.Guild.Name} <{vc.GuildId}>> {autoString}", BotLogType.MusicPlayer);
+			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", autoString));
+		}
 
-        public void DisconnectPlayer(ulong playerId)
-            => PlayerContainers.First(container => container.GuildId == playerId).Player.CancelStream();
-        
-        private async Task StopPlayerAsync(ulong playerId, bool autoLeave = false) {
-            var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == playerId);
+		public PlayerContainer GetPlayer(ulong playerId)
+			=> PlayerContainers.FirstOrDefault(container => container.GuildId == playerId);
 
-            if (container == null) return;
+		public bool IsCreated(ulong playerId)
+		{
+			if (PlayerContainers.Where(container => container.GuildId == playerId).Count() > 0) return true;
+			else return false;
+		}
 
-            var player = container.Player;
+		public void DisconnectPlayer(ulong playerId)
+			=> PlayerContainers.First(container => container.GuildId == playerId).Player.CancelStream();
 
-            if (!autoLeave) player.CancelStream();
+		private async Task StopPlayerAsync(ulong playerId, bool autoLeave = false)
+		{
+			var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == playerId);
 
-            while (player.PlayerTask.Status == TaskStatus.WaitingForActivation) await Task.Delay(500);
+			if (container == null) return;
 
-            player.PlayerTask.Dispose();
-            PlayerContainers.Remove(PlayerContainers.First(cnt => cnt.GuildId == playerId));
+			var player = container.Player;
 
-            await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"));
-        }
+			if (!autoLeave) player.CancelStream();
 
-        private async Task ConnectedAsync(ConnectedPlayerEventArgs args) {
-            var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
-            await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Connected!", BotLogType.MusicPlayer);
-        }
+			while (player.PlayerTask.Status == TaskStatus.WaitingForActivation) await Task.Delay(500);
 
-        private async Task PlayingAsync(CurrentSongPlayerEventArgs args) {
-            try {
-                ServerMusic data;
-                ITextChannel tc;
+			player.PlayerTask.Dispose();
+			PlayerContainers.Remove(PlayerContainers.First(cnt => cnt.GuildId == playerId));
 
-                using (var scope = _services.CreateScope()) {
-                    data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetAsync(args.GuildId);
-                }
+			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"));
+		}
 
-                if (data.NowPlayingChannel != 0)
-                    tc = await (await _client.GetGuildAsync(args.GuildId)).GetTextChannelAsync(data.NowPlayingChannel);
-                else tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
+		private async Task ConnectedAsync(ConnectedPlayerEventArgs args)
+		{
+			var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
+			await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Connected!", BotLogType.MusicPlayer);
+		}
 
-                if (!data.SilentNowPlaying) {
-                    var output = new StringBuilder()
-                        .AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Name), Response.GetSeparator(), Format.Bold(args.Song.Id.ToString())).AppendLine()
-                        .AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Length.ToString()), Response.GetSeparator(), Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
+		private async Task PlayingAsync(CurrentSongPlayerEventArgs args)
+		{
+			try {
+				ServerMusic data;
+				ITextChannel tc;
 
-                    await tc.SendMessageAsync(output.ToString());
-                }
+				using (var scope = _services.CreateScope()) {
+					data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetAsync(args.GuildId);
+				}
 
-                await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Now Playing {args.Song.Id}", BotLogType.MusicPlayer);
-            } catch {
-                await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
+				if (data.NowPlayingChannel != 0)
+					tc = await (await _client.GetGuildAsync(args.GuildId)).GetTextChannelAsync(data.NowPlayingChannel);
+				else tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
 
-                var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
+				if (!data.SilentNowPlaying) {
+					var output = new StringBuilder()
+						.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Name), Response.GetSeparator(), Format.Bold(args.Song.Id.ToString())).AppendLine()
+						.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Length.ToString()), Response.GetSeparator(), Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
 
-                if (container != null) container.Player.CancelStream(); 
-            }
-        }
+					await tc.SendMessageAsync(output.ToString());
+				}
 
-        private async Task TimeoutAsync(TimeoutPlayerEventArgs args) {
-            var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
+				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Now Playing {args.Song.Id}", BotLogType.MusicPlayer);
+			} catch {
+				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 
-            try {
-                await tc.SendMessageAsync("Connection to Discord Voice has timed out! Please try again.");
-            } catch {
-                await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
-            } finally {
-                var output = new StringBuilder()
-                    .AppendFormat("<{0} ({1})> Action Timeout!", tc.Guild.Name, args.GuildId).AppendLine()
-                    .AppendFormat("---- Exception : {0}", args.Exception.ToString());
-                
-                await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicPlayer);
-            }
-        }
+				var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
 
-        private async Task FinishedAsync(FinishedPlayerEventArgs args) {
-            var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
+				if (container != null) container.Player.CancelStream();
+			}
+		}
 
-            if (container == null) return;
+		private async Task TimeoutAsync(TimeoutPlayerEventArgs args)
+		{
+			var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
 
-            var tc = container.TextChannel;
+			try {
+				await tc.SendMessageAsync("Connection to Discord Voice has timed out! Please try again.");
+			} catch {
+				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
+			} finally {
+				var output = new StringBuilder()
+					.AppendFormat("<{0} ({1})> Action Timeout!", tc.Guild.Name, args.GuildId).AppendLine()
+					.AppendFormat("---- Exception : {0}", args.Exception.ToString());
 
-            try {
-                var output = new StringBuilder();
+				await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicPlayer);
+			}
+		}
 
-                if (args.Exception != null) {
-                    await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
+		private async Task FinishedAsync(FinishedPlayerEventArgs args)
+		{
+			var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
 
-                    var logOutput = new StringBuilder()
-                        .AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
-                        .AppendFormat("---- Error : {0}", args.Exception.ToString());
-                    
-                    await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.MusicPlayer);
+			if (container == null) return;
 
-                    output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.");
-                }
+			var tc = container.TextChannel;
 
-                var autoOutput = args.AutoDisconnected ? "Auto-" : "";
+			try {
+				var output = new StringBuilder();
 
-                output.AppendFormat("{0}Left Voice Channel", autoOutput);
+				if (args.Exception != null) {
+					await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
 
-                await tc.SendMessageAsync(output.ToString());
-                await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> {autoOutput}Disconnected", BotLogType.MusicPlayer);
-            } catch {
-                await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
-                await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected", BotLogType.MusicPlayer);
-            } finally {
-                await StopPlayerAsync(args.GuildId, args.AutoDisconnected);
-            }
-        }
-    }
+					var logOutput = new StringBuilder()
+						.AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
+						.AppendFormat("---- Error : {0}", args.Exception.ToString());
+
+					await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.MusicPlayer);
+
+					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.");
+				}
+
+				var autoOutput = args.AutoDisconnected ? "Auto-" : "";
+
+				output.AppendFormat("{0}Left Voice Channel", autoOutput);
+
+				await tc.SendMessageAsync(output.ToString());
+				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> {autoOutput}Disconnected", BotLogType.MusicPlayer);
+			} catch {
+				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
+				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected", BotLogType.MusicPlayer);
+			} finally {
+				await StopPlayerAsync(args.GuildId, args.AutoDisconnected);
+			}
+		}
+	}
 }
