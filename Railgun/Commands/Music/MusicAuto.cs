@@ -20,7 +20,7 @@ namespace Railgun.Commands.Music
 			[Command("join")]
 			public async Task JoinAsync()
 			{
-				var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 				var vc = ((IGuildUser)Context.Author).VoiceChannel;
 
 				if (vc == null && data.AutoVoiceChannel == 0) {
@@ -45,7 +45,7 @@ namespace Railgun.Commands.Music
 			[Command("skip")]
 			public async Task SkipAsync()
 			{
-				var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 
 				data.AutoSkip = !data.AutoSkip;
 
@@ -55,7 +55,7 @@ namespace Railgun.Commands.Music
 			[Command("download")]
 			public async Task DownloadAsync()
 			{
-				var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 
 				data.AutoDownload = !data.AutoDownload;
 
@@ -65,7 +65,7 @@ namespace Railgun.Commands.Music
 			[Command("loop")]
 			public async Task AutoLoopAsync()
 			{
-				var data = await Context.Database.ServerMusics.GetOrCreateAsync(Context.Guild.Id);
+				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 
 				data.PlaylistAutoLoop = !data.PlaylistAutoLoop;
 

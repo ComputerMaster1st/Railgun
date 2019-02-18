@@ -15,7 +15,7 @@ namespace Railgun.Commands.Fun
         
         [Command]
         public async Task HelloAsync() {
-            var name = await _commandUtils.GetUsernameOrMentionAsync((IGuildUser)Context.Author);
+            var name = _commandUtils.GetUsernameOrMention((IGuildUser)Context.Author);
             await ReplyAsync($"Hello {Format.Bold(name)}, I'm Railgun! Here to shock your world!");
         }
     }

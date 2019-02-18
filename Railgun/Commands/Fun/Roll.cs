@@ -16,7 +16,7 @@ namespace Railgun.Commands.Fun
         
         [Command]
         public async Task RollAsync(int num1 = 0, int num2 = 100) {
-            var name = await _commandUtils.GetUsernameOrMentionAsync((IGuildUser)Context.Author);
+            var name = _commandUtils.GetUsernameOrMention((IGuildUser)Context.Author);
             var rand = new Random();
             var rng = num1 > num2 ? rand.Next(num2, num1) : rand.Next(num1, num2);
             

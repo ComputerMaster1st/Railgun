@@ -11,40 +11,41 @@ using TreeDiagram;
 
 namespace Railgun.Core.Commands.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class RoleLock : Attribute, IPreconditionAttribute
-    {
-        private readonly ModuleType _moduleType;
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+	public class RoleLock : Attribute, IPreconditionAttribute
+	{
+		private readonly ModuleType _moduleType;
 
-        public RoleLock(ModuleType modType) => _moduleType = modType;
+		public RoleLock(ModuleType modType) => _moduleType = modType;
 
-        public async Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services) {
-            var user = (IGuildUser)context.Author;
-            var output = new StringBuilder();
+		public Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
+		{
+			var user = (IGuildUser)context.Author;
+			var output = new StringBuilder();
 
-            switch (_moduleType) {
-                case ModuleType.Music:
-                    var data = await context.Database.ServerMusics.GetAsync(context.Guild.Id);
+			switch (_moduleType) {
+				case ModuleType.Music:
+					var data = context.Database.ServerMusics.GetData(context.Guild.Id);
 
-                    if (data == null || data.AllowedRoles.Count < 1) return PreconditionResult.FromSuccess();
+					if (data == null || data.AllowedRoles.Count < 1) return Task.FromResult(PreconditionResult.FromSuccess());
 
-                    var tempOutput = new StringBuilder();
+					var tempOutput = new StringBuilder();
 
-                    foreach (var allowedRole in data.AllowedRoles) {
-                        var role = context.Guild.GetRole(allowedRole.RoleId);
+					foreach (var allowedRole in data.AllowedRoles) {
+						var role = context.Guild.GetRole(allowedRole.RoleId);
 
-                        tempOutput.AppendLine($"| {role.Name} |");
+						tempOutput.AppendLine($"| {role.Name} |");
 
-                        if (user.RoleIds.Contains(allowedRole.RoleId)) return PreconditionResult.FromSuccess();
-                    }
+						if (user.RoleIds.Contains(allowedRole.RoleId)) return Task.FromResult(PreconditionResult.FromSuccess());
+					}
 
-                    output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")
-                        .AppendLine()
-                        .AppendLine(tempOutput.ToString());
-                    break;
-                }
+					output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")
+						.AppendLine()
+						.AppendLine(tempOutput.ToString());
+					break;
+			}
 
-            return PreconditionResult.FromError(output.ToString());
-        }
-    }
+			return Task.FromResult(PreconditionResult.FromError(output.ToString()));
+		}
+	}
 }

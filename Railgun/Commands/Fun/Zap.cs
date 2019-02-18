@@ -27,7 +27,7 @@ namespace Railgun.Commands.Fun
                 return;
             }
             
-            var name = await _commandUtils.GetUsernameOrMentionAsync(user ?? (IGuildUser)Context.Author);
+            var name = _commandUtils.GetUsernameOrMention(user ?? (IGuildUser)Context.Author);
 
             await ReplyAsync($"{Format.Bold(name)} has been electrocuted! Something smells nice doesn't it?");
         }

@@ -43,7 +43,7 @@ namespace Railgun.Core.Managers
 
 			using (var scope = _services.CreateScope()) {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				data = await db.ServerMusics.GetOrCreateAsync(tc.GuildId);
+				data = db.ServerMusics.GetOrCreateData(tc.GuildId);
 
 				playlist = await _commandUtils.GetPlaylistAsync(data);
 			}
@@ -68,7 +68,7 @@ namespace Railgun.Core.Managers
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
-			var username = await _commandUtils.GetUsernameOrMentionAsync(user);
+			var username = _commandUtils.GetUsernameOrMention(user);
 
 			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
@@ -76,10 +76,14 @@ namespace Railgun.Core.Managers
 				PlaylistAutoLoop = data.PlaylistAutoLoop
 			};
 
-			player.Connected += async (s, a) => await ConnectedAsync(a);
-			player.Playing += async (s, a) => await PlayingAsync(a);
-			player.Timeout += async (s, a) => await TimeoutAsync(a);
-			player.Finished += async (s, a) => await FinishedAsync(a);
+			async void connected(object s, ConnectedPlayerEventArgs a) => await ConnectedAsync(a);
+			player.Connected += connected;
+			async void playing(object s, CurrentSongPlayerEventArgs a) => await PlayingAsync(a);
+			player.Playing += playing;
+			async void timeout(object s, TimeoutPlayerEventArgs a) => await TimeoutAsync(a);
+			player.Timeout += timeout;
+			async void finished(object s, FinishedPlayerEventArgs a) => await FinishedAsync(a);
+			player.Finished += finished;
 
 			if (preRequestedSong != null) {
 				player.AddSongRequest(preRequestedSong);
@@ -101,8 +105,8 @@ namespace Railgun.Core.Managers
 
 		public bool IsCreated(ulong playerId)
 		{
-			if (PlayerContainers.Where(container => container.GuildId == playerId).Count() > 0) return true;
-			else return false;
+			if (PlayerContainers.Any(container => container.GuildId == playerId)) return true;
+			return false;
 		}
 
 		public void DisconnectPlayer(ulong playerId)
@@ -139,7 +143,7 @@ namespace Railgun.Core.Managers
 				ITextChannel tc;
 
 				using (var scope = _services.CreateScope()) {
-					data = await scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetAsync(args.GuildId);
+					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
 				}
 
 				if (data.NowPlayingChannel != 0)

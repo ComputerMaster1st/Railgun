@@ -12,73 +12,78 @@ using TreeDiagram.Models.User;
 
 namespace Railgun.Core.Utilities
 {
-    public class CommandUtils
-    {
-        private readonly IServiceProvider _services;
-        private readonly MusicService _musicService;
+	public class CommandUtils
+	{
+		private readonly IServiceProvider _services;
+		private readonly MusicService _musicService;
 
-        public CommandUtils(IServiceProvider services) {
-            _services = services;
+		public CommandUtils(IServiceProvider services)
+		{
+			_services = services;
 
-            _musicService = _services.GetService<MusicService>();
-        }
+			_musicService = _services.GetService<MusicService>();
+		}
 
-        public async Task<string> GetUsernameOrMentionAsync(IGuildUser user) {
-            ServerMention sMention;
-            UserMention uMention;
+		public string GetUsernameOrMention(IGuildUser user)
+		{
+			ServerMention sMention;
+			UserMention uMention;
 
-            using (var scope = _services.CreateScope()) {
-                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+			using (var scope = _services.CreateScope()) {
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                sMention = await db.ServerMentions.GetAsync(user.GuildId);
-                uMention = await db.UserMentions.GetAsync(user.Id);
-            }
+				sMention = db.ServerMentions.GetData(user.GuildId);
+				uMention = db.UserMentions.GetData(user.Id);
+			}
 
-            if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions))
-                return user.Username;
-            else return user.Mention;
-        }
+			if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions))
+				return user.Username;
+			return user.Mention;
+		}
 
-        public async Task<Playlist> GetPlaylistAsync(ServerMusic data) {
-            if (data.PlaylistId != ObjectId.Empty)
-                return await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
-            
-            var playlist = new Playlist();
+		public async Task<Playlist> GetPlaylistAsync(ServerMusic data)
+		{
+			if (data.PlaylistId != ObjectId.Empty)
+				return await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
 
-            data.PlaylistId = playlist.Id;
+			var playlist = new Playlist();
 
-            await _musicService.Playlist.UpdateAsync(playlist);
+			data.PlaylistId = playlist.Id;
 
-            return playlist;
-        }
+			await _musicService.Playlist.UpdateAsync(playlist);
 
-        public async Task<bool> CheckIfSelfIsHigherRole(IGuild guild, IGuildUser user) {
-            var selfRolePosition = 0;
-            var userRolePosition = 0;
-            var self = await guild.GetCurrentUserAsync();
+			return playlist;
+		}
 
-            foreach (var roleId in self.RoleIds) {
-                var role = guild.GetRole(roleId);
+		public async Task<bool> CheckIfSelfIsHigherRole(IGuild guild, IGuildUser user)
+		{
+			var selfRolePosition = 0;
+			var userRolePosition = 0;
+			var self = await guild.GetCurrentUserAsync();
 
-                if (role.Permissions.BanMembers && role.Position > selfRolePosition) 
-                    selfRolePosition = role.Position;
-            }
+			foreach (var roleId in self.RoleIds) {
+				var role = guild.GetRole(roleId);
 
-            foreach (var roleId in self.RoleIds) {
-                var role = guild.GetRole(roleId);
+				if (role.Permissions.BanMembers && role.Position > selfRolePosition)
+					selfRolePosition = role.Position;
+			}
 
-                if (role.Position > userRolePosition) userRolePosition = role.Position;
-            }
+			foreach (var roleId in user.RoleIds) {
+				var role = guild.GetRole(roleId);
 
-            if (selfRolePosition > userRolePosition) return true;
-            else return false;
-        }
+				if (role.Position > userRolePosition) userRolePosition = role.Position;
+			}
 
-        public static async Task SendStringAsFileAsync(ITextChannel tc, string filename, string output, string msgText = null, bool includeGuildName = true) {
-            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(output));
-            var outputFilename = (includeGuildName ? $"{tc.Guild.Name}-" : "") + filename;
+			if (selfRolePosition > userRolePosition) return true;
+			else return false;
+		}
 
-            await tc.SendFileAsync(outputStream, outputFilename, msgText);
-        }
-    }
+		public static async Task SendStringAsFileAsync(ITextChannel tc, string filename, string output, string msgText = null, bool includeGuildName = true)
+		{
+			var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(output));
+			var outputFilename = (includeGuildName ? $"{tc.Guild.Name}-" : "") + filename;
+
+			await tc.SendFileAsync(outputStream, outputFilename, msgText);
+		}
+	}
 }
