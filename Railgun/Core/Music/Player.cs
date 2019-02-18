@@ -24,15 +24,15 @@ namespace Railgun.Core.Music
 		private readonly List<SongId> _playedSongs = new List<SongId>();
 
 		public IVoiceChannel VoiceChannel { get; }
-		public Task PlayerTask { get; private set; } = null;
+		public Task PlayerTask { get; private set; }
 		public DateTime CreatedAt { get; } = DateTime.Now;
 		public DateTime SongStartedAt { get; private set; }
 		public List<ISong> Requests { get; } = new List<ISong>();
 		public List<ulong> VoteSkipped { get; } = new List<ulong>();
 		public PlayerStatus Status { get; private set; } = PlayerStatus.Idle;
-		public bool AutoSkipped { get; set; } = false;
+		public bool AutoSkipped { get; set; }
 		public bool PlaylistAutoLoop { get; set; } = true;
-		public int RepeatSong { get; set; } = 0;
+		public int RepeatSong { get; set; }
 		public bool LeaveAfterSong { get; set; } = false;
 
 		public event EventHandler<ConnectedPlayerEventArgs> Connected;
@@ -142,15 +142,18 @@ namespace Railgun.Core.Music
 
 						await _musicService.Playlist.UpdateAsync(playlist);
 					} else _playedSongs.Add(songId);
-				} catch { }
+				}
+				catch {
+					// ignored
+				}
 			}
 
 			return request;
 		}
 
-		private void ForceTimeout(Task task, int ms, string errorMsg)
+		private async Task ForceTimeout(Task task, int ms, string errorMsg)
 		{
-			Task.WhenAny(task, Task.Delay(ms)).GetAwaiter();
+			await Task.WhenAny(task, Task.Delay(ms));
 
 			if (!task.IsCompleted)
 				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status.ToString()})", task.Exception);
@@ -212,16 +215,15 @@ namespace Railgun.Core.Music
 						using (var opusStream = new OpusOggReadStream(databaseStream)) {
 							Status = PlayerStatus.Playing;
 							SongStartedAt = DateTime.Now;
-							byte[] bytes;
 
 							while (opusStream.HasNextPacket && !_musicCancelled) {
-								bytes = opusStream.RetrieveNextPacket();
-								ForceTimeout(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
+								var bytes = opusStream.RetrieveNextPacket();
+								await ForceTimeout(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
 							}
 
 							Status = PlayerStatus.Finishing;
 
-							ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
+							await ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
 						}
 
 						if (RepeatSong > 0) RepeatSong--;
