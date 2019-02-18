@@ -90,7 +90,7 @@ namespace Railgun.Core.Managers
 				player.AutoSkipped = true;
 			}
 
-			player.StartPlayer(playlist.Id, autoJoin);
+			player.StartPlayer(playlist.Id);
 
 			PlayerContainers.Add(new PlayerContainer(tc, player));
 

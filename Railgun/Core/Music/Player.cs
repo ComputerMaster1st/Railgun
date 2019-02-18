@@ -13,20 +13,17 @@ namespace Railgun.Core.Music
 {
 	public class Player
 	{
-		private IAudioClient _client = null;
-		private Exception _audioDisconnectException = null;
-		private bool _audioDisconnected = false;
-		private bool _autoDisconnected = false;
-		private bool _musicCancelled = false;
-		private bool _streamCancelled = false;
-
+		private IAudioClient _client;
+		private Exception _audioDisconnectException;
+		private bool _audioDisconnected;
+		private bool _autoDisconnected;
+		private bool _musicCancelled;
+		private bool _streamCancelled;
+		private ObjectId _playlistId = ObjectId.Empty;
+		private readonly MusicService _musicService;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
 
-		private readonly MusicService _musicService;
-		private ObjectId _playlistId = ObjectId.Empty;
-
 		public IVoiceChannel VoiceChannel { get; }
-
 		public Task PlayerTask { get; private set; } = null;
 		public DateTime CreatedAt { get; } = DateTime.Now;
 		public DateTime SongStartedAt { get; private set; }
@@ -46,14 +43,13 @@ namespace Railgun.Core.Music
 		public int Latency {
 			get {
 				if (_client != null) return _client.Latency;
-				else return -1;
+				return -1;
 			}
 		}
 
 		public Player(MusicService musicService, IVoiceChannel vc)
 		{
 			_musicService = musicService;
-
 			VoiceChannel = vc;
 		}
 
@@ -93,19 +89,19 @@ namespace Railgun.Core.Music
 			return true;
 		}
 
-		public async Task<int> GetUserCountAsync()
-			=> (await VoiceChannel.GetUsersAsync().FlattenAsync()).Count(user => !user.IsBot);
+		public int GetUserCount()
+			=> (VoiceChannel.GetUsersAsync().FlattenAsync().GetAwaiter().GetResult()).Count(user => !user.IsBot);
 
-		public void StartPlayer(ObjectId playlistId, bool autoJoin)
+		public void StartPlayer(ObjectId playlistId)
 		{
 			_playlistId = playlistId;
-			PlayerTask = Task.Run(() => StartAsync());
+			PlayerTask = Task.Run(StartAsync);
 		}
 
-		private async Task<bool> IsAloneAsync()
+		private bool IsAlone()
 		{
-			if (await GetUserCountAsync() < 1) return true;
-			else return false;
+			if (GetUserCount() < 1) return true;
+			return false;
 		}
 
 		private async Task<ISong> QueueSongAsync()
@@ -152,17 +148,17 @@ namespace Railgun.Core.Music
 			return request;
 		}
 
-		private async Task TimeoutAsync(Task task, int ms, string errorMsg)
+		private void ForceTimeout(Task task, int ms, string errorMsg)
 		{
-			await Task.WhenAny(task, Task.Delay(ms));
+			Task.WhenAny(task, Task.Delay(ms)).GetAwaiter();
 
 			if (!task.IsCompleted)
 				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status.ToString()})", task.Exception);
 		}
 
-		private async Task ConnectToVoiceAsync()
+		private void ConnectToVoice()
 		{
-			_client = await VoiceChannel.ConnectAsync();
+			_client = VoiceChannel.ConnectAsync().GetAwaiter().GetResult();
 
 			if (_client == null)
 				throw new TimeoutException("Unable to establish a connection to voice server! Try changing regions if this problem persists.");
@@ -174,7 +170,7 @@ namespace Railgun.Core.Music
 			Status = PlayerStatus.Connecting;
 
 			try {
-				await ConnectToVoiceAsync();
+				ConnectToVoice();
 
 				Connected?.Invoke(this, new ConnectedPlayerEventArgs(VoiceChannel.GuildId));
 
@@ -193,10 +189,11 @@ namespace Railgun.Core.Music
 					Status = PlayerStatus.Connected;
 
 					while (!_streamCancelled) {
-						if (await IsAloneAsync() || LeaveAfterSong) {
+						if (IsAlone() || LeaveAfterSong) {
 							_autoDisconnected = true;
 							break;
-						} else if (_musicCancelled) _musicCancelled = false;
+						}
+						if (_musicCancelled) _musicCancelled = false;
 
 						Status = PlayerStatus.Queuing;
 
@@ -215,17 +212,16 @@ namespace Railgun.Core.Music
 						using (var opusStream = new OpusOggReadStream(databaseStream)) {
 							Status = PlayerStatus.Playing;
 							SongStartedAt = DateTime.Now;
-							Byte[] bytes;
+							byte[] bytes;
 
 							while (opusStream.HasNextPacket && !_musicCancelled) {
 								bytes = opusStream.RetrieveNextPacket();
-
-								await TimeoutAsync(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
+								ForceTimeout(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
 							}
 
 							Status = PlayerStatus.Finishing;
 
-							await TimeoutAsync(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
+							ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
 						}
 
 						if (RepeatSong > 0) RepeatSong--;
@@ -240,7 +236,6 @@ namespace Railgun.Core.Music
 				}
 			} catch (TimeoutException timeEx) {
 				Status = PlayerStatus.Timeout;
-
 				Timeout?.Invoke(this, new TimeoutPlayerEventArgs(VoiceChannel.GuildId, timeEx));
 			} catch (Exception inEx) {
 				Status = PlayerStatus.FailSafe;
@@ -252,7 +247,6 @@ namespace Railgun.Core.Music
 				}
 
 				Finished?.Invoke(this, new FinishedPlayerEventArgs(VoiceChannel.GuildId, _autoDisconnected, ex));
-
 				Status = PlayerStatus.Disconnected;
 			}
 		}

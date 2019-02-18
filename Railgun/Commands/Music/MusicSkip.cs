@@ -41,7 +41,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var player = container.Player;
-				var userCount = await player.GetUserCountAsync();
+				var userCount = player.GetUserCount();
 				var voteSkipResult = player.VoteSkip(Context.Author.Id);
 				var percent = (player.VoteSkipped.Count / userCount) * 100;
 
