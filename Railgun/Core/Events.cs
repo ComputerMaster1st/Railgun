@@ -116,7 +116,7 @@ namespace Railgun.Core
 				if (data != null && data.PlaylistId != ObjectId.Empty)
 					await _musicService.Playlist.DeleteAsync(data.PlaylistId);
 
-				await db.DeleteGuildDataAsync(guild.Id);
+				db.DeleteGuildData(guild.Id);
 			}
 
 			await _log.LogToBotLogAsync($"<{guild.Name} ({guild.Id})> Left", BotLogType.GuildManager);
