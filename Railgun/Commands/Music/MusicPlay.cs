@@ -55,7 +55,7 @@ namespace Railgun.Commands.Music
 					.AppendFormat("{0} Queued {1} as requested by {2}. {3}",
 						nowInstalled ? "Installed &" : _playOneTimeOnly ? "One-Time Only &" : "",
 						Format.Bold(song.Metadata.Name),
-						Format.Bold((__commandUtils.GetUsernameOrMentionn(((IGuildUser)Context.Author)),
+						Format.Bold(_commandUtils.GetUsernameOrMention((IGuildUser)Context.Author)),
 						playerContainer == null ? "Now starting music player..." : "").AppendLine();
 
 				var user = (IGuildUser)Context.Author;
