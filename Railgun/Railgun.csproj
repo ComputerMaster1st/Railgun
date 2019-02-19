@@ -13,6 +13,5 @@
         <PackageReference Include="Discord.Addons.Finite.Commands" Version="0.2.0-dev-00034" />
         <ProjectReference Include="..\Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj" />
         <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     </ItemGroup>
 </Project>
