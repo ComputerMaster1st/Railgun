@@ -33,7 +33,8 @@ namespace Railgun.Core.Music
 		public bool AutoSkipped { get; set; }
 		public bool PlaylistAutoLoop { get; set; } = true;
 		public int RepeatSong { get; set; }
-		public bool LeaveAfterSong { get; set; } = false;
+		public bool LeaveAfterSong { get; set; }
+		public ISong CurrentSong { get; private set; }
 
 		public event EventHandler<ConnectedPlayerEventArgs> Connected;
 		public event EventHandler<CurrentSongPlayerEventArgs> Playing;
@@ -200,22 +201,20 @@ namespace Railgun.Core.Music
 
 						Status = PlayerStatus.Queuing;
 
-						var song = await QueueSongAsync();
+						CurrentSong = await QueueSongAsync();
 
-						if (song == null) {
+						if (CurrentSong == null) {
 							_autoDisconnected = true;
 							break;
 						}
 
-						AddSongRequest(song);
+						AddSongRequest(CurrentSong);
+						Status = PlayerStatus.Playing;
+						SongStartedAt = DateTime.Now;
+						Playing?.Invoke(this, new CurrentSongPlayerEventArgs(VoiceChannel.GuildId, CurrentSong));
 
-						Playing?.Invoke(this, new CurrentSongPlayerEventArgs(VoiceChannel.GuildId, song));
-
-						using (var databaseStream = await song.GetMusicStreamAsync())
+						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
 						using (var opusStream = new OpusOggReadStream(databaseStream)) {
-							Status = PlayerStatus.Playing;
-							SongStartedAt = DateTime.Now;
-
 							while (opusStream.HasNextPacket && !_musicCancelled) {
 								var bytes = opusStream.RetrieveNextPacket();
 								await ForceTimeout(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
@@ -227,7 +226,7 @@ namespace Railgun.Core.Music
 						}
 
 						if (RepeatSong > 0) RepeatSong--;
-						else RemoveSongRequest(song);
+						else RemoveSongRequest(CurrentSong);
 
 						if (AutoSkipped && Requests.Count < 1) AutoSkipped = false;
 

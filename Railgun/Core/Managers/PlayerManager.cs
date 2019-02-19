@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
 using Railgun.Core.Logging;
 using Railgun.Core.Music;
@@ -19,6 +21,7 @@ namespace Railgun.Core.Managers
 	public class PlayerManager
 	{
 		private readonly IServiceProvider _services;
+		private readonly MasterConfig _masterConfig;
 		private readonly IDiscordClient _client;
 		private readonly Log _log;
 		private readonly CommandUtils _commandUtils;
@@ -30,6 +33,7 @@ namespace Railgun.Core.Managers
 		{
 			_services = services;
 
+			_masterConfig = _services.GetService<MasterConfig>();
 			_client = _services.GetService<IDiscordClient>();
 			_log = _services.GetService<Log>();
 			_commandUtils = _services.GetService<CommandUtils>();
@@ -76,28 +80,69 @@ namespace Railgun.Core.Managers
 				PlaylistAutoLoop = data.PlaylistAutoLoop
 			};
 
-			async void connected(object s, ConnectedPlayerEventArgs a) => await ConnectedAsync(a);
-			player.Connected += connected;
-			async void playing(object s, CurrentSongPlayerEventArgs a) => await PlayingAsync(a);
-			player.Playing += playing;
-			async void timeout(object s, TimeoutPlayerEventArgs a) => await TimeoutAsync(a);
-			player.Timeout += timeout;
-			async void finished(object s, FinishedPlayerEventArgs a) => await FinishedAsync(a);
-			player.Finished += finished;
+			async void Connected(object s, ConnectedPlayerEventArgs a) => await ConnectedAsync(a);
+			player.Connected += Connected;
+			async void Playing(object s, CurrentSongPlayerEventArgs a) => await PlayingAsync(a);
+			player.Playing += Playing;
+			async void Timeout(object s, TimeoutPlayerEventArgs a) => await TimeoutAsync(a);
+			player.Timeout += Timeout;
+			async void Finished(object s, FinishedPlayerEventArgs a) => await FinishedAsync(a);
+			player.Finished += Finished;
 
 			if (preRequestedSong != null) {
 				player.AddSongRequest(preRequestedSong);
 				player.AutoSkipped = true;
 			}
 
+			var container = new PlayerContainer(tc, player);
+
+			await CreateOrModifyMusicPlayerLogEntryAsync(container);
+			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
+			
 			player.StartPlayer(playlist.Id);
+			PlayerContainers.Add(container);
+		}
 
-			PlayerContainers.Add(new PlayerContainer(tc, player));
+		private async Task CreateOrModifyMusicPlayerLogEntryAsync(PlayerContainer container) {
+			var song = container.Player.CurrentSong;
+			var songId = "N/A";
+			var songName = "N/A";
+			var songLength = "N/A";
+			var songStarted = "N/A";
 
-			var autoString = $"{(autoJoin ? "Auto-" : "")}Connecting...";
+			if (song != null) {
+				songId = song.Id.ToString();
+				songName = song.Metadata.Name;
+				songLength = song.Metadata.Length.ToString();
+				songStarted = container.Player.SongStartedAt.ToString(CultureInfo.CurrentCulture);
+			}
+			
+			var output = new StringBuilder()
+				.AppendFormat("Music Player {0} <{1} <{2}>>", Response.GetSeparator(), container.TextChannel.Guild.Name,
+					container.TextChannel.GuildId).AppendLine()
+				.AppendFormat("---- Created At      : {0}", container.Player.CreatedAt).AppendLine()
+				.AppendFormat("---- Latency         : {0}ms", container.Player.Latency).AppendLine()
+				.AppendFormat("---- Status          : {0}", container.Player.Status).AppendLine()
+				.AppendFormat("---- Song Started At : {0}", songStarted).AppendLine()
+				.AppendFormat("---- Song ID         : {0}", songId).AppendLine()
+				.AppendFormat("---- Song Name       : {0}", songName).AppendLine()
+				.AppendFormat("---- Song Length     : {0}", songLength).AppendLine();
 
-			await _log.LogToBotLogAsync($"<{vc.Guild.Name} <{vc.GuildId}>> {autoString}", BotLogType.MusicPlayer);
-			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, "Music", autoString));
+			var formattedOutput = Format.Code(output.ToString());
+
+			if (container.LogEntry != null) {
+				await container.LogEntry.ModifyAsync((x) => x.Content = formattedOutput);
+				return;
+			}
+			
+			if (_masterConfig.DiscordConfig.BotLogChannels.MusicPlayerActive == 0) return;
+
+			var masterGuild = await _client.GetGuildAsync(_masterConfig.DiscordConfig.MasterGuildId);
+			if (masterGuild == null) return;
+			var logTc = await masterGuild.GetTextChannelAsync(_masterConfig.DiscordConfig.BotLogChannels.MusicPlayerActive);
+			if (logTc == null) return;
+
+			container.LogEntry = await logTc.SendMessageAsync(formattedOutput);
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)
@@ -132,8 +177,8 @@ namespace Railgun.Core.Managers
 
 		private async Task ConnectedAsync(ConnectedPlayerEventArgs args)
 		{
-			var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
-			await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Connected!", BotLogType.MusicPlayer);
+			var container = PlayerContainers.First(x => x.GuildId == args.GuildId);
+			await CreateOrModifyMusicPlayerLogEntryAsync(container);
 		}
 
 		private async Task PlayingAsync(CurrentSongPlayerEventArgs args)
@@ -141,6 +186,7 @@ namespace Railgun.Core.Managers
 			try {
 				ServerMusic data;
 				ITextChannel tc;
+				var container = PlayerContainers.First(x => x.GuildId == args.GuildId);
 
 				using (var scope = _services.CreateScope()) {
 					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
@@ -148,7 +194,7 @@ namespace Railgun.Core.Managers
 
 				if (data.NowPlayingChannel != 0)
 					tc = await (await _client.GetGuildAsync(args.GuildId)).GetTextChannelAsync(data.NowPlayingChannel);
-				else tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
+				else tc = container.TextChannel;
 
 				if (!data.SilentNowPlaying) {
 					var output = new StringBuilder()
@@ -158,13 +204,11 @@ namespace Railgun.Core.Managers
 					await tc.SendMessageAsync(output.ToString());
 				}
 
-				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> Now Playing {args.Song.Id}", BotLogType.MusicPlayer);
+				await CreateOrModifyMusicPlayerLogEntryAsync(container);
 			} catch {
 				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
-
 				var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
-
-				if (container != null) container.Player.CancelStream();
+				container?.Player.CancelStream();
 			}
 		}
 
@@ -181,7 +225,7 @@ namespace Railgun.Core.Managers
 					.AppendFormat("<{0} ({1})> Action Timeout!", tc.Guild.Name, args.GuildId).AppendLine()
 					.AppendFormat("---- Exception : {0}", args.Exception.ToString());
 
-				await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicPlayer);
+				await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicPlayerError);
 			}
 		}
 
@@ -203,7 +247,7 @@ namespace Railgun.Core.Managers
 						.AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
 						.AppendFormat("---- Error : {0}", args.Exception.ToString());
 
-					await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.MusicPlayer);
+					await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.MusicPlayerError);
 
 					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.");
 				}
@@ -213,11 +257,11 @@ namespace Railgun.Core.Managers
 				output.AppendFormat("{0}Left Voice Channel", autoOutput);
 
 				await tc.SendMessageAsync(output.ToString());
-				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({tc.GuildId})> {autoOutput}Disconnected", BotLogType.MusicPlayer);
 			} catch {
 				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
-				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected", BotLogType.MusicPlayer);
+				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected", BotLogType.MusicPlayerError);
 			} finally {
+				await container.LogEntry.DeleteAsync();
 				await StopPlayerAsync(args.GuildId, args.AutoDisconnected);
 			}
 		}

@@ -13,7 +13,6 @@ using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
-using TreeDiagram;
 
 namespace Railgun.Commands.Root
 {
@@ -36,7 +35,7 @@ namespace Railgun.Commands.Root
         public async Task ShowAsync() {
             var masterGuild = await Context.Client.GetGuildAsync(_config.DiscordConfig.MasterGuildId);
             var masterGuildName = masterGuild != null ? masterGuild.Name : "Not Set";
-            var masterGuildId = masterGuild != null ? masterGuild.Id : 0;
+            var masterGuildId = masterGuild?.Id ?? 0;
             
             var audiochordTc = _config.DiscordConfig.BotLogChannels.AudioChord != 0 ? 
                 await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.AudioChord) : null;
@@ -48,8 +47,10 @@ namespace Railgun.Commands.Root
                 await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.GuildMngr) : null;
             var musicTc = _config.DiscordConfig.BotLogChannels.MusicMngr != 0 ?
                 await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicMngr) : null;
-            var playerTc = _config.DiscordConfig.BotLogChannels.MusicPlayer != 0 ?
-                await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicPlayer) : null;
+            var playerActiveTc = _config.DiscordConfig.BotLogChannels.MusicPlayerActive != 0 ?
+                await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicPlayerActive) : null;
+            var playerErrorTc = _config.DiscordConfig.BotLogChannels.MusicPlayerError != 0 ?
+                await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.MusicPlayerError) : null;
             var timerTc = _config.DiscordConfig.BotLogChannels.TimerMngr != 0 ?
                 await masterGuild.GetTextChannelAsync(_config.DiscordConfig.BotLogChannels.TimerMngr) : null;
             var taskTc = _config.DiscordConfig.BotLogChannels.TaskSch != 0 ?
@@ -64,7 +65,8 @@ namespace Railgun.Commands.Root
                 .AppendFormat("Command Manager : {0}", commandTc != null ? $"{commandTc.Name} ({commandTc.Id})" : botlogDefault).AppendLine()
                 .AppendFormat("  Guild Manager : {0}", guildTc != null ? $"{guildTc.Name} ({guildTc.Id})" : botlogDefault).AppendLine()
                 .AppendFormat("  Music Manager : {0}", musicTc != null ? $"{musicTc.Name} ({musicTc.Id})" : botlogDefault).AppendLine()
-                .AppendFormat("   Music Player : {0}", playerTc != null ? $"{playerTc.Name} ({playerTc.Id})" : botlogDefault).AppendLine()
+                .AppendFormat("   Music Player : {0}", playerActiveTc != null ? $"{playerActiveTc.Name} ({playerActiveTc.Id})" : botlogDefault).AppendLine()
+                .AppendFormat("   Music Player : {0}", playerErrorTc != null ? $"{playerErrorTc.Name} ({playerErrorTc.Id})" : botlogDefault).AppendLine()
                 .AppendFormat("  Timer Manager : {0}", timerTc != null ? $"{timerTc.Name} ({timerTc.Id})" : botlogDefault).AppendLine()
                 .AppendFormat(" Task Scheduler : {0}", taskTc != null ? $"{taskTc.Name} ({taskTc.Id})" : botlogDefault).AppendLine();
                 
@@ -210,7 +212,7 @@ namespace Railgun.Commands.Root
                 return;
             }
             
-            var imageUrl = !String.IsNullOrWhiteSpace(url) ? url : Context.Message.Attachments.FirstOrDefault().Url;
+            var imageUrl = !string.IsNullOrWhiteSpace(url) ? url : Context.Message.Attachments.FirstOrDefault().Url;
 
             using (var webclient = new HttpClient()) {
                 var imageStream = await webclient.GetStreamAsync(imageUrl);

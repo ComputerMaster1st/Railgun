@@ -61,8 +61,11 @@ namespace Railgun.Core.Configuration
                 case BotLogType.MusicManager:
                     BotLogChannels.MusicMngr = channelId;
                     break;
-                case BotLogType.MusicPlayer:
-                    BotLogChannels.MusicPlayer = channelId;
+                case BotLogType.MusicPlayerActive:
+                    BotLogChannels.MusicPlayerActive = channelId;
+                    break;
+                case BotLogType.MusicPlayerError:
+                    BotLogChannels.MusicPlayerError = channelId;
                     break;
                 case BotLogType.AudioChord:
                     BotLogChannels.AudioChord = channelId;

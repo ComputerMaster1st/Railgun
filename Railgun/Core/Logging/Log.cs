@@ -50,13 +50,16 @@ namespace Railgun.Core.Logging
                 var pingMasterStr = pingMaster ? $"<@!{_config.DiscordConfig.MasterAdminId}>": string.Empty;
 
                 if (output.Length > 1950) {
-                    await CommandUtils.SendStringAsFileAsync(tc, $"{logType}.log", output.ToString(), $"Error! Refer to file {pingMasterStr}!", includeGuildName:false);
+                    await CommandUtils.SendStringAsFileAsync(tc, $"{logType}.log", output.ToString(), $"Error! Refer to file {pingMasterStr}!", false);
                     
                     return;
                 }
 
                 await tc.SendMessageAsync(Format.Code(output.ToString()) + pingMasterStr);
-            } catch { }
+            }
+            catch {
+                // ignored
+            }
 
             await WriteToLogFileAsync(output.ToString());
         }
@@ -82,8 +85,11 @@ namespace Railgun.Core.Logging
                 case BotLogType.MusicManager:
                     await SendBotLogAsync(guild, logType, _config.DiscordConfig.BotLogChannels.MusicMngr, entry, pingMaster);
                     break;
-                case BotLogType.MusicPlayer:
-                    await SendBotLogAsync(guild, logType, _config.DiscordConfig.BotLogChannels.MusicPlayer, entry, pingMaster);
+                case BotLogType.MusicPlayerActive:
+                    await SendBotLogAsync(guild, logType, _config.DiscordConfig.BotLogChannels.MusicPlayerActive, entry, pingMaster);
+                    break;
+                case BotLogType.MusicPlayerError:
+                    await SendBotLogAsync(guild, logType, _config.DiscordConfig.BotLogChannels.MusicPlayerError, entry, pingMaster);
                     break;
                 case BotLogType.TaskScheduler:
                     await SendBotLogAsync(guild, logType, _config.DiscordConfig.BotLogChannels.TaskSch, entry, pingMaster);

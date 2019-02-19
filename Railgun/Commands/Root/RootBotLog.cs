@@ -46,9 +46,15 @@ namespace Railgun.Commands.Root
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Manager botlog channel.");
             }
             
-            [Command("musicplayer")]
-            public async Task PlayerAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicPlayer);
+            [Command("musicplayer-active")]
+            public async Task PlayerActiveAsync() {
+                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicPlayerActive);
+                await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Player botlog channel.");
+            }
+            
+            [Command("musicplayer-error")]
+            public async Task PlayerErrorAsync() {
+                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicPlayerError);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Player botlog channel.");
             }
             

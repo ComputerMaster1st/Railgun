@@ -6,7 +6,8 @@ namespace Railgun.Core.Logging
         CommandManager,
         GuildManager,
         MusicManager,
-        MusicPlayer,
+        MusicPlayerActive,
+        MusicPlayerError,
         TimerManager,
         AudioChord,
         TaskScheduler
