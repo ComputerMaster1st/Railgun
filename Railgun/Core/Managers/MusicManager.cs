@@ -28,7 +28,7 @@ namespace Railgun.Core.Managers
 			_musicService = _services.GetService<MusicService>();
 		}
 
-		public async Task AddYoutubeSongsAsync(List<string> urls, ITextChannel tc)
+		public async Task AddYoutubeSongsAsync(IEnumerable<string> urls, ITextChannel tc)
 		{
 			Playlist playlist;
 
@@ -45,13 +45,13 @@ namespace Railgun.Core.Managers
 			foreach (var url in urls) {
 				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...");
 				var cleanUrl = url.Trim(' ', '<', '>');
-				var videoId = string.Empty;
 				ISong song = null;
 
-				if (!_musicService.Youtube.TryParseYoutubeUrl(url, out videoId)) {
+				if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId)) {
 					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Invalid Url :")} <{cleanUrl}>");
 					continue;
-				} else if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), result => song = result)) {
+				}
+				if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), result => song = result)) {
 					if (playlist.Songs.Contains(song.Id))
 						await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Already Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}");
 					else {
@@ -80,10 +80,11 @@ namespace Railgun.Core.Managers
 			await tc.SendMessageAsync("Done!");
 		}
 
-		public async Task ProcessYoutubePlaylistAsync(Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc)
+		public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc)
 		{
 			var alreadyInstalled = 0;
 			var failed = 0;
+			var startedAt = DateTime.Now;
 
 			foreach (var songTask in resolvingPlaylist.Songs) {
 				try {
@@ -100,6 +101,8 @@ namespace Railgun.Core.Managers
 				} catch { failed++; }
 			}
 
+			var newlyEncoded = (resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs) - failed;
+
 			var output = new StringBuilder()
 				.AppendLine("Finished Processing YouTube Playlist! Results...")
 				.AppendFormat(
@@ -107,11 +110,23 @@ namespace Railgun.Core.Managers
 					Format.Bold(alreadyInstalled.ToString()),
 					Response.GetSeparator(),
 					Format.Bold(resolvingPlaylist.ExistingSongs.ToString()),
-					Format.Bold(((resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs) - failed).ToString()),
+					Format.Bold(newlyEncoded.ToString()),
 					Format.Bold(failed.ToString())
 				);
 
+			var logOutput = new StringBuilder()
+				.AppendFormat("<{0} <{1}>> YouTube Playlist Processed!", tc.Guild.Name, tc.GuildId).AppendLine()
+				.AppendFormat("---- Url                : {0}", url).AppendLine()
+				.AppendFormat("---- Started            : {0}", startedAt).AppendLine()
+				.AppendFormat("---- Finished           : {0}", DateTime.Now).AppendLine()
+				.AppendLine()
+				.AppendFormat("---- Already Installed  : {0}", alreadyInstalled).AppendLine()
+				.AppendFormat("---- Imported From Repo : {0}", resolvingPlaylist.ExistingSongs).AppendLine()
+				.AppendFormat("---- Encoded/Installed  : {0}", newlyEncoded).AppendLine()
+				.AppendFormat("---- Failed To Install  : {0}", failed).AppendLine();
+
 			await tc.SendMessageAsync(output.ToString());
+			await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord);
 		}
 
 		public async Task YoutubePlaylistStatusUpdatedAsync(ITextChannel tc, SongProcessStatus status, ServerMusic data)
@@ -120,10 +135,7 @@ namespace Railgun.Core.Managers
 				case SongStatus.Errored: {
 						var output = (SongProcessError)status;
 						var url = "https://youtu.be/" + output.Id.SourceId;
-						var logOutput = new StringBuilder()
-								.AppendFormat("<{0} <{1}>> Process Failure!", tc.Guild.Name, tc.GuildId).AppendLine()
-								.AppendFormat("{0} - {1}", url, output.Exceptions.Message);
-
+						
 						try {
 							await tc.SendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
 						} catch (ArgumentException ex) {
@@ -131,17 +143,11 @@ namespace Railgun.Core.Managers
 						} catch (Exception ex) {
 							await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing TC", ex));
 						}
-
-						await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord);
 					}
 					break;
 				case SongStatus.Processed: {
 						var output = (SongProcessResult)status;
 						var song = await output.Result;
-
-						var logOutput = new StringBuilder()
-							.AppendFormat("<{0} ({1})> Processed Song!", tc.Guild.Name, tc.GuildId).AppendLine()
-							.AppendFormat("{0} <{1}> - {2}", song.Id.ToString(), song.Metadata.Length.ToString(), song.Metadata.Name);
 
 						try {
 							var playlist = await _commandUtils.GetPlaylistAsync(data);
@@ -149,16 +155,16 @@ namespace Railgun.Core.Managers
 							playlist.Songs.Add(song.Id);
 
 							await _musicService.Playlist.UpdateAsync(playlist);
-							await tc.SendMessageAsync($"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}");
+							await tc.SendMessageAsync($"{Format.Bold("Encoded & Installed :")} ({song.Id}) {song.Metadata.Name}");
 						} catch (ArgumentException ex) {
 							await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
 						} catch (Exception ex) {
 							await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing TC", ex));
 						}
-
-						await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord);
 					}
 					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 	}

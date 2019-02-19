@@ -19,7 +19,7 @@ namespace Railgun.Core.Filters
 		{
 			foreach (var url in data.BannedUrls) {
 				if (data.DenyMode && !content.Contains(url) && _regex.IsMatch(content)) return true;
-				else if (!data.DenyMode && content.Contains(url)) return true;
+				if (!data.DenyMode && content.Contains(url)) return true;
 			}
 
 			return false;
@@ -40,9 +40,8 @@ namespace Railgun.Core.Filters
 			var user = message.Author;
 
 			if (message.Author.Id == self.Id) return null;
-			else if (!self.GetPermissions(tc).ManageMessages) {
+			if (!self.GetPermissions(tc).ManageMessages) {
 				await tc.SendMessageAsync($"{Format.Bold("Anti-Url :")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
-
 				return null;
 			}
 
@@ -52,15 +51,14 @@ namespace Railgun.Core.Filters
 
 			if (data.BlockServerInvites && content.Contains("discord.gg/")) {
 				output.AppendFormat("Server Invite");
-
 				return await tc.SendMessageAsync(output.ToString());
-			} else if (_regex.IsMatch(content) && CheckContentForUrl(data, content)) {
+			}
+			if (_regex.IsMatch(content) && CheckContentForUrl(data, content)) {
 				output.AppendFormat("Unlisted Url Block");
-
 				return await tc.SendMessageAsync(output.ToString());
-			} else if (CheckContentForUrl(data, content)) {
+			}
+			if (CheckContentForUrl(data, content)) {
 				output.AppendFormat("Listed Url Block");
-
 				return await tc.SendMessageAsync(output.ToString());
 			}
 

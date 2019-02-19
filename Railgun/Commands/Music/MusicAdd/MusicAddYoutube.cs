@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,11 +35,8 @@ namespace Railgun.Commands.Music
 				[Command("video")]
 				public Task AddVideoAsync([Remainder] string urls)
 				{
-					var urlList = new List<string>();
-
-					foreach (var url in urls.Split(new char[] { ' ', ',' })) if (!string.IsNullOrWhiteSpace(url))
-							urlList.Add(url.Trim(' ', '<', '>'));
-
+					var urlList = (from url in urls.Split(new char[] {' ', ','}) where !string.IsNullOrWhiteSpace(url) 
+						select url.Trim(' ', '<', '>')).ToList();
 					return Task.Factory.StartNew(async () => await _musicManager.AddYoutubeSongsAsync(urlList, (ITextChannel)Context.Channel));
 				}
 
@@ -48,12 +45,13 @@ namespace Railgun.Commands.Music
 				{
 					var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 					var playlist = await _commandUtils.GetPlaylistAsync(data);
+					var cleanUrl = url.Trim(' ', '<', '>');
 
 					await Context.Database.SaveChangesAsync();
 
-					async void handler(SongProcessStatus status) => await _musicManager.YoutubePlaylistStatusUpdatedAsync((ITextChannel)Context.Channel, status, data);
-					Progress<SongProcessStatus> reporter = new Progress<SongProcessStatus>(handler);
-					var resolvingPlaylist = await _musicService.Youtube.DownloadPlaylistAsync(new Uri(url.Trim(' ', '<', '>')), reporter, CancellationToken.None);
+					async void Handler(SongProcessStatus status) => await _musicManager.YoutubePlaylistStatusUpdatedAsync((ITextChannel)Context.Channel, status, data);
+					var reporter = new Progress<SongProcessStatus>(Handler);
+					var resolvingPlaylist = await _musicService.Youtube.DownloadPlaylistAsync(new Uri(cleanUrl), reporter, CancellationToken.None);
 					var queued = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs;
 					var output = new StringBuilder()
 						.AppendFormat("Found In Repository : {0}", Format.Bold(resolvingPlaylist.ExistingSongs.ToString()));
@@ -63,7 +61,7 @@ namespace Railgun.Commands.Music
 					output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.");
 
 					await ReplyAsync(output.ToString());
-					await Task.Factory.StartNew(async () => await _musicManager.ProcessYoutubePlaylistAsync(playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
+					await Task.Factory.StartNew(async () => await _musicManager.ProcessYoutubePlaylistAsync(cleanUrl, playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
 				}
 			}
 		}

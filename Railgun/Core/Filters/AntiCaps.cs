@@ -34,8 +34,8 @@ namespace Railgun.Core.Filters
 			}
 
 			var user = await tc.Guild.GetUserAsync(message.Author.Id);
-			var charCount = 0;
-			var capsCount = 0;
+			double charCount = 0;
+			double capsCount = 0;
 
 			foreach (var c in message.Content) {
 				if (char.IsLetter(c)) {
@@ -54,7 +54,7 @@ namespace Railgun.Core.Filters
 			return await tc.SendMessageAsync(string.Format("{0} Deleted {1}'s Message! ({2} Caps)",
 				Format.Bold("Anti-Caps :"),
 				user.Mention,
-				Format.Bold(Math.Round(percent).ToString() + "%")));
+				Format.Bold(Math.Round(percent) + "%")));
 		}
 	}
 }
