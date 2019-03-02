@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -11,7 +11,6 @@
         <PackageReference Include="Discord.Net" Version="2.0.2-dev-01059" />
         <PackageReference Include="Google.Apis.YouTube.v3" Version="1.38.0.1488" />
         <PackageReference Include="Discord.Addons.Finite.Commands" Version="0.2.0-dev-00034" />
-        <ProjectReference Include="..\Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj" />
         <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
     </ItemGroup>
 </Project>

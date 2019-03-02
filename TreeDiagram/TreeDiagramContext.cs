@@ -1,5 +1,5 @@
+using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Models.Server;
@@ -11,7 +11,7 @@ using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
-	public sealed class TreeDiagramContext : DbContext
+    public sealed class TreeDiagramContext : DbContext
 	{
 		public DbSet<FilterCaps> FilterCapses { get; internal set; }
 		public DbSet<FilterUrl> FilterUrls { get; internal set; }
@@ -30,9 +30,9 @@ namespace TreeDiagram
 		public DbSet<UserCommand> UserCommands { get; internal set; }
 		public DbSet<UserMention> UserMentions { get; internal set; }
 
-		public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
+        public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) => AppContext.SetSwitch("System.Net.Http.useSocketsHttpHandler", false);
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ServerMusic>(x => {
 				x.Property(y => y.PlaylistId)
