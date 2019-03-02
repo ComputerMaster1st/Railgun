@@ -7,7 +7,6 @@
         <LangVersion>7.2</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AudioChord.Parsers" Version="1.0.1" />
         <PackageReference Include="CSharpScriptSerializer" Version="1.6.1" />
         <PackageReference Include="Discord.Net" Version="2.0.2-dev-01059" />
         <PackageReference Include="Google.Apis.YouTube.v3" Version="1.38.0.1488" />

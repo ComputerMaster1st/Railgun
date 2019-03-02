@@ -82,7 +82,7 @@ namespace Railgun.Core
                         )
                     ).EnableSensitiveDataLogging().UseLazyLoadingProxies();
                 }, ServiceLifetime.Transient)
-                .AddSingleton(new MusicService(new MusicServiceConfig() {
+                .AddSingleton(new MusicService(new MusicServiceConfiguration() {
                     Hostname = mongoConfig.Hostname,
                     Username = mongoConfig.Username,
                     Password = mongoConfig.Password,
