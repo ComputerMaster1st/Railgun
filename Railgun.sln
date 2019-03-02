@@ -1,17 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeDiagram", "TreeDiagram\TreeDiagram.csproj", "{A5739A19-A24B-44A2-81FD-0ED64255C926}"
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TreeDiagram", "TreeDiagram\TreeDiagram.csproj", "{A5739A19-A24B-44A2-81FD-0ED64255C926}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railgun", "Railgun\Railgun.csproj", "{0AD77693-5A9C-445F-924F-30944A500810}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared.Music", "Shared.Music", "{2BDBB056-70E8-4C1A-8094-0C0DBBCCABE3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{72F758FD-FE26-48EF-9540-14FF7F571178}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord", "Shared.Music\src\AudioChord\AudioChord.csproj", "{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioChord.Parsers", "Shared.Music\src\AudioChord.Parsers\AudioChord.Parsers.csproj", "{729F549A-00A3-429E-A551-FD0AE29308FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Railgun", "Railgun\Railgun.csproj", "{0AD77693-5A9C-445F-924F-30944A500810}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,18 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{361B5AD2-EE2A-48D9-8593-25BB2654E0F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D6D5DFF-CCA6-4571-ADC7-DDCF4FBA6840}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B15A8668-4E34-4949-A289-AFA2F407A370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B15A8668-4E34-4949-A289-AFA2F407A370}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B15A8668-4E34-4949-A289-AFA2F407A370}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B15A8668-4E34-4949-A289-AFA2F407A370}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A5739A19-A24B-44A2-81FD-0ED64255C926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5739A19-A24B-44A2-81FD-0ED64255C926}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5739A19-A24B-44A2-81FD-0ED64255C926}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,19 +21,12 @@ Global
 		{0AD77693-5A9C-445F-924F-30944A500810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AD77693-5A9C-445F-924F-30944A500810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AD77693-5A9C-445F-924F-30944A500810}.Release|Any CPU.Build.0 = Release|Any CPU
-		{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71}.Release|Any CPU.Build.0 = Release|Any CPU
-		{729F549A-00A3-429E-A551-FD0AE29308FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{729F549A-00A3-429E-A551-FD0AE29308FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{729F549A-00A3-429E-A551-FD0AE29308FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{729F549A-00A3-429E-A551-FD0AE29308FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{72F758FD-FE26-48EF-9540-14FF7F571178} = {2BDBB056-70E8-4C1A-8094-0C0DBBCCABE3}
-		{393CE48D-39D1-4FB4-AF2B-A19AAE19FB71} = {72F758FD-FE26-48EF-9540-14FF7F571178}
-		{729F549A-00A3-429E-A551-FD0AE29308FC} = {72F758FD-FE26-48EF-9540-14FF7F571178}
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D39AA090-3EBC-49A9-AF60-AEB35C162346}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
