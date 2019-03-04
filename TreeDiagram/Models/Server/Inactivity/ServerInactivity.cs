@@ -2,7 +2,7 @@
 
 namespace TreeDiagram.Models.Server.Inactivity
 {
-    class ServerInactivity : ConfigBase
+    public class ServerInactivity : ConfigBase
     {
         public bool IsEnabled { get; set; } = false;
         public bool SendInvite { get; set; } = false;
