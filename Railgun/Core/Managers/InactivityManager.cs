@@ -49,15 +49,30 @@ namespace Railgun.Core.Managers
 
             foreach (var config in configs)
             {
-                // TODO: Loop all users & check if active
+                var guild = await _client.GetGuildAsync(config.Id);
+                var alreadyInactiveUsers = new List<ulong>();
+
                 foreach (var container in config.Users)
                 {
                     if (container.LastActive.AddDays(config.InactiveDaysThreshold) > DateTime.Now) continue;
 
+                    var user = await guild.GetUserAsync(container.UserId);
+
+                    if (user.RoleIds.Contains(config.InactiveRoleId))
+                    {
+                        alreadyInactiveUsers.Add(container.UserId);
+                        continue;
+                    }
+
+                    // TODO: Create timer to execute role assignment.
                 }
 
-                // TODO: Check if user already has inactive role. If so, check if can be kicked (if enabled)
-                // TODO: Create timer to execute role assignment.
+                if (alreadyInactiveUsers.Count < 1) return;
+
+                foreach (var id in alreadyInactiveUsers)
+                {
+                    // TODO: Create timer to execute inactive kick.
+                }
             }
         }
     }
