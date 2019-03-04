@@ -28,7 +28,7 @@ namespace Railgun.Core.Managers
             _log = _services.GetService<Log>();
         }
 
-        public bool CreateAndStartTimer<T>(ITreeTimer data, bool isNew = false) where T : class, ITimerContainer {
+        public bool CreateAndStartTimer<T>(ITreeTimer data) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
             if (!(remainingTime.TotalMinutes < 30) || TimerContainers.Any(find => find.Data.Id == data.Id))
@@ -99,20 +99,18 @@ namespace Railgun.Core.Managers
             for (var i = 0; i < TimerContainers.Count; i++) {
                 var container = TimerContainers[i];
 
-                if (container.IsCompleted || container.HasCrashed) {
-                    if (container.IsCompleted) completedTimers++;
-                    else crashedTimers++;
+                if (!container.IsCompleted && !container.HasCrashed) continue;
+                if (container.IsCompleted) completedTimers++;
+                else crashedTimers++;
 
-                    TimerContainers.RemoveAt(i);
-                    i--;
-                }
+                TimerContainers.RemoveAt(i);
+                i--;
             }
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                foreach (var data in db.TimerRemindMes)
-                    if (CreateAndStartTimer<RemindMeTimerContainer>(data)) newTimers++;
+                newTimers += Enumerable.Count(db.TimerRemindMes, data => CreateAndStartTimer<RemindMeTimerContainer>(data));
             }
 
             if (newTimers < 1 && completedTimers < 1 && crashedTimers < 1) return;
