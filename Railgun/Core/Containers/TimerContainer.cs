@@ -10,21 +10,21 @@ namespace Railgun.Core.Containers
 {
     public abstract class TimerContainer : ITimerContainer
     {
-        protected readonly IServiceProvider _services;
-        protected readonly IDiscordClient _client;
-        protected readonly Log _log;
-        protected Timer _timer = null;
+        protected readonly IServiceProvider Services;
+        protected readonly IDiscordClient Client;
+        protected readonly Log Log;
+        protected Timer Timer;
 
         public ITreeTimer Data { get; }
-        public bool IsCompleted { get; protected set; } = false;
-        public bool HasCrashed { get; protected set; } = false;
+        public bool IsCompleted { get; protected set; }
+        public bool HasCrashed { get; protected set; }
 
         protected TimerContainer(IServiceProvider services, ITreeTimer data)
         {
-            _services = services;
+            Services = services;
             Data = data;
-            _client = _services.GetService<IDiscordClient>();
-            _log = _services.GetService<Log>();
+            Client = Services.GetService<IDiscordClient>();
+            Log = Services.GetService<Log>();
         }
 
         protected abstract Task RunAsync();
@@ -33,26 +33,26 @@ namespace Railgun.Core.Containers
 
         public void StartTimer(double ms)
         {
-            _timer = new Timer(ms)
+            Timer = new Timer(ms)
             {
                 AutoReset = false
             };
 
-            _timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
-            _timer.Start();
+            Timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
+            Timer.Start();
         }
 
         public void StopTimer()
         {
-            _timer.Stop();
-            _timer.Dispose();
+            Timer.Stop();
+            Timer.Dispose();
         }
 
         public Task ExecuteOverrideAsync() => RunAsync();
 
         protected void Dispose()
         {
-            if (_timer != null) _timer.Dispose();
+            if (Timer != null) Timer.Dispose();
 
             DeleteData();
         }

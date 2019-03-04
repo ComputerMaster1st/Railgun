@@ -20,7 +20,7 @@ namespace Railgun.Core.Containers
 
         protected override void DeleteData()
         {
-            using (var scope = _services.CreateScope())
+            using (var scope = Services.CreateScope())
             {
                 scope.ServiceProvider.GetService<TreeDiagramContext>().TimerRemindMes.Remove(_data);
             }
@@ -30,7 +30,7 @@ namespace Railgun.Core.Containers
         {
             try
             {
-                var guild = await _client.GetGuildAsync(_data.GuildId);
+                var guild = await Client.GetGuildAsync(_data.GuildId);
 
                 if (guild == null) throw new NullReferenceException("RemindMe || Guild doesn't exist!");
 
@@ -51,7 +51,7 @@ namespace Railgun.Core.Containers
 
                 Dispose();
 
-                await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer ID {_data.Id.ToString()} has completed! Awaiting final cleanup.", BotLogType.TimerManager);
+                await Log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer ID {_data.Id} has completed! Awaiting final cleanup.", BotLogType.TimerManager);
             }
             catch (NullReferenceException ex)
             {
@@ -59,23 +59,23 @@ namespace Railgun.Core.Containers
 
                 Dispose();
 
-                await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Timers", $"Timer ID |{_data.Id.ToString()}| RemindMe Container Exception!", ex));
+                await Log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Timers", $"Timer ID |{_data.Id}| RemindMe Container Exception!", ex));
             }
             catch (Exception ex)
             {
-                if (_timer != null && !IsCompleted)
+                if (Timer != null && !IsCompleted)
                 {
                     StopTimer();
                     StartTimer(TimeSpan.FromSeconds(60).TotalMilliseconds);
                     return;
                 }
-                if (_timer == null && !IsCompleted)
+                if (Timer == null && !IsCompleted)
                 {
                     HasCrashed = true;
                     Dispose();
                 }
 
-                await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Timers", $"Timer ID |{_data.Id.ToString()}| RemindMe Container Exception!", ex));
+                await Log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Timers", $"Timer ID |{_data.Id}| RemindMe Container Exception!", ex));
             }
         }
     }

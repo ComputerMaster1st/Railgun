@@ -18,7 +18,7 @@ namespace Railgun.Core.Managers
         private readonly Timer _masterTimer = new Timer(TimeSpan.FromMinutes(10).TotalMilliseconds);
         private readonly IServiceProvider _services;
         private readonly Log _log;
-        private bool _initialized = false;
+        private bool _initialized;
 
         public List<ITimerContainer> TimerContainers { get; } = new List<ITimerContainer>();
 
