@@ -9,9 +9,9 @@ namespace Railgun.Core.Containers
 {
     public abstract class TimerContainer : ITimerContainer, IDisposable
     {
-        private readonly IServiceProvider _services;
-        private readonly IDiscordClient _client;
-        private readonly Log _log;
+        protected readonly IServiceProvider _services;
+        protected readonly IDiscordClient _client;
+        protected readonly Log _log;
         private Timer _timer = null;
 
         public bool IsCompleted { get; protected set; } = false;
