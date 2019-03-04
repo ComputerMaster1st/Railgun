@@ -7,7 +7,7 @@ using System.Timers;
 
 namespace Railgun.Core.Containers
 {
-    public abstract class TimerContainer : ITimerContainer, IDisposable
+    public abstract class TimerContainer : ITimerContainer
     {
         protected readonly IServiceProvider _services;
         protected readonly IDiscordClient _client;
@@ -48,7 +48,7 @@ namespace Railgun.Core.Containers
 
         public Task ExecuteOverrideAsync() => RunAsync();
 
-        public void Dispose()
+        protected void Dispose()
         {
             if (_timer != null) _timer.Dispose();
 
