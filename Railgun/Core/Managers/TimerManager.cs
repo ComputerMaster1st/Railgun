@@ -16,24 +16,20 @@ namespace Railgun.Core.Managers
     public class TimerManager
     {
         private readonly Timer _masterTimer = new Timer(TimeSpan.FromMinutes(10).TotalMilliseconds);
-        private List<RemindMeContainer> _remindMeContainers = new List<RemindMeContainer>();
-        private bool _initialized = false;
-
         private readonly IServiceProvider _services;
         private readonly Log _log;
+        private bool _initialized = false;
 
-        public int RemindMeContainerCount { get { return _remindMeContainers.Count; } }
+        public List<ITimerContainer> TimerContainers { get; } = new List<ITimerContainer>();
 
         public TimerManager(IServiceProvider services) {
-            _masterTimer.Elapsed += async (s, a) => await HouseKeepingAsync();
+            _masterTimer.Elapsed += (s, a) => HouseKeepingAsync().GetAwaiter();
             _masterTimer.AutoReset = true;
-
             _services = services;
-
             _log = _services.GetService<Log>();
         }
 
-        public async Task<bool> CreateAndStartRemindMeContainerAsync(TimerRemindMe data, bool isNew = false) {
+        public async Task<bool> CreateAndStartTimerAsync(TimerRemindMe data, bool isNew = false) {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
             if (remainingTime.TotalMinutes < 30 && _remindMeContainers.FirstOrDefault(find => find.Data.Id == data.Id) == null) {
