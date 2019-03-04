@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using TreeDiagram;
+using TreeDiagram.Models.Server.Inactivity;
 
 namespace Railgun.Core.Managers
 {
@@ -20,15 +25,26 @@ namespace Railgun.Core.Managers
 
         public async Task RunAsync()
         {
-            // TODO: Check if any configs are enabled
+            List<ServerInactivity> configs = null;
 
-            // TODO: Grab enabled configs
+            using (var scope = _services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-            // TODO: loop each inactivity config
+                if (!db.ServerInactivities.Any((f) => f.IsEnabled == true)) return;
 
-            // TODO: Check if it has role & inactivity threshold
+                configs = new List<ServerInactivity>(db.ServerInactivities.Where(
+                    (f) => f.IsEnabled == true 
+                    && f.InactiveRoleId != 0 
+                    && f.InactiveThreshold != 0));
+            }
 
-            // TODO: Execute Role Assignment.
+            foreach (var config in configs)
+            {
+                // TODO: Check if user is active or whitelisted
+
+                // TODO: Create timer to execute role assignment.
+            }
         }
     }
 }
