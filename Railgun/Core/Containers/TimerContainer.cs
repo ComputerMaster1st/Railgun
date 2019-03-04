@@ -4,6 +4,7 @@ using Railgun.Core.Logging;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
+using TreeDiagram.Models;
 
 namespace Railgun.Core.Containers
 {
@@ -14,13 +15,14 @@ namespace Railgun.Core.Containers
         protected readonly Log _log;
         protected Timer _timer = null;
 
+        public ITreeTimer Data { get; }
         public bool IsCompleted { get; protected set; } = false;
         public bool HasCrashed { get; protected set; } = false;
 
-        protected TimerContainer(IServiceProvider services)
+        protected TimerContainer(IServiceProvider services, ITreeTimer data)
         {
             _services = services;
-
+            Data = data;
             _client = _services.GetService<IDiscordClient>();
             _log = _services.GetService<Log>();
         }
