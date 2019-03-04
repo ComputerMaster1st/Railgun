@@ -4,7 +4,7 @@ namespace TreeDiagram.Models
 {
     public interface ITreeTimer
     {
-        double Id { get; }
+        int Id { get; }
 
         ulong GuildId { get; set; }
         ulong TextChannelId { get; set; }

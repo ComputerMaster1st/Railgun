@@ -32,7 +32,7 @@ namespace Railgun.Core.Managers
         public async Task<bool> CreateAndStartTimerAsync<T>(ITreeTimer data, bool isNew = false) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
-            if (remainingTime.TotalMinutes < 30 && !TimerContainers.Any(find => find.Data.Id == data.Id)) {
+            if (remainingTime.TotalMinutes < 30 && TimerContainers.All(find => find.Data.Id != data.Id)) {
                 var container = (T)Activator.CreateInstance(typeof(T), _services, data);
 
                 container.StartTimer(remainingTime.TotalMilliseconds);
