@@ -39,6 +39,8 @@ namespace Railgun.Core.Managers
                     && f.InactiveThreshold != 0));
             }
 
+            if (configs.Count < 1) return;
+
             foreach (var config in configs)
             {
                 // TODO: Check if user is active or whitelisted
