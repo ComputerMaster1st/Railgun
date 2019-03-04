@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Discord;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,13 @@ namespace Railgun.Core.Managers
     {
         private readonly Timer _timer = new Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
         private readonly IServiceProvider _services;
+        private readonly IDiscordClient _client;
 
-        public InactivityManager(IServiceProvider services) => _services = services;
+        public InactivityManager(IServiceProvider services)
+        {
+            _services = services;
+            _client = _services.GetService<IDiscordClient>();
+        }
 
         public void Intialize()
         {
@@ -43,10 +49,14 @@ namespace Railgun.Core.Managers
 
             foreach (var config in configs)
             {
-                // TODO: Check if user is active or whitelisted
-                
+                // TODO: Loop all users & check if active
+                foreach (var container in config.Users)
+                {
+                    if (container.LastActive.AddDays(config.InactiveDaysThreshold) > DateTime.Now) continue;
 
-                // TODO: Check if user already has inactive role
+                }
+
+                // TODO: Check if user already has inactive role. If so, check if can be kicked (if enabled)
                 // TODO: Create timer to execute role assignment.
             }
         }
