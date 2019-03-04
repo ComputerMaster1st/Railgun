@@ -7,8 +7,8 @@ namespace TreeDiagram.Models.Server.Inactivity
         public bool IsEnabled { get; set; } = false;
         public bool SendInvite { get; set; } = false;
 
-        public int InactiveThreshold { get; set; } = 0;
-        public int KickThreshold { get; set; } = 0;
+        public int InactiveDaysThreshold { get; set; } = 0;
+        public int KickDaysThreshold { get; set; } = 0;
 
         public ulong InactiveRoleId { get; set; } = 0;
 
