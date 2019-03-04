@@ -36,7 +36,7 @@ namespace Railgun.Core.Managers
                 configs = new List<ServerInactivity>(db.ServerInactivities.Where(
                     (f) => f.IsEnabled == true 
                     && f.InactiveRoleId != 0 
-                    && f.InactiveThreshold != 0));
+                    && f.InactiveDaysThreshold != 0));
             }
 
             if (configs.Count < 1) return;
@@ -44,7 +44,9 @@ namespace Railgun.Core.Managers
             foreach (var config in configs)
             {
                 // TODO: Check if user is active or whitelisted
+                
 
+                // TODO: Check if user already has inactive role
                 // TODO: Create timer to execute role assignment.
             }
         }
