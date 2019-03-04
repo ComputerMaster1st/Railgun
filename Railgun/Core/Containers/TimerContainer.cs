@@ -14,8 +14,8 @@ namespace Railgun.Core.Containers
         private readonly Log _log;
         private Timer _timer = null;
 
-        public bool IsCompleted { get; private set; } = false;
-        public bool HasCrashed { get; private set; } = false;
+        public bool IsCompleted { get; protected set; } = false;
+        public bool HasCrashed { get; protected set; } = false;
 
         protected TimerContainer(IServiceProvider services)
         {
