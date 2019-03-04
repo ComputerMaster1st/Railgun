@@ -110,7 +110,7 @@ namespace Railgun.Core.Managers
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                newTimers += Enumerable.Count(db.TimerRemindMes, data => CreateAndStartTimer<RemindMeTimerContainer>(data));
+                newTimers += db.TimerRemindMes.Count(CreateAndStartTimer<RemindMeTimerContainer>);
             }
 
             if (newTimers < 1 && completedTimers < 1 && crashedTimers < 1) return;
