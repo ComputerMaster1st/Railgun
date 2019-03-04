@@ -79,7 +79,7 @@ namespace Railgun.Commands.Utilities
 			data.Message = message;
 			data.TimerExpire = expireTime;
 
-			await _timerManager.CreateAndStartTimerAsync<RemindMeTimerContainer>(data, true);
+			_timerManager.CreateAndStartTimer<RemindMeTimerContainer>(data, true);
 			await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString(CultureInfo.CurrentCulture))} UTC.");
 		}
 	}
