@@ -12,7 +12,7 @@ namespace Railgun.Core.Containers
         protected readonly IServiceProvider _services;
         protected readonly IDiscordClient _client;
         protected readonly Log _log;
-        private Timer _timer = null;
+        protected Timer _timer = null;
 
         public bool IsCompleted { get; protected set; } = false;
         public bool HasCrashed { get; protected set; } = false;
