@@ -68,6 +68,7 @@ namespace Railgun.Core.Managers
                 }
 
                 if (alreadyInactiveUsers.Count < 1) return;
+                if (config.KickDaysThreshold == 0) return;
 
                 foreach (var id in alreadyInactiveUsers)
                 {
