@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Logging;
 using System;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Railgun.Core.Containers
 {
@@ -11,6 +12,7 @@ namespace Railgun.Core.Containers
         private readonly IServiceProvider _services;
         private readonly IDiscordClient _client;
         private readonly Log _log;
+        private Timer _timer = null;
 
         public bool IsCompleted { get; private set; } = false;
         public bool HasCrashed { get; private set; } = false;
@@ -25,24 +27,32 @@ namespace Railgun.Core.Containers
 
         protected abstract Task RunAsync();
 
+        protected abstract void DeleteData();
+
         public void StartTimer(double ms)
         {
-            throw new NotImplementedException();
+            _timer = new Timer(ms)
+            {
+                AutoReset = false
+            };
+
+            _timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
+            _timer.Start();
         }
 
         public void StopTimer()
         {
-            throw new NotImplementedException();
+            _timer.Stop();
+            _timer.Dispose();
         }
 
-        public Task ExecuteOverrideAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public Task ExecuteOverrideAsync() => RunAsync();
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            if (_timer != null) _timer.Dispose();
+
+            DeleteData();
         }
     }
 }
