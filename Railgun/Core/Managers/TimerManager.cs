@@ -7,7 +7,6 @@ using System.Timers;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Containers;
 using Railgun.Core.Logging;
-using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models;
 
@@ -29,23 +28,19 @@ namespace Railgun.Core.Managers
             _log = _services.GetService<Log>();
         }
 
-        public async Task<bool> CreateAndStartTimerAsync<T>(ITreeTimer data, bool isNew = false) where T : class, ITimerContainer {
+        public bool CreateAndStartTimer<T>(ITreeTimer data, bool isNew = false) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
-            if (remainingTime.TotalMinutes < 30 && TimerContainers.All(find => find.Data.Id != data.Id)) {
-                var container = (T)Activator.CreateInstance(typeof(T), _services, data);
-
-                container.StartTimer(remainingTime.TotalMilliseconds);
-
-                TimerContainers.Add(container);
-
-                if (isNew) await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created & Started!", BotLogType.TimerManager);
-
-                return true;
-            } else if (isNew) {
-                await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created!", BotLogType.TimerManager);
+            if (!(remainingTime.TotalMinutes < 30) || TimerContainers.Any(find => find.Data.Id == data.Id))
                 return false;
-            } else return false;
+
+            var container = (T)Activator.CreateInstance(typeof(T), _services, data);
+
+            container.StartTimer(remainingTime.TotalMilliseconds);
+
+            TimerContainers.Add(container);
+
+            return true;
         }
 
         public async Task InitializeAsync() {
@@ -76,7 +71,7 @@ namespace Railgun.Core.Managers
                         else if (container.HasCrashed) crashedTimers++;
 
                         continue;
-                    } else if (await CreateAndStartTimerAsync<RemindMeTimerContainer>(data)) newTimers++;
+                    } else if (CreateAndStartTimer<RemindMeTimerContainer>(data)) newTimers++;
                 }
 
                 // END TODO
@@ -117,7 +112,7 @@ namespace Railgun.Core.Managers
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
                 foreach (var data in db.TimerRemindMes)
-                    if (await CreateAndStartTimerAsync(data)) newTimers++;
+                    if (CreateAndStartTimer<RemindMeTimerContainer>(data)) newTimers++;
             }
 
             if (newTimers < 1 && completedTimers < 1 && crashedTimers < 1) return;
