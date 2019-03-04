@@ -29,11 +29,11 @@ namespace Railgun.Core.Managers
             _log = _services.GetService<Log>();
         }
 
-        public async Task<bool> CreateAndStartTimerAsync(TimerRemindMe data, bool isNew = false) {
+        public async Task<bool> CreateAndStartTimerAsync<T>(TimerRemindMe data, bool isNew = false) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
             if (remainingTime.TotalMinutes < 30 && TimerContainers.FirstOrDefault(find => find.Data.Id == data.Id) == null) {
-                var container = new RemindMeContainer(_services, data);
+                var container = (T)Activator.CreateInstance(typeof(T), _services, data);
 
                 container.StartTimer(remainingTime.TotalMilliseconds);
 
@@ -64,6 +64,8 @@ namespace Railgun.Core.Managers
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
+                // TODO: Perhaps move this to an extension method?
+                
                 foreach (var data in db.TimerRemindMes) {
                     if (data.TimerExpire < DateTime.UtcNow) {
                         var container = new RemindMeContainer(_services, data);
@@ -74,8 +76,10 @@ namespace Railgun.Core.Managers
                         else if (container.HasCrashed) crashedTimers++;
 
                         continue;
-                    } else if (await CreateAndStartTimerAsync(data)) newTimers++;
+                    } else if (await CreateAndStartTimerAsync<RemindMeTimerContainer>(data)) newTimers++;
                 }
+
+                // END TODO
             }
 
             _masterTimer.Start();
