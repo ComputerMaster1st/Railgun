@@ -14,7 +14,5 @@ namespace TreeDiagram.Models
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
         public DateTime TimerExpire { get; set; }
-
-        [NotMapped] public Timer Timer { get; set; }
     }
 }
