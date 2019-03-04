@@ -9,7 +9,7 @@ using Railgun.Core.Containers;
 using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.TreeTimer;
+using TreeDiagram.Models;
 
 namespace Railgun.Core.Managers
 {
@@ -29,10 +29,10 @@ namespace Railgun.Core.Managers
             _log = _services.GetService<Log>();
         }
 
-        public async Task<bool> CreateAndStartTimerAsync<T>(TimerRemindMe data, bool isNew = false) where T : class, ITimerContainer {
+        public async Task<bool> CreateAndStartTimerAsync<T>(ITreeTimer data, bool isNew = false) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
-            if (remainingTime.TotalMinutes < 30 && TimerContainers.FirstOrDefault(find => find.Data.Id == data.Id) == null) {
+            if (remainingTime.TotalMinutes < 30 && !TimerContainers.Any(find => find.Data.Id == data.Id)) {
                 var container = (T)Activator.CreateInstance(typeof(T), _services, data);
 
                 container.StartTimer(remainingTime.TotalMilliseconds);
