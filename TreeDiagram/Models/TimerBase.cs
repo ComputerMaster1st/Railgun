@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeDiagram.Models
 {
-    public abstract class TimerBase : ITreeModel
+    public abstract class TimerBase : ITreeTimer
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public ulong Id { get; internal set; } = Convert.ToUInt64(DateTime.UtcNow.Subtract(
-            new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+        public double Id { get; internal set; } = DateTime.UtcNow.Subtract(
+            new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
         
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
