@@ -21,11 +21,18 @@ show                            --> Show Config
 reset                           --> Reset Config
 
 <================================>
-InactivityManager
+Events - Message Handler
+
+Simply remove inactive role if already assigned. Must meet conditions.
+
+<================================>
+InactivityManager - MUST ADD TO INITIALIZER
 
 Dedicated Task  --> Run check & execute upon conditions met
 void Start()    --> Start the task. Restart if need be
 Constructor     --> Initialize variables
+
+Use a timer to run at set repeated interval
 
 Interact w/ TimerManager? Maybe best to due to rate-limits. Requires model creation.
 
