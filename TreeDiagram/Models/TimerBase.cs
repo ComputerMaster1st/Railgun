@@ -8,7 +8,7 @@ namespace TreeDiagram.Models
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public ulong Id { get; internal set; } = Convert.ToUInt64(DateTime.UtcNow.Subtract(
-            new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            new DateTime(DateTime.UtcNow.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
