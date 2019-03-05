@@ -15,8 +15,8 @@ namespace TreeDiagram.Models.Server.Inactivity
 
         public List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
 
-        public List<ulong> UserWhitelist { get; private set; } = new List<ulong>();
-        public List<ulong> RoleWhitelist { get; private set; } = new List<ulong>();
+        public List<UlongUserId> UserWhitelist { get; private set; } = new List<UlongUserId>();
+        public List<UlongRoleId> RoleWhitelist { get; private set; } = new List<UlongRoleId>();
 
         public ServerInactivity(ulong id) : base(id) {}
     }
