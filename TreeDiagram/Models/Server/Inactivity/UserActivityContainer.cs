@@ -4,10 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeDiagram.Models.Server.Inactivity
 {
-    public class UserActivityContainer
-    {
+    public class UserActivityContainer {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; private set; }
+        public int Id { get; } = 0;
 
         public ulong UserId { get; }
         public DateTime LastActive { get; set; }
