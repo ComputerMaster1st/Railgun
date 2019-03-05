@@ -52,7 +52,7 @@ namespace Railgun.Core.Managers
             foreach (var config in configs)
             {
                 var guild = await _client.GetGuildAsync(config.Id);
-                var alreadyInactiveUsers = new List<ulong>();
+                var alreadyInactiveUsers = new List<UserActivityContainer>();
 
                 foreach (var container in config.Users) {
                     var currentTime = DateTime.Now;
@@ -63,7 +63,7 @@ namespace Railgun.Core.Managers
 
                     if (user.RoleIds.Contains(config.InactiveRoleId))
                     {
-                        alreadyInactiveUsers.Add(container.UserId);
+                        alreadyInactiveUsers.Add(container);
                         continue;
                     }
 
@@ -82,9 +82,21 @@ namespace Railgun.Core.Managers
                 if (alreadyInactiveUsers.Count < 1) return;
                 if (config.KickDaysThreshold == 0) return;
 
-                foreach (var id in alreadyInactiveUsers)
+                foreach (var container in alreadyInactiveUsers)
                 {
-                    // TODO: Create timer to execute inactive kick.
+                    var currentTime = DateTime.Now;
+                    
+                    if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
+
+                    TimerKickUser data;
+                    
+                    using (var scope = _services.CreateScope()) {
+                        data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
+                            .CreateTimer(config.Id, currentTime.AddMinutes(5));
+                        data.UserId = container.UserId;
+                    }
+
+                    _timerManager.CreateAndStartTimer<KickUserTimerContainer>(data);
                 }
             }
         }
