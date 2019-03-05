@@ -15,7 +15,9 @@ namespace Railgun.Core.Containers
     {
         private readonly TimerRemindMe _data;
 
-        public RemindMeTimerContainer(IServiceProvider services, ITreeTimer data) : base(services, data)
+        public override ITreeTimer Data => _data;
+
+        public RemindMeTimerContainer(IServiceProvider services, ITreeTimer data) : base(services)
             => _data = (TimerRemindMe)data;
 
         protected override void DeleteData()

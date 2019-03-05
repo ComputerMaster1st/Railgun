@@ -15,14 +15,13 @@ namespace Railgun.Core.Containers
         protected readonly Log Log;
         protected Timer Timer;
 
-        public ITreeTimer Data { get; }
+        public abstract ITreeTimer Data { get; }
         public bool IsCompleted { get; protected set; }
         public bool HasCrashed { get; protected set; }
 
-        protected TimerContainer(IServiceProvider services, ITreeTimer data)
+        protected TimerContainer(IServiceProvider services)
         {
             Services = services;
-            Data = data;
             Client = Services.GetService<IDiscordClient>();
             Log = Services.GetService<Log>();
         }
