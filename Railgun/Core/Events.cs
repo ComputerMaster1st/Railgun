@@ -129,7 +129,7 @@ namespace Railgun.Core
 
                     if (data.Users.Any((f) => f.UserId == user.Id))
                     {
-                        data.Users.Where((f) => f.UserId == user.Id).First().LastActive = DateTime.Now;
+                        data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
                         return;
                     }
 
@@ -162,8 +162,19 @@ namespace Railgun.Core
 		{
 			ServerJoinLeave data;
 
-			using (var scope = _services.CreateScope()) {
-				data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerJoinLeaves.GetData(user.Guild.Id);
+			using (var scope = _services.CreateScope())
+			{
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+
+				if (inactivityData != null)
+				{
+					if (inactivityData.Users.Any(u => u.UserId == user.Id))
+						inactivityData.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
+					else inactivityData.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+				}
+				
+				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
 			}
 
 			if (data == null) return;
@@ -183,7 +194,12 @@ namespace Railgun.Core
 			ServerJoinLeave data;
 
 			using (var scope = _services.CreateScope()) {
-				data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerJoinLeaves.GetData(user.Guild.Id);
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+
+				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
+
+				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
 			}
 
 			if (data == null) return;
