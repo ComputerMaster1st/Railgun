@@ -52,8 +52,7 @@ namespace Railgun.Core.Containers
 
         protected void Dispose()
         {
-            if (Timer != null) Timer.Dispose();
-
+            Timer?.Dispose();
             DeleteData();
         }
     }
