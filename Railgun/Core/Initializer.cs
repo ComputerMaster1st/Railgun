@@ -94,6 +94,7 @@ namespace Railgun.Core
                 .AddTransient<RandomCat>()
                 .AddSingleton<CommandManager>()
                 .AddSingleton<FilterManager>()
+                .AddSingleton<InactivityManager>()
                 .AddSingleton<MusicManager>()
                 .AddSingleton<PlayerManager>()
                 .AddSingleton<TimerManager>()
