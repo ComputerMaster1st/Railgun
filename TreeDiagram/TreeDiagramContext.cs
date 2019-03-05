@@ -27,8 +27,9 @@ namespace TreeDiagram
 		public DbSet<ServerMusic> ServerMusics { get; internal set; }
 		public DbSet<ServerWarning> ServerWarnings { get; internal set; }
 
-		public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
 	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; }
+	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; }
+	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
 
 	    public DbSet<UserCommand> UserCommands { get; internal set; }
 		public DbSet<UserMention> UserMentions { get; internal set; }
