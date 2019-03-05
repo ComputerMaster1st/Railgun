@@ -106,15 +106,15 @@ namespace Railgun.Core.Managers
                 .AppendLine()
                 .AppendFormat("Started         : {0}", newTimers).AppendLine()
                 .AppendFormat("Already Running : {0}", TimerContainers.Count - newTimers).AppendLine()
-                .AppendFormat("Crashed/Errored : {0}", crashedTimers).AppendLine()
+                .AppendFormat("Crashed         : {0}", crashedTimers).AppendLine()
                 .AppendFormat("Final Cleanup   : {0}", completedTimers + crashedTimers);
 
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.TimerManager);
         }
 
-        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> set, ref int newTimers, ref int completedTimers,
+        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> dbSet, ref int newTimers, ref int completedTimers,
             ref int crashedTimers) where TContainer : class, ITimerContainer {
-            foreach (var data in set) {
+            foreach (var data in dbSet) {
                 if (data.TimerExpire < DateTime.UtcNow) {
                     var container = (TContainer)Activator.CreateInstance(typeof(TContainer), _services, data);
 
