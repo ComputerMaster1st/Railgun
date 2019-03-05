@@ -40,14 +40,6 @@ namespace Railgun.Commands.Inactivity
             return ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
         }
 
-        [Command("sendinvite"), BotPerms(GuildPermission.ManageGuild)]
-        public Task SendInviteAsync()
-        {
-            var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
-            data.SendInvite = !data.SendInvite;
-            return ReplyAsync($"Send Invites has now been turned {Format.Bold(data.IsEnabled ? "On" : "Off")}.");
-        }
-
         [Command("initialize")]
         public async Task InitializeAsync()
         {
@@ -193,7 +185,7 @@ namespace Railgun.Commands.Inactivity
             }
 
             var inactiveRole = Context.Guild.GetRole(data.InactiveRoleId);
-            
+
             var output = new StringBuilder()
                 .AppendLine("Inactivity Monitor Configuration")
                 .AppendLine()
@@ -202,9 +194,7 @@ namespace Railgun.Commands.Inactivity
                 .AppendFormat("Inactive Threshold : {0} days after last active", data.InactiveDaysThreshold).AppendLine()
                 .AppendFormat("Kick Threshold     : {0} days after last active (0 = Not Set!)", data.KickDaysThreshold).AppendLine()
                 .AppendFormat("Whitelisted Roles  : {0}", whitelistedRoles.ToString()).AppendLine()
-                .AppendFormat("Whitelisted Users  : {0}", whitelistedUsers.ToString()).AppendLine()
-                .AppendLine()
-                .AppendFormat("DM Invite Code on Kick : {0}", data.SendInvite ? "Yes" : "No").AppendLine();
+                .AppendFormat("Whitelisted Users  : {0}", whitelistedUsers.ToString()).AppendLine();
 
             return ReplyAsync(Format.Code(output.ToString()));
         }
