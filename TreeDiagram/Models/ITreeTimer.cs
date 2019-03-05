@@ -7,7 +7,6 @@ namespace TreeDiagram.Models
         int Id { get; }
 
         ulong GuildId { get; }
-        ulong TextChannelId { get; }
 
         DateTime TimerExpire { get; }
     }

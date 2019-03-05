@@ -7,6 +7,6 @@ namespace TreeDiagram.Models.TreeTimer
         public ulong UserId { get; set; }
         public ulong RoleId { get; set; }
 
-        public TimerAssignRole(ulong guildId, ulong tc, DateTime timerExpire) : base(guildId, tc, timerExpire) {}
+        public TimerAssignRole(ulong guildId, DateTime timerExpire) : base(guildId, timerExpire) {}
     }
 }

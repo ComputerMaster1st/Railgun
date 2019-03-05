@@ -71,8 +71,9 @@ namespace Railgun.Commands.Utilities
 				return;
 			}
 
-			var data = Context.Database.TimerRemindMes.CreateTimer(Context.Guild.Id, Context.Channel.Id, expireTime);
+			var data = Context.Database.TimerRemindMes.CreateTimer(Context.Guild.Id, expireTime);
 
+			data.TextChannelId = Context.Channel.Id;
 			data.UserId = Context.Author.Id;
 			data.Message = message;
 

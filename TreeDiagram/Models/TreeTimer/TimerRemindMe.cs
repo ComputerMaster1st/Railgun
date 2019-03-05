@@ -4,9 +4,10 @@ namespace TreeDiagram.Models.TreeTimer
 {
     public class TimerRemindMe : TimerBase
     {
+        public ulong TextChannelId { get; set; }
         public ulong UserId { get; set; }
         public string Message { get; set; }
 
-        public TimerRemindMe(ulong guildId, ulong tc, DateTime timerExpire) : base(guildId, tc, timerExpire) {}
+        public TimerRemindMe(ulong guildId, DateTime timerExpire) : base(guildId, timerExpire) { }
     }
 }
