@@ -208,5 +208,17 @@ namespace Railgun.Commands.Inactivity
 
             return ReplyAsync(Format.Code(output.ToString()));
         }
+        
+        [Command("reset")]
+        public Task ResetAsync()
+        {
+            var data = Context.Database.ServerInactivities.GetData(Context.Guild.Id);
+
+            if (data == null) return ReplyAsync("Inactivity Monitor has no data to reset.");
+
+            Context.Database.ServerInactivities.Remove(data);
+
+            return ReplyAsync("Inactivity Monitor has been reset & disabled. All active timers will continue until finished.");
+        }
     }
 }
