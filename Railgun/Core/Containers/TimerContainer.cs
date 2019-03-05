@@ -26,9 +26,9 @@ namespace Railgun.Core.Containers
             Log = Services.GetService<Log>();
         }
 
-        protected abstract Task RunAsync();
-
         protected abstract void DeleteData();
+        
+        protected abstract Task RunAsync();
 
         public void StartTimer(double ms)
         {
