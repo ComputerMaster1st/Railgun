@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
@@ -14,6 +15,7 @@ using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
+using TreeDiagram.Models.Server.Inactivity;
 
 namespace Railgun.Core
 {
@@ -47,7 +49,9 @@ namespace Railgun.Core
 			_timerManager = _services.GetService<TimerManager>();
 			_inactivityManager = _services.GetService<InactivityManager>();
 
-			_client.JoinedGuild += JoinedGuildAsync;
+            _client.MessageReceived += MessageReceivedAsync;
+            _client.MessageUpdated += (oldMsg, newMsg, channel) => MessageReceivedAsync(newMsg);
+            _client.JoinedGuild += JoinedGuildAsync;
 			_client.LeftGuild += LeftGuildAsync;
 			_client.UserJoined += UserJoinedAsync;
 			_client.UserLeft += UserLeftAsync;
@@ -103,6 +107,36 @@ namespace Railgun.Core
 					}
 				});
 		}
+
+        private Task MessageReceivedAsync(SocketMessage sMessage)
+        {
+            if (!(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
+                return Task.CompletedTask;
+
+            return Task.Factory.StartNew(async() => {
+                var tc = (ITextChannel)sMessage.Channel;
+
+                using (var scope = _services.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                    var data = db.ServerInactivities.GetData(tc.GuildId);
+                    var guild = tc.Guild;
+                    var user = await guild.GetUserAsync(sMessage.Author.Id);
+
+                    if (data == null) return;
+                    if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
+                    foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
+
+                    if (data.Users.Any((f) => f.UserId == user.Id))
+                    {
+                        data.Users.Where((f) => f.UserId == user.Id).First().LastActive = DateTime.Now;
+                        return;
+                    }
+
+                    data.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+                }
+            });
+        }
 
 		private async Task JoinedGuildAsync(SocketGuild sGuild)
 			=> await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager);
