@@ -1,14 +1,13 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TreeDiagram.Models;
 
 namespace TreeDiagram
 {
-	public static class DbSetExtensions
+    public static class DbSetExtensions
 	{
-		public static TEntity CreateTimer<TEntity>(this DbSet<TEntity> set) where TEntity : class, ITreeModel
+		public static TEntity CreateTimer<TEntity>(this DbSet<TEntity> set) where TEntity : class, ITreeTimer
 		{
 			var data = (TEntity)Activator.CreateInstance(typeof(TEntity));
 			set.Add(data);

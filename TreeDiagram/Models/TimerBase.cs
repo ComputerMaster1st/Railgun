@@ -1,20 +1,16 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Timers;
 
 namespace TreeDiagram.Models
 {
-    public abstract class TimerBase : ITreeModel
+    public abstract class TimerBase : ITreeTimer
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public ulong Id { get; internal set; } = Convert.ToUInt64(DateTime.UtcNow.Subtract(
-            new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; internal set; }
         
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
         public DateTime TimerExpire { get; set; }
-
-        [NotMapped] public Timer Timer { get; set; }
     }
 }

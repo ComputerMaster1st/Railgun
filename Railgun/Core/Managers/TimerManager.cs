@@ -7,49 +7,40 @@ using System.Timers;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Containers;
 using Railgun.Core.Logging;
-using Railgun.Core.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.TreeTimer;
+using TreeDiagram.Models;
 
 namespace Railgun.Core.Managers
 {
     public class TimerManager
     {
         private readonly Timer _masterTimer = new Timer(TimeSpan.FromMinutes(10).TotalMilliseconds);
-        private List<RemindMeContainer> _remindMeContainers = new List<RemindMeContainer>();
-        private bool _initialized = false;
-
         private readonly IServiceProvider _services;
         private readonly Log _log;
+        private bool _initialized;
 
-        public int RemindMeContainerCount { get { return _remindMeContainers.Count; } }
+        public List<ITimerContainer> TimerContainers { get; } = new List<ITimerContainer>();
 
         public TimerManager(IServiceProvider services) {
-            _masterTimer.Elapsed += async (s, a) => await HouseKeepingAsync();
+            _masterTimer.Elapsed += (s, a) => HouseKeepingAsync().GetAwaiter();
             _masterTimer.AutoReset = true;
-
             _services = services;
-
             _log = _services.GetService<Log>();
         }
 
-        public async Task<bool> CreateAndStartRemindMeContainerAsync(TimerRemindMe data, bool isNew = false) {
+        public bool CreateAndStartTimer<T>(ITreeTimer data) where T : class, ITimerContainer {
             var remainingTime = data.TimerExpire - DateTime.UtcNow;
 
-            if (remainingTime.TotalMinutes < 30 && _remindMeContainers.FirstOrDefault(find => find.Data.Id == data.Id) == null) {
-                var container = new RemindMeContainer(_services, data);
-
-                container.StartTimer(remainingTime.TotalMilliseconds);
-
-                _remindMeContainers.Add(container);
-
-                if (isNew) await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created & Started!", BotLogType.TimerManager);
-
-                return true;
-            } else if (isNew) {
-                await _log.LogToBotLogAsync($"Remind Me {Response.GetSeparator()} Timer #{data.Id} Created!", BotLogType.TimerManager);
+            if (!(remainingTime.TotalMinutes < 30) || TimerContainers.Any(find => find.Data.Id == data.Id))
                 return false;
-            } else return false;
+
+            var container = (T)Activator.CreateInstance(typeof(T), _services, data);
+
+            container.StartTimer(remainingTime.TotalMilliseconds);
+
+            TimerContainers.Add(container);
+
+            return true;
         }
 
         public async Task InitializeAsync() {
@@ -57,8 +48,8 @@ namespace Railgun.Core.Managers
 
             if (_initialized) {
                 _masterTimer.Stop();
-                _remindMeContainers.ForEach(container => container.StopTimer());
-                _remindMeContainers.Clear();
+                TimerContainers.ForEach(container => container.StopTimer());
+                TimerContainers.Clear();
             }
 
             var newTimers = 0;
@@ -67,19 +58,9 @@ namespace Railgun.Core.Managers
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-
-                foreach (var data in db.TimerRemindMes) {
-                    if (data.TimerExpire < DateTime.UtcNow) {
-                        var container = new RemindMeContainer(_services, data);
-
-                        await container.ExecuteOverrideAsync();
-
-                        if (container.IsCompleted) completedTimers++;
-                        else if (container.HasCrashed) crashedTimers++;
-
-                        continue;
-                    } else if (await CreateAndStartRemindMeContainerAsync(data)) newTimers++;
-                }
+                
+                CreateOrOverrideTimers<RemindMeTimerContainer>(db.TimerRemindMes, ref newTimers, ref completedTimers,
+                    ref crashedTimers);
             }
 
             _masterTimer.Start();
@@ -101,23 +82,21 @@ namespace Railgun.Core.Managers
             var crashedTimers = 0;
             var completedTimers = 0;
 
-            for (var i = 0; i < RemindMeContainerCount; i++) {
-                var container = _remindMeContainers[i];
+            for (var i = 0; i < TimerContainers.Count; i++) {
+                var container = TimerContainers[i];
 
-                if (container.IsCompleted || container.HasCrashed) {
-                    if (container.IsCompleted) completedTimers++;
-                    else crashedTimers++;
+                if (!container.IsCompleted && !container.HasCrashed) continue;
+                if (container.IsCompleted) completedTimers++;
+                else crashedTimers++;
 
-                    _remindMeContainers.RemoveAt(i);
-                    i--;
-                }
+                TimerContainers.RemoveAt(i);
+                i--;
             }
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                foreach (var data in db.TimerRemindMes)
-                    if (await CreateAndStartRemindMeContainerAsync(data)) newTimers++;
+                newTimers += db.TimerRemindMes.Count(CreateAndStartTimer<RemindMeTimerContainer>);
             }
 
             if (newTimers < 1 && completedTimers < 1 && crashedTimers < 1) return;
@@ -126,11 +105,28 @@ namespace Railgun.Core.Managers
                 .AppendLine("Timer Housekeeping Completed!")
                 .AppendLine()
                 .AppendFormat("Started         : {0}", newTimers).AppendLine()
-                .AppendFormat("Already Running : {0}", RemindMeContainerCount - newTimers).AppendLine()
-                .AppendFormat("Crashed/Errored : {0}", crashedTimers).AppendLine()
+                .AppendFormat("Already Running : {0}", TimerContainers.Count - newTimers).AppendLine()
+                .AppendFormat("Crashed         : {0}", crashedTimers).AppendLine()
                 .AppendFormat("Final Cleanup   : {0}", completedTimers + crashedTimers);
 
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.TimerManager);
+        }
+
+        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> dbSet, ref int newTimers, ref int completedTimers,
+            ref int crashedTimers) where TContainer : class, ITimerContainer {
+            foreach (var data in dbSet) {
+                if (data.TimerExpire < DateTime.UtcNow) {
+                    var container = (TContainer)Activator.CreateInstance(typeof(TContainer), _services, data);
+
+                    container.ExecuteOverrideAsync().GetAwaiter();
+                    
+                    if (container.IsCompleted) completedTimers++;
+                    else if (container.HasCrashed) crashedTimers++;
+
+                    continue;
+                }
+                if (CreateAndStartTimer<TContainer>(data)) newTimers++;
+            }
         }
     }
 }

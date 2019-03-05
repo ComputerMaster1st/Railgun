@@ -1,10 +1,12 @@
 using System;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Containers;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
@@ -42,7 +44,7 @@ namespace Railgun.Commands.Utilities
 				return;
 			}
 
-			var dhm = new int[] { 0, 0, 0 };
+			var dhm = new[] { 0, 0, 0 };
 			var i = dhm.Length - times.Length;
 			var ti = 0;
 
@@ -77,8 +79,8 @@ namespace Railgun.Commands.Utilities
 			data.Message = message;
 			data.TimerExpire = expireTime;
 
-			await _timerManager.CreateAndStartRemindMeContainerAsync(data, true);
-			await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString())} UTC.");
+			_timerManager.CreateAndStartTimer<RemindMeTimerContainer>(data);
+			await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString(CultureInfo.CurrentCulture))} UTC.");
 		}
 	}
 }
