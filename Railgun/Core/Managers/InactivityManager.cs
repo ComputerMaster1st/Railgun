@@ -13,23 +13,28 @@ using TreeDiagram.Models.TreeTimer;
 namespace Railgun.Core.Managers
 {
     public class InactivityManager {
-        private readonly Timer _timer = new Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+        private readonly Timer _timer;
         private readonly IServiceProvider _services;
         private readonly IDiscordClient _client;
         private readonly TimerManager _timerManager;
+        private bool _initialized;
 
         public InactivityManager(IServiceProvider services)
         {
             _services = services;
             _client = _services.GetService<IDiscordClient>();
             _timerManager = _services.GetService<TimerManager>();
+
+            _timer = new Timer(TimeSpan.FromMinutes(5).TotalMilliseconds) {AutoReset = true};
+            _timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
         }
 
         public void Initialize()
         {
-            _timer.AutoReset = true;
-            _timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
+            if (_initialized) _timer.Stop();
+            
             _timer.Start();
+            _initialized = true;
         }
 
         private async Task RunAsync() {
