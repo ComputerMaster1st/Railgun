@@ -28,8 +28,9 @@ namespace TreeDiagram
 		public DbSet<ServerWarning> ServerWarnings { get; internal set; }
 
 		public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
+	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; }
 
-		public DbSet<UserCommand> UserCommands { get; internal set; }
+	    public DbSet<UserCommand> UserCommands { get; internal set; }
 		public DbSet<UserMention> UserMentions { get; internal set; }
 
         public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) => AppContext.SetSwitch("System.Net.Http.useSocketsHttpHandler", false);
