@@ -59,6 +59,10 @@ namespace Railgun.Core.Managers
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 
+                CreateOrOverrideTimers<AssignRoleTimerContainer>(db.TimerAssignRoles, ref newTimers, ref completedTimers,
+                    ref crashedTimers);
+                CreateOrOverrideTimers<KickUserTimerContainer>(db.TimerKickUsers, ref newTimers, ref completedTimers,
+                    ref crashedTimers);
                 CreateOrOverrideTimers<RemindMeTimerContainer>(db.TimerRemindMes, ref newTimers, ref completedTimers,
                     ref crashedTimers);
             }
@@ -95,7 +99,9 @@ namespace Railgun.Core.Managers
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-
+                
+                newTimers += db.TimerAssignRoles.Count(CreateAndStartTimer<AssignRoleTimerContainer>);
+                newTimers += db.TimerKickUsers.Count(CreateAndStartTimer<KickUserTimerContainer>);
                 newTimers += db.TimerRemindMes.Count(CreateAndStartTimer<RemindMeTimerContainer>);
             }
 
