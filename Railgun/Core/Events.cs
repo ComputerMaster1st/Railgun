@@ -70,7 +70,7 @@ namespace Railgun.Core
 
 			if (tc == null) return;
 
-			IUserMessage msg = null;
+			IUserMessage msg;
 
 			try {
 				msg = await tc.SendMessageAsync(message);
@@ -182,8 +182,10 @@ namespace Railgun.Core
 			if (vc.Id == data.AutoVoiceChannel && tc != null) await _playerManager.CreatePlayerAsync(user, vc, tc, true);
 		}
 
-		private async Task ShardReadyAsync(DiscordSocketClient sClient)
-		{
+		private Task ShardReadyAsync(DiscordSocketClient sClient)
+			=> Task.Factory.StartNew(async () => await ShardReadyTaskAsync(sClient));
+
+		private async Task ShardReadyTaskAsync(DiscordSocketClient sClient) {
 			if (_playerManager.PlayerContainers.Count > 0)
 				foreach (var player in _playerManager.PlayerContainers) player.Player.CancelStream();
 
