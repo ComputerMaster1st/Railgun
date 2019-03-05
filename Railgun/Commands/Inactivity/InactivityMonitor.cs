@@ -4,6 +4,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Utilities;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,9 +27,8 @@ namespace Railgun.Commands.Inactivity
         [Command("role")]
         public Task SetRoleAsync(string name)
         {
-            var role = Context.Guild.Roles.Where((r) => r.Name == name).FirstOrDefault();
-            if (role == null) return ReplyAsync($"Unable to find role: {Format.Bold(name)}");
-            return SetRoleAsync(role);
+            var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
+            return role == null ? ReplyAsync($"Unable to find role: {Format.Bold(name)}") : SetRoleAsync(role);
         }
 
         [Command("role")]
@@ -65,7 +65,8 @@ namespace Railgun.Commands.Inactivity
             var monitoringUsers = 0;
             var alreadyMonitoring = 0;
 
-            output.AppendFormat("{0} {1} {2} Users Found! Preparing Monitor...", DateTime.Now.ToString("HH:mm:ss"), Response.GetSeparator(), users.Count);
+            output.AppendFormat("{0} {1} {2} Users Found! Preparing Monitor...", DateTime.Now.ToString("HH:mm:ss"), 
+                Response.GetSeparator(), users.Count);
             await response.ModifyAsync((x) => x.Content = Format.Code(output.ToString()));
 
             foreach (var user in users)
@@ -76,13 +77,28 @@ namespace Railgun.Commands.Inactivity
                     continue;
                 }
                 if (data.UserWhitelist.Any((u) => u.UserId == user.Id)) continue;
-                if (data.RoleWhitelist.Count > 0) foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) continue;
+
+                var whitelisted = false;
+
+                if (data.RoleWhitelist.Count > 0)
+                {
+                    foreach (var role in data.RoleWhitelist)
+                    {
+                        if (!user.RoleIds.Contains(role.RoleId)) continue;
+                        
+                        whitelisted = true;
+                        break;
+                    }
+                }
+
+                if (whitelisted) continue;
                 
                 data.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
                 monitoringUsers++;
             }
 
-            output.AppendFormat("{0} {1} Initialization completed!", DateTime.Now.ToString("HH:mm:ss"), Response.GetSeparator()).AppendLine()
+            output.AppendFormat("{0} {1} Initialization completed!", DateTime.Now.ToString("HH:mm:ss"), 
+                    Response.GetSeparator()).AppendLine()
                 .AppendLine()
                 .AppendFormat("Monitoring Users   : {0}", monitoringUsers).AppendLine()
                 .AppendFormat("Whitelisted Users  : {0}", users.Count - monitoringUsers).AppendLine()
@@ -102,16 +118,16 @@ namespace Railgun.Commands.Inactivity
             }
 
             var users = await Context.Guild.GetUsersAsync();
-            var inactiveUsers = users.Where((u) => u.RoleIds.Contains(data.InactiveRoleId));
+            var inactiveUsers = users.Where((u) => u.RoleIds.Contains(data.InactiveRoleId)).ToList();
             var output = new StringBuilder()
                 .AppendLine("Inactivity Monitor Report!")
                 .AppendLine()
                 .AppendFormat("Currently Monitoring      : {0}/{1} users", data.Users.Count, users.Count).AppendLine()
                 .AppendFormat("Whitelisted (Users/Roles) : {0}/{1}", data.UserWhitelist.Count, data.RoleWhitelist.Count).AppendLine()
-                .AppendFormat("Users Marked As Inactive  : {0}", inactiveUsers.Count()).AppendLine()
+                .AppendFormat("Users Marked As Inactive  : {0}", inactiveUsers.Count).AppendLine()
                 .AppendLine();
 
-            if (inactiveUsers.Count() < 1)
+            if (inactiveUsers.Count < 1)
             {
                 await ReplyAsync(Format.Code(output.ToString()));
                 return;
@@ -119,10 +135,13 @@ namespace Railgun.Commands.Inactivity
 
             foreach (var user in inactiveUsers)
             {
-                var activityContainer = data.Users.Where((u) => u.UserId == user.Id).FirstOrDefault();
+                var activityContainer = data.Users.FirstOrDefault(u => u.UserId == user.Id);
 
                 output.AppendFormat("Username : {0} {1} ID : {2} {1} Last Active : {3}",
-                    user.Username, Response.GetSeparator(), user.Id, activityContainer != null ? activityContainer.LastActive.ToString() : "UNKNOWN! (Something went wrong!)")
+                    user.Username, Response.GetSeparator(), user.Id, 
+                    activityContainer != null 
+                        ? activityContainer.LastActive.ToString(CultureInfo.CurrentCulture) 
+                        : "UNKNOWN! (Something went wrong!)")
                     .AppendLine();
             }
 
