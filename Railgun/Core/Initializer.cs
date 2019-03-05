@@ -30,8 +30,8 @@ namespace Railgun.Core
         private readonly DiscordShardedClient _client;
         private CommandService<SystemContext> _commandService;
         private IServiceProvider _services;
-        private Log _log;
-        private ServerCount _serverCount;
+        private readonly Log _log;
+        private readonly ServerCount _serverCount;
 
         public Initializer(MasterConfig config, DiscordShardedClient client) {
             _masterConfig = config;
@@ -49,13 +49,11 @@ namespace Railgun.Core
 
             _commandService = new CommandServiceBuilder<SystemContext>()
                 .AddModules(Assembly.GetEntryAssembly())
-                .AddTypeReaderFactory<DiscordTypeReaderFactory>(() => {
-                    return new DiscordTypeReaderFactory()
-                        .AddReader(new IUserTypeReader())
-                        .AddReader(new IGuildUserTypeReader())
-                        .AddReader(new ITextChannelTypeReader())
-                        .AddReader(new IRoleTypeReader());
-                })
+                .AddTypeReaderFactory(() => new DiscordTypeReaderFactory()
+                    .AddReader(new IUserTypeReader())
+                    .AddReader(new IGuildUserTypeReader())
+                    .AddReader(new ITextChannelTypeReader())
+                    .AddReader(new IRoleTypeReader()))
                 .AddPipeline<PrefixPipeline>()
                 .AddCommandParser<SystemCommandParser<SystemContext>>()
                 .AddPipeline<PreconditionPipeline>()
@@ -73,13 +71,8 @@ namespace Railgun.Core
                 .AddSingleton(_log)
                 .AddSingleton(_serverCount)
                 .AddDbContext<TreeDiagramContext>(options => {
-                    options.UseNpgsql(
-                        string.Format("Server={0};Port=5432;Database={1};UserId={2};Password={3};",
-                            postgreConfig.Hostname,
-                            postgreConfig.Database,
-                            postgreConfig.Username,
-                            postgreConfig.Password
-                        )
+                    options.UseNpgsql($"Server={postgreConfig.Hostname};Port=5432;Database={postgreConfig.Database};" +
+                                      $"UserId={postgreConfig.Username};Password={postgreConfig.Password};"
                     ).EnableSensitiveDataLogging().UseLazyLoadingProxies();
                 }, ServiceLifetime.Transient)
                 .AddSingleton(new MusicService(new MusicServiceConfiguration() {
