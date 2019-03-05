@@ -28,6 +28,7 @@ namespace Railgun.Core
 		private readonly MusicService _musicService;
 		private readonly PlayerManager _playerManager;
 		private readonly TimerManager _timerManager;
+		private readonly InactivityManager _inactivityManager;
 
 		private bool _initialized;
 		private readonly Dictionary<int, bool> _shardsReady = new Dictionary<int, bool>();
@@ -44,6 +45,7 @@ namespace Railgun.Core
 			_musicService = _services.GetService<MusicService>();
 			_playerManager = _services.GetService<PlayerManager>();
 			_timerManager = _services.GetService<TimerManager>();
+			_inactivityManager = _services.GetService<InactivityManager>();
 
 			_client.JoinedGuild += JoinedGuildAsync;
 			_client.LeftGuild += LeftGuildAsync;
@@ -195,6 +197,7 @@ namespace Railgun.Core
 			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}",
 				$"Shard {(_shardsReady[sClient.ShardId] ? "Re-" : "")}Connected! ({sClient.Guilds.Count} Servers)"));
 			await _timerManager.InitializeAsync();
+			_inactivityManager.Initialize();
 
 			if (_initialized) return;
 			if (_shardsReady.Count < _client.Shards.Count) return;
