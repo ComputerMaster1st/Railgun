@@ -22,25 +22,25 @@ namespace Railgun.Core.Managers
             _client = _services.GetService<IDiscordClient>();
         }
 
-        public void Intialize()
+        public void Initialize()
         {
             _timer.AutoReset = true;
             _timer.Elapsed += (s, a) => RunAsync().GetAwaiter();
             _timer.Start();
         }
 
-        public async Task RunAsync()
+        private async Task RunAsync()
         {
-            List<ServerInactivity> configs = null;
+            List<ServerInactivity> configs;
 
             using (var scope = _services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                if (!db.ServerInactivities.Any((f) => f.IsEnabled == true)) return;
+                if (!db.ServerInactivities.Any((f) => f.IsEnabled)) return;
 
                 configs = new List<ServerInactivity>(db.ServerInactivities.Where(
-                    (f) => f.IsEnabled == true 
+                    (f) => f.IsEnabled 
                     && f.InactiveRoleId != 0 
                     && f.InactiveDaysThreshold != 0));
             }
