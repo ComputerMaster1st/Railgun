@@ -58,23 +58,9 @@ namespace Railgun.Core.Managers
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-
-                // TODO: Perhaps move this to an extension method?
                 
-                foreach (var data in db.TimerRemindMes) {
-                    if (data.TimerExpire < DateTime.UtcNow) {
-                        var container = new RemindMeContainer(_services, data);
-
-                        await container.ExecuteOverrideAsync();
-
-                        if (container.IsCompleted) completedTimers++;
-                        else if (container.HasCrashed) crashedTimers++;
-
-                        continue;
-                    } else if (CreateAndStartTimer<RemindMeTimerContainer>(data)) newTimers++;
-                }
-
-                // END TODO
+                CreateOrOverrideTimers<RemindMeTimerContainer>(db.TimerRemindMes, ref newTimers, ref completedTimers,
+                    ref crashedTimers);
             }
 
             _masterTimer.Start();
@@ -124,6 +110,23 @@ namespace Railgun.Core.Managers
                 .AppendFormat("Final Cleanup   : {0}", completedTimers + crashedTimers);
 
             await _log.LogToBotLogAsync(output.ToString(), BotLogType.TimerManager);
+        }
+
+        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> set, ref int newTimers, ref int completedTimers,
+            ref int crashedTimers) where TContainer : class, ITimerContainer {
+            foreach (var data in set) {
+                if (data.TimerExpire < DateTime.UtcNow) {
+                    var container = (TContainer)Activator.CreateInstance(typeof(TContainer), _services, data);
+
+                    container.ExecuteOverrideAsync().GetAwaiter();
+                    
+                    if (container.IsCompleted) completedTimers++;
+                    else if (container.HasCrashed) crashedTimers++;
+
+                    continue;
+                }
+                if (CreateAndStartTimer<TContainer>(data)) newTimers++;
+            }
         }
     }
 }
