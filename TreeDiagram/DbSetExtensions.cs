@@ -7,9 +7,10 @@ namespace TreeDiagram
 {
     public static class DbSetExtensions
 	{
-		public static TEntity CreateTimer<TEntity>(this DbSet<TEntity> set) where TEntity : class, ITreeTimer
+		public static TEntity CreateTimer<TEntity>(this DbSet<TEntity> set, ulong guildId, ulong tc, 
+			DateTime timerExpire) where TEntity : class, ITreeTimer
 		{
-			var data = (TEntity)Activator.CreateInstance(typeof(TEntity));
+			var data = (TEntity)Activator.CreateInstance(typeof(TEntity), guildId, tc, timerExpire);
 			set.Add(data);
 
 			return data;
