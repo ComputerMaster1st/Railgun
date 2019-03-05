@@ -4,6 +4,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -146,6 +147,66 @@ namespace Railgun.Commands.Inactivity
             }
 
             await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Inactivity Report", output.ToString());
+        }
+
+        [Command("show")]
+        public Task ShowAsync()
+        {
+            var data = Context.Database.ServerInactivities.GetData(Context.Guild.Id);
+
+            if (data == null) return ReplyAsync("No Inactivity Monitor Config has been generated!");
+
+            var whitelistedRoles = new StringBuilder();
+            var whitelistedUsers = new StringBuilder();
+
+            if (data.RoleWhitelist.Count < 1) whitelistedRoles.AppendFormat("None");
+            else
+            {
+                var deletedRoles = new List<ulong>();
+                
+                foreach (var roleId in data.RoleWhitelist)
+                {
+                    var role = Context.Guild.GetRole(roleId.RoleId);
+                    
+                    if (role != null) whitelistedRoles.AppendFormat("{0} {1} ", Response.GetSeparator(), role.Name);
+                    else deletedRoles.Add(roleId.RoleId);
+                }
+
+                foreach (var id in deletedRoles) data.RoleWhitelist.RemoveAll(r => r.RoleId == id);
+            }
+            
+            if (data.UserWhitelist.Count < 1) whitelistedUsers.AppendFormat("None");
+            else
+            {
+                var deletedUsers = new List<ulong>();
+                
+                foreach (var userId in data.UserWhitelist)
+                {
+                    var user = Context.Guild.GetUserAsync(userId.UserId).GetAwaiter().GetResult();
+                    
+                    if (user != null) whitelistedUsers.AppendFormat("{0} {1}#{2} ", Response.GetSeparator(), 
+                        user.Username, user.DiscriminatorValue);
+                    else deletedUsers.Add(userId.UserId);
+                }
+
+                foreach (var id in deletedUsers) data.UserWhitelist.RemoveAll(u => u.UserId == id);
+            }
+
+            var inactiveRole = Context.Guild.GetRole(data.InactiveRoleId);
+            
+            var output = new StringBuilder()
+                .AppendLine("Inactivity Monitor Configuration")
+                .AppendLine()
+                .AppendFormat("Enabled            : {0}", data.IsEnabled ? "Yes" : "No").AppendLine()
+                .AppendFormat("Inactive Role      : {0}", inactiveRole != null ? inactiveRole.Name : "Not Set!").AppendLine()
+                .AppendFormat("Inactive Threshold : {0} days after last active", data.InactiveDaysThreshold).AppendLine()
+                .AppendFormat("Kick Threshold     : {0} days after last active (0 = Not Set!)", data.KickDaysThreshold).AppendLine()
+                .AppendFormat("Whitelisted Roles  : {0}", whitelistedRoles.ToString()).AppendLine()
+                .AppendFormat("Whitelisted Users  : {0}", whitelistedUsers.ToString()).AppendLine()
+                .AppendLine()
+                .AppendFormat("DM Invite Code on Kick : {0}", data.SendInvite ? "Yes" : "No").AppendLine();
+
+            return ReplyAsync(Format.Code(output.ToString()));
         }
     }
 }
