@@ -43,7 +43,12 @@ namespace TreeDiagram
 					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
 				x.HasMany(f => f.AllowedRoles).WithOne().OnDelete(DeleteBehavior.Cascade);
 			});
-            modelBuilder.Entity<ServerInactivity>().HasMany(f => f.Users).WithOne().OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ServerInactivity>(x =>
+			{
+				x.HasMany(f => f.Users).WithOne().OnDelete(DeleteBehavior.Cascade);
+				x.HasMany(f => f.RoleWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
+				x.HasMany(f => f.UserWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
+			});
             modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);

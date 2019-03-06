@@ -4,8 +4,8 @@ namespace TreeDiagram.Models.Server.Filter
 {
     public class FilterUrl : FilterBase
     {
-        public bool BlockServerInvites { get; set; } = false;
-        public bool DenyMode { get; set; } = false;
+        public bool BlockServerInvites { get; set; }
+        public bool DenyMode { get; set; }
 
         public List<string> BannedUrls { get; private set; } = new List<string>();
         
