@@ -126,13 +126,14 @@ namespace Railgun.Commands.Inactivity
                 return;
             }
 
-            foreach (var user in inactiveUsers)
+            foreach (var user in users)
             {
                 var activityContainer = data.Users.FirstOrDefault(u => u.UserId == user.Id);
 
-                output.AppendFormat("Username : {0} {1} ID : {2} {1} Last Active : {3}",
-                    user.Username, Response.GetSeparator(), user.Id, 
-                    activityContainer != null 
+                output.AppendFormat("Username : {0}#{1} {2} ID : {3} {2} Status : {4} {2} Last Active : {5}",
+                    user.Username, user.DiscriminatorValue, Response.GetSeparator(), user.Id, 
+                    !user.RoleIds.Contains(data.InactiveRoleId) ? "Active" : "Inactive"
+                    , activityContainer != null 
                         ? activityContainer.LastActive.ToString(CultureInfo.CurrentCulture) 
                         : "UNKNOWN! (Something went wrong!)")
                     .AppendLine();
