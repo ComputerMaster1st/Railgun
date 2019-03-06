@@ -26,18 +26,18 @@ namespace Railgun.Commands.Inactivity
         }
 
         [Command("role")]
-        public Task SetRoleAsync(string name)
-        {
-            var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
-            return role == null ? ReplyAsync($"Unable to find role: {Format.Bold(name)}") : SetRoleAsync(role);
-        }
-
-        [Command("role")]
         public Task SetRoleAsync(IRole role)
         {
             var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
             data.InactiveRoleId = role.Id;
             return ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
+        }
+        
+        [Command("role")]
+        public Task SetRoleAsync(string name)
+        {
+            var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
+            return role == null ? ReplyAsync($"Unable to find role: {Format.Bold(name)}") : SetRoleAsync(role);
         }
 
         [Command("initialize")]
