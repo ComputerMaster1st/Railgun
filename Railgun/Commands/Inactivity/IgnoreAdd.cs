@@ -26,6 +26,7 @@ namespace Railgun.Commands.Inactivity
                     return ReplyAsync("User added to whitelist!");
                 }
 
+                [Command("role")]
                 public Task AddRoleAsync(IRole role)
                 {
                     var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
@@ -36,6 +37,7 @@ namespace Railgun.Commands.Inactivity
                     return ReplyAsync("Role added to whitelist!");
                 }
 
+                [Command("role")]
                 public Task AddRoleAsync(string name)
                 {
                     var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);

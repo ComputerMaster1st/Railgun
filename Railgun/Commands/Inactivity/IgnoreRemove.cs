@@ -26,6 +26,7 @@ namespace Railgun.Commands.Inactivity
                     return ReplyAsync("User removed from whitelist!");
                 }
 
+                [Command("role")]
                 public Task RemoveRoleAsync(IRole role)
                 {
                     var data = Context.Database.ServerInactivities.GetData(Context.Guild.Id);
@@ -37,6 +38,7 @@ namespace Railgun.Commands.Inactivity
                     return ReplyAsync("Role removed from whitelist!");
                 }
 
+                [Command("role")]
                 public Task RemoveRoleAsync(string name)
                 {
                     var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
