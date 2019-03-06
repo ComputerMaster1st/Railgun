@@ -1,4 +1,4 @@
-namespace TreeDiagram.Models.Server.Filter
+namespace TreeDiagram.Models.Filter
 {
     public class FilterCaps : FilterBase
     {

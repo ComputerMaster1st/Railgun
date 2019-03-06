@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Railgun.Core.Managers;
 using TreeDiagram;
-using TreeDiagram.Models.Server.Filter;
+using TreeDiagram.Models.Filter;
 
 namespace Railgun.Core.Filters
 {

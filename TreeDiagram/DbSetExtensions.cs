@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models;
 
 namespace TreeDiagram
@@ -16,19 +17,25 @@ namespace TreeDiagram
 			return data;
 		}
 
-		public static TEntity GetOrCreateData<TEntity>(this DbSet<TEntity> set, ulong id) where TEntity : class, ITreeModel
+		public static TEntity GetOrCreateData<TEntity>(this DbSet<TEntity> set, ulong guildId) where TEntity : class, ITreeModel
 		{
-			var data = set.FirstOrDefault(find => find.Id == id);
+			var data = set.FirstOrDefault(find => find.Id == guildId);
 
 			if (data != null) return data;
 
-			data = (TEntity)Activator.CreateInstance(typeof(TEntity), id);
+			data = (TEntity)Activator.CreateInstance(typeof(TEntity), guildId);
 			set.Add(data);
 
 			return data;
 		}
 
-		public static TEntity GetData<TEntity>(this DbSet<TEntity> set, ulong id) where TEntity : class, ITreeModel
-			=> set.FirstOrDefault(find => find.Id == id);
+		public static TEntity GetData<TEntity>(this DbSet<TEntity> set, ulong guildId) where TEntity : class, ITreeModel
+			=> set.FirstOrDefault(find => find.Id == guildId);
+
+		internal static void DeleteData<TEntity>(this DbSet<TEntity> set, ulong guildId) where TEntity : class, ITreeModel
+		{
+			var data = set.GetData(guildId);
+			if (data != null) set.Remove(data);
+		}
 	}
 }

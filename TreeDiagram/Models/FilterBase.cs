@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using TreeDiagram.Models.SubModels;
 
-namespace TreeDiagram.Models.Server.Filter
+namespace TreeDiagram.Models
 {
     public abstract class FilterBase : ConfigBase
     {

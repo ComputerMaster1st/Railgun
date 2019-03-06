@@ -9,7 +9,7 @@ using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Logging;
 using Railgun.Core.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.Server.Warning;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Server
 {

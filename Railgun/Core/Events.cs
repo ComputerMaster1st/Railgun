@@ -15,7 +15,7 @@ using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
-using TreeDiagram.Models.Server.Inactivity;
+using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Core
 {

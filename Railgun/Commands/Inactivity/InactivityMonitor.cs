@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TreeDiagram;
-using TreeDiagram.Models.Server.Inactivity;
+using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Inactivity
 {
