@@ -31,5 +31,11 @@ namespace TreeDiagram
 
 		public static TEntity GetData<TEntity>(this DbSet<TEntity> set, ulong id) where TEntity : class, ITreeModel
 			=> set.FirstOrDefault(find => find.Id == id);
+
+		internal static void DeleteData<TEntity>(this DbSet<TEntity> set, ulong id) where TEntity : class, ITreeModel
+		{
+			var data = set.GetData(id);
+			if (data != null) set.Remove(data);
+		}
 	}
 }
