@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TreeDiagram.Models.Server.Warning
+namespace TreeDiagram.Models.SubModels
 {
     public class ServerWarningInfo
     {

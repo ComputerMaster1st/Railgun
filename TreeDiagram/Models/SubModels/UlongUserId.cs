@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TreeDiagram.Models.Server
+namespace TreeDiagram.Models.SubModels
 {
-    public class UlongRoleId {
+    public class UlongUserId {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; private set; }
-        public ulong RoleId { get; private set; }
+        public ulong UserId { get; private set; }
 
-        public UlongRoleId(ulong roleId) => RoleId = roleId;
+        public UlongUserId(ulong userId) => UserId = userId;
     }
 }

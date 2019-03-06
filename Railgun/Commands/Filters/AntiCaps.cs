@@ -8,6 +8,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using TreeDiagram;
 using TreeDiagram.Models.Server.Filter;
+using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Filters
 {

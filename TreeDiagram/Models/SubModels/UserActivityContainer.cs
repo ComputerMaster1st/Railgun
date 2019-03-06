@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TreeDiagram.Models.Server.Inactivity
+namespace TreeDiagram.Models.SubModels
 {
     public class UserActivityContainer {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]

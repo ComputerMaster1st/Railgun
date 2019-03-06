@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MongoDB.Bson;
+using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {

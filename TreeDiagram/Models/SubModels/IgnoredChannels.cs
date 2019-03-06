@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TreeDiagram.Models.Server.Filter
+namespace TreeDiagram.Models.SubModels
 {
     public class IgnoredChannels
     {

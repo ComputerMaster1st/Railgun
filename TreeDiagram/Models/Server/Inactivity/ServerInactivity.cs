@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server.Inactivity
 {
