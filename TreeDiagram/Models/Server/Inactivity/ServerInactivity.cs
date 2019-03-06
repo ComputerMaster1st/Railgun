@@ -9,10 +9,10 @@ namespace TreeDiagram.Models.Server.Inactivity
         public int KickDaysThreshold { get; set; }
         public ulong InactiveRoleId { get; set; }
 
-        public List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
+        public virtual List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
 
-        public List<UlongUserId> UserWhitelist { get; private set; } = new List<UlongUserId>();
-        public List<UlongRoleId> RoleWhitelist { get; private set; } = new List<UlongRoleId>();
+        public virtual List<UlongUserId> UserWhitelist { get; private set; } = new List<UlongUserId>();
+        public virtual List<UlongRoleId> RoleWhitelist { get; private set; } = new List<UlongRoleId>();
 
         public ServerInactivity(ulong id) : base(id) {}
     }
