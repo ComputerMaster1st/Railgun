@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TreeDiagram.Models.Server.Fun
+namespace TreeDiagram.Models.Fun
 {
     public class FunBite : FunBase
     {

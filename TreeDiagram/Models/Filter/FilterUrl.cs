@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TreeDiagram.Models.Server.Filter
+namespace TreeDiagram.Models.Filter
 {
     public class FilterUrl : FilterBase
     {

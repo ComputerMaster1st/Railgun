@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
+using TreeDiagram.Models.Filter;
+using TreeDiagram.Models.Fun;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.Server.Filter;
 using TreeDiagram.Models.Server.Fun;
