@@ -4,9 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeDiagram.Models.SubModels
 {
-    public class UserActivityContainer {
+    public class UserActivityContainer
+    {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; private set; }
+        public int Id { get; private set; } = 0;
 
         public ulong UserId { get; private set; }
         public DateTime LastActive { get; set; }
