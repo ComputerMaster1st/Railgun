@@ -28,6 +28,17 @@ namespace Railgun.Commands.Inactivity
         [Command("role")]
         public Task SetRoleAsync(IRole role)
         {
+            var self = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
+            var selfHighestRole = 0;
+
+            foreach (var roleId in self.RoleIds)
+            {
+                var tempRole = Context.Guild.GetRole(roleId);
+                if (tempRole.Position > selfHighestRole) selfHighestRole = tempRole.Position;
+            }
+
+            if (selfHighestRole < role.Position) return ReplyAsync("Please make sure the inactivity role is in a lower role position than me.");
+
             var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
             data.InactiveRoleId = role.Id;
             return ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
