@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using TreeDiagram.Models.SubModels;
 
-namespace TreeDiagram.Models.Server.Inactivity
+namespace TreeDiagram.Models.Server
 {
     public class ServerInactivity : ConfigBase
     {

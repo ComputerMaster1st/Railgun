@@ -5,8 +5,6 @@ using MongoDB.Bson;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.Server.Filter;
 using TreeDiagram.Models.Server.Fun;
-using TreeDiagram.Models.Server.Inactivity;
-using TreeDiagram.Models.Server.Warning;
 using TreeDiagram.Models.TreeTimer;
 using TreeDiagram.Models.User;
 

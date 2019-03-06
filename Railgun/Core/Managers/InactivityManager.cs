@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Railgun.Core.Containers;
 using TreeDiagram;
-using TreeDiagram.Models.Server.Inactivity;
+using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
 using TreeDiagram.Models.TreeTimer;
 
