@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Containers;
 using Railgun.Core.Logging;
 using TreeDiagram;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models;
 
 namespace Railgun.Core.Managers

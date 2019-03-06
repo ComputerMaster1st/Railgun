@@ -1,4 +1,4 @@
-namespace TreeDiagram.Models
+namespace TreeDiagram.Interfaces
 {
     public interface ITreeModel
     {

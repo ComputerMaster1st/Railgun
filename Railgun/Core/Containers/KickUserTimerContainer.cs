@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using TreeDiagram;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models;
 using TreeDiagram.Models.TreeTimer;
 

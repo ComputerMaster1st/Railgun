@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TreeDiagram.Models
+namespace TreeDiagram.Interfaces
 {
     public interface ITreeTimer
     {

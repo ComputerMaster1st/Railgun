@@ -4,6 +4,7 @@ using Railgun.Core.Logging;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models;
 
 namespace Railgun.Core.Containers
