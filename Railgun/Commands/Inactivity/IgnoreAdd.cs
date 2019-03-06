@@ -16,7 +16,7 @@ namespace Railgun.Commands.Inactivity
             public class IgnoreAdd : SystemBase
             {
                 [Command("user")]
-                public Task AddUserAsync(IUser user)
+                public Task AddUserAsync(IGuildUser user)
                 {
                     var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
 

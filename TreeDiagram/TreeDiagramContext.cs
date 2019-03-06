@@ -36,7 +36,7 @@ namespace TreeDiagram
 
         public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) => AppContext.SetSwitch("System.Net.Http.useSocketsHttpHandler", false);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+	    protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<ServerMusic>(x => {
 				x.Property(y => y.PlaylistId)
@@ -49,6 +49,7 @@ namespace TreeDiagram
 				x.HasMany(f => f.RoleWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
 				x.HasMany(f => f.UserWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
 			});
+			
             modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);

@@ -6,7 +6,7 @@ namespace TreeDiagram.Models.Server.Inactivity
 {
     public class UserActivityContainer {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; private set; } = 0;
+        public int Id { get; private set; }
 
         public ulong UserId { get; private set; }
         public DateTime LastActive { get; set; }

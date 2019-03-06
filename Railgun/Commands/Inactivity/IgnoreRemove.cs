@@ -15,7 +15,7 @@ namespace Railgun.Commands.Inactivity
             public class IgnoreRemove : SystemBase
             {
                 [Command("user")]
-                public Task RemoveUserAsync(IUser user)
+                public Task RemoveUserAsync(IGuildUser user)
                 {
                     var data = Context.Database.ServerInactivities.GetData(Context.Guild.Id);
 
