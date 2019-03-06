@@ -1,4 +1,4 @@
-namespace TreeDiagram.Models.Server.Fun
+namespace TreeDiagram.Models
 {
     public abstract class FunBase : ConfigBase
     {
