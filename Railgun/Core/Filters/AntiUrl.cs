@@ -6,7 +6,6 @@ using Discord;
 using Railgun.Core.Managers;
 using TreeDiagram;
 using TreeDiagram.Models.Filter;
-using TreeDiagram.Models.Server.Filter;
 
 namespace Railgun.Core.Filters
 {
