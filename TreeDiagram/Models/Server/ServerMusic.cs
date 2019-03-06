@@ -5,18 +5,18 @@ namespace TreeDiagram.Models.Server
 {
 	public class ServerMusic : ConfigBase
 	{
-		public ulong AutoTextChannel { get; set; } = 0;
-		public ulong AutoVoiceChannel { get; set; } = 0;
-		public bool AutoSkip { get; set; } = false;
-		public bool AutoDownload { get; set; } = false;
+		public ulong AutoTextChannel { get; set; }
+		public ulong AutoVoiceChannel { get; set; }
+		public bool AutoSkip { get; set; }
+		public bool AutoDownload { get; set; }
 		public bool PlaylistAutoLoop { get; set; } = true;
 		public ObjectId PlaylistId { get; set; } = ObjectId.Empty;
-		public bool VoteSkipEnabled { get; set; } = false;
+		public bool VoteSkipEnabled { get; set; }
 		public int VoteSkipLimit { get; set; } = 50;
-		public bool SilentNowPlaying { get; set; } = false;
-		public bool SilentSongProcessing { get; set; } = false;
-		public ulong NowPlayingChannel { get; set; } = 0;
-		public virtual List<AllowedRole> AllowedRoles { get; private set; } = new List<AllowedRole>();
+		public bool SilentNowPlaying { get; set; }
+		public bool SilentSongProcessing { get; set; }
+		public ulong NowPlayingChannel { get; set; }
+		public virtual List<UlongRoleId> AllowedRoles { get; private set; } = new List<UlongRoleId>();
 
 		public ServerMusic(ulong id) : base(id) { }
 	}

@@ -4,13 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeDiagram.Models
 {
-    public abstract class TimerBase : ITreeTimer
-    {
+    public abstract class TimerBase : ITreeTimer {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; internal set; }
+        public int Id { get; private set; }
         
-        public ulong GuildId { get; set; }
-        public ulong TextChannelId { get; set; }
-        public DateTime TimerExpire { get; set; }
+        public ulong GuildId { get; private set; }
+        public DateTime TimerExpire { get; private set; }
+
+        protected TimerBase(ulong guildId, DateTime timerExpire) {
+            GuildId = guildId;
+            TimerExpire = timerExpire;
+        }
     }
 }

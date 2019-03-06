@@ -71,13 +71,11 @@ namespace Railgun.Commands.Utilities
 				return;
 			}
 
-			var data = Context.Database.TimerRemindMes.CreateTimer();
+			var data = Context.Database.TimerRemindMes.CreateTimer(Context.Guild.Id, expireTime);
 
-			data.GuildId = Context.Guild.Id;
 			data.TextChannelId = Context.Channel.Id;
 			data.UserId = Context.Author.Id;
 			data.Message = message;
-			data.TimerExpire = expireTime;
 
 			_timerManager.CreateAndStartTimer<RemindMeTimerContainer>(data);
 			await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString(CultureInfo.CurrentCulture))} UTC.");

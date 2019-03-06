@@ -4,10 +4,10 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AudioChord" Version="1.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.2" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.0" />
+        <PackageReference Include="AudioChord" Version="1.0.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.1.8" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
     </ItemGroup>
 </Project>

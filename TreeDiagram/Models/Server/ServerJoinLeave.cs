@@ -6,9 +6,9 @@ namespace TreeDiagram.Models.Server
 {
     public class ServerJoinLeave : ConfigBase
     {
-        public bool SendToDM { get; set; } = false;
-        public ulong ChannelId { get; set; } = 0;
-        public int DeleteAfterMinutes { get; set; } = 0;
+        public bool SendToDM { get; set; }
+        public ulong ChannelId { get; set; }
+        public int DeleteAfterMinutes { get; set; }
 
         public List<string> JoinMessages { get; private set; } = new List<string>() { "Welcome to **<server>**, **<user>**!" };
         public List<string> LeaveMessages { get; private set; } = new List<string>() { "Goodbye, **<user>**." };
@@ -65,7 +65,10 @@ namespace TreeDiagram.Models.Server
                             throw new ArgumentOutOfRangeException(nameof(type), type, null);
                     }
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             }
 
             return message;

@@ -5,7 +5,7 @@ namespace TreeDiagram.Models.Server.Warning
 {
     public class ServerWarning : ConfigBase
     {
-        public int WarnLimit { get; set; } = 0;
+        public int WarnLimit { get; set; }
         public virtual List<ServerWarningInfo> Warnings { get; private set; } = new List<ServerWarningInfo>();
 
         public ServerWarning(ulong id) : base(id) { }

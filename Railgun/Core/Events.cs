@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
@@ -14,6 +15,7 @@ using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
+using TreeDiagram.Models.Server.Inactivity;
 
 namespace Railgun.Core
 {
@@ -28,6 +30,7 @@ namespace Railgun.Core
 		private readonly MusicService _musicService;
 		private readonly PlayerManager _playerManager;
 		private readonly TimerManager _timerManager;
+		private readonly InactivityManager _inactivityManager;
 
 		private bool _initialized;
 		private readonly Dictionary<int, bool> _shardsReady = new Dictionary<int, bool>();
@@ -44,8 +47,11 @@ namespace Railgun.Core
 			_musicService = _services.GetService<MusicService>();
 			_playerManager = _services.GetService<PlayerManager>();
 			_timerManager = _services.GetService<TimerManager>();
+			_inactivityManager = _services.GetService<InactivityManager>();
 
-			_client.JoinedGuild += JoinedGuildAsync;
+            _client.MessageReceived += MessageReceivedAsync;
+            _client.MessageUpdated += (oldMsg, newMsg, channel) => MessageReceivedAsync(newMsg);
+            _client.JoinedGuild += JoinedGuildAsync;
 			_client.LeftGuild += LeftGuildAsync;
 			_client.UserJoined += UserJoinedAsync;
 			_client.UserLeft += UserLeftAsync;
@@ -102,6 +108,43 @@ namespace Railgun.Core
 				});
 		}
 
+        private Task MessageReceivedAsync(SocketMessage sMessage)
+        {
+            if (!(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
+                return Task.CompletedTask;
+
+            return Task.Factory.StartNew(async() => await CheckInactivityAsync(sMessage));
+        }
+
+		private async Task CheckInactivityAsync(SocketMessage sMessage)
+		{
+			var tc = (ITextChannel)sMessage.Channel;
+
+			using (var scope = _services.CreateScope())
+			{
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var data = db.ServerInactivities.GetData(tc.GuildId);
+				var guild = tc.Guild;
+				var user = await guild.GetUserAsync(sMessage.Author.Id);
+
+				if (data == null) return;
+				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
+				if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
+				foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
+
+				if (data.Users.Any((f) => f.UserId == user.Id))
+				{
+					if (user.RoleIds.Contains(data.InactiveRoleId))
+						await user.RemoveRoleAsync(guild.GetRole(data.InactiveRoleId));
+	                    
+					data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
+					return;
+				}
+
+				data.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+			}
+		}
+
 		private async Task JoinedGuildAsync(SocketGuild sGuild)
 			=> await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager);
 
@@ -126,8 +169,20 @@ namespace Railgun.Core
 		{
 			ServerJoinLeave data;
 
-			using (var scope = _services.CreateScope()) {
-				data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerJoinLeaves.GetData(user.Guild.Id);
+			using (var scope = _services.CreateScope())
+			{
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+
+				if (inactivityData != null && inactivityData.IsEnabled && inactivityData.InactiveDaysThreshold != 0 && 
+				    inactivityData.InactiveRoleId != 0)
+				{
+					if (inactivityData.Users.Any(u => u.UserId == user.Id))
+						inactivityData.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
+					else inactivityData.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+				}
+				
+				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
 			}
 
 			if (data == null) return;
@@ -147,7 +202,12 @@ namespace Railgun.Core
 			ServerJoinLeave data;
 
 			using (var scope = _services.CreateScope()) {
-				data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerJoinLeaves.GetData(user.Guild.Id);
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+
+				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
+
+				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
 			}
 
 			if (data == null) return;
@@ -195,6 +255,7 @@ namespace Railgun.Core
 			await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}",
 				$"Shard {(_shardsReady[sClient.ShardId] ? "Re-" : "")}Connected! ({sClient.Guilds.Count} Servers)"));
 			await _timerManager.InitializeAsync();
+			_inactivityManager.Initialize();
 
 			if (_initialized) return;
 			if (_shardsReady.Count < _client.Shards.Count) return;

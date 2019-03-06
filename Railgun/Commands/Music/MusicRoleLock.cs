@@ -32,7 +32,7 @@ namespace Railgun.Commands.Music
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 
-				data.AllowedRoles.Add(new AllowedRole(role.Id));
+				data.AllowedRoles.Add(new UlongRoleId(role.Id));
 
 				if (data.AllowedRoles.Count < 2) {
 					await ReplyAsync($"All music commands are now role-locked to {role.Name}.");
