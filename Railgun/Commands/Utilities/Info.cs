@@ -169,7 +169,9 @@ namespace Railgun.Commands.Utilities
             var output = new StringBuilder()
                 .AppendLine("TreeDiagram Timers Status")
                 .AppendLine()
-                .AppendFormat("Remind Me : {0}", Context.Database.TimerRemindMes.CountAsync());
+                .AppendFormat("Remind Me   : {0}", await Context.Database.TimerRemindMes.CountAsync()).AppendLine()
+                .AppendFormat("Assign Role : {0}", await Context.Database.TimerAssignRoles.CountAsync()).AppendLine()
+                .AppendFormat("Kick User   : {0}", await Context.Database.TimerKickUsers.CountAsync());
             
             await ReplyAsync(Format.Code(output.ToString()));
         }
