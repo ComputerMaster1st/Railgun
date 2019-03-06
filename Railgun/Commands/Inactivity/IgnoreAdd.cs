@@ -38,9 +38,8 @@ namespace Railgun.Commands.Inactivity
 
                 public Task AddRoleAsync(string name)
                 {
-                    var role = Context.Guild.Roles.Where((r) => r.Name == name).FirstOrDefault();
-                    if (role == null) return ReplyAsync($"Unable to find role: {Format.Bold(name)}");
-                    return AddRoleAsync(role);
+                    var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
+                    return role == null ? ReplyAsync($"Unable to find role: {Format.Bold(name)}") : AddRoleAsync(role);
                 }
             }
         }
