@@ -15,19 +15,6 @@ namespace Railgun.Commands.Music
 		public class MusicRoleLock : SystemBase
 		{
 			[Command("add")]
-			public async Task AddRoleAsync([Remainder] string roleName)
-			{
-				foreach (var role in Context.Guild.Roles)
-					if (role.Name.Contains(roleName)) {
-						await AddRoleAsync(role);
-
-						return;
-					}
-
-				await ReplyAsync("Unable to find a role with the name you specified.");
-			}
-
-			[Command("add")]
 			public async Task AddRoleAsync(IRole role)
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
@@ -42,13 +29,13 @@ namespace Railgun.Commands.Music
 
 				await ReplyAsync($"Users with the role {Format.Bold(role.Name)}, may also use the music commands.");
 			}
-
-			[Command("remove")]
-			public async Task RemoveRoleAsync([Remainder] string roleName)
+			
+			[Command("add")]
+			public async Task AddRoleAsync([Remainder] string roleName)
 			{
 				foreach (var role in Context.Guild.Roles)
 					if (role.Name.Contains(roleName)) {
-						await RemoveRoleAsync(role);
+						await AddRoleAsync(role);
 
 						return;
 					}
@@ -74,6 +61,19 @@ namespace Railgun.Commands.Music
 				if (data.AllowedRoles.Count < 1) output.AppendLine("All music commands are no longer role-locked.");
 
 				await ReplyAsync(output.ToString());
+			}
+			
+			[Command("remove")]
+			public async Task RemoveRoleAsync([Remainder] string roleName)
+			{
+				foreach (var role in Context.Guild.Roles)
+					if (role.Name.Contains(roleName)) {
+						await RemoveRoleAsync(role);
+
+						return;
+					}
+
+				await ReplyAsync("Unable to find a role with the name you specified.");
 			}
 		}
 	}

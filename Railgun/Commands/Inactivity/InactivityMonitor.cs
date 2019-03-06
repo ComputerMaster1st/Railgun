@@ -34,7 +34,7 @@ namespace Railgun.Commands.Inactivity
         }
         
         [Command("role")]
-        public Task SetRoleAsync(string name)
+        public Task SetRoleAsync([Remainder] string name)
         {
             var role = Context.Guild.Roles.FirstOrDefault(r => r.Name == name);
             return role == null ? ReplyAsync($"Unable to find role: {Format.Bold(name)}") : SetRoleAsync(role);
