@@ -93,24 +93,25 @@ namespace Railgun.Commands.Utilities
             await ReplyAsync(Format.Code(output.ToString()));
         }
 
-        [Command("config")]
+        [Command("config", "configs")]
         public async Task ConfigAsync() {
             var output = new StringBuilder();
 
             output.AppendLine("TreeDiagram Configuration Report")
                 .AppendLine().AppendLine("Server/Guild Configurations :")
-                .AppendFormat("Anti-Caps : {0}", await Context.Database.FilterCapses.CountAsync()).AppendLine()
-                .AppendFormat(" Anti-Url : {0}", await Context.Database.FilterUrls.CountAsync()).AppendLine()
-                .AppendFormat("     Bite : {0}", await Context.Database.FunBites.CountAsync()).AppendLine()
-                .AppendFormat("      RST : {0}", await Context.Database.FunRsts.CountAsync()).AppendLine()
-                .AppendFormat("  Command : {0}", await Context.Database.ServerCommands.CountAsync())
-                .AppendFormat("JoinLeave : {0}", await Context.Database.ServerJoinLeaves.CountAsync()).AppendLine()
-                .AppendFormat("  Mention : {0}", await Context.Database.ServerMentions.CountAsync()).AppendLine()
-                .AppendFormat("    Music : {0}", await Context.Database.ServerMusics.CountAsync()).AppendLine()
-                .AppendFormat("  Warning : {0}", await Context.Database.ServerWarnings.CountAsync()).AppendLine()
+                .AppendFormat(" Anti-Caps : {0}", await Context.Database.FilterCapses.CountAsync()).AppendLine()
+                .AppendFormat("  Anti-Url : {0}", await Context.Database.FilterUrls.CountAsync()).AppendLine()
+                .AppendFormat("      Bite : {0}", await Context.Database.FunBites.CountAsync()).AppendLine()
+                .AppendFormat("       RST : {0}", await Context.Database.FunRsts.CountAsync()).AppendLine()
+                .AppendFormat("   Command : {0}", await Context.Database.ServerCommands.CountAsync()).AppendLine()
+                .AppendFormat("Inactivity : {0}", await Context.Database.ServerInactivities.CountAsync()).AppendLine()
+                .AppendFormat(" JoinLeave : {0}", await Context.Database.ServerJoinLeaves.CountAsync()).AppendLine()
+                .AppendFormat("   Mention : {0}", await Context.Database.ServerMentions.CountAsync()).AppendLine()
+                .AppendFormat("     Music : {0}", await Context.Database.ServerMusics.CountAsync()).AppendLine()
+                .AppendFormat("   Warning : {0}", await Context.Database.ServerWarnings.CountAsync()).AppendLine()
                 .AppendLine().AppendLine("User Configurations :")
-                .AppendFormat("  Mention : {0}", await Context.Database.UserMentions.CountAsync()).AppendLine()
-                .AppendFormat("  Command : {0}", await Context.Database.UserCommands.CountAsync()).AppendLine()
+                .AppendFormat("   Mention : {0}", await Context.Database.UserMentions.CountAsync()).AppendLine()
+                .AppendFormat("   Command : {0}", await Context.Database.UserCommands.CountAsync()).AppendLine()
                 .AppendLine()
                 .AppendLine("End of Report!");
             
