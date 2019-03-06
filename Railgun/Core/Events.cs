@@ -113,34 +113,37 @@ namespace Railgun.Core
             if (!(sMessage is SocketUserMessage) || !(sMessage.Channel is SocketGuildChannel) || string.IsNullOrEmpty(sMessage.Content))
                 return Task.CompletedTask;
 
-            return Task.Factory.StartNew(async() => {
-                var tc = (ITextChannel)sMessage.Channel;
-
-                using (var scope = _services.CreateScope())
-                {
-                    var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                    var data = db.ServerInactivities.GetData(tc.GuildId);
-                    var guild = tc.Guild;
-                    var user = await guild.GetUserAsync(sMessage.Author.Id);
-
-                    if (data == null) return;
-	                if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
-                    if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
-                    foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
-
-                    if (data.Users.Any((f) => f.UserId == user.Id))
-                    {
-	                    if (user.RoleIds.Contains(data.InactiveRoleId))
-		                    await user.RemoveRoleAsync(guild.GetRole(data.InactiveRoleId));
-	                    
-                        data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
-                        return;
-                    }
-
-                    data.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
-                }
-            });
+            return Task.Factory.StartNew(async() => await CheckInactivityAsync(sMessage));
         }
+
+		private async Task CheckInactivityAsync(SocketMessage sMessage)
+		{
+			var tc = (ITextChannel)sMessage.Channel;
+
+			using (var scope = _services.CreateScope())
+			{
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+				var data = db.ServerInactivities.GetData(tc.GuildId);
+				var guild = tc.Guild;
+				var user = await guild.GetUserAsync(sMessage.Author.Id);
+
+				if (data == null) return;
+				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
+				if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
+				foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
+
+				if (data.Users.Any((f) => f.UserId == user.Id))
+				{
+					if (user.RoleIds.Contains(data.InactiveRoleId))
+						await user.RemoveRoleAsync(guild.GetRole(data.InactiveRoleId));
+	                    
+					data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
+					return;
+				}
+
+				data.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+			}
+		}
 
 		private async Task JoinedGuildAsync(SocketGuild sGuild)
 			=> await _log.LogToBotLogAsync($"<{sGuild.Name} ({sGuild.Id})> Joined", BotLogType.GuildManager);
