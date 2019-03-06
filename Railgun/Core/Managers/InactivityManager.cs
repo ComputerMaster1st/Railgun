@@ -38,70 +38,60 @@ namespace Railgun.Core.Managers
         }
 
         private async Task RunAsync() {
-            List<ServerInactivity> configs;
-            
             using (var scope = _services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
                 if (!db.ServerInactivities.Any((f) => f.IsEnabled)) return;
 
-                configs = new List<ServerInactivity>(db.ServerInactivities.Where(
+                var configs = new List<ServerInactivity>(db.ServerInactivities.Where(
                     (f) => f.IsEnabled 
                            && f.InactiveRoleId != 0 
                            && f.InactiveDaysThreshold != 0));
                 
                 if (configs.Count < 1) return;
-            }
-            
-            foreach (var config in configs)
-            {
-                var guild = await _client.GetGuildAsync(config.Id);
-                var alreadyInactiveUsers = new List<UserActivityContainer>();
+                
+                foreach (var config in configs)
+                {
+                    var guild = await _client.GetGuildAsync(config.Id);
+                    var alreadyInactiveUsers = new List<UserActivityContainer>();
+    
+                    foreach (var container in config.Users) {
+                        var currentTime = DateTime.Now;
+                        
+                        if (container.LastActive.AddDays(config.InactiveDaysThreshold) > currentTime) continue;
+    
+                        var user = await guild.GetUserAsync(container.UserId);
+    
+                        if (user.RoleIds.Contains(config.InactiveRoleId))
+                        {
+                            alreadyInactiveUsers.Add(container);
+                            continue;
+                        }
 
-                foreach (var container in config.Users) {
-                    var currentTime = DateTime.Now;
-                    
-                    if (container.LastActive.AddDays(config.InactiveDaysThreshold) > currentTime) continue;
-
-                    var user = await guild.GetUserAsync(container.UserId);
-
-                    if (user.RoleIds.Contains(config.InactiveRoleId))
-                    {
-                        alreadyInactiveUsers.Add(container);
-                        continue;
-                    }
-
-                    TimerAssignRole data;
-                    
-                    using (var scope = _services.CreateScope()) {
-                        data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerAssignRoles
+                        var data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerAssignRoles
                             .CreateTimer(config.Id, currentTime.AddMinutes(5));
                         data.UserId = container.UserId;
                         data.RoleId = config.InactiveRoleId;
+    
+                        _timerManager.CreateAndStartTimer<AssignRoleTimerContainer>(data);
                     }
+    
+                    if (alreadyInactiveUsers.Count < 1) return;
+                    if (config.KickDaysThreshold == 0) return;
+    
+                    foreach (var container in alreadyInactiveUsers)
+                    {
+                        var currentTime = DateTime.Now;
+                        
+                        if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
 
-                    _timerManager.CreateAndStartTimer<AssignRoleTimerContainer>(data);
-                }
-
-                if (alreadyInactiveUsers.Count < 1) return;
-                if (config.KickDaysThreshold == 0) return;
-
-                foreach (var container in alreadyInactiveUsers)
-                {
-                    var currentTime = DateTime.Now;
-                    
-                    if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
-
-                    TimerKickUser data;
-                    
-                    using (var scope = _services.CreateScope()) {
-                        data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
+                        var data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
                             .CreateTimer(config.Id, currentTime.AddMinutes(5));
                         data.UserId = container.UserId;
+    
+                        _timerManager.CreateAndStartTimer<KickUserTimerContainer>(data);
                     }
-
-                    _timerManager.CreateAndStartTimer<KickUserTimerContainer>(data);
                 }
             }
         }
