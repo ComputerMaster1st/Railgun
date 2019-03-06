@@ -33,7 +33,7 @@ namespace Railgun.Commands.Inactivity
             {
                 var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
 
-                if (data.RoleWhitelist.Any((f) => f.RoleId == role.Id))
+                if (data.RoleWhitelist.Any(f => f.RoleId == role.Id))
                 {
                     data.RoleWhitelist.RemoveAll(f => f.RoleId == role.Id);
                     return ReplyAsync("Role removed from whitelisted!");
