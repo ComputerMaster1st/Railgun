@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Models.Filter;
@@ -56,27 +55,18 @@ namespace TreeDiagram
 
 		public void DeleteGuildData(ulong id)
 		{
-			var filterCaps = FilterCapses.FirstOrDefault(find => find.Id == id);
-			var filterUrl = FilterUrls.FirstOrDefault(find => find.Id == id);
-			var funBites = FunBites.FirstOrDefault(find => find.Id == id);
-			var funRst = FunRsts.FirstOrDefault(find => find.Id == id);
-			var serverCommand = ServerCommands.FirstOrDefault(find => find.Id == id);
-            var serverInactivity = ServerInactivities.FirstOrDefault(find => find.Id == id);
-            var serverMention = ServerMentions.FirstOrDefault(find => find.Id == id);
-			var serverMusic = ServerMusics.FirstOrDefault(find => find.Id == id);
-			var serverWarning = ServerWarnings.FirstOrDefault(find => find.Id == id);
-			var serverJoinLeave = ServerJoinLeaves.FirstOrDefault(find => find.Id == id);
-
-			if (filterCaps != null) FilterCapses.Remove(filterCaps);
-			if (filterUrl != null) FilterUrls.Remove(filterUrl);
-			if (funBites != null) FunBites.Remove(funBites);
-			if (funRst != null) FunRsts.Remove(funRst);
-			if (serverCommand != null) ServerCommands.Remove(serverCommand);
-            if (serverInactivity != null) ServerInactivities.Remove(serverInactivity);
-            if (serverMention != null) ServerMentions.Remove(serverMention);
-			if (serverMusic != null) ServerMusics.Remove(serverMusic);
-			if (serverWarning != null) ServerWarnings.Remove(serverWarning);
-			if (serverJoinLeave != null) ServerJoinLeaves.Remove(serverJoinLeave);
+			FilterCapses.DeleteData(id);
+			FilterUrls.DeleteData(id);
+			
+			FunBites.DeleteData(id);
+			FunRsts.DeleteData(id);
+			
+			ServerCommands.DeleteData(id);
+            ServerInactivities.DeleteData(id);
+            ServerMentions.DeleteData(id);
+			ServerMusics.DeleteData(id);
+			ServerWarnings.DeleteData(id);
+			ServerJoinLeaves.DeleteData(id);
 
 			SaveChanges();
 		}
