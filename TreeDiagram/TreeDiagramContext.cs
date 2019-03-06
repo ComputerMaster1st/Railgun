@@ -11,25 +11,25 @@ namespace TreeDiagram
 {
     public sealed class TreeDiagramContext : DbContext
     {
-        public DbSet<FilterCaps> FilterCapses { get; internal set; }
-        public DbSet<FilterUrl> FilterUrls { get; internal set; }
+	    public DbSet<FilterCaps> FilterCapses { get; internal set; } = null;
+        public DbSet<FilterUrl> FilterUrls { get; internal set; } = null;
 
-        public DbSet<FunBite> FunBites { get; internal set; }
-        public DbSet<FunRst> FunRsts { get; internal set; }
+        public DbSet<FunBite> FunBites { get; internal set; } = null;
+        public DbSet<FunRst> FunRsts { get; internal set; } = null;
 
-        public DbSet<ServerCommand> ServerCommands { get; internal set; }
-        public DbSet<ServerInactivity> ServerInactivities { get; internal set; }
-		public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; }
-		public DbSet<ServerMention> ServerMentions { get; internal set; }
-		public DbSet<ServerMusic> ServerMusics { get; internal set; }
-		public DbSet<ServerWarning> ServerWarnings { get; internal set; }
+        public DbSet<ServerCommand> ServerCommands { get; internal set; } = null;
+        public DbSet<ServerInactivity> ServerInactivities { get; internal set; } = null;
+		public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; } = null;
+		public DbSet<ServerMention> ServerMentions { get; internal set; } = null;
+		public DbSet<ServerMusic> ServerMusics { get; internal set; } = null;
+		public DbSet<ServerWarning> ServerWarnings { get; internal set; } = null;
 
-	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; }
-	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; }
-	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; }
+	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
+	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
+	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
 
-	    public DbSet<UserCommand> UserCommands { get; internal set; }
-		public DbSet<UserMention> UserMentions { get; internal set; }
+	    public DbSet<UserCommand> UserCommands { get; internal set; } = null;
+		public DbSet<UserMention> UserMentions { get; internal set; } = null;
 
         public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) => AppContext.SetSwitch("System.Net.Http.useSocketsHttpHandler", false);
 
@@ -40,6 +40,7 @@ namespace TreeDiagram
 					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
 				x.HasMany(f => f.AllowedRoles).WithOne().OnDelete(DeleteBehavior.Cascade);
 			});
+			
 			modelBuilder.Entity<ServerInactivity>(x =>
 			{
 				x.HasMany(f => f.Users).WithOne().OnDelete(DeleteBehavior.Cascade);
