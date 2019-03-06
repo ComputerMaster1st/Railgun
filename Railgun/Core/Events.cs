@@ -124,11 +124,15 @@ namespace Railgun.Core
                     var user = await guild.GetUserAsync(sMessage.Author.Id);
 
                     if (data == null) return;
+	                if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
                     if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
                     foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
 
                     if (data.Users.Any((f) => f.UserId == user.Id))
                     {
+	                    if (user.RoleIds.Contains(data.InactiveRoleId))
+		                    await user.RemoveRoleAsync(guild.GetRole(data.InactiveRoleId));
+	                    
                         data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
                         return;
                     }
@@ -167,7 +171,8 @@ namespace Railgun.Core
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
 
-				if (inactivityData != null)
+				if (inactivityData != null && inactivityData.IsEnabled && inactivityData.InactiveDaysThreshold != 0 && 
+				    inactivityData.InactiveRoleId != 0)
 				{
 					if (inactivityData.Users.Any(u => u.UserId == user.Id))
 						inactivityData.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
