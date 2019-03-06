@@ -111,16 +111,16 @@ namespace Railgun.Commands.Inactivity
             }
 
             var users = await Context.Guild.GetUsersAsync();
-            var inactiveUsers = users.Where((u) => u.RoleIds.Contains(data.InactiveRoleId)).ToList();
+            var inactiveUsers = users.Count((u) => u.RoleIds.Contains(data.InactiveRoleId));
             var output = new StringBuilder()
                 .AppendLine("Inactivity Monitor Report!")
                 .AppendLine()
                 .AppendFormat("Currently Monitoring      : {0}/{1} users", data.Users.Count, users.Count).AppendLine()
                 .AppendFormat("Whitelisted (Users/Roles) : {0}/{1}", data.UserWhitelist.Count, data.RoleWhitelist.Count).AppendLine()
-                .AppendFormat("Users Marked As Inactive  : {0}", inactiveUsers.Count).AppendLine()
+                .AppendFormat("Users Marked As Inactive  : {0}", inactiveUsers).AppendLine()
                 .AppendLine();
 
-            if (inactiveUsers.Count < 1)
+            if (inactiveUsers < 1)
             {
                 await ReplyAsync(Format.Code(output.ToString()));
                 return;
