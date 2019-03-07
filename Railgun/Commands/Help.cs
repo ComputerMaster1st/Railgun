@@ -4,7 +4,7 @@ using Discord;
 using Finite.Commands;
 using Railgun.Core.Commands;
 
-namespace Railgun.Commands.Utilities
+namespace Railgun.Commands
 {
     [Alias("help")]
     public class Help : SystemBase

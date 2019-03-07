@@ -12,9 +12,8 @@ using Railgun.Core.Commands;
 using Railgun.Core.Configuration;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
-using TreeDiagram;
 
-namespace Railgun.Commands.Utilities
+namespace Railgun.Commands
 {
     [Alias("info")]
     public class Info : SystemBase
