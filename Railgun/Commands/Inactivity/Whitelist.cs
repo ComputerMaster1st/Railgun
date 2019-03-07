@@ -4,7 +4,6 @@ using Discord;
 using Finite.Commands;
 using Railgun.Core.Commands;
 using TreeDiagram;
-using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Inactivity
