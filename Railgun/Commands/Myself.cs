@@ -6,7 +6,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using TreeDiagram;
 
-namespace Railgun.Commands.User
+namespace Railgun.Commands
 {
 	[Alias("myself", "self")]
 	public class Myself : SystemBase
