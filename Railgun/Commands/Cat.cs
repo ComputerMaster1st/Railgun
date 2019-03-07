@@ -5,7 +5,7 @@ using Railgun.Core.Api;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 
-namespace Railgun.Commands.Fun
+namespace Railgun.Commands
 {
     [Alias("cat")]
     public class Cat : SystemBase

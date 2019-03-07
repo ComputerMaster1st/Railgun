@@ -6,7 +6,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Utilities;
 
-namespace Railgun.Commands.Fun
+namespace Railgun.Commands
 {
     [Alias("8ball")]
     public class MagicBall : SystemBase

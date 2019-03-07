@@ -4,7 +4,7 @@ using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Utilities;
 
-namespace Railgun.Commands.Fun
+namespace Railgun.Commands
 {
     [Alias("zap")]
     public class Zap : SystemBase
