@@ -29,13 +29,8 @@ namespace Railgun.Commands.Inactivity
         public Task SetRoleAsync(IRole role)
         {
             var self = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
-            var selfHighestRole = 0;
-
-            foreach (var roleId in self.RoleIds)
-            {
-                var tempRole = Context.Guild.GetRole(roleId);
-                if (tempRole.Position > selfHighestRole) selfHighestRole = tempRole.Position;
-            }
+            var selfHighestRole = self.RoleIds.Select(roleId => Context.Guild.GetRole(roleId))
+                .Select(tempRole => tempRole.Position).Concat(new[] {0}).Max();
 
             if (selfHighestRole < role.Position) return ReplyAsync("Please make sure the inactivity role is in a lower role position than me.");
 
