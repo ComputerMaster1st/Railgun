@@ -9,7 +9,6 @@ using Railgun.Core.Containers;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
-using TreeDiagram.Models.TreeTimer;
 
 namespace Railgun.Core.Managers
 {
@@ -70,12 +69,12 @@ namespace Railgun.Core.Managers
                             continue;
                         }
 
-                        var data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerAssignRoles
+                        var timer = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerAssignRoles
                             .CreateTimer(config.Id, currentTime.AddMinutes(5));
-                        data.UserId = container.UserId;
-                        data.RoleId = config.InactiveRoleId;
+                        timer.UserId = container.UserId;
+                        timer.RoleId = config.InactiveRoleId;
     
-                        _timerManager.CreateAndStartTimer<AssignRoleTimerContainer>(data);
+                        _timerManager.CreateAndStartTimer<AssignRoleTimerContainer>(timer);
                     }
     
                     if (alreadyInactiveUsers.Count < 1) return;
@@ -87,11 +86,11 @@ namespace Railgun.Core.Managers
                         
                         if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
 
-                        var data = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
+                        var timer = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
                             .CreateTimer(config.Id, currentTime.AddMinutes(5));
-                        data.UserId = container.UserId;
+                        timer.UserId = container.UserId;
     
-                        _timerManager.CreateAndStartTimer<KickUserTimerContainer>(data);
+                        _timerManager.CreateAndStartTimer<KickUserTimerContainer>(timer);
                     }
                 }
             }
