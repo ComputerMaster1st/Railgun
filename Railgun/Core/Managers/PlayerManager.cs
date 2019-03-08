@@ -130,19 +130,28 @@ namespace Railgun.Core.Managers
 
 			var formattedOutput = Format.Code(output.ToString());
 
-			if (container.LogEntry != null) {
-				await container.LogEntry.ModifyAsync((x) => x.Content = formattedOutput);
-				return;
+			try
+			{
+				if (container.LogEntry != null)
+				{
+					await container.LogEntry.ModifyAsync((x) => x.Content = formattedOutput);
+					return;
+				}
+
+				if (_masterConfig.DiscordConfig.BotLogChannels.MusicPlayerActive == 0) return;
+
+				var masterGuild = await _client.GetGuildAsync(_masterConfig.DiscordConfig.MasterGuildId);
+				if (masterGuild == null) return;
+				var logTc = await masterGuild.GetTextChannelAsync(_masterConfig.DiscordConfig.BotLogChannels
+					.MusicPlayerActive);
+				if (logTc == null) return;
+
+				container.LogEntry = await logTc.SendMessageAsync(formattedOutput);
 			}
-			
-			if (_masterConfig.DiscordConfig.BotLogChannels.MusicPlayerActive == 0) return;
-
-			var masterGuild = await _client.GetGuildAsync(_masterConfig.DiscordConfig.MasterGuildId);
-			if (masterGuild == null) return;
-			var logTc = await masterGuild.GetTextChannelAsync(_masterConfig.DiscordConfig.BotLogChannels.MusicPlayerActive);
-			if (logTc == null) return;
-
-			container.LogEntry = await logTc.SendMessageAsync(formattedOutput);
+			catch
+			{
+				// Ignore
+			}
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)
