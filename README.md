@@ -2,7 +2,7 @@
 
 
 # Railgun Discord Bot (Coded W/ C#)
-Railgun is a multi-purpose Discord bot who is capable of performing various tasks. She is powered by .NETCore v3.0.0, Discord.Net Library & coded using C#.
+Railgun is a multi-purpose Discord bot who is capable of performing various tasks. She is powered by .NETCore v2.2, Discord.Net Library & coded using C#.
 
 ## Can I download Railgun's Source Code?
 It is best to not download the source code. The reason being is due to Railgun utilizing a library called AudioChord which has been developed by myself & mrspits4ever and requires additional parts such as FFMPEG & MongoDB as this library manages the interaction with the database.
