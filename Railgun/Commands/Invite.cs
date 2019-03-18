@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Finite.Commands;
 using Railgun.Core.Commands;
 
-namespace Railgun.Commands.Utilities
+namespace Railgun.Commands
 {
     [Alias("invite")]
     public class Invite : SystemBase

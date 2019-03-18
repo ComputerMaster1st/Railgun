@@ -9,7 +9,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
-namespace Railgun.Commands.Fun
+namespace Railgun.Commands
 {
 	[Alias("bite")]
 	public class Bite : SystemBase

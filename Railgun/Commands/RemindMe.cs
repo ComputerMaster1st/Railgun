@@ -11,7 +11,7 @@ using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
-namespace Railgun.Commands.Utilities
+namespace Railgun.Commands
 {
 	[Alias("remindme")]
 	public class RemindMe : SystemBase

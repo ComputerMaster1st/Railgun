@@ -8,7 +8,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
-namespace Railgun.Commands.Fun
+namespace Railgun.Commands
 {
 	[Alias("rst")]
 	public class Rst : SystemBase

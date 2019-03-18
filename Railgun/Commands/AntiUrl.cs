@@ -10,7 +10,7 @@ using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.SubModels;
 
-namespace Railgun.Commands.Filters
+namespace Railgun.Commands
 {
 	[Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiUrl : SystemBase

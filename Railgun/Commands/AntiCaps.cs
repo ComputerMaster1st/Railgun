@@ -9,7 +9,7 @@ using Railgun.Core.Commands.Attributes;
 using TreeDiagram;
 using TreeDiagram.Models.SubModels;
 
-namespace Railgun.Commands.Filters
+namespace Railgun.Commands
 {
 	[Alias("anticaps"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiCaps : SystemBase

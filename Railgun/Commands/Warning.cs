@@ -11,7 +11,7 @@ using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
-namespace Railgun.Commands.Server
+namespace Railgun.Commands
 {
 	[Alias("warn")]
 	public class Warning : SystemBase
