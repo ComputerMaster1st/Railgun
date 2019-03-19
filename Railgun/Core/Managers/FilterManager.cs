@@ -16,7 +16,7 @@ namespace Railgun.Core.Managers
         public FilterManager(IServiceProvider services)
             => _services = services;
 
-        public void RegisterFilter(IMessageFilter filter) => _filters.Add(filter);
+        public void AddMessageFilter(IMessageFilter filter) => _filters.Add(filter);
 
         public async Task<IUserMessage> ApplyFilterAsync(IUserMessage msg) {
             IUserMessage result = null;

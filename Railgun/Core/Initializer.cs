@@ -16,6 +16,7 @@ using Railgun.Core.Commands;
 using Railgun.Core.Commands.Pipelines;
 using Railgun.Core.Commands.Readers;
 using Railgun.Core.Configuration;
+using Railgun.Core.Extensions;
 using Railgun.Core.Filters;
 using Railgun.Core.Logging;
 using Railgun.Core.Managers;
@@ -91,8 +92,6 @@ namespace Railgun.Core
                 .AddSingleton<MusicManager>()
                 .AddSingleton<PlayerManager>()
                 .AddSingleton<TimerManager>()
-                .AddSingleton<AntiCaps>()
-                .AddSingleton<AntiUrl>()
                 .AddSingleton<YoutubeSearch>()
                 .BuildServiceProvider();
             
@@ -104,8 +103,9 @@ namespace Railgun.Core
             _services.GetService<Analytics>();
             _services.GetService<Events>();
             _services.GetService<CommandManager>();
-            _services.GetService<AntiCaps>();
-            _services.GetService<AntiUrl>();
+            _services.GetService<FilterManager>()
+                .AddMessageFilter<AntiCaps>()
+                .AddMessageFilter<AntiUrl>();
         }
 
         private async Task UnobservedTaskAsync(UnobservedTaskExceptionEventArgs e) {

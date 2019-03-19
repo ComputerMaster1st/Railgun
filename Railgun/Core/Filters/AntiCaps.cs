@@ -9,8 +9,6 @@ namespace Railgun.Core.Filters
 {
 	public class AntiCaps : IMessageFilter
 	{
-		public AntiCaps(FilterManager manager) => manager.RegisterFilter(this);
-
 		public async Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext context)
 		{
 			if (string.IsNullOrWhiteSpace(message.Content)) return null;

@@ -13,8 +13,6 @@ namespace Railgun.Core.Filters
 	{
 		private readonly Regex _regex = new Regex("(http(s)?)://(www.)?");
 
-		public AntiUrl(FilterManager manager) => manager.RegisterFilter(this);
-
 		private bool CheckContentForUrl(FilterUrl data, string content)
 		{
 			foreach (var url in data.BannedUrls) {
