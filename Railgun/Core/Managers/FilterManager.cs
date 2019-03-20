@@ -18,7 +18,7 @@ namespace Railgun.Core.Managers
 
         public void AddMessageFilter(IMessageFilter filter) => _filters.Add(filter);
 
-        public async Task<IUserMessage> ApplyFilterAsync(IUserMessage msg) {
+        public IUserMessage ApplyFilter(IUserMessage msg) {
             if (string.IsNullOrWhiteSpace(msg.Content)) return null;
 
             var tc = (ITextChannel)msg.Channel;
@@ -28,8 +28,7 @@ namespace Railgun.Core.Managers
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
                 foreach (var filter in _filters) {
-                    result = await filter.FilterAsync(tc, msg, db);
-
+                    result = filter.FilterAsync(tc, msg, db).GetAwaiter().GetResult();
                     if (result != null) break;
                 }
             }

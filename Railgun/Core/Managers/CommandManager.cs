@@ -47,21 +47,17 @@ namespace Railgun.Core.Managers
 
 				if (!self.GetPermissions(tc).SendMessages) return;
 
-				var filterMsg = await _filterManager.ApplyFilterAsync(msg);
+				var filterMsg = _filterManager.ApplyFilter(msg);
 
-				if (filterMsg != null) {
-					await Task.Run(() => {
-						try {
-							msg.DeleteAsync();
-
-							_analytics.FilterDeletedMessages++;
-
-							Task.Delay(5000);
-							filterMsg.DeleteAsync();
-						} catch { // Ignored
-						}
-					});
-				}
+				if (filterMsg != null) await Task.Run(() => {
+					try {
+						msg.DeleteAsync();
+						_analytics.FilterDeletedMessages++;
+						Task.Delay(5000);
+						filterMsg.DeleteAsync();
+					} catch { // Ignored
+					}
+				});
 
 				using (var scope = _services.CreateScope()) {
 					var context = new SystemContext(_client, sMessage, scope.ServiceProvider);
