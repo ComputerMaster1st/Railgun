@@ -47,10 +47,6 @@ namespace Railgun.Core.Filters
 			var output = new StringBuilder()
 				.AppendFormat("{0} Deleted {1}'s Message! {2}", Format.Bold("Anti-Url :"), user.Mention, Format.Bold("Reason :"));
 
-			if (data.BlockServerInvites && content.Contains("discord.gg/")) {
-				output.AppendFormat("Server Invite");
-				return await tc.SendMessageAsync(output.ToString());
-			}
 			if (_regex.IsMatch(content) && CheckContentForUrl(data, content)) {
 				output.AppendFormat("Unlisted Url Block");
 				return await tc.SendMessageAsync(output.ToString());

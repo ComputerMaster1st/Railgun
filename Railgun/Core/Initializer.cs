@@ -105,6 +105,7 @@ namespace Railgun.Core
             _services.GetService<CommandManager>();
             _services.GetService<FilterManager>()
                 .AddMessageFilter<AntiCaps>()
+                .AddMessageFilter<AntiInvite>()
                 .AddMessageFilter<AntiUrl>();
         }
 
