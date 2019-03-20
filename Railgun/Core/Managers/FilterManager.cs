@@ -19,13 +19,16 @@ namespace Railgun.Core.Managers
         public void AddMessageFilter(IMessageFilter filter) => _filters.Add(filter);
 
         public async Task<IUserMessage> ApplyFilterAsync(IUserMessage msg) {
+            if (string.IsNullOrWhiteSpace(msg.Content)) return null;
+
+            var tc = (ITextChannel)msg.Channel;
             IUserMessage result = null;
 
             using (var scope = _services.CreateScope()) {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
                 foreach (var filter in _filters) {
-                    result = await filter.FilterAsync(msg, db);
+                    result = await filter.FilterAsync(tc, msg, db);
 
                     if (result != null) break;
                 }

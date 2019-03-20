@@ -8,11 +8,8 @@ namespace Railgun.Core.Filters
 {
     public class AntiInvite : IMessageFilter
     {
-        public Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext context)
+        public Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
         {
-            if (string.IsNullOrWhiteSpace(message.Content)) return null;
-
-            var tc = (ITextChannel)message.Channel;
             var data = context.FilterUrls.GetData(tc.GuildId);
 
             if (data == null || !data.IsEnabled ||
@@ -26,7 +23,7 @@ namespace Railgun.Core.Filters
             var output = new StringBuilder()
                 .AppendFormat("{0} Deleted {1}'s Message! {2}", Format.Bold("Anti-Url :"), message.Author.Mention, Format.Bold("Reason :"))
                 .AppendFormat("Server Invite");
-                
+
             return tc.SendMessageAsync(output.ToString());
         }
     }

@@ -23,11 +23,8 @@ namespace Railgun.Core.Filters
 			return false;
 		}
 
-		public async Task<IUserMessage> FilterAsync(IUserMessage message, TreeDiagramContext context)
+		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
 		{
-			if (string.IsNullOrWhiteSpace(message.Content)) return null;
-
-			var tc = (ITextChannel)message.Channel;
 			var data = context.FilterUrls.GetData(tc.GuildId);
 
 			if (data == null || !data.IsEnabled ||
