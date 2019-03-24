@@ -70,6 +70,7 @@ namespace Railgun.Commands.Inactivity
 
             foreach (var user in users)
             {
+                if (user.IsBot || user.IsWebhook) continue;
                 if (data.Users.Any((u) => u.UserId == user.Id))
                 {
                     alreadyMonitoring++;

@@ -118,6 +118,8 @@ namespace Railgun.Core
 
 		private async Task CheckInactivityAsync(SocketMessage sMessage)
 		{
+			if (sMessage.Author.IsBot  || sMessage.Author.IsWebhook) return;
+
 			var tc = (ITextChannel)sMessage.Channel;
 
 			using (var scope = _services.CreateScope())

@@ -16,6 +16,8 @@ namespace Railgun.Commands.Inactivity
             [Command("user")]
             public Task UserAsync(IGuildUser user)
             {
+                if (user.IsBot || user.IsWebhook) return ReplyAsync("This user is a bot! Bots will always be ignored/whitelisted.");
+
                 var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
 
                 if (data.UserWhitelist.Any(f => f.UserId == user.Id))
