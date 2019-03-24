@@ -69,8 +69,7 @@ namespace Railgun.Core.Managers
                             continue;
                         }
 
-                        var timer = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerAssignRoles
-                            .CreateTimer(config.Id, currentTime.AddMinutes(5));
+                        var timer = db.TimerAssignRoles.CreateTimer(config.Id, currentTime.AddMinutes(5));
                         timer.UserId = container.UserId;
                         timer.RoleId = config.InactiveRoleId;
     
@@ -86,8 +85,7 @@ namespace Railgun.Core.Managers
                         
                         if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
 
-                        var timer = scope.ServiceProvider.GetService<TreeDiagramContext>().TimerKickUsers
-                            .CreateTimer(config.Id, currentTime.AddMinutes(5));
+                        var timer = db.TimerKickUsers.CreateTimer(config.Id, currentTime.AddMinutes(5));
                         timer.UserId = container.UserId;
     
                         _timerManager.CreateAndStartTimer<KickUserTimerContainer>(timer);
