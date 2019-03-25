@@ -8,7 +8,7 @@ namespace Railgun.Core.Filters
 {
     public class AntiInvite : IMessageFilter
     {
-        public Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
+        public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
         {
             var data = context.FilterUrls.GetData(tc.GuildId);
 
@@ -24,7 +24,7 @@ namespace Railgun.Core.Filters
                 .AppendFormat("{0} Deleted {1}'s Message! {2}", Format.Bold("Anti-Url :"), message.Author.Mention, Format.Bold("Reason :"))
                 .AppendFormat("Server Invite");
 
-            return tc.SendMessageAsync(output.ToString());
+            return await tc.SendMessageAsync(output.ToString());
         }
     }
 }
