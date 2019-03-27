@@ -131,6 +131,7 @@ namespace Railgun.Core
 
 				if (data == null) return;
 				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
+				if (guild.OwnerId == user.Id) return;
 				if (data.UserWhitelist.Any((f) => f.UserId == user.Id)) return;
 				foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId.RoleId)) return;
 
