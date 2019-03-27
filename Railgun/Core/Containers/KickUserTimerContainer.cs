@@ -28,10 +28,35 @@ namespace Railgun.Core.Containers {
                 var guild = await Client.GetGuildAsync(_data.GuildId) ?? throw new NullReferenceException("Guild Not Found!");
                 var user = await guild.GetUserAsync(_data.UserId) ?? throw new NullReferenceException("User Not Found!");
 
-                await user.KickAsync("Auto-Kicked for Inactivity");
-                
-                IsCompleted = true;
-                Dispose();
+                // TODO: Please refactor this somehow...
+                var selfRolePosition = 0;
+                var userRolePosition = 0;
+                var self = await guild.GetCurrentUserAsync();
+
+                foreach (var roleId in self.RoleIds) {
+                    var role = guild.GetRole(roleId);
+
+                    if (role.Permissions.KickMembers && role.Position > selfRolePosition)
+                        selfRolePosition = role.Position;
+                }
+
+                foreach (var roleId in user.RoleIds) {
+                    var role = guild.GetRole(roleId);
+
+                    if (role.Position > userRolePosition) userRolePosition = role.Position;
+                }
+
+                if (selfRolePosition > userRolePosition) {
+                    await user.KickAsync("Auto-Kicked for Inactivity");
+                    IsCompleted = true;
+                    Dispose();
+                } else {
+                    await Log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, 
+                        "Timers", $"Timer ID |{_data.Id}| KickUser Container Permission Error! Guild ID : {guild.Id}"));
+                    HasCrashed = true;
+                    Dispose();
+                }
+                // END Refactor
             } catch (NullReferenceException ex) {
                 HasCrashed = true;
                 Dispose();
