@@ -142,7 +142,7 @@ namespace Railgun.Commands.Inactivity
                     user.Username, user.DiscriminatorValue, Response.GetSeparator(), user.Id, 
                     !user.RoleIds.Contains(data.InactiveRoleId) ? "Active" : "Inactive"
                     , activityContainer != null 
-                        ? activityContainer.LastActive.ToString(CultureInfo.CurrentCulture) 
+                        ? activityContainer.LastActive.ToString() 
                         : "UNKNOWN! (Something went wrong!)")
                     .AppendLine();
             }
