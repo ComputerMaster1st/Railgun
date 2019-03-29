@@ -65,21 +65,6 @@ namespace Railgun.Commands
         }
 
         [Command]
-        public Task WhoIsAsync() => WhoIsAsync(Context.Author);
-
-        [Command]
-        public async Task WhoIsAsync(ulong userId) {
-            var user = await Context.Client.GetUserAsync(userId);
-
-            if (user == null) {
-                await ReplyAsync("Can not find user.");
-                return;
-            }
-
-            await WhoIsAsync(user);
-        }
-
-        [Command]
         public async Task WhoIsAsync(IUser user) {
             var username = $"{user.Username}#{user.DiscriminatorValue}";
             var isHuman = user.IsBot | user.IsWebhook ? "Bot" : "User";
@@ -114,5 +99,20 @@ namespace Railgun.Commands
 
             await ReplyAsync(embed:embedBuilder.Build());
         }
+
+        [Command]
+        public async Task WhoIsAsync(ulong userId) {
+            var user = await Context.Client.GetUserAsync(userId);
+
+            if (user == null) {
+                await ReplyAsync("Can not find user.");
+                return;
+            }
+
+            await WhoIsAsync(user);
+        }
+
+        [Command]
+        public Task WhoIsAsync() => WhoIsAsync(Context.Author);
     }
 }
