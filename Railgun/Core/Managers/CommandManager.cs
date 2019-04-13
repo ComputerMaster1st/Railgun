@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Results;
 using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
@@ -67,7 +68,7 @@ namespace Railgun.Core.Managers
 
 					switch (result) {
 						case PreconditionResult r:
-							await tc.SendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
+							await tc.TrySendMessageAsync(string.Format("{0} {1}", Format.Bold("Command Error!"), r.Error));
 							break;
 						case CommandResult c:
 							if (result.IsSuccess) {
@@ -113,7 +114,7 @@ namespace Railgun.Core.Managers
 				.AppendLine()
 				.AppendFormat("{0} {1}", Format.Bold("ERROR :"), result.Exception.Message);
 
-			await context.Channel.SendMessageAsync(tcOutput.ToString());
+			await (context.Channel as ITextChannel).TrySendMessageAsync(tcOutput.ToString());
 		}
 	}
 }

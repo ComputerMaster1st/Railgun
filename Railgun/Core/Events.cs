@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
@@ -64,7 +65,7 @@ namespace Railgun.Core
 			if (string.IsNullOrEmpty(message)) return;
 			if (data.SendToDM) {
 				try {
-					await (await user.GetOrCreateDMChannelAsync()).SendMessageAsync(message);
+					await (await user.GetOrCreateDMChannelAsync()).TrySendMessageAsync(message);
 				} catch { // Ignored
 				}
 
@@ -79,7 +80,7 @@ namespace Railgun.Core
 			IUserMessage msg;
 
 			try {
-				msg = await tc.SendMessageAsync(message);
+				msg = await tc.TrySendMessageAsync(message);
 			} catch {
 				var output = new StringBuilder()
 					.AppendFormat("<{0} <{1}>> Missing Send Message Permission!", tc.Guild.Name, tc.GuildId).AppendLine()

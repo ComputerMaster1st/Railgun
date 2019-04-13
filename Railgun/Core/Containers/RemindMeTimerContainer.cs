@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 using System;
 using System.Text;
@@ -47,7 +48,7 @@ namespace Railgun.Core.Containers
                     .AppendLine()
                     .AppendLine(_data.Message);
 
-                await tc.SendMessageAsync(output.ToString());
+                await tc.TrySendMessageAsync(output.ToString());
 
                 IsCompleted = true;
 

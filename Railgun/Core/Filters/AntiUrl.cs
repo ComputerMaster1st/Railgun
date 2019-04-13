@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using TreeDiagram;
 using TreeDiagram.Models.Filter;
@@ -36,7 +37,7 @@ namespace Railgun.Core.Filters
 
 			if (message.Author.Id == self.Id) return null;
 			if (!self.GetPermissions(tc).ManageMessages) {
-				await tc.SendMessageAsync($"{Format.Bold("Anti-Url :")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
+				await tc.TrySendMessageAsync($"{Format.Bold("Anti-Url :")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
 				return null;
 			}
 
@@ -46,11 +47,11 @@ namespace Railgun.Core.Filters
 
 			if (_regex.IsMatch(content) && CheckContentForUrl(data, content)) {
 				output.AppendFormat("Unlisted Url Block");
-				return await tc.SendMessageAsync(output.ToString());
+				return await tc.TrySendMessageAsync(output.ToString());
 			}
 			if (CheckContentForUrl(data, content)) {
 				output.AppendFormat("Listed Url Block");
-				return await tc.SendMessageAsync(output.ToString());
+				return await tc.TrySendMessageAsync(output.ToString());
 			}
 
 			return null;

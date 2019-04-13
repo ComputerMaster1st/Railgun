@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using TreeDiagram;
 
@@ -23,7 +24,7 @@ namespace Railgun.Core.Filters
 
 			if (message.Author.Id == self.Id) return null;
 			else if (!self.GetPermissions(tc).ManageMessages) {
-				await tc.SendMessageAsync($"{Format.Bold("Anti-Caps : ")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
+				await tc.TrySendMessageAsync($"{Format.Bold("Anti-Caps : ")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
 
 				return null;
 			}
@@ -46,7 +47,7 @@ namespace Railgun.Core.Filters
 
 			if (percent < data.Percentage) return null;
 
-			return await tc.SendMessageAsync(string.Format("{0} Deleted {1}'s Message! ({2} Caps)",
+			return await tc.TrySendMessageAsync(string.Format("{0} Deleted {1}'s Message! ({2} Caps)",
 				Format.Bold("Anti-Caps :"),
 				user.Mention,
 				Format.Bold(Math.Round(percent) + "%")));
