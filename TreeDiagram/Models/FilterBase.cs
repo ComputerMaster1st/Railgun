@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models
 {
-    public abstract class FilterBase : ConfigBase
+    public abstract class FilterBase : ConfigBase, ITreeFilter
     {
         public bool IsEnabled { get; set; }
         public bool IncludeBots { get; set; }

@@ -6,11 +6,12 @@ using Discord;
 using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using TreeDiagram;
+using TreeDiagram.Interfaces;
 using TreeDiagram.Models.Filter;
 
 namespace Railgun.Core.Filters
 {
-	public class AntiUrl : IMessageFilter
+	public class AntiUrl : AntiFilterBase, IMessageFilter
 	{
 		private readonly Regex _regex = new Regex("(http(s)?)://(www.)?");
 
@@ -28,9 +29,7 @@ namespace Railgun.Core.Filters
 		{
 			var data = context.FilterUrls.GetData(tc.GuildId);
 
-			if (data == null || !data.IsEnabled ||
-				(!data.IncludeBots && (message.Author.IsBot | message.Author.IsWebhook)) ||
-				data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) return null;
+			if (!CheckConditions(data as ITreeFilter, message)) return null;
 
 			var self = await tc.Guild.GetCurrentUserAsync();
 			var user = message.Author;

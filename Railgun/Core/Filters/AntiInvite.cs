@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using Discord;
 using Railgun.Core.Extensions;
 using TreeDiagram;
+using TreeDiagram.Interfaces;
 
 namespace Railgun.Core.Filters
 {
-    public class AntiInvite : IMessageFilter
+    public class AntiInvite : AntiFilterBase, IMessageFilter
     {
         public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
         {
             var data = context.FilterUrls.GetData(tc.GuildId);
 
-            if (data == null || !data.IsEnabled ||
-                (!data.IncludeBots && (message.Author.IsBot | message.Author.IsWebhook)) ||
-                data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) return null;
+            if (!CheckConditions(data as ITreeFilter, message)) return null;
 
             var content = message.Content.ToLower();
 

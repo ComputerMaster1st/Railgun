@@ -5,20 +5,18 @@ using Discord;
 using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using TreeDiagram;
+using TreeDiagram.Interfaces;
 
 namespace Railgun.Core.Filters
 {
-	public class AntiCaps : IMessageFilter
+	public class AntiCaps : AntiFilterBase, IMessageFilter
 	{
 		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
 		{
 			var data = context.FilterCapses.GetData(tc.GuildId);
 
-			if ((data == null || !data.IsEnabled) ||
-				(!data.IncludeBots && (message.Author.IsBot | message.Author.IsWebhook)) ||
-				data.IgnoredChannels.Any(f => f.ChannelId == tc.Id) ||
-				message.Content.Length < data.Length
-			) return null;
+			if (!CheckConditions(data as ITreeFilter, message)) return null;
+			if (message.Content.Length < data.Length) return null;
 
 			var self = await tc.Guild.GetCurrentUserAsync();
 
