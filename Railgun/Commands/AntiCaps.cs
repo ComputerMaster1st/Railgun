@@ -120,8 +120,7 @@ namespace Railgun.Commands
 
 				if (deletedChannels.Count > 0)
 					deletedChannels.ForEach(channel => data.IgnoredChannels.Remove(channel));
-				else output.AppendLine("Ignored Channels : None");
-			}
+			} else output.AppendLine("Ignored Channels : None");
 
 			await ReplyAsync(Format.Code(output.ToString()));
 		}
