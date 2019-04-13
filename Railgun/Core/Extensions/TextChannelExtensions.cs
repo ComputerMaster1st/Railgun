@@ -15,7 +15,8 @@ namespace Railgun.Core.Extensions
             for (var i=0; i<Retry; i++) {
                 try {
                     return await tc.SendMessageAsync(msg, isTTS, embed);
-                } catch (HttpRequestException) {
+                } catch (HttpRequestException e) {
+                    normalException = e;
                     continue;
                 } catch (Exception e) {
                     normalException = e;
