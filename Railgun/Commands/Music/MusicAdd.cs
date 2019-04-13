@@ -5,15 +5,16 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Finite.Commands;
+using Railgun.Core;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("add")]
 		public partial class MusicAdd : SystemBase

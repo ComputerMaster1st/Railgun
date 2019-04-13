@@ -9,7 +9,7 @@ using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Music;
 using Railgun.Core.Music.PlayerEventArgs;
 using Railgun.Core.Utilities;
@@ -18,7 +18,7 @@ using TreeDiagram.Models.Server;
 
 namespace Railgun.Core.Managers
 {
-	public class PlayerManager
+    public class PlayerManager
 	{
 		private readonly IServiceProvider _services;
 		private readonly MasterConfig _masterConfig;

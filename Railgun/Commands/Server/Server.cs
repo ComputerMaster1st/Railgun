@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
+using Railgun.Core;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Server
 {
-	[Alias("server")]
+    [Alias("server")]
 	public partial class Server : SystemBase
 	{
 		private readonly Log _log;

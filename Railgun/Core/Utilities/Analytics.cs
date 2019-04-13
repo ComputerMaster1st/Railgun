@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Results;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 
 namespace Railgun.Core.Utilities
 {

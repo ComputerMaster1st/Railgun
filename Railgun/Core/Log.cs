@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core.Configuration;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 
-namespace Railgun.Core.Logging
+namespace Railgun.Core
 {
     public class Log
     {

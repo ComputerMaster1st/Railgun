@@ -9,7 +9,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Railgun.Core.Configuration;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
@@ -19,7 +19,7 @@ using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Core
 {
-	public class Events
+    public class Events
 	{
 		private readonly IServiceProvider _services;
 		private readonly MasterConfig _config;

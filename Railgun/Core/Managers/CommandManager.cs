@@ -7,13 +7,13 @@ using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Results;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Core.Managers
 {
-	public class CommandManager
+    public class CommandManager
 	{
 		private readonly IServiceProvider _services;
 		private readonly DiscordShardedClient _client;

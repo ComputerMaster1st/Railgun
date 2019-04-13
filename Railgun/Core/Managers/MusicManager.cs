@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
 namespace Railgun.Core.Managers
 {
-	public class MusicManager
+    public class MusicManager
 	{
 		private readonly IServiceProvider _services;
 		private readonly Log _log;

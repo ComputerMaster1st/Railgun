@@ -1,13 +1,12 @@
 ﻿using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using System;
 using System.Text;
 using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Interfaces;
-using TreeDiagram.Models;
 using TreeDiagram.Models.TreeTimer;
 
 namespace Railgun.Core.Containers

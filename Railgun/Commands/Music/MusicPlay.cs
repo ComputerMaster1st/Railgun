@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Finite.Commands;
+using Railgun.Core;
 using Railgun.Core.Api.Youtube;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
@@ -18,7 +19,7 @@ using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("play")]
 		public class MusicPlay : SystemBase
