@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core.Configuration;
+using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 
-namespace Railgun.Core.Logging
+namespace Railgun.Core
 {
     public class Log
     {
@@ -55,7 +57,7 @@ namespace Railgun.Core.Logging
                     return;
                 }
 
-                await tc.SendMessageAsync(Format.Code(output.ToString()) + pingMasterStr);
+                await tc.TrySendMessageAsync(Format.Code(output.ToString()) + pingMasterStr);
             }
             catch {
                 // ignored

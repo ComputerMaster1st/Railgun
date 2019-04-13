@@ -10,20 +10,21 @@ using Finite.Commands;
 using Finite.Commands.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core;
 using Railgun.Core.Api;
 using Railgun.Core.Api.Youtube;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Pipelines;
 using Railgun.Core.Commands.Readers;
 using Railgun.Core.Configuration;
+using Railgun.Core.Enums;
 using Railgun.Core.Extensions;
 using Railgun.Core.Filters;
-using Railgun.Core.Logging;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 
-namespace Railgun.Core
+namespace Railgun
 {
     public class Initializer
     {

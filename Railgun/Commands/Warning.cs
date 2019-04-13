@@ -4,16 +4,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
+using Railgun.Core;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands
 {
-	[Alias("warn")]
+    [Alias("warn")]
 	public class Warning : SystemBase
 	{
 		private readonly Log _log;

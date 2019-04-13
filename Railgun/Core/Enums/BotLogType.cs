@@ -1,4 +1,4 @@
-namespace Railgun.Core.Logging
+namespace Railgun.Core.Enums
 {
     public enum BotLogType
     {

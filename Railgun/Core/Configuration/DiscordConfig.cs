@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 
 namespace Railgun.Core.Configuration
 {

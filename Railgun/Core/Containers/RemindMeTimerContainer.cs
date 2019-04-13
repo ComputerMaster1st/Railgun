@@ -1,13 +1,13 @@
 ﻿using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 using System;
 using System.Text;
 using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Interfaces;
-using TreeDiagram.Models;
 using TreeDiagram.Models.TreeTimer;
 
 namespace Railgun.Core.Containers
@@ -48,7 +48,7 @@ namespace Railgun.Core.Containers
                     .AppendLine()
                     .AppendLine(_data.Message);
 
-                await tc.SendMessageAsync(output.ToString());
+                await tc.TrySendMessageAsync(output.ToString());
 
                 IsCompleted = true;
 

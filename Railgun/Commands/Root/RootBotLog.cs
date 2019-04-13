@@ -3,7 +3,7 @@ using Discord;
 using Finite.Commands;
 using Railgun.Core.Commands;
 using Railgun.Core.Configuration;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 
 namespace Railgun.Commands.Root
 {

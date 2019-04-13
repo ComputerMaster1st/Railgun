@@ -9,7 +9,8 @@ using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Music;
 using Railgun.Core.Music.PlayerEventArgs;
 using Railgun.Core.Utilities;
@@ -18,7 +19,7 @@ using TreeDiagram.Models.Server;
 
 namespace Railgun.Core.Managers
 {
-	public class PlayerManager
+    public class PlayerManager
 	{
 		private readonly IServiceProvider _services;
 		private readonly MasterConfig _masterConfig;
@@ -56,7 +57,7 @@ namespace Railgun.Core.Managers
 				if (preRequestedSong != null && !playlist.Songs.Contains(preRequestedSong.Id))
 					playlist.Songs.Add(preRequestedSong.Id);
 
-				await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...");
+				await tc.TrySendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One momemt please...");
 
 				var repository = (await _musicService.GetAllSongsAsync()).ToList();
 				var rand = new Random();
@@ -74,7 +75,7 @@ namespace Railgun.Core.Managers
 
 			var username = _commandUtils.GetUsernameOrMention(user);
 
-			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
+			await tc.TrySendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
 			var player = new Player(_musicService, vc) {
 				PlaylistAutoLoop = data.PlaylistAutoLoop
@@ -146,7 +147,7 @@ namespace Railgun.Core.Managers
 					.MusicPlayerActive);
 				if (logTc == null) return;
 
-				container.LogEntry = await logTc.SendMessageAsync(formattedOutput);
+				container.LogEntry = await logTc.TrySendMessageAsync(formattedOutput);
 			}
 			catch
 			{
@@ -210,7 +211,7 @@ namespace Railgun.Core.Managers
 						.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Name), Response.GetSeparator(), Format.Bold(args.Song.Id.ToString())).AppendLine()
 						.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Length.ToString()), Response.GetSeparator(), Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
 
-					await tc.SendMessageAsync(output.ToString());
+					await tc.TrySendMessageAsync(output.ToString());
 				}
 
 				await CreateOrModifyMusicPlayerLogEntryAsync(container);
@@ -226,7 +227,7 @@ namespace Railgun.Core.Managers
 			var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
 
 			try {
-				await tc.SendMessageAsync("Connection to Discord Voice has timed out! Please try again.");
+				await tc.TrySendMessageAsync("Connection to Discord Voice has timed out! Please try again.");
 			} catch {
 				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 			} finally {
@@ -265,7 +266,7 @@ namespace Railgun.Core.Managers
 
 				output.AppendFormat("{0}Left Voice Channel", autoOutput);
 
-				await tc.SendMessageAsync(output.ToString());
+				await tc.TrySendMessageAsync(output.ToString());
 			} catch {
 				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 				await _log.LogToBotLogAsync($"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected", BotLogType.MusicPlayerError);

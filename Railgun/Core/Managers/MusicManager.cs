@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
+using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
 namespace Railgun.Core.Managers
 {
-	public class MusicManager
+    public class MusicManager
 	{
 		private readonly IServiceProvider _services;
 		private readonly Log _log;
@@ -43,7 +44,7 @@ namespace Railgun.Core.Managers
 			var playlistModified = false;
 
 			foreach (var url in urls) {
-				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...");
+				var response = await tc.TrySendMessageAsync($"{Format.Bold("Processing :")} <{url}>...");
 				var cleanUrl = url.Trim(' ', '<', '>');
 				ISong song = null;
 
@@ -77,7 +78,7 @@ namespace Railgun.Core.Managers
 
 			if (playlistModified) await _musicService.Playlist.UpdateAsync(playlist);
 
-			await tc.SendMessageAsync("Done!");
+			await tc.TrySendMessageAsync("Done!");
 		}
 
 		public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc)
@@ -125,7 +126,7 @@ namespace Railgun.Core.Managers
 				.AppendFormat("---- Encoded/Installed  : {0}", newlyEncoded).AppendLine()
 				.AppendFormat("---- Failed To Install  : {0}", failed).AppendLine();
 
-			await tc.SendMessageAsync(output.ToString());
+			await tc.TrySendMessageAsync(output.ToString());
 			await _log.LogToBotLogAsync(logOutput.ToString(), BotLogType.AudioChord);
 		}
 
@@ -137,7 +138,7 @@ namespace Railgun.Core.Managers
 						var url = "https://youtu.be/" + output.Id.SourceId;
 						
 						try {
-							await tc.SendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
+							await tc.TrySendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
 						} catch (ArgumentException ex) {
 							await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
 						} catch (Exception ex) {
@@ -155,7 +156,7 @@ namespace Railgun.Core.Managers
 							playlist.Songs.Add(song.Id);
 
 							await _musicService.Playlist.UpdateAsync(playlist);
-							await tc.SendMessageAsync($"{Format.Bold("Encoded & Installed :")} ({song.Id}) {song.Metadata.Name}");
+							await tc.TrySendMessageAsync($"{Format.Bold("Encoded & Installed :")} ({song.Id}) {song.Metadata.Name}");
 						} catch (ArgumentException ex) {
 							await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
 						} catch (Exception ex) {

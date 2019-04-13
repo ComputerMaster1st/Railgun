@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Containers;
-using Railgun.Core.Logging;
+using Railgun.Core.Enums;
 using TreeDiagram;
 using TreeDiagram.Interfaces;
-using TreeDiagram.Models;
 
 namespace Railgun.Core.Managers
 {
