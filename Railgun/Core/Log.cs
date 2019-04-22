@@ -6,7 +6,6 @@ using Discord;
 using Discord.WebSocket;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
-using Railgun.Core.Extensions;
 using Railgun.Core.Utilities;
 
 namespace Railgun.Core
@@ -57,7 +56,7 @@ namespace Railgun.Core
                     return;
                 }
 
-                await tc.TrySendMessageAsync(Format.Code(output.ToString()) + pingMasterStr);
+                await tc.SendMessageAsync(Format.Code(output.ToString()) + pingMasterStr);
             }
             catch {
                 // ignored

@@ -1,8 +1,6 @@
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using Railgun.Core.Extensions;
 using TreeDiagram;
 using TreeDiagram.Interfaces;
 
@@ -24,7 +22,7 @@ namespace Railgun.Core.Filters
                 .AppendFormat("{0} Deleted {1}'s Message! {2}", Format.Bold("Anti-Url :"), message.Author.Mention, Format.Bold("Reason :"))
                 .AppendFormat("Server Invite");
 
-            return await tc.TrySendMessageAsync(output.ToString());
+            return await tc.SendMessageAsync(output.ToString());
         }
     }
 }

@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Railgun.Core.Commands;
 using Railgun.Core.Commands.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Extensions;
 using Railgun.Core.Managers;
 using Railgun.Core.Utilities;
 
@@ -133,7 +132,7 @@ namespace Railgun.Commands.Root
                 var masterAdmin = await Context.Client.GetUserAsync(_config.DiscordConfig.MasterAdminId);
                 var dm = await masterAdmin.GetOrCreateDMChannelAsync();
                 
-                await dm.TrySendMessageAsync(output.ToString());
+                await dm.SendMessageAsync(output.ToString());
             } catch { await ReplyAsync($"Unable to get invites for server id {Format.Bold(id.ToString())}"); }
         }
         
@@ -157,7 +156,7 @@ namespace Railgun.Commands.Root
                     Format.Bold("WARNING"), string.IsNullOrWhiteSpace(msg) ? Format.Bold("System Restart") : Format.Bold(msg));
                 
                 foreach (var playerInfo in _playerManager.PlayerContainers) {
-                    await playerInfo.TextChannel.TrySendMessageAsync(output.ToString());
+                    await playerInfo.TextChannel.SendMessageAsync(output.ToString());
 
                     playerInfo.Player.CancelStream();
                 }
