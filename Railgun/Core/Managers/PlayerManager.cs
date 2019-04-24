@@ -187,7 +187,9 @@ namespace Railgun.Core.Managers
 		private async Task ConnectedAsync(ConnectedPlayerEventArgs args)
 		{
 			var container = PlayerContainers.First(x => x.GuildId == args.GuildId);
+			await container.Lock.WaitAsync();
 			await CreateOrModifyMusicPlayerLogEntryAsync(container);
+			container.Lock.Release();
 		}
 
 		private async Task PlayingAsync(CurrentSongPlayerEventArgs args)
@@ -196,7 +198,8 @@ namespace Railgun.Core.Managers
 				ServerMusic data;
 				ITextChannel tc;
 				var container = PlayerContainers.First(x => x.GuildId == args.GuildId);
-
+				await container.Lock.WaitAsync();
+				
 				using (var scope = _services.CreateScope()) {
 					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
 				}
@@ -214,17 +217,21 @@ namespace Railgun.Core.Managers
 				}
 
 				await CreateOrModifyMusicPlayerLogEntryAsync(container);
+				container.Lock.Release();
 			} catch {
 				await _log.LogToConsoleAsync(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 				var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
 				container?.Player.CancelStream();
+				container?.Lock.Release();
 			}
 		}
 
 		private async Task TimeoutAsync(TimeoutPlayerEventArgs args)
 		{
-			var tc = PlayerContainers.First(container => container.GuildId == args.GuildId).TextChannel;
+			var container = PlayerContainers.First(c => c.GuildId == args.GuildId);
+			await container.Lock.WaitAsync();
 
+			var tc = container.TextChannel;
 			try {
 				await tc.SendMessageAsync("Connection to Discord Voice has timed out! Please try again.");
 			} catch {
@@ -236,13 +243,15 @@ namespace Railgun.Core.Managers
 
 				await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicPlayerError);
 			}
+
+			container.Lock.Release();
 		}
 
 		private async Task FinishedAsync(FinishedPlayerEventArgs args)
 		{
 			var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == args.GuildId);
-
 			if (container == null) return;
+			await container.Lock.WaitAsync();
 
 			var tc = container.TextChannel;
 
@@ -273,6 +282,8 @@ namespace Railgun.Core.Managers
 				await container.LogEntry.DeleteAsync();
 				await StopPlayerAsync(args.GuildId, args.AutoDisconnected);
 			}
+
+			container.Lock.Release();
 		}
 	}
 }
