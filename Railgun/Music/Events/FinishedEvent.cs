@@ -62,11 +62,10 @@ namespace Railgun.Music.Events
 			} 
             finally 
             {
+			    _container.Lock.Release();
 				await _container.LogEntry.DeleteAsync();
 				await _controller.StopPlayerAsync(args.GuildId, args.AutoDisconnected);
 			}
-
-			_container.Lock.Release();
         }
     }
 }
