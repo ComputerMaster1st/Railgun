@@ -3,20 +3,23 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 
 namespace Railgun.Commands
 {
     [Alias("whois")]
     public class WhoIs : SystemBase
     {
-        private int GetEsperLevel(IGuildUser user) {
+        private int GetEsperLevel(IGuildUser user) 
+        {
             if (Context.Guild.OwnerId == user.Id) return 6;
 
             var score = 0;
 
-            foreach (var perm in user.GuildPermissions.ToList()) {
-                switch (perm) {
+            foreach (var perm in user.GuildPermissions.ToList()) 
+            {
+                switch (perm) 
+                {
                     case GuildPermission.Administrator:
                         return 5;
                     case GuildPermission.ManageChannels:
@@ -65,13 +68,15 @@ namespace Railgun.Commands
         }
 
         [Command]
-        public async Task WhoIsAsync(IUser user) {
+        public async Task WhoIsAsync(IUser user) 
+        {
             var username = $"{user.Username}#{user.DiscriminatorValue}";
             var isHuman = user.IsBot | user.IsWebhook ? "Bot" : "User";
             var guilds = await Context.Client.GetGuildsAsync();
             var locatedOn = 0;
 
-            var embedBuilder = new EmbedBuilder() {
+            var embedBuilder = new EmbedBuilder() 
+            {
                 Title = $"Who is {Format.Bold(username)}?",
                 Color = Color.Blue,
                 ThumbnailUrl = user.GetAvatarUrl(),
@@ -86,7 +91,8 @@ namespace Railgun.Commands
             
             var gUser = await Context.Guild.GetUserAsync(user.Id);
 
-            if (gUser != null) {
+            if (gUser != null) 
+            {
                 var roles = new StringBuilder();
 
                 foreach (var roleId in gUser.RoleIds) roles.AppendFormat("{0} ", Context.Guild.GetRole(roleId).Mention);
@@ -101,10 +107,12 @@ namespace Railgun.Commands
         }
 
         [Command]
-        public async Task WhoIsAsync(ulong userId) {
+        public async Task WhoIsAsync(ulong userId) 
+        {
             var user = await Context.Client.GetUserAsync(userId);
 
-            if (user == null) {
+            if (user == null)
+            {
                 await ReplyAsync("Can not find user.");
                 return;
             }
