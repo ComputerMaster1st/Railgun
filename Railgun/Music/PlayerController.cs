@@ -24,14 +24,13 @@ namespace Railgun.Music
 
         public List<PlayerContainer> PlayerContainers { get; } = new List<PlayerContainer>();
 
-        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, IServiceProvider services)
+        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, IServiceProvider services)
         {
             _config = config;
             _client = client;
             _botLog = botLog;
+			_musicService = musicService;
             _services = services;
-            
-            _musicService = services.GetService<MusicService>();
         }
 
         public async Task CreatePlayerAsync(IGuildUser user, IVoiceChannel vc, ITextChannel tc, bool autoJoin = false, ISong preRequestedSong = null)
