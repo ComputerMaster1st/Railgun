@@ -45,9 +45,27 @@ namespace Railgun.Timers
                 TimerContainers.Clear();
             }
 
+            var newTimers = 0;
+            var expiredTimers = 0;
+
+            using (var scope = _services.CreateScope()) 
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+
+                CreateOrOverrideTimers<AssignRoleTimerContainer>(db.TimerAssignRoles, ref newTimers, ref expiredTimers);
+                CreateOrOverrideTimers<KickUserTimerContainer>(db.TimerKickUsers, ref newTimers, ref expiredTimers);
+                CreateOrOverrideTimers<RemindMeTimerContainer>(db.TimerRemindMes, ref newTimers, ref expiredTimers);
+            }
+
             _masterTimer.Start();
             _initialized = true;
-            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Timers", $"{(_initialized ? "Re-" : "")}Initialized!"));
+            var output = new StringBuilder()
+                .AppendFormat("{0}Initialization Completed!", _initialized ? "Re-" : "").AppendLine()
+                .AppendLine()
+                .AppendFormat("Timers Found & Restarted : {0}", expiredTimers).AppendLine()
+                .AppendFormat("Timers Started           : {0}", newTimers);
+
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Timers", output.ToString()));
         }
 
         public bool CreateAndStartTimer<T>(ITreeTimer data) where T : class, ITimerContainer
@@ -66,8 +84,7 @@ namespace Railgun.Timers
             return true;
         }
 
-        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> dbSet, ref int newTimers, ref int completedTimers,
-            ref int crashedTimers) where TContainer : class, ITimerContainer
+        private void CreateOrOverrideTimers<TContainer>(IEnumerable<ITreeTimer> dbSet, ref int newTimers, ref int expiredTimers) where TContainer : class, ITimerContainer
         {
             foreach (var data in dbSet)
             {
@@ -75,11 +92,9 @@ namespace Railgun.Timers
                 {
                     var container = (TContainer)Activator.CreateInstance(typeof(TContainer), _client, _services, data);
 
-                    container.ExecuteOverrideAsync().GetAwaiter();
-                    
-                    if (container.IsCompleted) completedTimers++;
-                    else if (container.HasCrashed) crashedTimers++;
-
+                    container.StartTimer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+                    TimerContainers.Add(container);
+                    expiredTimers++;
                     continue;
                 }
                 if (CreateAndStartTimer<TContainer>(data)) newTimers++;
