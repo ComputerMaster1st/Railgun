@@ -109,5 +109,28 @@ namespace Railgun.Core
 				});
             }
 		}
+
+		public static async Task<bool> CheckIfSelfIsHigherRole(IGuild guild, IGuildUser user)
+		{
+			var selfRolePosition = 0;
+			var userRolePosition = 0;
+			var self = await guild.GetCurrentUserAsync();
+
+			foreach (var roleId in self.RoleIds)
+			{
+				var role = guild.GetRole(roleId);
+				if (role.Permissions.BanMembers && role.Position > selfRolePosition)
+					selfRolePosition = role.Position;
+			}
+
+			foreach (var roleId in user.RoleIds) 
+			{
+				var role = guild.GetRole(roleId);
+				if (role.Position > userRolePosition) userRolePosition = role.Position;
+			}
+
+			if (selfRolePosition > userRolePosition) return true;
+			else return false;
+		}
     }
 }
