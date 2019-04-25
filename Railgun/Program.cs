@@ -24,8 +24,8 @@ namespace Railgun
 
         private async Task StartAsync()
         {
-            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Booting System..."));
             Directories.CheckDirectories();
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Booting System..."));
 
             _config = MasterConfig.Load();
             _kernel = new Kernel(_config, _client);
