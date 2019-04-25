@@ -70,6 +70,7 @@ namespace Railgun
             
             _botLog = new BotLog(_config, _client);
             _serverCount = new ServerCount(_config, _client);
+            _analytics = new Analytics(_botLog);
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Preparing Dependency Injection..."));
             

@@ -18,6 +18,8 @@ namespace Railgun.Utilities
 
         public Dictionary<string, int> UsedCommands { get; } = new Dictionary<string, int>();
 
+        public Analytics(BotLog botLog) => _botLog = botLog;
+
         public void ExecutedCommand(SystemContext ctx, CommandResult result) {
             var cmdString = result.CommandPath;
             var guild = ctx.Guild;
