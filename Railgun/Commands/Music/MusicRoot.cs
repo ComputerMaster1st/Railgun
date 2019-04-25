@@ -2,10 +2,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Core.Extensions;
+using Railgun.Music;
 
 namespace Railgun.Commands.Music
 {
@@ -14,27 +14,27 @@ namespace Railgun.Commands.Music
         [Alias("root"), BotAdmin]
         public class MusicRoot : SystemBase
         {
-            private readonly PlayerManager _playerManager;
+            private readonly PlayerController _playerController;
 
-            public MusicRoot(PlayerManager playerManager) => _playerManager = playerManager;
+            public MusicRoot(PlayerController playerController) => _playerController = playerController;
             
             [Command("active"), BotPerms(ChannelPermission.AttachFiles)]
             public async Task ActiveAsync() {
-                if (_playerManager.PlayerContainers.Count < 1) {
+                if (_playerController.PlayerContainers.Count < 1) {
                     await ReplyAsync("There are no active music streams at this time.");
 
                     return;
                 }
                 
                 var output = new StringBuilder()
-                    .AppendFormat("Active Music Streams ({0} Total):", _playerManager.PlayerContainers.Count).AppendLine().AppendLine();
+                    .AppendFormat("Active Music Streams ({0} Total):", _playerController.PlayerContainers.Count).AppendLine().AppendLine();
                 
-                foreach (var info in _playerManager.PlayerContainers) {
+                foreach (var info in _playerController.PlayerContainers) {
                     var player = info.Player;
                     var song = player.GetFirstSongRequest();
                     
-                    output.AppendFormat("Id : {0} {1} Spawned At : {2} {1} Status : {3}", info.GuildId, Response.GetSeparator(), player.CreatedAt, player.Status).AppendLine()
-                        .AppendFormat("\\--> Latency : {0}ms {1} Playing : {2} {1} Since : {3}", player.Latency, Response.GetSeparator(), song == null ? "Searching..." : song.Id.ToString(), player.SongStartedAt).AppendLine().AppendLine();
+                    output.AppendFormat("Id : {0} {1} Spawned At : {2} {1} Status : {3}", info.GuildId, SystemUtilities.GetSeparator, player.CreatedAt, player.Status).AppendLine()
+                        .AppendFormat("\\--> Latency : {0}ms {1} Playing : {2} {1} Since : {3}", player.Latency, SystemUtilities.GetSeparator, song == null ? "Searching..." : song.Id.ToString(), player.SongStartedAt).AppendLine().AppendLine();
                 }
                 
                 if (output.Length < 1950) {
@@ -43,12 +43,12 @@ namespace Railgun.Commands.Music
                     return;
                 }
 
-                await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "ActivePlayers.txt", output.ToString(), includeGuildName:false);
+                await ((ITextChannel)Context.Channel).SendStringAsFileAsync("ActivePlayers.txt", output.ToString(), includeGuildName:false);
             }
             
             [Command("kill")]
             public Task KillAsync(ulong id) {
-                _playerManager.DisconnectPlayer(id);
+                _playerController.DisconnectPlayer(id);
 
                 return ReplyAsync($"Sent 'Kill Code' to Player ID {id}.");
             }

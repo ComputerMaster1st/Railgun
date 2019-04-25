@@ -4,9 +4,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Core.Extensions;
+using Railgun.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.SubModels;
 
@@ -169,7 +170,7 @@ namespace Railgun.Commands
 			}
 
 			if (output.Length > 1900)
-				await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "AntiUrl.txt", output.ToString());
+				await (Context.Channel as ITextChannel).SendStringAsFileAsync("AntiUrl.txt", output.ToString());
 			else await ReplyAsync(Format.Code(output.ToString()));
 		}
 

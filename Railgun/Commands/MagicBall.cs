@@ -2,9 +2,8 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 
 namespace Railgun.Commands
 {
@@ -40,7 +39,7 @@ namespace Railgun.Commands
             var index = rand.Next(0, (_responses.Length - 1));
             var output = new StringBuilder()
                 .AppendFormat("{0}8Ball's Response: {1}", string.IsNullOrWhiteSpace(query) ? "" : 
-                    string.Format("Your Question: {0} {1} ", query, Response.GetSeparator()), _responses[index]);
+                    string.Format("Your Question: {0} {1} ", query, SystemUtilities.GetSeparator, _responses[index]));
 
             return ReplyAsync(output.ToString());
         }

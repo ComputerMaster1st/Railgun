@@ -3,10 +3,10 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using MongoDB.Bson;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Managers;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -17,27 +17,27 @@ namespace Railgun.Commands.Music
 		public class MusicReset : SystemBase
 		{
 			private readonly MasterConfig _config;
-			private readonly PlayerManager _playerManager;
+			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 			private bool _full;
 
-			public MusicReset(MasterConfig config, PlayerManager playerManager, MusicService musicService)
+			public MusicReset(MasterConfig config, PlayerController playerController, MusicService musicService)
 			{
 				_config = config;
-				_playerManager = playerManager;
+				_playerController = playerController;
 				_musicService = musicService;
 			}
 
 			[Command("stream")]
 			public async Task StreamAsync()
 			{
-				if (!_playerManager.IsCreated(Context.Guild.Id)) {
+				if (_playerController.GetPlayer(Context.Guild.Id) == null) {
 					if (!_full) await ReplyAsync("I'm not streaming any music at this time.");
 
 					return;
 				}
 
-				_playerManager.DisconnectPlayer(Context.Guild.Id);
+				_playerController.DisconnectPlayer(Context.Guild.Id);
 
 				if (!_full) await ReplyAsync($"Music stream has been reset! Use {Format.Code($"{_config.DiscordConfig.Prefix}music join")} to create a new music stream.");
 			}

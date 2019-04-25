@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
 
@@ -18,55 +18,55 @@ namespace Railgun.Commands.Root
         
             [Command]
             public async Task DefaultAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.Common);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.Common);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Default botlog channel.");
             }
             
             [Command("audiochord")]
             public async Task AudioAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.AudioChord);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.AudioChord);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the AudioChord botlog channel.");
             }
             
             [Command("cmdmngr")]
             public async Task CommandAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.CommandManager);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.CommandManager);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Command Manager botlog channel.");
             }
         
             [Command("guildmngr")]
             public async Task GuildAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.GuildManager);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.GuildManager);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Guild Manager botlog channel.");
             }
             
             [Command("musicmngr")]
             public async Task MusicAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicManager);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.MusicManager);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Manager botlog channel.");
             }
             
             [Command("musicplayer-active")]
             public async Task PlayerActiveAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicPlayerActive);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.MusicPlayerActive);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Player botlog channel.");
             }
             
             [Command("musicplayer-error")]
             public async Task PlayerErrorAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.MusicPlayerError);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.MusicPlayerError);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Music Player botlog channel.");
             }
             
             [Command("tasksch")]
             public async Task TaskAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.TaskScheduler);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.TaskScheduler);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Task Scheduler botlog channel.");
             }
             
             [Command("timermngr")]
             public async Task TimerAsync() {
-                await _config.AssignBotLogChannelAsync(Context.Channel.Id, BotLogType.TimerManager);
+                _config.AssignBotLogChannel(Context.Channel.Id, BotLogType.TimerManager);
                 await ReplyAsync($"This channel {Format.Bold(Context.Channel.Name)} has been set as the Timer Manager botlog channel.");
             }
         }

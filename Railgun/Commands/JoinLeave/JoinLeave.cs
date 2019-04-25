@@ -2,9 +2,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Core.Extensions;
 using TreeDiagram;
 
 namespace Railgun.Commands.JoinLeave
@@ -109,7 +109,7 @@ namespace Railgun.Commands.JoinLeave
 				return;
 			}
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "JoinLeave Notifications.txt", output.ToString());
+			await ((ITextChannel)Context.Channel).SendStringAsFileAsync("JoinLeave Notifications.txt", output.ToString());
 		}
 
 		[Command("reset")]

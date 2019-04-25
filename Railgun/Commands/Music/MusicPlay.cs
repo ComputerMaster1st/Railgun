@@ -6,16 +6,14 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Api.Youtube;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Apis.Youtube;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
 using Railgun.Core.Enums;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
+using Railgun.Music;
 
 namespace Railgun.Commands.Music
 {
@@ -25,18 +23,16 @@ namespace Railgun.Commands.Music
 		public class MusicPlay : SystemBase
 		{
 			private readonly MasterConfig _config;
-			private readonly Log _log;
-			private readonly CommandUtils _commandUtils;
-			private readonly PlayerManager _playerManager;
+			private readonly BotLog _botLog;
+			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 			private bool _playOneTimeOnly;
 
-			public MusicPlay(MasterConfig config, Log log, CommandUtils commandUtils, PlayerManager playerManager, MusicService musicService)
+			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService)
 			{
 				_config = config;
-				_log = log;
-				_commandUtils = commandUtils;
-				_playerManager = playerManager;
+				_botLog = botLog;
+				_playerController = playerController;
 				_musicService = musicService;
 			}
 
@@ -56,7 +52,7 @@ namespace Railgun.Commands.Music
 					.AppendFormat("{0} Queued {1} as requested by {2}. {3}",
 						nowInstalled ? "Installed &" : _playOneTimeOnly ? "One-Time Only &" : "",
 						Format.Bold(song.Metadata.Name),
-						Format.Bold(_commandUtils.GetUsernameOrMention((IGuildUser)Context.Author)),
+						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author)),
 						playerContainer == null ? "Now starting music player..." : "").AppendLine();
 
 				var user = (IGuildUser)Context.Author;
@@ -64,7 +60,7 @@ namespace Railgun.Commands.Music
 
 				if (playerContainer == null) {
 					await response.ModifyAsync(x => x.Content = output.ToString());
-					await _playerManager.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel, preRequestedSong: song);
+					await _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel, preRequestedSong: song);
 
 					return;
 				}
@@ -102,9 +98,9 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				var playerContainer = _playerManager.GetPlayer(Context.Guild.Id);
+				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var playlist = await _commandUtils.GetPlaylistAsync(data);
+				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
 				await Context.Database.SaveChangesAsync();
 
@@ -141,7 +137,7 @@ namespace Railgun.Commands.Music
 						.AppendFormat("<{0} ({1})> Upload From Discord Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine()
 						.AppendLine(ex.ToString());
 
-					await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicManager);
+					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
 
@@ -198,7 +194,7 @@ namespace Railgun.Commands.Music
 					var output = new StringBuilder()
 						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.Message);
 
-					await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicManager);
+					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
 
@@ -215,7 +211,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var search = new YoutubeSearch(_config);
-				var video = await search.GetVideoAsync(input);
+				var video = search.GetVideoAsync(input);
 
 				if (video == null) {
 					await response.ModifyAsync(x => x.Content = "Unable to find anything using that query.");

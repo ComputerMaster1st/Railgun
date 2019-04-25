@@ -1,8 +1,8 @@
 ﻿using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,14 +58,14 @@ namespace Railgun.Commands.Inactivity
             }
 
             var output = new StringBuilder()
-                .AppendFormat("{0} {1} Initializing Inactivity Monitor...", DateTime.Now.ToString("HH:mm:ss"), Response.GetSeparator()).AppendLine();
+                .AppendFormat("{0} {1} Initializing Inactivity Monitor...", DateTime.Now.ToString("HH:mm:ss"), SystemUtilities.GetSeparator).AppendLine();
             var response = await ReplyAsync(Format.Code(output.ToString()));
             var users = await Context.Guild.GetUsersAsync();
             var monitoringUsers = 0;
             var alreadyMonitoring = 0;
 
             output.AppendFormat("{0} {1} {2} Users Found! Preparing Monitor...", DateTime.Now.ToString("HH:mm:ss"), 
-                Response.GetSeparator(), users.Count);
+                SystemUtilities.GetSeparator, users.Count);
             await response.ModifyAsync((x) => x.Content = Format.Code(output.ToString()));
 
             foreach (var user in users)
@@ -99,7 +99,7 @@ namespace Railgun.Commands.Inactivity
             }
 
             output.AppendFormat("{0} {1} Initialization completed!", DateTime.Now.ToString("HH:mm:ss"), 
-                    Response.GetSeparator()).AppendLine()
+                    SystemUtilities.GetSeparator).AppendLine()
                 .AppendLine()
                 .AppendFormat("Monitoring Users   : {0}", monitoringUsers).AppendLine()
                 .AppendFormat("Whitelisted Users  : {0}", users.Count - monitoringUsers).AppendLine()
@@ -139,7 +139,7 @@ namespace Railgun.Commands.Inactivity
                 var activityContainer = data.Users.FirstOrDefault(u => u.UserId == user.Id);
 
                 output.AppendFormat("Username : {0}#{1} {2} ID : {3} {2} Status : {4} {2} Last Active : {5}",
-                    user.Username, user.DiscriminatorValue, Response.GetSeparator(), user.Id, 
+                    user.Username, user.DiscriminatorValue, SystemUtilities.GetSeparator, user.Id, 
                     !user.RoleIds.Contains(data.InactiveRoleId) ? "Active" : "Inactive"
                     , activityContainer != null 
                         ? activityContainer.LastActive.ToString() 
@@ -147,7 +147,7 @@ namespace Railgun.Commands.Inactivity
                     .AppendLine();
             }
 
-            await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Inactivity Report", output.ToString());
+            await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Inactivity Report", output.ToString());
         }
 
         [Command("show")]
@@ -169,7 +169,7 @@ namespace Railgun.Commands.Inactivity
                 {
                     var role = Context.Guild.GetRole(roleId.RoleId);
                     
-                    if (role != null) whitelistedRoles.AppendFormat("{0} {1} ", Response.GetSeparator(), role.Name);
+                    if (role != null) whitelistedRoles.AppendFormat("{0} {1} ", SystemUtilities.GetSeparator, role.Name);
                     else deletedRoles.Add(roleId.RoleId);
                 }
 
@@ -185,7 +185,7 @@ namespace Railgun.Commands.Inactivity
                 {
                     var user = Context.Guild.GetUserAsync(userId.UserId).GetAwaiter().GetResult();
                     
-                    if (user != null) whitelistedUsers.AppendFormat("{0} {1}#{2} ", Response.GetSeparator(), 
+                    if (user != null) whitelistedUsers.AppendFormat("{0} {1}#{2} ", SystemUtilities.GetSeparator, 
                         user.Username, user.DiscriminatorValue);
                     else deletedUsers.Add(userId.UserId);
                 }
