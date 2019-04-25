@@ -37,7 +37,7 @@ namespace Railgun.Events
             _timerController = services.GetService<TimerController>();
         }
 
-        public void Load() => _client.ShardReady += (socketClient) => Task.Factory.StartNew(() => ExecuteAsync(socketClient));
+        public void Load() => _client.ShardReady += (socketClient) => Task.Factory.StartNew(async () => await ExecuteAsync(socketClient));
 
         private async Task ExecuteAsync(DiscordSocketClient sClient)
         {

@@ -18,7 +18,7 @@ namespace Railgun.Events
             _client = client;
         }
 
-        public void Load() => _client.Log += (message) => Task.Factory.StartNew(() => ExecuteAsync(message));
+        public void Load() => _client.Log += (message) => Task.Factory.StartNew(async () => await ExecuteAsync(message));
 
         private Task ExecuteAsync(LogMessage message)
         {

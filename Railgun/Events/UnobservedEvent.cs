@@ -13,7 +13,7 @@ namespace Railgun.Events
 
         public UnobservedEvent(BotLog botLog) => _botLog = botLog;
 
-        public void Load() => TaskScheduler.UnobservedTaskException += (s, e) => Task.Factory.StartNew(() => ExecuteAsync(e));
+        public void Load() => TaskScheduler.UnobservedTaskException += (s, e) => Task.Factory.StartNew(async () => await ExecuteAsync(e));
 
         private Task ExecuteAsync(UnobservedTaskExceptionEventArgs e)
         {

@@ -26,7 +26,7 @@ namespace Railgun.Events
             _services = services;
         }
 
-        public void Load() => _client.UserJoined += (user) => Task.Factory.StartNew(() => ExecuteAsync(user));
+        public void Load() => _client.UserJoined += (user) => Task.Factory.StartNew(async () => await ExecuteAsync(user));
 
         private Task ExecuteAsync(SocketGuildUser user)
         {

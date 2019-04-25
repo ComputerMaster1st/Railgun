@@ -18,8 +18,8 @@ namespace Railgun.Events
         }
 
         public void Load() {
-            _client.MessageReceived += (message) => Task.Factory.StartNew(() => ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (oldMessage, newMessage, channel) => Task.Factory.StartNew(() => ExecuteUpdatedAsync(newMessage));
+            _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
+            _client.MessageUpdated += (oldMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
         }
 
         public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)

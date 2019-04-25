@@ -16,7 +16,7 @@ namespace Railgun.Events
             _analytics = analytics;
         }
 
-        public void Load() => _client.MessageDeleted += (oldMessage, channel) => Task.Factory.StartNew(() => ExecuteAsync());
+        public void Load() => _client.MessageDeleted += (oldMessage, channel) => Task.Factory.StartNew(async () => await ExecuteAsync());
 
         private Task ExecuteAsync()
         {

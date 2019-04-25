@@ -15,7 +15,7 @@ namespace Railgun.Events
             _botLog = botLog;
         }
 
-        public void Load() => _client.JoinedGuild += (guild) => Task.Factory.StartNew(() => ExecuteAsync(guild));
+        public void Load() => _client.JoinedGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
 
         private Task ExecuteAsync(SocketGuild guild)
         {

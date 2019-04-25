@@ -28,7 +28,7 @@ namespace Railgun.Events
             _playerController = services.GetService<PlayerController>();
         }
 
-        public void Load() => _client.LeftGuild += (guild) => Task.Factory.StartNew(() => ExecuteAsync(guild));
+        public void Load() => _client.LeftGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
 
         private Task ExecuteAsync(SocketGuild guild)
         {

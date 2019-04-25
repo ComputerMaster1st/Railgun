@@ -23,7 +23,7 @@ namespace Railgun.Events
             _controller = services.GetService<PlayerController>();
         }
 
-        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(() => ExecuteAsync(user, after));
+        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, after));
 
         private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState after)
         {
