@@ -2,15 +2,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
 using TreeDiagram;
 
 namespace Railgun.Commands
 {
-	[Alias("rst")]
+    [Alias("rst")]
 	public class Rst : SystemBase
 	{
 		private readonly MasterConfig _config;
@@ -22,13 +22,14 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) {
+			if (data == null) 
+			{
 				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-
 				return;
-			} else if (!data.IsEnabled) {
+			} 
+			else if (!data.IsEnabled) 
+			{
 				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
 				return;
 			}
 
@@ -43,17 +44,17 @@ namespace Railgun.Commands
 		[Command("add")]
 		public async Task AddAsync([Remainder] string msg)
 		{
-			if (string.IsNullOrWhiteSpace(msg)) {
+			if (string.IsNullOrWhiteSpace(msg))
+			{
 				await ReplyAsync("Your message was empty. Please add a message to add.");
-
 				return;
 			}
 
 			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
 
-			if (!data.IsEnabled) {
+			if (!data.IsEnabled) 
+			{
 				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
 				return;
 			}
 
@@ -67,17 +68,19 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) {
+			if (data == null) 
+			{
 				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-
 				return;
-			} else if (!data.IsEnabled) {
+			} 
+			else if (!data.IsEnabled) 
+			{
 				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
 				return;
-			} else if (index < 0 || index >= data.Rst.Count) {
+			} 
+			else if (index < 0 || index >= data.Rst.Count) 
+			{
 				await ReplyAsync("The Message Id provided is out of bounds. Please recheck via RST List.");
-
 				return;
 			}
 
@@ -91,13 +94,14 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) {
+			if (data == null) 
+			{
 				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-
 				return;
-			} else if (!data.IsEnabled) {
+			} 
+			else if (!data.IsEnabled) 
+			{
 				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
 				return;
 			}
 
@@ -106,22 +110,20 @@ namespace Railgun.Commands
 
 			data.Rst.ForEach(msg => output.AppendFormat("[{0}] {1}", Format.Code(data.Rst.IndexOf(msg).ToString()), msg).AppendLine());
 
-			if (output.Length < 1950) {
+			if (output.Length < 1950) 
+			{
 				await ReplyAsync(output.ToString());
-
 				return;
 			}
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "RST.txt", output.ToString());
+			await (Context.Channel as ITextChannel).SendStringAsFileAsync("RST.txt", output.ToString());
 		}
 
 		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
 		public async Task AllowDenyAsync()
 		{
 			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
-
 			data.IsEnabled = !data.IsEnabled;
-
 			await ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
 		}
 
@@ -130,9 +132,9 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) {
+			if (data == null) 
+			{
 				await ReplyAsync("RST has no data to reset.");
-
 				return;
 			}
 
