@@ -22,24 +22,7 @@ namespace Railgun.Events
 
         private Task ExecuteAsync(LogMessage message)
         {
-            switch (message.Severity) {
-                case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    break;
-                case LogSeverity.Critical:
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    break;
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                default:
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    break;
-            }
-
+            SystemUtilities.ChangeConsoleColor(message.Severity);
             SystemUtilities.LogToConsoleAndFile(message);
             return Task.CompletedTask;
         }

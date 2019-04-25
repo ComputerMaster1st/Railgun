@@ -26,6 +26,7 @@ namespace Railgun.Core
 
         public static void LogToConsoleAndFile(LogMessage message)
         {
+			ChangeConsoleColor(message.Severity);
             Console.WriteLine(message.ToString());
             WriteToLogFile(Directories.ConsoleLog, message.ToString());
         }
@@ -131,6 +132,27 @@ namespace Railgun.Core
 
 			if (selfRolePosition > userRolePosition) return true;
 			else return false;
+		}
+
+		public static void ChangeConsoleColor(LogSeverity severity)
+		{
+			switch (severity) {
+                case LogSeverity.Info:
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    break;
+                case LogSeverity.Critical:
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    break;
+                case LogSeverity.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogSeverity.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    break;
+            }
 		}
     }
 }
