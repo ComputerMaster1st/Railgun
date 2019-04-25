@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using AudioChord;
 using Discord;
@@ -47,8 +48,7 @@ namespace Railgun
 
         public void Boot()
         {
-            _botLog = new BotLog(_config, _client);
-            _serverCount = new ServerCount(_config, _client);
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Command Service..."));
 
             _commandService = new CommandServiceBuilder<SystemContext>()
                 .AddModules(Assembly.GetEntryAssembly())
@@ -63,8 +63,15 @@ namespace Railgun
                 .AddPipeline<FinalizePipeline>()
                 .BuildCommandService();
 
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", $"Loaded {_commandService.GetAllCommands().Count()} Commands!"));
+
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
+            
+            _botLog = new BotLog(_config, _client);
+            _serverCount = new ServerCount(_config, _client);
+
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Preparing Dependency Injection..."));
             
             _serviceProvider = new ServiceCollection()
                 .AddSingleton(_config)
@@ -94,10 +101,14 @@ namespace Railgun
                 .AddTransient<RandomCat>()
                 .BuildServiceProvider();
 
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
+
             _filterLoader = new FilterLoader(_serviceProvider)
                 .AddMessageFilter<AntiCaps>()
                 .AddMessageFilter<AntiInvite>()
                 .AddMessageFilter<AntiUrl>();
+
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Events..."));
 
             _eventLoader = new EventLoader()
                 .LoadEvent(new ConsoleLogEvent(_config, _client))
