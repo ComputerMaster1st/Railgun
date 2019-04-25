@@ -20,7 +20,7 @@ namespace Railgun.Events
 
         private Task ExecuteAsync()
         {
-            _analytics.UpdatedMessages++;
+            _analytics.DeletedMessages++;
             return Task.CompletedTask;
         }
     }
