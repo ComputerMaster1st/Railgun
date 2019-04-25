@@ -11,7 +11,8 @@ namespace Railgun.Core.Configuration
         public string Database { get; }
 
         [JsonConstructor]
-        public DatabaseConfig(string hostname, string username, string password, string database) {
+        public DatabaseConfig(string hostname, string username, string password, string database)
+        {
             Hostname = hostname;
             Username = username;
             Password = password;

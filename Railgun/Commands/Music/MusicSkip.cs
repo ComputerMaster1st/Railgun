@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -14,20 +13,15 @@ namespace Railgun.Commands.Music
 		[Alias("skip")]
 		public class MusicSkip : SystemBase
 		{
-			private readonly CommandUtils _commandUtils;
-			private readonly PlayerManager _playerManager;
+			private readonly PlayerController _playerController;
 
-			public MusicSkip(CommandUtils commandUtils, PlayerManager playerManager)
-			{
-				_commandUtils = commandUtils;
-				_playerManager = playerManager;
-			}
+			public MusicSkip(PlayerController playerManager) => _playerController = playerManager;
 
 			[Command]
 			public async Task SkipAsync()
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
-				var container = _playerManager.GetPlayer(Context.Guild.Id);
+				var container = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (data == null || container == null) {
 					await ReplyAsync("Can not skip current song because I am not in voice channel.");
@@ -46,7 +40,7 @@ namespace Railgun.Commands.Music
 				var percent = (player.VoteSkipped.Count / userCount) * 100;
 
 				if (percent < data.VoteSkipLimit) {
-					var name = _commandUtils.GetUsernameOrMention((IGuildUser)Context.Author);
+					var name = SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author);
 
 					await ReplyAsync($"{Format.Bold(name)} has voted to skip the current song!");
 
@@ -66,7 +60,7 @@ namespace Railgun.Commands.Music
 			public async Task ForceAsync()
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
-				var container = _playerManager.GetPlayer(Context.Guild.Id);
+				var container = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (data == null || !data.VoteSkipEnabled) {
 					await ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");

@@ -330,6 +330,7 @@ ASALocalRun/
 .mfractor/
 dbconfig.json
 masterconfig.json
-logs
+log_console
+log_bot
 Railgun.pdf
 Published/

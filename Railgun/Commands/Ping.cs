@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 
 namespace Railgun.Commands
 {

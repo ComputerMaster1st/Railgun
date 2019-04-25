@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 
 namespace Railgun.Commands
 {

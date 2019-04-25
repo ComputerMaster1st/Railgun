@@ -4,9 +4,9 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using MongoDB.Bson;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Managers;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -16,12 +16,12 @@ namespace Railgun.Commands.Music
 		[Alias("remove"), UserPerms(GuildPermission.ManageGuild)]
 		public class MusicRemove : SystemBase
 		{
-			private readonly PlayerManager _playerManager;
+			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 
-			public MusicRemove(PlayerManager playerManager, MusicService musicService)
+			public MusicRemove(PlayerController playerController, MusicService musicService)
 			{
-				_playerManager = playerManager;
+				_playerController = playerController;
 				_musicService = musicService;
 			}
 
@@ -66,7 +66,7 @@ namespace Railgun.Commands.Music
 			[Command("current")]
 			public async Task CurrentAsync()
 			{
-				var playerContainer = _playerManager.GetPlayer(Context.Guild.Id);
+				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (playerContainer == null) {
 					await ReplyAsync("Cannot use this command if there's no active music stream at this time.");

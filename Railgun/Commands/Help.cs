@@ -2,7 +2,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 
 namespace Railgun.Commands
 {

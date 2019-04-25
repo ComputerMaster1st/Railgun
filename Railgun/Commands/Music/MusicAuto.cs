@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Managers;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -13,9 +13,9 @@ namespace Railgun.Commands.Music
 		[Alias("auto"), UserPerms(GuildPermission.ManageGuild)]
 		public class MusicAuto : SystemBase
 		{
-			private readonly PlayerManager _playerManager;
+			private readonly PlayerController _playerController;
 
-			public MusicAuto(PlayerManager playerManager) => _playerManager = playerManager;
+			public MusicAuto(PlayerController playerController) => _playerController = playerController;
 
 			[Command("join")]
 			public async Task JoinAsync()
@@ -69,7 +69,7 @@ namespace Railgun.Commands.Music
 
 				data.PlaylistAutoLoop = !data.PlaylistAutoLoop;
 
-				var container = _playerManager.GetPlayer(Context.Guild.Id);
+				var container = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (container != null) container.Player.PlaylistAutoLoop = data.PlaylistAutoLoop;
 

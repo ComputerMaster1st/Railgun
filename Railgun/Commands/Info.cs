@@ -8,10 +8,10 @@ using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
 using Microsoft.EntityFrameworkCore;
-using Railgun.Core.Commands;
+using Railgun.Core;
 using Railgun.Core.Configuration;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Music;
+using Railgun.Utilities;
 
 namespace Railgun.Commands
 {
@@ -22,15 +22,15 @@ namespace Railgun.Commands
         private readonly DiscordShardedClient _client;
         private readonly CommandService<SystemContext> _commandService;
         private readonly MusicService _musicService;
-        private readonly PlayerManager _playerManager;
+        private readonly PlayerController _playerController;
         private readonly Analytics _analytics;
 
-        public Info(MasterConfig config, DiscordShardedClient client, CommandService<SystemContext> commandService, MusicService musicService, PlayerManager playerManager, Analytics analytics) {
+        public Info(MasterConfig config, DiscordShardedClient client, CommandService<SystemContext> commandService, MusicService musicService, PlayerController playerController, Analytics analytics) {
             _config = config;
             _client = client;
             _commandService = commandService;
             _musicService = musicService;
-            _playerManager = playerManager;
+            _playerController = playerController;
             _analytics = analytics;
         }
 
@@ -53,7 +53,7 @@ namespace Railgun.Commands
             var gcOutput = new StringBuilder();
 
             for (var i = 0; i <= GC.MaxGeneration; i++) 
-                gcOutput.AppendFormat("Gen {0} : {1} {2} ", i, GC.CollectionCount(i), Response.GetSeparator());
+                gcOutput.AppendFormat("Gen {0} : {1} {2} ", i, GC.CollectionCount(i), SystemUtilities.GetSeparator);
             
             gcOutput.Remove(gcOutput.Length - 2, 2);
 
@@ -65,7 +65,7 @@ namespace Railgun.Commands
                 .AppendFormat("  Messages Deleted : {0} <{1}> ({2}/sec)", _analytics.DeletedMessages, _analytics.FilterDeletedMessages, Math.Round(_analytics.DeletedMessages / DateTime.Now.Subtract(self.StartTime).TotalSeconds, 4)).AppendLine()
                 .AppendFormat("Commands Available : {0}", installedCommands).AppendLine()
                 .AppendFormat(" Commands Executed : {0}", commandsExecuted).AppendLine()
-                .AppendFormat("     Music Streams : {0}", _playerManager.PlayerContainers.Count).AppendLine()
+                .AppendFormat("     Music Streams : {0}", _playerController.PlayerContainers.Count).AppendLine()
                 .AppendLine()
                 .AppendFormat("    Client Latency : {0}ms", _client.Latency).AppendLine()
                 .AppendFormat("  Connected Shards : {0}", _client.Shards.Count).AppendLine()

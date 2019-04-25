@@ -3,10 +3,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
+using Railgun.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands
@@ -15,13 +16,8 @@ namespace Railgun.Commands
 	public class Bite : SystemBase
 	{
 		private readonly MasterConfig _config;
-		private readonly CommandUtils _commandUtils;
 
-		public Bite(MasterConfig config, CommandUtils commandUtils)
-		{
-			_config = config;
-			_commandUtils = commandUtils;
-		}
+		public Bite(MasterConfig config) =>_config = config;
 
 		[Command]
 		public async Task BiteAsync(IUser user = null)
@@ -78,8 +74,8 @@ namespace Railgun.Commands
 					break;
 			}
 
-			var biterName = _commandUtils.GetUsernameOrMention(biter);
-			var biteeName = _commandUtils.GetUsernameOrMention(bitee);
+			var biterName = SystemUtilities.GetUsernameOrMention(Context.Database, biter);
+			var biteeName = SystemUtilities.GetUsernameOrMention(Context.Database, bitee);
 
 			var biteMessage = data.GetBite().Replace("<biter>", Format.Bold(biterName)).Replace("<bitee>", Format.Bold(biteeName));
 
@@ -138,7 +134,7 @@ namespace Railgun.Commands
 				return;
 			}
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Bites.txt", output.ToString(),
+			await (Context.Channel as ITextChannel).SendStringAsFileAsync("Bites.txt", output.ToString(),
 				$"List of {Format.Bold(data.Bites.Count.ToString())} Bite Sentences");
 		}
 

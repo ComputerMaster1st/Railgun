@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using System.Linq;
 using System.Threading.Tasks;
 using TreeDiagram;

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
+using Railgun.Core;
 using TreeDiagram;
 using TreeDiagram.Enums;
 

@@ -1,29 +1,42 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core;
 using Railgun.Core.Configuration;
 
-namespace Railgun {
-
-    class Program 
+namespace Railgun
+{
+    class Program
     {
-        public static void Main(string[] args)
-            => new Program().StartAsync().GetAwaiter().GetResult();
-
-        private async Task StartAsync() {
-            var masterConfig = await MasterConfig.LoadAsync();
-            var client = new DiscordShardedClient(new DiscordSocketConfig() {
+        private MasterConfig _config = null;
+        private DiscordShardedClient _client = new DiscordShardedClient(
+            new DiscordSocketConfig()
+            {
                 LogLevel = LogSeverity.Info,
                 DefaultRetryMode = RetryMode.AlwaysRetry
-            });
-            var initializer = new Initializer(masterConfig, client);
+            }
+        );
 
-            await initializer.InitializeAsync();
-            await client.LoginAsync(TokenType.Bot, masterConfig.DiscordConfig.Token);
-            await client.StartAsync();
-            await client.SetStatusAsync(UserStatus.Idle);
-            await client.SetGameAsync("Booting System...");
+        private Kernel _kernel = null;
+
+        static void Main(string[] args) => new Program().StartAsync().GetAwaiter().GetResult();
+
+        private async Task StartAsync()
+        {
+            Directories.CheckDirectories();
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Booting System..."));
+
+            _config = MasterConfig.Load();
+            _kernel = new Kernel(_config, _client);
+            _kernel.Boot();
+
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "System Booted!"));
+
+            await _client.LoginAsync(TokenType.Bot, _config.DiscordConfig.Token);
+            await _client.StartAsync();
+            await _client.SetStatusAsync(UserStatus.Idle);
+            await _client.SetGameAsync("Booting System...");
 
             await Task.Delay(-1);
         }

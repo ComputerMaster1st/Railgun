@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
+using Railgun.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Server
@@ -17,14 +17,9 @@ namespace Railgun.Commands.Server
     [Alias("server")]
 	public partial class Server : SystemBase
 	{
-		private readonly Log _log;
-		private readonly CommandUtils _commandUtils;
+		private readonly BotLog _botLog;
 
-		public Server(Log log, CommandUtils commandUtils)
-		{
-			_log = log;
-			_commandUtils = commandUtils;
-		}
+		public Server(BotLog botLog) => _botLog = botLog;
 
 		[Command("leave"), UserPerms(GuildPermission.ManageGuild)]
 		public async Task LeaveAsync()
@@ -66,7 +61,7 @@ namespace Railgun.Commands.Server
 		[Command("kick"), UserPerms(GuildPermission.KickMembers), BotPerms(GuildPermission.KickMembers)]
 		public async Task KickAsync(IGuildUser user, [Remainder] string reason = "No Reason Specified")
 		{
-			if (!await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user)) {
+			if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, user)) {
 				await ReplyAsync($"Unable to kick {user.Username} as my role isn't high enough.");
 
 				return;
@@ -76,9 +71,9 @@ namespace Railgun.Commands.Server
 			await ReplyAsync($"{Format.Bold(user.Username)} has been kicked from the server. Reason: {Format.Bold(reason)}");
 
 			var output = new StringBuilder()
-				.AppendFormat("User Kicked {0} <{1} ({2})> {3}#{4}", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
+				.AppendFormat("User Kicked {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
 
-			await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
+			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
 
 		[Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
@@ -86,7 +81,7 @@ namespace Railgun.Commands.Server
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (!await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, user)) {
+			if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, user)) {
 				await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.");
 
 				return;
@@ -100,9 +95,9 @@ namespace Railgun.Commands.Server
 			await ReplyAsync($"{Format.Bold(user.Username)} has been banned from the server. Reason: {Format.Bold(reason)}");
 
 			var output = new StringBuilder()
-				.AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
+				.AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
 
-			await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
+			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
 
 		[Command("unban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
@@ -110,7 +105,7 @@ namespace Railgun.Commands.Server
 		{
 			await Context.Guild.RemoveBanAsync(user);
 			await ReplyAsync($"User ID {Format.Bold(user.ToString())} is now unbanned from the server.");
-			await _log.LogToBotLogAsync($"User Unbanned {Response.GetSeparator()} <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}", BotLogType.Common);
+			await _botLog.SendBotLogAsync(BotLogType.Common, $"User Unbanned {SystemUtilities.GetSeparator} <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}");
 		}
 
 		[Command("banlist"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)]
@@ -132,7 +127,7 @@ namespace Railgun.Commands.Server
 				return;
 			}
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Banlist.txt", output.ToString(), "Ban List");
+			await (Context.Channel as ITextChannel).SendStringAsFileAsync("Banlist.txt", output.ToString(), "Ban List");
 		}
 	}
 }

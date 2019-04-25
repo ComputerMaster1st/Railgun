@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
@@ -17,19 +16,13 @@ namespace Railgun.Commands
     [Alias("warn")]
 	public class Warning : SystemBase
 	{
-		private readonly Log _log;
-		private readonly CommandUtils _commandUtils;
+		private readonly BotLog _botLog;
 
-		public Warning(Log log, CommandUtils commandUtils)
-		{
-			_log = log;
-			_commandUtils = commandUtils;
-		}
-
+		public Warning(BotLog botLog) =>_botLog = botLog;
+		
 		private Task WarnUserAsync(ServerWarning data, IUser user, string reason)
 		{
 			data.AddWarning(user.Id, reason);
-
 			return ReplyAsync($"{user.Mention} has received a warning! Reason: {Format.Bold(reason)}");
 		}
 
@@ -39,43 +32,46 @@ namespace Railgun.Commands
 		[Command, UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
 		public async Task WarnAsync(IGuildUser user, [Remainder] string reason)
 		{
-			if (user.Id == Context.Client.CurrentUser.Id) {
+			if (user.Id == Context.Client.CurrentUser.Id) 
+			{
 				await ReplyAsync("You can not warn me. Just No. Baka.");
-
 				return;
 			}
 
 			var data = Context.Database.ServerWarnings.GetOrCreateData(Context.Guild.Id);
 			var userWarnings = data.GetWarnings(user.Id);
 
-			if (data.WarnLimit < 1) {
+			if (data.WarnLimit < 1) 
+			{
 				await ReplyAsync("User Warnings are currently disabled. You can enable it by changing the warning limit.");
-
 				return;
-			} else if (!await _commandUtils.CheckIfSelfIsHigherRole(Context.Guild, (IGuildUser)user)) {
+			} 
+			else if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, (IGuildUser)user)) 
+			{
 				await ReplyAsync($"Unable to warn {user.Username} as my role isn't high enough to auto-ban the user.");
-
 				return;
-			} else if (userWarnings == null || userWarnings.Count < data.WarnLimit) {
+			} 
+			else if (userWarnings == null || userWarnings.Count < data.WarnLimit) 
+			{
 				await WarnUserAsync(data, user, reason);
-
 				return;
 			}
 
-			try {
+			try 
+			{
 				await Context.Guild.AddBanAsync(user, 7, reason);
 
 				data.ResetWarnings(user.Id);
 
 				await ReplyAsync($"{Format.Bold(user.Username)} has been Auto-Banned from the server. Reason: {Format.Bold($"{reason} & Too many warnings!")}");
-				await _log.LogToBotLogAsync($"Auto Ban {Response.GetSeparator()} <{Context.Guild.Name} ({Context.Guild.Id})> Successful! {user.Username}#{user.DiscriminatorValue}", BotLogType.Common);
+				await _botLog.SendBotLogAsync(BotLogType.Common, $"Auto Ban {SystemUtilities.GetSeparator} <{Context.Guild.Name} ({Context.Guild.Id})> Successful! {user.Username}#{user.DiscriminatorValue}");
 			} catch (Exception e) {
 				await ReplyAsync("Unable to auto-ban user! Please be sure that I'm higher up on the role list.");
 
 				var output = new StringBuilder()
-					.AppendFormat("Auto Ban {0} <{1} ({2})> Failure!", Response.GetSeparator(), Context.Guild.Name, Context.Guild.Id).AppendLine().AppendFormat("---- Reason : {0}", e.Message);
+					.AppendFormat("Auto Ban {0} <{1} ({2})> Failure!", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id).AppendLine().AppendFormat("---- Reason : {0}", e.Message);
 
-				await _log.LogToBotLogAsync(output.ToString(), BotLogType.Common);
+				await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 			}
 		}
 
@@ -84,9 +80,9 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) {
+			if (data == null || data.Warnings.Count < 1) 
+			{
 				await ReplyAsync("There are currently no users with warnings.");
-
 				return;
 			}
 
@@ -94,12 +90,13 @@ namespace Railgun.Commands
 			var output = new StringBuilder()
 				.AppendFormat("There are currently {0} user(s) with warnings for...", Format.Bold(data.Warnings.Count.ToString())).AppendLine().AppendLine();
 
-			foreach (var warning in data.Warnings) {
+			foreach (var warning in data.Warnings) 
+			{
 				var user = await Context.Guild.GetUserAsync(warning.UserId);
 
-				if (user == null) {
+				if (user == null) 
+				{
 					unknownUsers.Add(warning.UserId);
-
 					continue;
 				}
 
@@ -110,15 +107,16 @@ namespace Railgun.Commands
 				output.AppendLine();
 			}
 
-			if (unknownUsers.Count > 0) {
+			if (unknownUsers.Count > 0) 
+			{
 				unknownUsers.ForEach(data.ResetWarnings);
 
 				output.AppendFormat("Detected {0} unknown user(s)! These user(s) have been automatically removed from the list.", unknownUsers.Count).AppendLine();
 			}
 
-			if (output.Length > 1950) {
-				await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Warnings.txt", output.ToString());
-
+			if (output.Length > 1950) 
+			{
+				await (Context.Channel as ITextChannel).SendStringAsFileAsync("Warnings.txt", output.ToString());
 				return;
 			}
 
@@ -130,17 +128,17 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) {
+			if (data == null || data.Warnings.Count < 1) 
+			{
 				await ReplyAsync("There are currently no users with warnings.");
-
 				return;
 			}
 
 			var warnings = data.GetWarnings(Context.Author.Id);
 
-			if (warnings == null || warnings.Count < 1) {
+			if (warnings == null || warnings.Count < 1) 
+			{
 				await ReplyAsync("You have no warnings to your name.");
-
 				return;
 			}
 
@@ -157,17 +155,17 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) {
+			if (data == null || data.Warnings.Count < 1) 
+			{
 				await ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
-
 				return;
 			}
 
 			var warnings = data.GetWarnings(user.Id);
 
-			if (warnings == null || warnings.Count < 1) {
+			if (warnings == null || warnings.Count < 1)
+			{
 				await ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
-
 				return;
 			}
 
@@ -181,9 +179,9 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) {
+			if (data == null || data.Warnings.Count < 1) 
+			{
 				await ReplyAsync("Warnings list is already empty.");
-
 				return;
 			}
 
@@ -197,18 +195,21 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetOrCreateData(Context.Guild.Id);
 
-			if (limit < 0) {
+			if (limit < 0) 
+			{
 				await ReplyAsync("The limit entered is invalid. Must be 0 or higher.");
-
 				return;
 			}
 
 			string message;
 
-			if (limit > 0) {
+			if (limit > 0) 
+			{
 				message = $"Auto-Ban{(data.WarnLimit == 0 ? " is now enabled and the" : "")} warning limit is now set to {Format.Bold(limit.ToString())}. You can disable warnings by changing the limit to 0.";
 				data.WarnLimit = limit;
-			} else {
+			} 
+			else 
+			{
 				data.WarnLimit = limit;
 				message = "Auto-Ban has been disabled.";
 			}
@@ -221,9 +222,9 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null) {
+			if (data == null) 
+			{
 				await ReplyAsync("Warnings has no data to reset.");
-
 				return;
 			}
 

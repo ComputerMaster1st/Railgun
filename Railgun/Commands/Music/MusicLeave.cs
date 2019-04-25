@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Managers;
+using Railgun.Core;
+using Railgun.Music;
 
 namespace Railgun.Commands.Music
 {
@@ -10,13 +10,13 @@ namespace Railgun.Commands.Music
         [Alias("leave")]
         public class MusicLeave : SystemBase
         {
-            private readonly PlayerManager _playerManager;
+            private readonly PlayerController _playerController;
             
-            public MusicLeave(PlayerManager playerManager) => _playerManager = playerManager;
+            public MusicLeave(PlayerController playerController) => _playerController = playerController;
             
             [Command]
             public async Task LeaveAsync() {
-                if (!_playerManager.IsCreated(Context.Guild.Id)) {
+                if (_playerController.GetPlayer(Context.Guild.Id) == null) {
                     await ReplyAsync("I'm not streaming any music at this time.");
 
                     return;
@@ -24,12 +24,12 @@ namespace Railgun.Commands.Music
             
                 await ReplyAsync("Stopping Music Stream...");
 
-                _playerManager.DisconnectPlayer(Context.Guild.Id);
+                _playerController.DisconnectPlayer(Context.Guild.Id);
             }
             
             [Command("aftersong")]
             public async Task LeaveAfterSongAsync() {
-                var container = _playerManager.GetPlayer(Context.Guild.Id);
+                var container = _playerController.GetPlayer(Context.Guild.Id);
                 
                 if (container == null) {
                     await ReplyAsync("I'm not streaming any music at this time.");

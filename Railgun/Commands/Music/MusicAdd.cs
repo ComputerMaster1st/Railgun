@@ -6,10 +6,8 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
-using Railgun.Core.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -19,14 +17,12 @@ namespace Railgun.Commands.Music
 		[Alias("add")]
 		public partial class MusicAdd : SystemBase
 		{
-			private readonly Log _log;
-			private readonly CommandUtils _commandUtils;
+			private readonly BotLog _botLog;
 			private readonly MusicService _musicService;
 
-			public MusicAdd(Log log, CommandUtils commandUtils, MusicService musicService)
+			public MusicAdd(BotLog log, MusicService musicService)
 			{
-				_log = log;
-				_commandUtils = commandUtils;
+				_botLog = log;
 				_musicService = musicService;
 			}
 
@@ -40,7 +36,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var playlist = await _commandUtils.GetPlaylistAsync(data);
+				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				var response = await ReplyAsync("Processing Attachment! Standby...");
 				var attachment = Context.Message.Attachments.FirstOrDefault();
 
@@ -55,7 +51,7 @@ namespace Railgun.Commands.Music
 					playlist.Songs.Add(song.Id);
 
 					await _musicService.Playlist.UpdateAsync(playlist);
-					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} {Response.GetSeparator()} ID : {Format.Bold(song.Id.ToString())}");
+					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} {SystemUtilities.GetSeparator} ID : {Format.Bold(song.Id.ToString())}");
 				} catch (Exception ex) {
 					await response.ModifyAsync(c => c.Content = $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}");
 
@@ -63,7 +59,7 @@ namespace Railgun.Commands.Music
 						.AppendFormat("<{0} ({1})> Upload From Discord Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine()
 						.AppendLine(ex.ToString());
 
-					await _log.LogToBotLogAsync(output.ToString(), BotLogType.MusicManager);
+					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
 
@@ -71,7 +67,7 @@ namespace Railgun.Commands.Music
 			public async Task ImportRepoAsync()
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var playlist = await _commandUtils.GetPlaylistAsync(data);
+				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				var repo = (await _musicService.GetAllSongsAsync()).ToList();
 				var existingSongs = 0;
 
@@ -81,7 +77,7 @@ namespace Railgun.Commands.Music
 				}
 
 				await _musicService.Playlist.UpdateAsync(playlist);
-				await ReplyAsync($"Processing Completed! {Response.GetSeparator()} Accepted : {Format.Bold((repo.Count() - existingSongs).ToString())} {Response.GetSeparator()} Already Installed : {Format.Bold(existingSongs.ToString())}");
+				await ReplyAsync($"Processing Completed! {SystemUtilities.GetSeparator} Accepted : {Format.Bold((repo.Count() - existingSongs).ToString())} {SystemUtilities.GetSeparator} Already Installed : {Format.Bold(existingSongs.ToString())}");
 			}
 		}
 	}

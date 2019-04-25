@@ -3,10 +3,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Core;
+using Railgun.Core.Attributes;
+using Railgun.Music;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
@@ -17,9 +16,9 @@ namespace Railgun.Commands.Music
 		[Alias("np")]
 		public class MusicNp : SystemBase
 		{
-			private readonly PlayerManager _playerManager;
+			private readonly PlayerController _playerController;
 
-			public MusicNp(PlayerManager playerManager) => _playerManager = playerManager;
+			public MusicNp(PlayerController playerController) => _playerController = playerController;
 
 			private Task SetNpChannelAsync(ServerMusic data, ITextChannel tc, bool locked = false)
 			{
@@ -31,7 +30,7 @@ namespace Railgun.Commands.Music
 			[Command]
 			public Task NowPlayingAsync()
 			{
-				var container = _playerManager.GetPlayer(Context.Guild.Id);
+				var container = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (container == null) return ReplyAsync("I'm not playing anything at this time.");
 
@@ -41,7 +40,7 @@ namespace Railgun.Commands.Music
 				var output = new StringBuilder()
 					.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine()
 					.AppendFormat("Url: {0} {1} Length: {2}/{3}", Format.Bold($"<{meta.Url}>"),
-								  Response.GetSeparator(),
+								  SystemUtilities.GetSeparator,
 								  Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
 								  Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"));
 

@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Railgun.Core.Api;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Apis.RandomCat;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 
 namespace Railgun.Commands
 {
@@ -16,6 +16,6 @@ namespace Railgun.Commands
         
         [Command, BotPerms(ChannelPermission.AttachFiles)]
         public async Task CatAsync() 
-            => await Context.Channel.SendFileAsync(await _randomCat.GetRandomCatAsync(), "CatImg.png");
+            => await Context.Channel.SendFileAsync(_randomCat.GetRandomCatAsync(), "CatImg.png");
     }
 }

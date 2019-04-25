@@ -7,12 +7,12 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using MongoDB.Bson;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -21,20 +21,20 @@ namespace Railgun.Commands.Music
 	public partial class Music : SystemBase
 	{
 		private readonly MasterConfig _config;
-		private readonly PlayerManager _playerManager;
+		private readonly PlayerController _playerController;
 		private readonly MusicService _musicService;
 
-		public Music(MasterConfig config, PlayerManager playerManager, MusicService musicService)
+		public Music(MasterConfig config, PlayerController playerController, MusicService musicService)
 		{
 			_config = config;
-			_playerManager = playerManager;
+			_playerController = playerController;
 			_musicService = musicService;
 		}
 
 		[Command("join"), BotPerms(GuildPermission.Connect | GuildPermission.Speak)]
 		public async Task JoinAsync()
 		{
-			if (_playerManager.IsCreated(Context.Guild.Id)) {
+			if (_playerController.GetPlayer(Context.Guild.Id) != null) {
 				await ReplyAsync($"Sorry, I'm already in a voice channel. If you're experiencing problems, please do {Format.Code($"{_config.DiscordConfig.Prefix}music reset stream.")}");
 
 				return;
@@ -49,7 +49,7 @@ namespace Railgun.Commands.Music
 				return;
 			}
 
-			await _playerManager.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel);
+			await _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel);
 		}
 
 		[Command("playlist"), BotPerms(ChannelPermission.AttachFiles)]
@@ -102,14 +102,14 @@ namespace Railgun.Commands.Music
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Playlist.txt", output.ToString(), $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)");
+			await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Playlist.txt", output.ToString(), $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)");
 			await response.DeleteAsync();
 		}
 
 		[Command("repeat")]
 		public async Task RepeatAsync(int count = 1)
 		{
-			var container = _playerManager.GetPlayer(Context.Guild.Id);
+			var container = _playerController.GetPlayer(Context.Guild.Id);
 
 			if (container == null) {
 				await ReplyAsync("I'm not playing anything at this time.");
@@ -144,14 +144,14 @@ namespace Railgun.Commands.Music
 
 			output.AppendLine("End of Repository.");
 
-			await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "MusicRepo.txt", output.ToString(), $"Music Repository ({repo.Count()} songs)", includeGuildName: false);
+			await ((ITextChannel)Context.Channel).SendStringAsFileAsync("MusicRepo.txt", output.ToString(), $"Music Repository ({repo.Count()} songs)", includeGuildName: false);
 			await response.DeleteAsync();
 		}
 
 		[Command("ping")]
 		public Task PingAsync()
 		{
-			var container = _playerManager.GetPlayer(Context.Guild.Id);
+			var container = _playerController.GetPlayer(Context.Guild.Id);
 
 			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
 		}
@@ -159,7 +159,7 @@ namespace Railgun.Commands.Music
 		[Command("queue"), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task QueueAsync()
 		{
-			var playerContainer = _playerManager.GetPlayer(Context.Guild.Id);
+			var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
 
 			if (playerContainer == null) {
 				await ReplyAsync("I'm not playing anything at this time.");
@@ -190,7 +190,7 @@ namespace Railgun.Commands.Music
 
 						output.AppendFormat("Now : {0} {1} Length : {2}/{3}",
 											Format.Bold(meta.Name),
-											Response.GetSeparator(),
+											SystemUtilities.GetSeparator,
 											Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
 											Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"))
 							.AppendLine();
@@ -198,14 +198,14 @@ namespace Railgun.Commands.Music
 					case 1:
 						output.AppendFormat("Next : {0} {1} Length : {2}",
 											Format.Bold(meta.Name),
-											Response.GetSeparator(),
+											SystemUtilities.GetSeparator,
 											Format.Bold(meta.Length.ToString()));
 						break;
 					default:
 						output.AppendFormat("{0} : {1} {2} Length : {3}",
 											Format.Code($"[{i}]"),
 											Format.Bold(meta.Name),
-											Response.GetSeparator(),
+											SystemUtilities.GetSeparator,
 											Format.Bold(meta.Length.ToString()));
 						break;
 				}
@@ -215,7 +215,7 @@ namespace Railgun.Commands.Music
 			}
 
 			if (output.Length > 1950) {
-				await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
+				await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
 
 				return;
 			}

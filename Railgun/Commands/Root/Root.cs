@@ -8,11 +8,13 @@ using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Railgun.Core.Commands;
-using Railgun.Core.Commands.Attributes;
+using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Managers;
-using Railgun.Core.Utilities;
+using Railgun.Core.Extensions;
+using Railgun.Music;
+using Railgun.Timers;
+using Railgun.Utilities;
 
 namespace Railgun.Commands.Root
 {
@@ -21,14 +23,14 @@ namespace Railgun.Commands.Root
     {
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
-        private readonly PlayerManager _playerManager;
-        private readonly TimerManager _timerManager;
+        private readonly PlayerController _playerController;
+        private readonly TimerController _timerManager;
 
-        public Root(MasterConfig config, DiscordShardedClient client, PlayerManager playerManager, TimerManager timerManager) {
+        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController) {
             _config = config;
             _client = client;
-            _playerManager = playerManager;
-            _timerManager = timerManager;
+            _playerController = playerController;
+            _timerManager = timerController;
         }
         
         [Command("show")]
@@ -97,7 +99,7 @@ namespace Railgun.Commands.Root
         
         [Command("master")]
         public async Task MasterAsync() {
-            await _config.AssignMasterGuildAsync(Context.Guild.Id);
+            _config.AssignMasterGuild(Context.Guild.Id);
             await ReplyAsync($"This server {Format.Bold(Context.Guild.Name)} has been set as master.");
         }
         
@@ -109,12 +111,12 @@ namespace Railgun.Commands.Root
             
             foreach (var guild in guilds) output.AppendFormat("{0} : {1}", guild.Id, guild.Name).AppendLine();
             
-            await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
+            await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
         }
         
         [Command("updatestatus")]
         public async Task UpdateStatusAsync() {
-            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {Response.GetSeparator()} On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
             await ReplyAsync("Playing Status has been updated!");
         }
         
@@ -150,19 +152,19 @@ namespace Railgun.Commands.Root
             await _client.SetGameAsync("Shutting Down ...");
             await ReplyAsync("Disconnecting ...");
             
-            if (_playerManager.PlayerContainers.Count > 0) {
+            if (_playerController.PlayerContainers.Count > 0) {
                 var output = new StringBuilder()
                     .AppendFormat("{0} : Stopping music stream due to the following reason... {1}", 
                     Format.Bold("WARNING"), string.IsNullOrWhiteSpace(msg) ? Format.Bold("System Restart") : Format.Bold(msg));
                 
-                foreach (var playerInfo in _playerManager.PlayerContainers) {
+                foreach (var playerInfo in _playerController.PlayerContainers) {
                     await playerInfo.TextChannel.SendMessageAsync(output.ToString());
 
                     playerInfo.Player.CancelStream();
                 }
             }
             
-            while (_playerManager.PlayerContainers.Count > 0) await Task.Delay(1000);
+            while (_playerController.PlayerContainers.Count > 0) await Task.Delay(1000);
             
             await _client.StopAsync();
             await _client.LogoutAsync();
@@ -176,7 +178,7 @@ namespace Railgun.Commands.Root
                 return;
             }
             
-            await _config.AssignPrefixAsync(input);
+            _config.AssignPrefix(input);
             await UpdateStatusAsync();
             await ReplyAsync($"Prefix {Format.Code($"{_config.DiscordConfig.Prefix}<command>")} is now set.");
         }
@@ -190,7 +192,7 @@ namespace Railgun.Commands.Root
             catch (Exception ex) { output = ex.Message; }
             
             if (output.Length > 1900) {
-                await CommandUtils.SendStringAsFileAsync((ITextChannel)Context.Channel, "evalresult.txt", output, "Evaluation Results!", false);
+                await ((ITextChannel)Context.Channel).SendStringAsFileAsync("evalresult.txt", output, "Evaluation Results!", false);
 
                 return;
             }
@@ -252,7 +254,7 @@ namespace Railgun.Commands.Root
                 .AppendLine();
 
             foreach (var remoteUser in remoteUsers) {
-                output.AppendFormat("{0}#{1} {2} ", remoteUser.Username, remoteUser.DiscriminatorValue, Response.GetSeparator());
+                output.AppendFormat("{0}#{1} {2} ", remoteUser.Username, remoteUser.DiscriminatorValue, SystemUtilities.GetSeparator);
             }
 
             output.Remove(output.Length - 3, 3);
