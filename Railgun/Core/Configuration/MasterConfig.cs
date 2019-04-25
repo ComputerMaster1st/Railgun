@@ -20,7 +20,8 @@ namespace Railgun.Core.Configuration
         public string RandomCatApiToken { get; }
 
         [JsonConstructor]
-        public MasterConfig(DiscordConfig discordConfig, DatabaseConfig postgresql, DatabaseConfig mongodb, string googleApiToken, string randomCatApiKey) {
+        public MasterConfig(DiscordConfig discordConfig, DatabaseConfig postgresql, DatabaseConfig mongodb, string googleApiToken, string randomCatApiKey)
+        {
             DiscordConfig = discordConfig;
             PostgreSqlConfig = postgresql;
             MongoDbConfig = mongodb;
@@ -28,29 +29,27 @@ namespace Railgun.Core.Configuration
             RandomCatApiToken = randomCatApiKey;
         }
 
-        private static string SetupInput(string query) {
+        private static string SetupInput(string query)
+        {
             Console.Write(query);
-
             return Console.ReadLine();
         }
 
-        private static string SetupInput(string query, string defaultTo) {
+        private static string SetupInput(string query, string defaultTo)
+        {
             Console.Write(query);
-
             var output = Console.ReadLine();
-
             return string.IsNullOrWhiteSpace(output) ? defaultTo: output;
         }
 
-        public static async Task<MasterConfig> LoadAsync() {
-            if (!File.Exists(Filename)) return await SetupAsync();
-
-            var json = await File.ReadAllTextAsync(Filename);
-
-            return JsonConvert.DeserializeObject<MasterConfig>(json);
+        public static MasterConfig Load() 
+        {
+            if (!File.Exists(Filename)) return Setup();
+            return JsonConvert.DeserializeObject<MasterConfig>(File.ReadAllText(Filename));
         }
 
-        private static async Task<MasterConfig> SetupAsync() {
+        private static MasterConfig Setup()
+        {
             var token = SetupInput("Discord || Token: ");
             var prefix = SetupInput("Discord || Prefix [!]: ", "!");
             var masterAdminId = ulong.Parse(SetupInput("Discord || Master Admin ID: "));
@@ -71,46 +70,43 @@ namespace Railgun.Core.Configuration
             var randomCatApiKey = SetupInput("Other || RandomCat API Key: ");
 
             var masterConfig = new MasterConfig(discordConfig, postgresqlConfig, mongodbConfig, googleApiKey, randomCatApiKey);
-
-            await masterConfig.SaveAsync();
+            masterConfig.Save();
 
             return masterConfig;
         }
 
-        private Task SaveAsync()
-            => File.WriteAllTextAsync(Filename, JsonConvert.SerializeObject(this, Formatting.Indented));
+        private void Save()
+            => File.WriteAllText(Filename, JsonConvert.SerializeObject(this, Formatting.Indented));
         
-        public Task AssignMasterGuildAsync(ulong guildId) {
+        public void AssignMasterGuild(ulong guildId)
+        {
             DiscordConfig.AssignMasterGuild(guildId);
-
-            return SaveAsync();
+            Save();
         }
 
-        public Task AssignBotLogChannelAsync(ulong channelId, BotLogType logType) {
+        public void AssignBotLogChannel(ulong channelId, BotLogType logType)
+        {
             DiscordConfig.AssignBotLogChannel(channelId, logType);
-
-            return SaveAsync();
+            Save();
         }
 
-        public async Task AssignPrefixAsync(string prefix) {
+        public void AssignPrefix(string prefix)
+        {
             DiscordConfig.Prefix = prefix;
-
-            await SaveAsync();
+            Save();
         }
 
-        public async Task<bool> AssignAdminAsync(ulong userId) {
+        public bool AssignAdmin(ulong userId)
+        {
             if (!DiscordConfig.AssignAdmin(userId)) return false;
-
-            await SaveAsync();
-
+            Save();
             return true;
         }
 
-        public async Task<bool> RemoveAdminAsync(ulong userId) {
+        public bool RemoveAdmin(ulong userId)
+        {
             if (!DiscordConfig.RemoveAdmin(userId)) return false;
-
-            await SaveAsync();
-
+            Save();
             return true;
         }
     }
