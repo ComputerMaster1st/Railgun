@@ -202,7 +202,7 @@ namespace Railgun.Commands.Root
         
         [Command("timer-restart")]
         public async Task TimerRestartAsync() {
-            await _timerManager.InitializeAsync();
+            _timerManager.Initialize();
             await ReplyAsync("Timer Manager Restarted!");
         }
         

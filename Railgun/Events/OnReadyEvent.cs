@@ -50,7 +50,7 @@ namespace Railgun.Events
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}",
 				$"Shard {(_shardsReady[sClient.ShardId] ? "Re-" : "")}Connected! ({sClient.Guilds.Count} Servers)"));
 
-			await _timerController.InitializeAsync();
+			_timerController.Initialize();
 			_inactivityController.Initialize();
 
 			if (_initialized) return;

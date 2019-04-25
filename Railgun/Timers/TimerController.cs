@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Timers.Containers;
 using TreeDiagram;
@@ -33,9 +34,9 @@ namespace Railgun.Timers
             _masterTimer.AutoReset = true;
         }
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
-            await _botLog.SendBotLogAsync(BotLogType.TimerManager, $"{(_initialized ? "Re-" : "")}Initializing...");
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Timers", $"{(_initialized ? "Re-" : "")}Initializing..."));
 
             if (_initialized)
             {
@@ -44,34 +45,9 @@ namespace Railgun.Timers
                 TimerContainers.Clear();
             }
 
-            var newTimers = 0;
-            var crashedTimers = 0;
-            var completedTimers = 0;
-
-            using (var scope = _services.CreateScope()) 
-            {
-                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                
-                CreateOrOverrideTimers<AssignRoleTimerContainer>(db.TimerAssignRoles, ref newTimers, ref completedTimers,
-                    ref crashedTimers);
-                CreateOrOverrideTimers<KickUserTimerContainer>(db.TimerKickUsers, ref newTimers, ref completedTimers,
-                    ref crashedTimers);
-                CreateOrOverrideTimers<RemindMeTimerContainer>(db.TimerRemindMes, ref newTimers, ref completedTimers,
-                    ref crashedTimers);
-            }
-
             _masterTimer.Start();
-
-            var output = new StringBuilder()
-                .AppendFormat("{0}Initialization Completed!", _initialized ? "Re-" : "").AppendLine()
-                .AppendLine()
-                .AppendFormat("Timers Executed & Cleaned Up : {0}", completedTimers).AppendLine()
-                .AppendFormat("Timers Crashed & Cleaned Up  : {0}", crashedTimers).AppendLine()
-                .AppendFormat("Timers Started               : {0}", newTimers);
-            
-            await _botLog.SendBotLogAsync(BotLogType.TimerManager, output.ToString());
-
             _initialized = true;
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Timers", $"{(_initialized ? "Re-" : "")}Initialized!"));
         }
 
         public bool CreateAndStartTimer<T>(ITreeTimer data) where T : class, ITimerContainer
