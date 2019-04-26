@@ -41,7 +41,7 @@ namespace Railgun.Commands.Music
 				var playlistUpdated = false;
 
 				foreach (var id in ids.Split(',', ' ')) {
-					if (!id.Contains('#')) continue;
+					if (!id.Contains("#")) continue;
 
 					ISong song = null;
 
