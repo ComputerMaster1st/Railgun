@@ -32,10 +32,7 @@ namespace Railgun.Events
 
         private Task ExecuteAsync(SocketGuild guild)
         {
-            var container = _playerController.GetPlayer(guild.Id);
-            if (container == null) return Task.CompletedTask;
-
-            container.Player.CancelStream();
+            _playerController.GetPlayer(guild.Id)?.Player.CancelStream();
 
 			using (var scope = _services.CreateScope()) {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
