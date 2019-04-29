@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
+using Railgun.Core.Enums;
 using Railgun.Music.Events;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
@@ -79,6 +80,7 @@ namespace Railgun.Music
                 .LoadEvent(new FinishedEvent(this, _botLog));
 
             container.AddEventLoader(loader);
+			await container.Lock.WaitAsync();
 
 			if (preRequestedSong != null) {
 				player.AddSongRequest(preRequestedSong);
@@ -90,6 +92,7 @@ namespace Railgun.Music
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
 			player.StartPlayer(playlist.Id);
 			PlayerContainers.Add(container);
+			container.Lock.Release();
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)
@@ -108,7 +111,7 @@ namespace Railgun.Music
 
 			if (!autoLeave) player.CancelStream();
 
-			while (player.PlayerTask.Status == TaskStatus.WaitingForActivation) await Task.Delay(500);
+			while (player.Status != PlayerStatus.Disconnected) await Task.Delay(500);
 
 			player.PlayerTask.Dispose();
 			container.Lock.Dispose();
