@@ -2,7 +2,6 @@ namespace Railgun.Core.Enums
 {
     public enum PlayerStatus
     {
-        Idle,
         Connecting,
         Connected,
         Queuing,

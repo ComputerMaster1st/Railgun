@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
@@ -72,6 +73,22 @@ namespace Railgun.Music
 			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
 			var player = new Player(_musicService, vc) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+
+			try
+			{
+				await player.ConnectToVoiceAsync();
+			}
+			catch (Exception ex)
+			{
+				var failOutput = new StringBuilder()
+					.AppendLine("Failed to connect to Discord Voice! If this problem persists, try changing voice/server regions.")
+					.AppendLine()
+					.AppendFormat("{0} {1}", Format.Bold("ERROR :"), ex.Message);
+
+				await tc.SendMessageAsync(failOutput.ToString());
+				return;
+			}
+
 			var container = new PlayerContainer(tc, player);
             var loader = new PlayerEventLoader(container)
                 .LoadEvent(new ConnectedEvent(_config, _client))
@@ -111,7 +128,7 @@ namespace Railgun.Music
 
 			if (!autoLeave) player.CancelStream();
 
-			while (player.Status != PlayerStatus.Disconnected) await Task.Delay(500);
+			while (player.PlayerTask.Status == TaskStatus.WaitingForActivation) await Task.Delay(500);
 
 			player.PlayerTask.Dispose();
 			container.Lock.Dispose();

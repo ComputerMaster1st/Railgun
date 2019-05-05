@@ -29,7 +29,7 @@ namespace Railgun.Music
 		public DateTime SongStartedAt { get; private set; }
 		public List<ISong> Requests { get; } = new List<ISong>();
 		public List<ulong> VoteSkipped { get; } = new List<ulong>();
-		public PlayerStatus Status { get; private set; } = PlayerStatus.Idle;
+		public PlayerStatus Status { get; private set; } = PlayerStatus.Connecting;
 		public bool AutoSkipped { get; set; }
 		public bool PlaylistAutoLoop { get; set; } = true;
 		public int RepeatSong { get; set; }
@@ -160,9 +160,9 @@ namespace Railgun.Music
 				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status.ToString()})", task.Exception);
 		}
 
-		private void ConnectToVoice()
+		public async Task ConnectToVoiceAsync()
 		{
-			_client = VoiceChannel.ConnectAsync().GetAwaiter().GetResult();
+			_client = await VoiceChannel.ConnectAsync();
 
 			if (_client == null)
 				throw new TimeoutException("Unable to establish a connection to voice server! Try changing regions if this problem persists.");
@@ -171,11 +171,8 @@ namespace Railgun.Music
 		private async Task StartAsync()
 		{
 			Exception ex = null;
-			Status = PlayerStatus.Connecting;
 
 			try {
-				ConnectToVoice();
-
 				Connected?.Invoke(this, new ConnectedEventArgs(VoiceChannel.GuildId));
 
 				_client.Disconnected += (audioEx) => {
