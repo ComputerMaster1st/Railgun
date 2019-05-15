@@ -20,18 +20,12 @@ namespace Railgun.Commands
 		public RemindMe(TimerController timerController) => _timerController = timerController;
 
 		[Command]
-		public async Task RemindMeAsync(string expireIn, [Remainder] string message)
+		public Task RemindMeAsync(string expireIn, [Remainder] string message)
 		{
-			if (string.IsNullOrWhiteSpace(message)) 
-			{
-				await ReplyAsync("You didn't specify a message to remind you about.");
-				return;
-			} 
-			else if (message.Length > 1800) 
-			{
-				await ReplyAsync("Remind me has a character limit of 1800. Please shorten the message.");
-				return;
-			}
+			if (string.IsNullOrWhiteSpace(message))
+				return ReplyAsync("You didn't specify a message to remind you about.");
+			if (message.Length > 1800)
+				return ReplyAsync("Remind me has a character limit of 1800. Please shorten the message.");
 
 			var times = expireIn.Split(':');
 			var invalidFormat = new StringBuilder()
@@ -42,10 +36,7 @@ namespace Railgun.Commands
 				.AppendFormat("{0} << Days:Hours:Minutes {1} 1 Day, 1 Hour, 10 Minutes Example : {2}", Format.Code("d:h:m"), SystemUtilities.GetSeparator, Format.Code("1:1:10 this is my msg."));
 
 			if (times.Length > 3)
-			{
-				await ReplyAsync(invalidFormat.ToString());
-				return;
-			}
+				return ReplyAsync(invalidFormat.ToString());
 
 			var dhm = new[] { 0, 0, 0 };
 			var i = dhm.Length - times.Length;
@@ -54,10 +45,7 @@ namespace Railgun.Commands
 			while (i < dhm.Length)
 			{
 				if (!int.TryParse(times[ti], out int number)) 
-				{
-					await ReplyAsync(invalidFormat.ToString());
-					return;
-				}
+					return ReplyAsync(invalidFormat.ToString());
 
 				dhm[i] = number;
 				i++;
@@ -73,8 +61,7 @@ namespace Railgun.Commands
 					.AppendLine()
 					.AppendLine(message);
 
-				await ReplyAsync(output.ToString());
-				return;
+				return ReplyAsync(output.ToString());
 			}
 
 			var data = Context.Database.TimerRemindMes.CreateTimer(Context.Guild.Id, expireTime);
@@ -84,7 +71,7 @@ namespace Railgun.Commands
 			data.Message = message;
 
 			_timerController.CreateAndStartTimer<RemindMeTimerContainer>(data);
-			await ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString(CultureInfo.CurrentCulture))} UTC.");
+			return ReplyAsync($"Reminder has been created! You'll be pinged here at {Format.Bold(data.TimerExpire.ToString(CultureInfo.CurrentCulture))} UTC.");
 		}
 	}
 }

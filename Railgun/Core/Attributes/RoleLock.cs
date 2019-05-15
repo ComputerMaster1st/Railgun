@@ -20,7 +20,7 @@ namespace Railgun.Core.Attributes
 
 		public Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
 		{
-			var user = (IGuildUser)context.Author;
+			var user = context.Author as IGuildUser;
 			var output = new StringBuilder();
 
 			switch (_moduleType) 

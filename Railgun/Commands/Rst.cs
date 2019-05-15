@@ -18,129 +18,92 @@ namespace Railgun.Commands
 		public Rst(MasterConfig config) => _config = config;
 
 		[Command]
-		public async Task RstAsync()
+		public Task RstAsync()
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) 
-			{
-				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-				return;
-			} 
-			else if (!data.IsEnabled) 
-			{
-				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
+			if (!data.IsEnabled)
+				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
 
 			var msg = data.GetRst();
 
 			if (string.IsNullOrEmpty(msg))
 				msg = $"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.";
 
-			await ReplyAsync(msg);
+			return ReplyAsync(msg);
 		}
 
 		[Command("add")]
-		public async Task AddAsync([Remainder] string msg)
+		public Task AddAsync([Remainder] string msg)
 		{
 			if (string.IsNullOrWhiteSpace(msg))
-			{
-				await ReplyAsync("Your message was empty. Please add a message to add.");
-				return;
-			}
+				return ReplyAsync("Your message was empty. Please add a message to add.");
 
 			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
 
-			if (!data.IsEnabled) 
-			{
-				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-				return;
-			}
+			if (!data.IsEnabled)
+				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
 
 			data.AddRst(msg);
-
-			await ReplyAsync($"Added To RST: {Format.Code(msg)}");
+			return ReplyAsync($"Added To RST: {Format.Code(msg)}");
 		}
 
 		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task RemoveAsync(int index)
+		public Task RemoveAsync(int index)
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) 
-			{
-				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-				return;
-			} 
-			else if (!data.IsEnabled) 
-			{
-				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-				return;
-			} 
-			else if (index < 0 || index >= data.Rst.Count) 
-			{
-				await ReplyAsync("The Message Id provided is out of bounds. Please recheck via RST List.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
+			if (!data.IsEnabled)
+				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
+			if (index < 0 || index >= data.Rst.Count)
+				return ReplyAsync("The Message Id provided is out of bounds. Please recheck via RST List.");
 
 			data.Rst.RemoveAt(index);
-
-			await ReplyAsync("Message Removed!");
+			return ReplyAsync("Message Removed!");
 		}
 
 		[Command("list"), BotPerms(ChannelPermission.AttachFiles)]
-		public async Task ListAsync()
+		public Task ListAsync()
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) 
-			{
-				await ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-				return;
-			} 
-			else if (!data.IsEnabled) 
-			{
-				await ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
+			if (!data.IsEnabled)
+				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
 
 			var output = new StringBuilder()
 				.AppendLine("Randomly Selected Text List :").AppendLine();
 
 			data.Rst.ForEach(msg => output.AppendFormat("[{0}] {1}", Format.Code(data.Rst.IndexOf(msg).ToString()), msg).AppendLine());
 
-			if (output.Length < 1950) 
-			{
-				await ReplyAsync(output.ToString());
-				return;
-			}
-
-			await (Context.Channel as ITextChannel).SendStringAsFileAsync("RST.txt", output.ToString());
+			if (output.Length < 1950)
+				return ReplyAsync(output.ToString());
+			return (Context.Channel as ITextChannel).SendStringAsFileAsync("RST.txt", output.ToString());
 		}
 
 		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task AllowDenyAsync()
+		public Task AllowDenyAsync()
 		{
 			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
 			data.IsEnabled = !data.IsEnabled;
-			await ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
+			return ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
 		}
 
 		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
 
-			if (data == null) 
-			{
-				await ReplyAsync("RST has no data to reset.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync("RST has no data to reset.");
 
 			Context.Database.FunRsts.Remove(data);
-
-			await ReplyAsync("RST has been reset.");
+			return ReplyAsync("RST has been reset.");
 		}
 	}
 }

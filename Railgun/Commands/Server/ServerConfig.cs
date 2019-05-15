@@ -14,68 +14,54 @@ namespace Railgun.Commands.Server
 		public class ServerConfig : SystemBase
 		{
 			[Command("mention")]
-			public async Task MentionAsync()
+			public Task MentionAsync()
 			{
 				var data = Context.Database.ServerMentions.GetData(Context.Guild.Id);
 
 				if (data != null) {
 					Context.Database.ServerMentions.Remove(data);
-
-					await ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.");
-
-					return;
+					return ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.");
 				}
 
 				data = Context.Database.ServerMentions.GetOrCreateData(Context.Guild.Id);
 				data.DisableMentions = true;
-
-				await ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.");
+				return ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.");
 			}
 
 			[Command("prefix")]
-			public async Task PrefixAsync([Remainder] string input = null)
+			public Task PrefixAsync([Remainder] string input = null)
 			{
 				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
 
-				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Prefix)) {
-					await ReplyAsync("No prefix has been specified. Please specify a prefix.");
-
-					return;
-				} else if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Prefix)) {
+				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Prefix))
+					return ReplyAsync("No prefix has been specified. Please specify a prefix.");
+				if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Prefix)) {
 					data.Prefix = string.Empty;
-
-					await ReplyAsync("Server prefix has been removed.");
-
-					return;
+					return ReplyAsync("Server prefix has been removed.");
 				}
 
 				data.Prefix = input;
-
-				await ReplyAsync($"Server prefix has been set! {Format.Code(input = "<command>")}!");
+				return ReplyAsync($"Server prefix has been set! {Format.Code(input = "<command>")}!");
 			}
 
 			[Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)]
-			public async Task DeleteCmdAsync()
+			public Task DeleteCmdAsync()
 			{
 				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
-
 				data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
-
-				await ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
+				return ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
 			}
 
 			[Command("respondtobots")]
-			public async Task RespondAsync()
+			public Task RespondAsync()
 			{
 				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
-
 				data.RespondToBots = !data.RespondToBots;
-
-				await ReplyAsync($"I will {Format.Bold(data.RespondToBots ? "now" : "no longer")} respond to other bots.");
+				return ReplyAsync($"I will {Format.Bold(data.RespondToBots ? "now" : "no longer")} respond to other bots.");
 			}
 
 			[Command("show")]
-			public async Task ShowAsync()
+			public Task ShowAsync()
 			{
 				var command = Context.Database.ServerCommands.GetData(Context.Guild.Id);
 				var mention = Context.Database.ServerMentions.GetData(Context.Guild.Id);
@@ -88,7 +74,7 @@ namespace Railgun.Commands.Server
 					.AppendFormat("  Allow Mention : {0}", mention != null && mention.DisableMentions ? "No" : "Yes").AppendLine()
 					.AppendFormat("  Server Prefix : {0}", command != null && !string.IsNullOrEmpty(command.Prefix) ? command.Prefix : "Not Set").AppendLine();
 
-				await ReplyAsync(Format.Code(output.ToString()));
+				return ReplyAsync(Format.Code(output.ToString()));
 			}
 		}
 	}

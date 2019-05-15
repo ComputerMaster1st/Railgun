@@ -16,11 +16,11 @@ namespace Railgun.Commands
         public Task ZapAsync(IGuildUser user) 
         {
             if (user != null && user.Id == _client.CurrentUser.Id) return ReplyAsync("I'm immune to electricity, BAKA!");
-            var name = SystemUtilities.GetUsernameOrMention(Context.Database, user ?? (IGuildUser)Context.Author);
+            var name = SystemUtilities.GetUsernameOrMention(Context.Database, user ?? Context.Author as IGuildUser);
             return ReplyAsync($"{Format.Bold(name)} has been electrocuted! Something smells nice doesn't it?");
         }
 
         [Command]
-        public Task ZapAsync() => ZapAsync((IGuildUser)Context.Author);
+        public Task ZapAsync() => ZapAsync(Context.Author as IGuildUser);
     }
 }

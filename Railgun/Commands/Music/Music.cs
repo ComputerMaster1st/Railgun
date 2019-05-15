@@ -32,24 +32,17 @@ namespace Railgun.Commands.Music
 		}
 
 		[Command("join"), BotPerms(GuildPermission.Connect | GuildPermission.Speak)]
-		public async Task JoinAsync()
+		public Task JoinAsync()
 		{
-			if (_playerController.GetPlayer(Context.Guild.Id) != null) {
-				await ReplyAsync($"Sorry, I'm already in a voice channel. If you're experiencing problems, please do {Format.Code($"{_config.DiscordConfig.Prefix}music reset stream.")}");
-
-				return;
-			}
+			if (_playerController.GetPlayer(Context.Guild.Id) != null)
+				return ReplyAsync($"Sorry, I'm already in a voice channel. If you're experiencing problems, please do {Format.Code($"{_config.DiscordConfig.Prefix}music reset stream.")}");
 
 			var user = (IGuildUser)Context.Author;
 			var vc = user.VoiceChannel;
 
-			if (vc == null) {
-				await ReplyAsync("Please go into a voice channel before inviting me.");
+			if (vc == null) return ReplyAsync("Please go into a voice channel before inviting me.");
 
-				return;
-			}
-
-			await _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel);
+			return _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel);
 		}
 
 		[Command("playlist"), BotPerms(ChannelPermission.AttachFiles)]
@@ -59,7 +52,6 @@ namespace Railgun.Commands.Music
 
 			if (data == null || data.PlaylistId == ObjectId.Empty) {
 				await ReplyAsync("Server playlist == currently empty.");
-
 				return;
 			}
 
@@ -67,7 +59,6 @@ namespace Railgun.Commands.Music
 
 			if (playlist == null || playlist.Songs.Count < 1) {
 				await ReplyAsync("Server playlist == currently empty.");
-
 				return;
 			}
 
@@ -98,7 +89,6 @@ namespace Railgun.Commands.Music
 
 			if (removedSongs.Count > 0) {
 				foreach (var songId in removedSongs) playlist.Songs.Remove(songId);
-
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
@@ -107,21 +97,16 @@ namespace Railgun.Commands.Music
 		}
 
 		[Command("repeat")]
-		public async Task RepeatAsync(int count = 1)
+		public Task RepeatAsync(int count = 1)
 		{
 			var container = _playerController.GetPlayer(Context.Guild.Id);
 
-			if (container == null) {
-				await ReplyAsync("I'm not playing anything at this time.");
-
-				return;
-			}
+			if (container == null) return ReplyAsync("I'm not playing anything at this time.");
 
 			var player = container.Player;
-
 			player.RepeatSong = count;
 
-			await ReplyAsync("Repeating song after finishing.");
+			return ReplyAsync("Repeating song after finishing.");
 		}
 
 		[Command("repo"), BotPerms(ChannelPermission.AttachFiles)]
@@ -152,28 +137,21 @@ namespace Railgun.Commands.Music
 		public Task PingAsync()
 		{
 			var container = _playerController.GetPlayer(Context.Guild.Id);
-
 			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
 		}
 
 		[Command("queue"), BotPerms(ChannelPermission.AttachFiles)]
-		public async Task QueueAsync()
+		public Task QueueAsync()
 		{
 			var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
 
-			if (playerContainer == null) {
-				await ReplyAsync("I'm not playing anything at this time.");
-
-				return;
-			}
+			if (playerContainer == null)
+				return ReplyAsync("I'm not playing anything at this time.");
 
 			var player = playerContainer.Player;
 
-			if (!player.AutoSkipped && player.Requests.Count < 2) {
-				await ReplyAsync("There are currently no music requests in the queue.");
-
-				return;
-			}
+			if (!player.AutoSkipped && player.Requests.Count < 2)
+				return ReplyAsync("There are currently no music requests in the queue.");
 
 			var i = 0;
 			var output = new StringBuilder()
@@ -214,13 +192,9 @@ namespace Railgun.Commands.Music
 				i++;
 			}
 
-			if (output.Length > 1950) {
-				await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
-
-				return;
-			}
-
-			await ReplyAsync(output.ToString());
+			if (output.Length > 1950) 
+				return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
+			return ReplyAsync(output.ToString());
 		}
 
 		[Command("show")]
@@ -231,11 +205,9 @@ namespace Railgun.Commands.Music
 
 			if (data == null) {
 				await ReplyAsync("There are no settings available for Music.");
-
 				return;
 			} else if (data.PlaylistId != ObjectId.Empty) {
 				var playlist = await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
-
 				songCount = playlist.Songs.Count;
 			}
 

@@ -20,7 +20,7 @@ namespace Railgun.Utilities
 
         public Analytics(BotLog botLog) => _botLog = botLog;
 
-        public void ExecutedCommand(SystemContext ctx, CommandResult result) {
+        public Task ExecutedCommand(SystemContext ctx, CommandResult result) {
             var cmdString = result.CommandPath;
             var guild = ctx.Guild;
 
@@ -36,7 +36,7 @@ namespace Railgun.Utilities
 
             output.AppendLine("---- Result  : Completed");
 
-            _botLog.SendBotLogAsync(BotLogType.CommandManager, output.ToString()).GetAwaiter();
+            return _botLog.SendBotLogAsync(BotLogType.CommandManager, output.ToString());
         }
     }
 }

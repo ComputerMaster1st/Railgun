@@ -23,7 +23,6 @@ namespace Railgun.Commands.Music
 			private Task SetNpChannelAsync(ServerMusic data, ITextChannel tc, bool locked = false)
 			{
 				data.NowPlayingChannel = locked ? tc.Id : 0;
-
 				return ReplyAsync($"{Format.Bold("Now Playing")} messages are {Format.Bold(locked ? "Now" : "No Longer")} locked to #{tc.Name}.");
 			}
 
@@ -48,18 +47,14 @@ namespace Railgun.Commands.Music
 			}
 
 			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-			public async Task SetNpChannelAsync(ITextChannel tcParam = null)
+			public Task SetNpChannelAsync(ITextChannel tcParam = null)
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var tc = tcParam ?? (ITextChannel)Context.Channel;
+				var tc = tcParam ?? Context.Channel as ITextChannel;
 
-				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel) {
-					await SetNpChannelAsync(data, tc);
-
-					return;
-				}
-
-				await SetNpChannelAsync(data, tc, true);
+				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel)
+					return SetNpChannelAsync(data, tc);
+				return SetNpChannelAsync(data, tc, true);
 			}
 		}
 	}

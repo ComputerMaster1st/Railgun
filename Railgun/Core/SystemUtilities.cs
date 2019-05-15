@@ -111,7 +111,7 @@ namespace Railgun.Core
             }
 		}
 
-		public static async Task<bool> CheckIfSelfIsHigherRole(IGuild guild, IGuildUser user)
+		public static async Task<bool> CheckIfSelfIsHigherRoleAsync(IGuild guild, IGuildUser user)
 		{
 			var selfRolePosition = 0;
 			var userRolePosition = 0;

@@ -18,9 +18,6 @@ namespace Railgun.Events
         public void Load() => _client.JoinedGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
 
         private Task ExecuteAsync(SocketGuild guild)
-        {
-            _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Joined").GetAwaiter();
-            return Task.CompletedTask;
-        }
+            => _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Joined");
     }
 }

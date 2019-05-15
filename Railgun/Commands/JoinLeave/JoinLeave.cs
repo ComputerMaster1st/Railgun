@@ -13,65 +13,47 @@ namespace Railgun.Commands.JoinLeave
 	public partial class JoinLeave : SystemBase
 	{
 		[Command]
-		public async Task EnableAsync()
+		public Task EnableAsync()
 		{
 			var data = Context.Database.ServerJoinLeaves.GetOrCreateData(Context.Guild.Id);
 
 			if (data.ChannelId == Context.Channel.Id) {
 				data.ChannelId = 0;
-
-				await ReplyAsync($"Join/Leave Notifications is now {Format.Bold("Disabled")}.");
-
-				return;
+				return ReplyAsync($"Join/Leave Notifications is now {Format.Bold("Disabled")}.");
 			}
 
 			data.ChannelId = Context.Channel.Id;
-
-			await ReplyAsync($"Join/Leave Notifications is now {Format.Bold((data.ChannelId == 0 ? "Enabled & Set" : "Set"))} to this channel.");
+			return ReplyAsync($"Join/Leave Notifications is now {Format.Bold((data.ChannelId == 0 ? "Enabled & Set" : "Set"))} to this channel.");
 		}
 
 		[Command("deleteafter"), BotPerms(ChannelPermission.ManageMessages)]
-		public async Task DeleteAfterAsync(int minutes = 0)
+		public Task DeleteAfterAsync(int minutes = 0)
 		{
-			if (minutes < 0) {
-				await ReplyAsync("Minutes can not be less than 0.");
-
-				return;
-			}
+			if (minutes < 0) return ReplyAsync("Minutes can not be less than 0.");
 
 			var data = Context.Database.ServerJoinLeaves.GetOrCreateData(Context.Guild.Id);
 
 			if (minutes == 0 && data.DeleteAfterMinutes == 0) {
-				await ReplyAsync("Already set to not delete Join/Leave notifications.");
-
-				return;
+				return ReplyAsync("Already set to not delete Join/Leave notifications.");
 			} else if (minutes == 0 && data.DeleteAfterMinutes != 0) {
 				data.DeleteAfterMinutes = 0;
-
-				await ReplyAsync("No longer deleting Join/Leave notifications.");
-
-				return;
+				return ReplyAsync("No longer deleting Join/Leave notifications.");
 			}
 
 			data.DeleteAfterMinutes = minutes;
-
-			await ReplyAsync($"Join/Leave notifications will now be deleted after {minutes} minutes.");
+			return ReplyAsync($"Join/Leave notifications will now be deleted after {minutes} minutes.");
 		}
 
 		[Command("sendtodm")]
-		public async Task DmAsync()
+		public Task DmAsync()
 		{
 			var data = Context.Database.ServerJoinLeaves.GetData(Context.Guild.Id);
 
-			if (data == null || data.ChannelId == 0) {
-				await ReplyAsync("Join/Leave Notifications is currently turned off. Please turn on before using this command.");
-
-				return;
-			}
+			if (data == null || data.ChannelId == 0) 
+				return ReplyAsync("Join/Leave Notifications is currently turned off. Please turn on before using this command.");
 
 			data.SendToDM = !data.SendToDM;
-
-			await ReplyAsync($"Join/Leave Notification will {Format.Bold((data.SendToDM ? "Now" : "No Longer"))} be sent via DMs.");
+			return ReplyAsync($"Join/Leave Notification will {Format.Bold((data.SendToDM ? "Now" : "No Longer"))} be sent via DMs.");
 		}
 
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
@@ -81,7 +63,6 @@ namespace Railgun.Commands.JoinLeave
 
 			if (data == null) {
 				await ReplyAsync("Join/Leave Notifications has not been configured!");
-
 				return;
 			}
 
@@ -109,23 +90,18 @@ namespace Railgun.Commands.JoinLeave
 				return;
 			}
 
-			await ((ITextChannel)Context.Channel).SendStringAsFileAsync("JoinLeave Notifications.txt", output.ToString());
+			await (Context.Channel as ITextChannel).SendStringAsFileAsync("JoinLeave Notifications.txt", output.ToString());
 		}
 
 		[Command("reset")]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.ServerJoinLeaves.GetData(Context.Guild.Id);
 
-			if (data == null) {
-				await ReplyAsync("Join/Leave Notifications has no data to reset.");
-
-				return;
-			}
+			if (data == null) return ReplyAsync("Join/Leave Notifications has no data to reset.");
 
 			Context.Database.ServerJoinLeaves.Remove(data);
-
-			await ReplyAsync("Join/Leave Notifications has been reset & disabled.");
+			return ReplyAsync("Join/Leave Notifications has been reset & disabled.");
 		}
 	}
 }

@@ -42,9 +42,7 @@ namespace Railgun.Commands.Music
 
 				if (!playlist.Songs.Contains(song.Id) && !_playOneTimeOnly) {
 					playlist.Songs.Add(song.Id);
-
 					await _musicService.Playlist.UpdateAsync(playlist);
-
 					nowInstalled = true;
 				}
 
@@ -52,7 +50,7 @@ namespace Railgun.Commands.Music
 					.AppendFormat("{0} Queued {1} as requested by {2}. {3}",
 						nowInstalled ? "Installed &" : _playOneTimeOnly ? "One-Time Only &" : "",
 						Format.Bold(song.Metadata.Name),
-						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author)),
+						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser)),
 						playerContainer == null ? "Now starting music player..." : "").AppendLine();
 
 				var user = (IGuildUser)Context.Author;
@@ -61,7 +59,6 @@ namespace Railgun.Commands.Music
 				if (playerContainer == null) {
 					await response.ModifyAsync(x => x.Content = output.ToString());
 					await _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel, preRequestedSong: song);
-
 					return;
 				}
 
@@ -69,7 +66,6 @@ namespace Railgun.Commands.Music
 
 				if (player.VoiceChannel.Id != vc.Id) {
 					await response.ModifyAsync(x => x.Content = "Please be in the same voice channel as me when requesting a song to play.");
-
 					return;
 				}
 
@@ -81,7 +77,6 @@ namespace Railgun.Commands.Music
 				}
 
 				player.AutoSkipped = true;
-
 				await response.ModifyAsync(x => x.Content = output.ToString());
 			}
 
@@ -90,11 +85,9 @@ namespace Railgun.Commands.Music
 			{
 				if (string.IsNullOrWhiteSpace(input) && Context.Message.Attachments.Count < 1) {
 					await ReplyAsync("Please specify either a YouTube Link, Music Id, Search Query or upload an audio file.");
-
 					return;
 				} else if (((IGuildUser)Context.Author).VoiceChannel == null) {
 					await ReplyAsync("You're not in a voice channel! Please join one.");
-
 					return;
 				}
 
@@ -119,7 +112,6 @@ namespace Railgun.Commands.Music
 			public Task PlayOneTimeAsync([Remainder] string input = null)
 			{
 				_playOneTimeOnly = true;
-
 				return PlayAsync(input);
 			}
 
@@ -166,34 +158,28 @@ namespace Railgun.Commands.Music
 
 				if (!input.Contains("youtu")) {
 					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
-
 					return;
 				} else if (!_musicService.Youtube.TryParseYoutubeUrl(input, out videoId)) {
 					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
-
 					return;
 				} else if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), songOut => song = songOut)) {
 					if (playlist.Songs.Contains(song.Id)) {
 						await QueueSongAsync(playerContainer, playlist, song, data, response);
-
 						return;
 					} else if (!data.AutoDownload) {
 						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
-
 						return;
 					}
 				}
 
 				try {
 					song = await _musicService.Youtube.DownloadAsync(new Uri(input));
-
 					await QueueSongAsync(playerContainer, playlist, song, data, response);
 				} catch (Exception ex) {
 					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}");
 
 					var output = new StringBuilder()
 						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.Message);
-
 					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
@@ -202,20 +188,17 @@ namespace Railgun.Commands.Music
 			{
 				if (string.IsNullOrEmpty(_config.GoogleApiToken)) {
 					await response.ModifyAsync(x => x.Content = "Music Search is disabled due to no YouTube API V3 key being installed. Please contact the master admin.");
-
 					return;
 				} else if (string.IsNullOrWhiteSpace(input)) {
 					await response.ModifyAsync(x => x.Content = "Search Query can not be empty.");
-
 					return;
 				}
 
 				var search = new YoutubeSearch(_config);
-				var video = search.GetVideoAsync(input);
+				var video = await search.GetVideoAsync(input);
 
 				if (video == null) {
 					await response.ModifyAsync(x => x.Content = "Unable to find anything using that query.");
-
 					return;
 				}
 

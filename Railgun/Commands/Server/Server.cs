@@ -36,7 +36,7 @@ namespace Railgun.Commands.Server
 
 			while (count > 0) {
 				var subCount = count >= 100 ? 100 : count;
-				var tc = (ITextChannel)Context.Channel;
+				var tc = Context.Channel as ITextChannel;
 				var msgs = await tc.GetMessagesAsync(subCount).FlattenAsync();
 				var msgsToDelete = new List<IMessage>();
 
@@ -61,9 +61,8 @@ namespace Railgun.Commands.Server
 		[Command("kick"), UserPerms(GuildPermission.KickMembers), BotPerms(GuildPermission.KickMembers)]
 		public async Task KickAsync(IGuildUser user, [Remainder] string reason = "No Reason Specified")
 		{
-			if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, user)) {
+			if (!await SystemUtilities.CheckIfSelfIsHigherRoleAsync(Context.Guild, user)) {
 				await ReplyAsync($"Unable to kick {user.Username} as my role isn't high enough.");
-
 				return;
 			}
 
@@ -72,7 +71,6 @@ namespace Railgun.Commands.Server
 
 			var output = new StringBuilder()
 				.AppendFormat("User Kicked {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
-
 			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
 
@@ -81,9 +79,8 @@ namespace Railgun.Commands.Server
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, user)) {
+			if (!await SystemUtilities.CheckIfSelfIsHigherRoleAsync(Context.Guild, user)) {
 				await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.");
-
 				return;
 			}
 
@@ -96,7 +93,6 @@ namespace Railgun.Commands.Server
 
 			var output = new StringBuilder()
 				.AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
-
 			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
 
@@ -123,7 +119,6 @@ namespace Railgun.Commands.Server
 
 			if (output.Length < 1950) {
 				await ReplyAsync(output.ToString());
-
 				return;
 			}
 

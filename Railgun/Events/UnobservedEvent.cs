@@ -24,8 +24,7 @@ namespace Railgun.Events
                 .AppendLine("An unobserved task threw an exception!")
                 .AppendLine(e.Exception.InnerException.ToString());
             
-            _botLog.SendBotLogAsync(BotLogType.TaskScheduler, output.ToString()).GetAwaiter();
-            return Task.CompletedTask;
+            return _botLog.SendBotLogAsync(BotLogType.TaskScheduler, output.ToString());
         }
     }
 }

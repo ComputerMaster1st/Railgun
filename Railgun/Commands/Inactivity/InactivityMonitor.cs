@@ -26,17 +26,17 @@ namespace Railgun.Commands.Inactivity
         }
 
         [Command("role")]
-        public Task SetRoleAsync(IRole role)
+        public async Task SetRoleAsync(IRole role)
         {
-            var self = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
+            var self = await Context.Guild.GetCurrentUserAsync();
             var selfHighestRole = self.RoleIds.Select(roleId => Context.Guild.GetRole(roleId))
                 .Select(tempRole => tempRole.Position).Concat(new[] {0}).Max();
 
-            if (selfHighestRole < role.Position) return ReplyAsync("Please make sure the inactivity role is in a lower role position than me.");
+            if (selfHighestRole < role.Position) await ReplyAsync("Please make sure the inactivity role is in a lower role position than me.");
 
             var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
             data.InactiveRoleId = role.Id;
-            return ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
+            await ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
         }
         
         [Command("role")]
@@ -151,11 +151,11 @@ namespace Railgun.Commands.Inactivity
         }
 
         [Command("show")]
-        public Task ShowAsync()
+        public async Task ShowAsync()
         {
             var data = Context.Database.ServerInactivities.GetData(Context.Guild.Id);
 
-            if (data == null) return ReplyAsync("No Inactivity Monitor Config has been generated!");
+            if (data == null) await ReplyAsync("No Inactivity Monitor Config has been generated!");
 
             var whitelistedRoles = new StringBuilder();
             var whitelistedUsers = new StringBuilder();
@@ -183,7 +183,7 @@ namespace Railgun.Commands.Inactivity
                 
                 foreach (var userId in data.UserWhitelist)
                 {
-                    var user = Context.Guild.GetUserAsync(userId.UserId).GetAwaiter().GetResult();
+                    var user = await Context.Guild.GetUserAsync(userId.UserId);
                     
                     if (user != null) whitelistedUsers.AppendFormat("{0} {1}#{2} ", SystemUtilities.GetSeparator, 
                         user.Username, user.DiscriminatorValue);
@@ -205,7 +205,7 @@ namespace Railgun.Commands.Inactivity
                 .AppendFormat("Whitelisted Roles  : {0}", whitelistedRoles.ToString()).AppendLine()
                 .AppendFormat("Whitelisted Users  : {0}", whitelistedUsers.ToString()).AppendLine();
 
-            return ReplyAsync(Format.Code(output.ToString()));
+            await ReplyAsync(Format.Code(output.ToString()));
         }
         
         [Command("reset")]

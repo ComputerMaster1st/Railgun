@@ -18,24 +18,21 @@ namespace Railgun.Core.Attributes
 
         public BotPerms(ChannelPermission channelPermission) => _channelPermission = channelPermission;
 
-        public Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
+        public async Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
         {
             var config = services.GetService<MasterConfig>();
-            var self = context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
+            var self = await context.Guild.GetCurrentUserAsync();
 
             if (_guildPermission.HasValue)
-            {
                 if (!(self.GuildPermissions.Has(_guildPermission.Value) || self.GuildPermissions.Administrator))
-                    return Task.FromResult(PreconditionResult.FromError($"I do not have permission to perform this command! {Format.Bold($"SERVER-PERM-MISSING : {_guildPermission.ToString()}")}"));
-            }
-            else if (_channelPermission.HasValue)
-            {
+                    return PreconditionResult.FromError($"I do not have permission to perform this command! {Format.Bold($"SERVER-PERM-MISSING : {_guildPermission.ToString()}")}");
+            if (_channelPermission.HasValue) {
                 var channelPerms = self.GetPermissions((IGuildChannel)context.Channel);
                 if (!(channelPerms.Has(_channelPermission.Value) || self.GuildPermissions.Administrator))
-                    return Task.FromResult(PreconditionResult.FromError($"I do not have permission to perform this command! {Format.Bold($"CHANNEL-PERM-MISSING : {_channelPermission.ToString()}")}"));
+                    return PreconditionResult.FromError($"I do not have permission to perform this command! {Format.Bold($"CHANNEL-PERM-MISSING : {_channelPermission.ToString()}")}");
             }
 
-            return Task.FromResult(PreconditionResult.FromSuccess());
+            return PreconditionResult.FromSuccess();
         }
     }
 }

@@ -18,20 +18,16 @@ namespace Railgun.Commands.Music
 			public MusicSkip(PlayerController playerManager) => _playerController = playerManager;
 
 			[Command]
-			public async Task SkipAsync()
+			public Task SkipAsync()
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || container == null) {
-					await ReplyAsync("Can not skip current song because I am not in voice channel.");
-
-					return;
-				} else if (!data.VoteSkipEnabled) {
-					await ReplyAsync("Skipping music now...");
-
+				if (data == null || container == null) 
+					return ReplyAsync("Can not skip current song because I am not in voice channel.");
+				if (!data.VoteSkipEnabled) {
 					container.Player.CancelMusic();
-					return;
+					return ReplyAsync("Skipping music now...");
 				}
 
 				var player = container.Player;
@@ -41,40 +37,27 @@ namespace Railgun.Commands.Music
 
 				if (percent < data.VoteSkipLimit) {
 					var name = SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author);
-
-					await ReplyAsync($"{Format.Bold(name)} has voted to skip the current song!");
-
-					return;
-				} else if (!voteSkipResult) {
-					await ReplyAsync("You've already voted to skip!");
-
-					return;
-				}
-
-				await ReplyAsync("Vote-Skipping music now...");
+					return ReplyAsync($"{Format.Bold(name)} has voted to skip the current song!");
+				} else if (!voteSkipResult)
+					return ReplyAsync("You've already voted to skip!");
 
 				player.CancelMusic();
+				return ReplyAsync("Vote-Skipping music now...");
 			}
 
 			[Command("force"), UserPerms(GuildPermission.ManageGuild)]
-			public async Task ForceAsync()
+			public Task ForceAsync()
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || !data.VoteSkipEnabled) {
-					await ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");
-
-					return;
-				} else if (container == null) {
-					await ReplyAsync("Can not skip current song because I am not in voice channel.");
-
-					return;
-				}
-
-				await ReplyAsync("Force-Skipping music now...");
+				if (data == null || !data.VoteSkipEnabled) 
+					return ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");
+				if (container == null)
+					return ReplyAsync("Can not skip current song because I am not in voice channel.");
 
 				container.Player.CancelMusic();
+				return ReplyAsync("Force-Skipping music now...");
 			}
 		}
 	}

@@ -12,29 +12,18 @@ namespace Railgun.Commands.JoinLeave
 		[Alias("remove")]
 		public class JoinLeaveRemove : SystemBase
 		{
-			private async Task MsgHandlerAsync(int index, MsgType type)
+			private Task MsgHandlerAsync(int index, MsgType type)
 			{
-				if (index < 0) {
-					await ReplyAsync("The specified Id can not be lower than 0.");
-
-					return;
-				}
+				if (index < 0) return ReplyAsync("The specified Id can not be lower than 0.");
 
 				var data = Context.Database.ServerJoinLeaves.GetData(Context.Guild.Id);
 
-				if (data == null) {
-					await ReplyAsync("Join/Leave has yet to be configured.");
-
-					return;
-				} else if ((type == MsgType.Join && data.JoinMessages.Count <= index) || (type == MsgType.Leave && data.LeaveMessages.Count <= index)) {
-					await ReplyAsync("Specified message is not listed.");
-
-					return;
-				}
+				if (data == null) return ReplyAsync("Join/Leave has yet to be configured.");
+				if ((type == MsgType.Join && data.JoinMessages.Count <= index) || (type == MsgType.Leave && data.LeaveMessages.Count <= index))
+					return ReplyAsync("Specified message is not listed.");
 
 				data.RemoveMessage(index, type);
-
-				await ReplyAsync($"Successfully removed from {Format.Bold(type.ToString())} messages.");
+				return ReplyAsync($"Successfully removed from {Format.Bold(type.ToString())} messages.");
 			}
 
 			[Command("joinmsg")]

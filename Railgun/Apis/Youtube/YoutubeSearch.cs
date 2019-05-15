@@ -16,14 +16,14 @@ namespace Railgun.Apis.Youtube
             ApplicationName = this.GetType().ToString()
         });
 
-        public YoutubeVideoData GetVideoAsync(string query)
+        public async Task<YoutubeVideoData> GetVideoAsync(string query)
         {
             var request = _service.Search.List("snippet");
 
             request.Q = query;
             request.MaxResults = 1;
 
-            var response = request.ExecuteAsync().GetAwaiter().GetResult();
+            var response = await request.ExecuteAsync();
 
             if (response.Items.Count < 1) return null;
 

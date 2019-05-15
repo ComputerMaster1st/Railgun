@@ -7,12 +7,11 @@ namespace Railgun.Core.Extensions
 {
     public static class TextChannelExtensions
     {
-        public static async Task SendStringAsFileAsync(this ITextChannel tc, string filename, string output, string msgText = null, bool includeGuildName = true)
+        public static Task SendStringAsFileAsync(this ITextChannel tc, string filename, string output, string msgText = null, bool includeGuildName = true)
 		{
 			var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(output));
 			var outputFilename = (includeGuildName ? $"{tc.Guild.Name}-" : "") + filename;
-
-			await tc.SendFileAsync(outputStream, outputFilename, msgText);
+			return tc.SendFileAsync(outputStream, outputFilename, msgText);
 		}
     }
 }

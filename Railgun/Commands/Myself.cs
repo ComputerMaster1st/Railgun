@@ -12,45 +12,38 @@ namespace Railgun.Commands
 	public class Myself : SystemBase
 	{
 		[Command("mention")]
-		public async Task MentionsAsync()
+		public Task MentionsAsync()
 		{
 			var data = Context.Database.UserMentions.GetOrCreateData(Context.Author.Id);
 
 			if (data.DisableMentions) {
 				Context.Database.UserMentions.Remove(data);
-
-				await ReplyAsync($"Personal mentions are now {Format.Bold("Enabled")}.");
-				return;
+				return ReplyAsync($"Personal mentions are now {Format.Bold("Enabled")}.");
 			}
 
 			data.DisableMentions = !data.DisableMentions;
-
-			await ReplyAsync($"Personal mentions are now {Format.Bold("Disabled")}.");
+			return ReplyAsync($"Personal mentions are now {Format.Bold("Disabled")}.");
 		}
 
 		[Command("prefix")]
-		public async Task PrefixAsync([Remainder] string input = null)
+		public Task PrefixAsync([Remainder] string input = null)
 		{
 			var data = Context.Database.UserCommands.GetData(Context.Author.Id);
 
-			if (string.IsNullOrWhiteSpace(input) && data == null) {
-				await ReplyAsync("No prefix has been specified. Please specify a prefix.");
-				return;
-			} else if (string.IsNullOrWhiteSpace(input) && data != null) {
+			if (string.IsNullOrWhiteSpace(input) && data == null)
+				return ReplyAsync("No prefix has been specified. Please specify a prefix.");
+			if (string.IsNullOrWhiteSpace(input) && data != null) {
 				Context.Database.UserCommands.Remove(data);
-
-				await ReplyAsync("Personal prefix has been removed.");
-				return;
+				return ReplyAsync("Personal prefix has been removed.");
 			}
 
 			data = Context.Database.UserCommands.GetOrCreateData(Context.Author.Id);
 			data.Prefix = input;
-
-			await ReplyAsync($"Personal prefix has been set! {Format.Code(input + " <command>")}!");
+			return ReplyAsync($"Personal prefix has been set! {Format.Code(input + " <command>")}!");
 		}
 
 		[Command("show")]
-		public async Task ShowAsync()
+		public Task ShowAsync()
 		{
 			var prefix = Context.Database.UserCommands.GetData(Context.Author.Id);
 			var mention = Context.Database.UserMentions.GetOrCreateData(Context.Author.Id);
@@ -61,7 +54,7 @@ namespace Railgun.Commands
 				.AppendFormat("  Allow Mention : {0}", mention != null ? "No" : "Yes").AppendLine()
 				.AppendFormat("Personal Prefix : {0}", prefix != null ? prefix.Prefix : "Not Set").AppendLine();
 
-			await ReplyAsync(Format.Code(output.ToString()));
+			return ReplyAsync(Format.Code(output.ToString()));
 		}
 	}
 }

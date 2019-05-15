@@ -34,7 +34,6 @@ namespace Railgun.Commands
 				return;
 			} else if (!data.IsEnabled) {
 				await ReplyAsync($"Bite is currently {Format.Bold("disabled")} on this server.");
-
 				return;
 			}
 
@@ -76,116 +75,84 @@ namespace Railgun.Commands
 
 			var biterName = SystemUtilities.GetUsernameOrMention(Context.Database, biter);
 			var biteeName = SystemUtilities.GetUsernameOrMention(Context.Database, bitee);
-
 			var biteMessage = data.GetBite().Replace("<biter>", Format.Bold(biterName)).Replace("<bitee>", Format.Bold(biteeName));
 
 			await ReplyAsync(biteMessage);
 		}
 
 		[Command("add")]
-		public async Task AddAsync([Remainder] string msg)
+		public Task AddAsync([Remainder] string msg)
 		{
-			if (string.IsNullOrWhiteSpace(msg)) {
-				await ReplyAsync("You didn't specify a sentence!");
-
-				return;
-			}
+			if (string.IsNullOrWhiteSpace(msg))
+				return ReplyAsync("You didn't specify a sentence!");
 
 			var data = Context.Database.FunBites.GetOrCreateData(Context.Guild.Id);
 
-			if (!data.IsEnabled) {
-				await ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
-
-				return;
-			}
+			if (!data.IsEnabled)
+				return ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
 
 			data.AddBite(msg);
-
-			await ReplyAsync($"Added Sentence: {Format.Code(msg)}");
+			return ReplyAsync($"Added Sentence: {Format.Code(msg)}");
 		}
 
 		[Command("list"), BotPerms(ChannelPermission.AttachFiles)]
-		public async Task ListAsync()
+		public Task ListAsync()
 		{
 			var data = Context.Database.FunBites.GetData(Context.Guild.Id);
 
-			if (data == null) {
-				await ReplyAsync($"There are no bite sentences available. Use {Format.Code($"{_config.DiscordConfig.Prefix}bite add <message>")} to add some.");
-
-				return;
-			} else if (!data.IsEnabled) {
-				await ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
-
-				return;
-			} else if (data.Bites.Count < 1) {
-				await ReplyAsync($"There are no bite sentences available. To add a sentence, use {Format.Code($"{_config.DiscordConfig.Prefix}bite add <sentence>")}. You will need to place {Format.Code("<biter>")} & {Format.Code("<bitee>")} in the sentence somewhere to make this work.");
-
-				return;
-			}
+			if (data == null)
+				return ReplyAsync($"There are no bite sentences available. Use {Format.Code($"{_config.DiscordConfig.Prefix}bite add <message>")} to add some.");
+			if (!data.IsEnabled)
+				return ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
+			if (data.Bites.Count < 1)
+				return ReplyAsync($"There are no bite sentences available. To add a sentence, use {Format.Code($"{_config.DiscordConfig.Prefix}bite add <sentence>")}. You will need to place {Format.Code("<biter>")} & {Format.Code("<bitee>")} in the sentence somewhere to make this work.");
 
 			var output = new StringBuilder()
 				.AppendFormat("List of Bite Sentences: ({0} Total)", data.Bites.Count).AppendLine().AppendLine();
 
 			data.Bites.ForEach(bite => output.AppendFormat("[{0}] {1}", Format.Code(data.Bites.IndexOf(bite).ToString()), bite).AppendLine());
 
-			if (output.Length < 1900) {
-				await ReplyAsync(output.ToString());
+			if (output.Length < 1900)
+				return ReplyAsync(output.ToString());
 
-				return;
-			}
-
-			await (Context.Channel as ITextChannel).SendStringAsFileAsync("Bites.txt", output.ToString(),
+			return (Context.Channel as ITextChannel).SendStringAsFileAsync("Bites.txt", output.ToString(),
 				$"List of {Format.Bold(data.Bites.Count.ToString())} Bite Sentences");
 		}
 
 		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task RemoveAsync(int index)
+		public Task RemoveAsync(int index)
 		{
 			var data = Context.Database.FunBites.GetData(Context.Guild.Id);
 
-			if (data == null || data.Bites.Count < 1) {
-				await ReplyAsync("The list of bite sentences is already empty.");
-
-				return;
-			} else if (!data.IsEnabled) {
-				await ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
-
-				return;
-			} else if (index < 0 || index >= data.Bites.Count) {
-				await ReplyAsync("The Message Id provided is out of bounds. Please recheck via Bite List.");
-
-				return;
-			}
+			if (data == null || data.Bites.Count < 1)
+				return ReplyAsync("The list of bite sentences is already empty.");
+			if (!data.IsEnabled)
+				return ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
+			if (index < 0 || index >= data.Bites.Count)
+				return ReplyAsync("The Message Id provided is out of bounds. Please recheck via Bite List.");
 
 			data.Bites.RemoveAt(index);
-
-			await ReplyAsync("Message Removed.");
+			return ReplyAsync("Message Removed.");
 		}
 
 		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task AllowDenyAsync()
+		public Task AllowDenyAsync()
 		{
 			var data = Context.Database.FunBites.GetOrCreateData(Context.Guild.Id);
-
 			data.IsEnabled = !data.IsEnabled;
-
-			await ReplyAsync($"Bites are now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
+			return ReplyAsync($"Bites are now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
 		}
 
 		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.FunBites.GetData(Context.Guild.Id);
 
-			if (data == null) {
-				await ReplyAsync("Bites has no data to reset.");
-
-				return;
-			}
+			if (data == null)
+				return ReplyAsync("Bites has no data to reset.");
 
 			Context.Database.FunBites.Remove(data);
-
-			await ReplyAsync("Bites has been reset.");
+			return ReplyAsync("Bites has been reset.");
 		}
 	}
 }

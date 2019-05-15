@@ -30,7 +30,7 @@ namespace Railgun.Events
 
         public void Load() => _client.LeftGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
 
-        private Task ExecuteAsync(SocketGuild guild)
+        private async Task ExecuteAsync(SocketGuild guild)
         {
             _playerController.GetPlayer(guild.Id)?.Player.CancelStream();
 
@@ -38,13 +38,12 @@ namespace Railgun.Events
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 				var data = db.ServerMusics.GetData(guild.Id);
 
-				if (data != null && data.PlaylistId != ObjectId.Empty) _musicService.Playlist.DeleteAsync(data.PlaylistId).GetAwaiter();
+				if (data != null && data.PlaylistId != ObjectId.Empty) await _musicService.Playlist.DeleteAsync(data.PlaylistId);
 
 				db.DeleteGuildData(guild.Id);
 			}
 
-			_botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Left").GetAwaiter();
-            return Task.CompletedTask;
+			await _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Left");
         }
     }
 }

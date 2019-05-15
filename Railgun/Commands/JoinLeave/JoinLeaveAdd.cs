@@ -13,25 +13,17 @@ namespace Railgun.Commands.JoinLeave
 		[Alias("add")]
 		public class JoinLeaveAdd : SystemBase
 		{
-			private async Task MsgHandlerAsync(string msg, MsgType type)
+			private Task MsgHandlerAsync(string msg, MsgType type)
 			{
-				if (string.IsNullOrWhiteSpace(msg)) {
-					await ReplyAsync("Please specify a message to add.");
-
-					return;
-				}
+				if (string.IsNullOrWhiteSpace(msg)) return ReplyAsync("Please specify a message to add.");
 
 				var data = Context.Database.ServerJoinLeaves.GetOrCreateData(Context.Guild.Id);
 
-				if ((type == MsgType.Join && data.JoinMessages.Contains(msg)) || (type == MsgType.Leave && data.LeaveMessages.Contains(msg))) {
-					await ReplyAsync("Specified message is already listed.");
-
-					return;
-				}
+				if ((type == MsgType.Join && data.JoinMessages.Contains(msg)) || (type == MsgType.Leave && data.LeaveMessages.Contains(msg)))
+					return ReplyAsync("Specified message is already listed.");
 
 				data.AddMessage(msg, type);
-
-				await ReplyAsync($"Successfully added {Format.Code(msg)} to {Format.Bold(type.ToString())} message.");
+				return ReplyAsync($"Successfully added {Format.Code(msg)} to {Format.Bold(type.ToString())} message.");
 			}
 
 			[Command("joinmsg")]

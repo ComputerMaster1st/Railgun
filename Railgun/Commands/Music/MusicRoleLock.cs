@@ -16,65 +16,49 @@ namespace Railgun.Commands.Music
 		public class MusicRoleLock : SystemBase
 		{
 			[Command("add")]
-			public async Task AddRoleAsync(IRole role)
+			public Task AddRoleAsync(IRole role)
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-
 				data.AllowedRoles.Add(new UlongRoleId(role.Id));
 
-				if (data.AllowedRoles.Count < 2) {
-					await ReplyAsync($"All music commands are now role-locked to {role.Name}.");
-
-					return;
-				}
-
-				await ReplyAsync($"Users with the role {Format.Bold(role.Name)}, may also use the music commands.");
+				if (data.AllowedRoles.Count < 2) 
+					return ReplyAsync($"All music commands are now role-locked to {role.Name}.");
+				return ReplyAsync($"Users with the role {Format.Bold(role.Name)}, may also use the music commands.");
 			}
 			
 			[Command("add")]
-			public async Task AddRoleAsync([Remainder] string roleName)
+			public Task AddRoleAsync([Remainder] string roleName)
 			{
 				foreach (var role in Context.Guild.Roles)
-					if (role.Name.Contains(roleName)) {
-						await AddRoleAsync(role);
-
-						return;
-					}
-
-				await ReplyAsync("Unable to find a role with the name you specified.");
+					if (role.Name.Contains(roleName))
+						return AddRoleAsync(role);
+				return ReplyAsync("Unable to find a role with the name you specified.");
 			}
 
 			[Command("remove")]
-			public async Task RemoveRoleAsync(IRole role)
+			public Task RemoveRoleAsync(IRole role)
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 				var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole.RoleId == role.Id);
 
-				if (count < 1) {
-					await ReplyAsync("The role specified was never role-locked.");
-
-					return;
-				}
+				if (count < 1)
+					return ReplyAsync("The role specified was never role-locked.");
 
 				var output = new StringBuilder()
 					.AppendFormat("The role {0}, has now been removed from role-locking.", role.Name).AppendLine();
 
 				if (data.AllowedRoles.Count < 1) output.AppendLine("All music commands are no longer role-locked.");
 
-				await ReplyAsync(output.ToString());
+				return ReplyAsync(output.ToString());
 			}
 			
 			[Command("remove")]
-			public async Task RemoveRoleAsync([Remainder] string roleName)
+			public Task RemoveRoleAsync([Remainder] string roleName)
 			{
 				foreach (var role in Context.Guild.Roles)
-					if (role.Name.Contains(roleName)) {
-						await RemoveRoleAsync(role);
-
-						return;
-					}
-
-				await ReplyAsync("Unable to find a role with the name you specified.");
+					if (role.Name.Contains(roleName))
+						return RemoveRoleAsync(role);
+				return ReplyAsync("Unable to find a role with the name you specified.");
 			}
 		}
 	}

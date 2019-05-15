@@ -9,9 +9,9 @@ namespace Railgun.Commands
     public class Hello : SystemBase
     {        
         [Command]
-        public async Task HelloAsync() {
-            var name = SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author);
-            await ReplyAsync($"Hello {Format.Bold(name)}, I'm Railgun! Here to shock your world!");
+        public Task HelloAsync() {
+            var name = SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser);
+            return ReplyAsync($"Hello {Format.Bold(name)}, I'm Railgun! Here to shock your world!");
         }
     }
 }

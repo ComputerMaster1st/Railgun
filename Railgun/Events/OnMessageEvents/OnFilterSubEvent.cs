@@ -17,13 +17,13 @@ namespace Railgun.Events.OnMessageEvents
             _analytics = analytics;
         }
 
-        public Task ExecuteAsync(SocketMessage message)
+        public async Task ExecuteAsync(SocketMessage message)
         {
             var msg = message as IUserMessage;
-            var filterMsg = _filterLoader.ApplyFilter(msg);
+            var filterMsg = await _filterLoader.ApplyFilterAsync(msg);
 
 			if (filterMsg != null) {
-				Task.Run(async () => {
+				await Task.Run(async () => {
 					try
                     {
 						await msg.DeleteAsync();
@@ -33,10 +33,8 @@ namespace Railgun.Events.OnMessageEvents
 					} 
                     catch { // Ignored
 			        }
-				}).GetAwaiter();
+				});
 			}
-
-            return Task.CompletedTask;
         }
     }
 }

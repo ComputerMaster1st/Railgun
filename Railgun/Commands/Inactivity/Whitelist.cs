@@ -33,10 +33,10 @@ namespace Railgun.Commands.Inactivity
             }
             
             [Command("role")]
-            public Task RoleAsync(IRole role)
+            public async Task RoleAsync(IRole role)
             {
                 var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
-                var users = Context.Guild.GetUsersAsync().GetAwaiter().GetResult()
+                var users = (await Context.Guild.GetUsersAsync())
                     .Where(f => f.RoleIds.Contains(role.Id));
 
                 if (data.RoleWhitelist.Any(f => f.RoleId == role.Id))
@@ -47,14 +47,14 @@ namespace Railgun.Commands.Inactivity
                         if (data.Users.All(f => f.UserId != user.Id)) 
                             data.Users.Add(new UserActivityContainer(user.Id));
                     
-                    return ReplyAsync("Role removed from whitelisted!");
+                    await ReplyAsync("Role removed from whitelisted!");
                 }
 
                 data.RoleWhitelist.Add(new UlongRoleId(role.Id));
 
                 foreach (var user in users) data.Users.RemoveAll(f => f.UserId == user.Id);
                 
-                return ReplyAsync("Role added to whitelist!");
+                await ReplyAsync("Role added to whitelist!");
             }
 
             [Command("role")]

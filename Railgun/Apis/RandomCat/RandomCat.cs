@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Railgun.Core.Configuration;
 
 namespace Railgun.Apis.RandomCat
@@ -12,13 +13,13 @@ namespace Railgun.Apis.RandomCat
         public RandomCat(MasterConfig config)
             => _apiKey = config.RandomCatApiToken;
 
-        public Stream GetRandomCatAsync()
+        public async Task<Stream> GetRandomCatAsync()
         {
             Stream stream;
 
             using (var client = new HttpClient())
             {
-                stream = client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med").GetAwaiter().GetResult();
+                stream = await client.GetStreamAsync($"{BaseUrl}get?api_key={_apiKey}&type=png&size=med");
             }
 
             return stream;

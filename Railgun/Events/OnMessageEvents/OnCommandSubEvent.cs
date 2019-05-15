@@ -54,7 +54,7 @@ namespace Railgun.Events.OnMessageEvents
 								if (!(result is CommandResult cmdResult)) return;
 								if (cmdResult.CommandPath == "root dc") return;
 
-								_analytics.ExecutedCommand(context, cmdResult);
+								await _analytics.ExecutedCommand(context, cmdResult);
 
 								var data = context.Database.ServerCommands.GetData(guild.Id);
 

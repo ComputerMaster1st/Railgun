@@ -23,14 +23,14 @@ namespace Railgun.Core
         public void Start()
         {
             _timer.AutoReset = true;
-            _timer.Elapsed += (sender, args) => Task.Factory.StartNew(() => UpdateServerCountAsync());
+            _timer.Elapsed += async (sender, args) => await Task.Factory.StartNew(async () => await UpdateServerCountAsync());
             _timer.Start();
         }
 
-        private void UpdateServerCountAsync() {
+        private async Task UpdateServerCountAsync() {
             if (PreviousGuildCount == _client.Guilds.Count) return;
             PreviousGuildCount = _client.Guilds.Count;
-            _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} {PreviousGuildCount} Servers!", type:ActivityType.Watching).GetAwaiter();
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} {PreviousGuildCount} Servers!", type:ActivityType.Watching);
         }
     }
 }

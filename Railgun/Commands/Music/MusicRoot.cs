@@ -19,12 +19,9 @@ namespace Railgun.Commands.Music
             public MusicRoot(PlayerController playerController) => _playerController = playerController;
             
             [Command("active"), BotPerms(ChannelPermission.AttachFiles)]
-            public async Task ActiveAsync() {
-                if (_playerController.PlayerContainers.Count < 1) {
-                    await ReplyAsync("There are no active music streams at this time.");
-
-                    return;
-                }
+            public Task ActiveAsync() {
+                if (_playerController.PlayerContainers.Count < 1)
+                    return ReplyAsync("There are no active music streams at this time.");
                 
                 var output = new StringBuilder()
                     .AppendFormat("Active Music Streams ({0} Total):", _playerController.PlayerContainers.Count).AppendLine().AppendLine();
@@ -37,19 +34,14 @@ namespace Railgun.Commands.Music
                         .AppendFormat("\\--> Latency : {0}ms {1} Playing : {2} {1} Since : {3}", player.Latency, SystemUtilities.GetSeparator, song == null ? "Searching..." : song.Id.ToString(), player.SongStartedAt).AppendLine().AppendLine();
                 }
                 
-                if (output.Length < 1950) {
-                    await ReplyAsync(Format.Code(output.ToString()));
-
-                    return;
-                }
-
-                await ((ITextChannel)Context.Channel).SendStringAsFileAsync("ActivePlayers.txt", output.ToString(), includeGuildName:false);
+                if (output.Length < 1950)
+                    return ReplyAsync(Format.Code(output.ToString()));
+                return (Context.Channel as ITextChannel).SendStringAsFileAsync("ActivePlayers.txt", output.ToString(), includeGuildName:false);
             }
             
             [Command("kill")]
             public Task KillAsync(ulong id) {
                 _playerController.DisconnectPlayer(id);
-
                 return ReplyAsync($"Sent 'Kill Code' to Player ID {id}.");
             }
         }

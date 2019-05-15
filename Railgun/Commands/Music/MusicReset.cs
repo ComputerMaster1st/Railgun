@@ -29,17 +29,14 @@ namespace Railgun.Commands.Music
 			}
 
 			[Command("stream")]
-			public async Task StreamAsync()
+			public Task StreamAsync()
 			{
-				if (_playerController.GetPlayer(Context.Guild.Id) == null) {
-					if (!_full) await ReplyAsync("I'm not streaming any music at this time.");
-
-					return;
-				}
+				if (_playerController.GetPlayer(Context.Guild.Id) == null)
+					if (!_full) return ReplyAsync("I'm not streaming any music at this time.");
 
 				_playerController.DisconnectPlayer(Context.Guild.Id);
-
-				if (!_full) await ReplyAsync($"Music stream has been reset! Use {Format.Code($"{_config.DiscordConfig.Prefix}music join")} to create a new music stream.");
+				if (!_full) return ReplyAsync($"Music stream has been reset! Use {Format.Code($"{_config.DiscordConfig.Prefix}music join")} to create a new music stream.");
+				return Task.CompletedTask;
 			}
 
 			[Command("playlist")]
@@ -49,7 +46,6 @@ namespace Railgun.Commands.Music
 
 				if (data == null || data.PlaylistId == ObjectId.Empty && !_full) {
 					await ReplyAsync("Server playlist is already empty.");
-
 					return;
 				}
 
@@ -72,12 +68,10 @@ namespace Railgun.Commands.Music
 
 				if (data == null) {
 					await ReplyAsync("Music has no data to reset.");
-
 					return;
 				}
 
 				Context.Database.ServerMusics.Remove(data);
-
 				await ReplyAsync("Music settings & playlist has been reset.");
 			}
 		}

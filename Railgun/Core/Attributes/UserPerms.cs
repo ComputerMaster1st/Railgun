@@ -18,24 +18,21 @@ namespace Railgun.Core.Attributes
 
         public UserPerms(ChannelPermission permission) => _channelPermission = permission;
 
-        public Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
+        public async Task<PreconditionResult> CheckPermissionsAsync(SystemContext context, CommandInfo command, IServiceProvider services)
         {
             var config = services.GetService<MasterConfig>();
-            var user = context.Guild.GetUserAsync(context.Author.Id).GetAwaiter().GetResult();
+            var user = await context.Guild.GetUserAsync(context.Author.Id);
 
             if (_guildPermission.HasValue) 
-            {
                 if (!(user.GuildPermissions.Has(_guildPermission.Value) || user.GuildPermissions.Administrator || config.DiscordConfig.OtherAdmins.Contains(user.Id) || user.Id == config.DiscordConfig.MasterAdminId))
-                    return Task.FromResult(PreconditionResult.FromError($"You do not have permission to use this command! {Format.Bold($"SERVER-PERM-MISSING : {_guildPermission.ToString()}")}"));
-            }
-            else if (_channelPermission.HasValue)
-            {
+                    return PreconditionResult.FromError($"You do not have permission to use this command! {Format.Bold($"SERVER-PERM-MISSING : {_guildPermission.ToString()}")}");
+            if (_channelPermission.HasValue) {
                 var channelPerms = user.GetPermissions((IGuildChannel)context.Channel);
                 if (!(channelPerms.Has(_channelPermission.Value) || user.GuildPermissions.Administrator || config.DiscordConfig.OtherAdmins.Contains(user.Id) || user.Id == config.DiscordConfig.MasterAdminId))
-                    return Task.FromResult(PreconditionResult.FromError($"You do not have permission to use this command! {Format.Bold($"CHANNEL-PERM-MISSING : {_channelPermission.ToString()}")}"));
+                    return PreconditionResult.FromError($"You do not have permission to use this command! {Format.Bold($"CHANNEL-PERM-MISSING : {_channelPermission.ToString()}")}");
             }
 
-            return Task.FromResult(PreconditionResult.FromSuccess());
+            return PreconditionResult.FromSuccess();
         }
     }
 }

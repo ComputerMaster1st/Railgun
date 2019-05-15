@@ -32,7 +32,6 @@ namespace Railgun.Commands.Music
 
 				if (data == null || data.PlaylistId == ObjectId.Empty) {
 					await ReplyAsync("Unknown Music Id Given!");
-
 					return;
 				}
 
@@ -70,7 +69,6 @@ namespace Railgun.Commands.Music
 
 				if (playerContainer == null) {
 					await ReplyAsync("Cannot use this command if there's no active music stream at this time.");
-
 					return;
 				}
 
@@ -79,7 +77,6 @@ namespace Railgun.Commands.Music
 
 				if (data == null || data.PlaylistId == ObjectId.Empty || player == null) {
 					await ReplyAsync("Can not remove current song because I am not in voice channel.");
-
 					return;
 				}
 
@@ -88,7 +85,6 @@ namespace Railgun.Commands.Music
 
 				if (song == null) {
 					await ReplyAsync("No song has been selected yet. Try this command again once a song starts playing.");
-
 					return;
 				}
 

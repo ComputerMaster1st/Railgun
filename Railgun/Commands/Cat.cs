@@ -16,6 +16,6 @@ namespace Railgun.Commands
         
         [Command, BotPerms(ChannelPermission.AttachFiles)]
         public async Task CatAsync() 
-            => await Context.Channel.SendFileAsync(_randomCat.GetRandomCatAsync(), "CatImg.png");
+            => await Context.Channel.SendFileAsync(await _randomCat.GetRandomCatAsync(), "CatImg.png");
     }
 }

@@ -46,7 +46,7 @@ namespace Railgun.Commands
 				await ReplyAsync("User Warnings are currently disabled. You can enable it by changing the warning limit.");
 				return;
 			} 
-			else if (!await SystemUtilities.CheckIfSelfIsHigherRole(Context.Guild, (IGuildUser)user)) 
+			else if (!await SystemUtilities.CheckIfSelfIsHigherRoleAsync(Context.Guild, (IGuildUser)user)) 
 			{
 				await ReplyAsync($"Unable to warn {user.Username} as my role isn't high enough to auto-ban the user.");
 				return;
@@ -124,113 +124,85 @@ namespace Railgun.Commands
 		}
 
 		[Command("mylist")]
-		public async Task MyListAsync()
+		public Task MyListAsync()
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) 
-			{
-				await ReplyAsync("There are currently no users with warnings.");
-				return;
-			}
+			if (data == null || data.Warnings.Count < 1)
+				return ReplyAsync("There are currently no users with warnings.");
 
 			var warnings = data.GetWarnings(Context.Author.Id);
 
-			if (warnings == null || warnings.Count < 1) 
-			{
-				await ReplyAsync("You have no warnings to your name.");
-				return;
-			}
+			if (warnings == null || warnings.Count < 1)
+				return ReplyAsync("You have no warnings to your name.");
 
 			var output = new StringBuilder()
 				.AppendFormat("You have been warned {0} time(s) for...", Format.Bold(warnings.Count.ToString())).AppendLine().AppendLine();
 
 			warnings.ForEach(reason => output.AppendFormat("---- {0}", Format.Bold(reason)).AppendLine());
-
-			await ReplyAsync(output.ToString());
+			return ReplyAsync(output.ToString());
 		}
 
 		[Command("clear"), UserPerms(GuildPermission.BanMembers)]
-		public async Task ClearAsync(IUser user)
+		public Task ClearAsync(IUser user)
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null || data.Warnings.Count < 1) 
-			{
-				await ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
-				return;
-			}
+			if (data == null || data.Warnings.Count < 1)
+				return ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
 
 			var warnings = data.GetWarnings(user.Id);
 
 			if (warnings == null || warnings.Count < 1)
-			{
-				await ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
-				return;
-			}
+				return ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
 
 			data.ResetWarnings(user.Id);
-
-			await ReplyAsync($"{user.Mention} no longer has any warnings.");
+			return ReplyAsync($"{user.Mention} no longer has any warnings.");
 		}
 
 		[Command("empty"), UserPerms(GuildPermission.ManageGuild)]
-		public async Task EmptyAsync()
+		public Task EmptyAsync()
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
 			if (data == null || data.Warnings.Count < 1) 
-			{
-				await ReplyAsync("Warnings list is already empty.");
-				return;
-			}
+				return ReplyAsync("Warnings list is already empty.");
 
 			data.Warnings.Clear();
-
-			await ReplyAsync("Warnings list is now empty.");
+			return ReplyAsync("Warnings list is now empty.");
 		}
 
 		[Command("limit"), UserPerms(GuildPermission.ManageGuild)]
-		public async Task WarnLimitAsync(int limit = 5)
+		public Task WarnLimitAsync(int limit = 5)
 		{
 			var data = Context.Database.ServerWarnings.GetOrCreateData(Context.Guild.Id);
 
-			if (limit < 0) 
-			{
-				await ReplyAsync("The limit entered is invalid. Must be 0 or higher.");
-				return;
-			}
+			if (limit < 0)
+				return ReplyAsync("The limit entered is invalid. Must be 0 or higher.");
 
 			string message;
 
-			if (limit > 0) 
-			{
+			if (limit > 0) {
 				message = $"Auto-Ban{(data.WarnLimit == 0 ? " is now enabled and the" : "")} warning limit is now set to {Format.Bold(limit.ToString())}. You can disable warnings by changing the limit to 0.";
 				data.WarnLimit = limit;
-			} 
-			else 
-			{
+			} else {
 				data.WarnLimit = limit;
 				message = "Auto-Ban has been disabled.";
 			}
 
-			await ReplyAsync(message);
+			return ReplyAsync(message);
 		}
 
 		[Command("reset"), UserPerms(GuildPermission.ManageGuild)]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
 
-			if (data == null) 
-			{
-				await ReplyAsync("Warnings has no data to reset.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync("Warnings has no data to reset.");
 
 			Context.Database.ServerWarnings.Remove(data);
-
-			await ReplyAsync("Warnings has been reset & disabled.");
+			return ReplyAsync("Warnings has been reset & disabled.");
 		}
 	}
 }

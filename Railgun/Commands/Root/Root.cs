@@ -98,9 +98,9 @@ namespace Railgun.Commands.Root
         }
         
         [Command("master")]
-        public async Task MasterAsync() {
+        public Task MasterAsync() {
             _config.AssignMasterGuild(Context.Guild.Id);
-            await ReplyAsync($"This server {Format.Bold(Context.Guild.Name)} has been set as master.");
+            return ReplyAsync($"This server {Format.Bold(Context.Guild.Name)} has been set as master.");
         }
         
         [Command("serverlist"), BotPerms(ChannelPermission.AttachFiles)]
@@ -110,8 +110,7 @@ namespace Railgun.Commands.Root
                 .AppendFormat("Railgun Connected Server List: ({0} Servers Listed)", guilds.Count).AppendLine().AppendLine();
             
             foreach (var guild in guilds) output.AppendFormat("{0} : {1}", guild.Id, guild.Name).AppendLine();
-            
-            await ((ITextChannel)Context.Channel).SendStringAsFileAsync("Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
+            await (Context.Channel as ITextChannel).SendStringAsFileAsync("Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
         }
         
         [Command("updatestatus")]
@@ -142,7 +141,6 @@ namespace Railgun.Commands.Root
         public Task GcAsync() {
             GC.WaitForPendingFinalizers();
             GC.Collect();
-            
             return ReplyAsync("GC Forced!");
         }
         
@@ -159,7 +157,6 @@ namespace Railgun.Commands.Root
                 
                 foreach (var playerInfo in _playerController.PlayerContainers) {
                     await playerInfo.TextChannel.SendMessageAsync(output.ToString());
-
                     playerInfo.Player.CancelStream();
                 }
             }
@@ -174,7 +171,6 @@ namespace Railgun.Commands.Root
         public async Task PrefixAsync([Remainder] string input) {
             if (string.IsNullOrWhiteSpace(input)) {
                 await ReplyAsync("Please specify a prefix.");
-
                 return;
             }
             
@@ -192,7 +188,7 @@ namespace Railgun.Commands.Root
             catch (Exception ex) { output = ex.Message; }
             
             if (output.Length > 1900) {
-                await ((ITextChannel)Context.Channel).SendStringAsFileAsync("evalresult.txt", output, "Evaluation Results!", false);
+                await (Context.Channel as ITextChannel).SendStringAsFileAsync("evalresult.txt", output, "Evaluation Results!", false);
 
                 return;
             }
@@ -201,16 +197,15 @@ namespace Railgun.Commands.Root
         }
         
         [Command("timer-restart")]
-        public async Task TimerRestartAsync() {
+        public Task TimerRestartAsync() {
             _timerManager.Initialize();
-            await ReplyAsync("Timer Manager Restarted!");
+            return ReplyAsync("Timer Manager Restarted!");
         }
         
         [Command("avatar")]
         public async Task AvatarAsync(string url = null) {
             if (string.IsNullOrWhiteSpace(url) && Context.Message.Attachments.Count < 1) {
                 await ReplyAsync("Please specify a url or upload an image.");
-
                 return;
             }
             
@@ -238,7 +233,6 @@ namespace Railgun.Commands.Root
 
             foreach (var localUser in localUsers) {
                 var remoteUser = await guild.GetUserAsync(localUser.Id);
-
                 if (remoteUser != null) remoteUsers.Add(remoteUser);
             }
 
@@ -253,12 +247,10 @@ namespace Railgun.Commands.Root
                     Format.Bold($"{guild.Name} <{guild.Id}>")).AppendLine()
                 .AppendLine();
 
-            foreach (var remoteUser in remoteUsers) {
+            foreach (var remoteUser in remoteUsers)
                 output.AppendFormat("{0}#{1} {2} ", remoteUser.Username, remoteUser.DiscriminatorValue, SystemUtilities.GetSeparator);
-            }
 
             output.Remove(output.Length - 3, 3);
-
             await ReplyAsync(output.ToString());
         }
     }

@@ -28,27 +28,24 @@ namespace Railgun.Events
             return this;
         }
 
-        private Task ExecuteReceivedAsync(SocketMessage message)
+        private async Task ExecuteReceivedAsync(SocketMessage message)
         {
             _analytics.ReceivedMessages++;
-            ExecuteAsync(message).GetAwaiter();
-            return Task.CompletedTask;
+            await ExecuteAsync(message);
         }
 
-        private Task ExecuteUpdatedAsync(SocketMessage message)
+        private async Task ExecuteUpdatedAsync(SocketMessage message)
         {
             _analytics.UpdatedMessages++;
-            ExecuteAsync(message).GetAwaiter();
-            return Task.CompletedTask;          
+            await ExecuteAsync(message);          
         }
 
-        private Task ExecuteAsync(SocketMessage message)
+        private async Task ExecuteAsync(SocketMessage message)
         {
-            if (!(message is SocketUserMessage) || !(message.Channel is SocketGuildChannel) || string.IsNullOrEmpty(message.Content)) return Task.CompletedTask;
+            if (!(message is SocketUserMessage) || !(message.Channel is SocketGuildChannel) || string.IsNullOrEmpty(message.Content)) return;
 
             foreach (var subEvent in _subEvents)
-                subEvent.ExecuteAsync(message).GetAwaiter();
-            return Task.CompletedTask;
+                await subEvent.ExecuteAsync(message);
         }
     }
 }

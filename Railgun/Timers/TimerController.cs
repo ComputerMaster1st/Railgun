@@ -137,9 +137,7 @@ namespace Railgun.Timers
                 .AppendFormat("Already Running : {0}", TimerContainers.Count - newTimers).AppendLine()
                 .AppendFormat("Crashed         : {0}", crashedTimers).AppendLine()
                 .AppendFormat("Final Cleanup   : {0}", completedTimers + crashedTimers);
-            _botLog.SendBotLogAsync(BotLogType.TimerManager, output.ToString()).GetAwaiter();
-
-            return Task.CompletedTask;
+            return _botLog.SendBotLogAsync(BotLogType.TimerManager, output.ToString());
         }
     }
 }

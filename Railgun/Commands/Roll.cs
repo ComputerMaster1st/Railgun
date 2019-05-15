@@ -10,13 +10,13 @@ namespace Railgun.Commands
     public class Roll : SystemBase
     {        
         [Command]
-        public async Task RollAsync(int num1 = 0, int num2 = 100) 
+        public Task RollAsync(int num1 = 0, int num2 = 100) 
         {
-            var name = SystemUtilities.GetUsernameOrMention(Context.Database, (IGuildUser)Context.Author);
+            var name = SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser);
             var rand = new Random();
             var rng = num1 > num2 ? rand.Next(num2, num1) : rand.Next(num1, num2);
             
-            await ReplyAsync($"{Format.Bold(name)} has rolled {Format.Bold(rng.ToString())}.");
+            return ReplyAsync($"{Format.Bold(name)} has rolled {Format.Bold(rng.ToString())}.");
         }
     }
 }

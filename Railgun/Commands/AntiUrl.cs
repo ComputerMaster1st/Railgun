@@ -28,96 +28,79 @@ namespace Railgun.Commands
 		}
 
 		[Command]
-		public async Task EnableAsync()
+		public Task EnableAsync()
 		{
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
-
 			data.IsEnabled = !data.IsEnabled;
-
-			await ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
+			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
 
 		[Command("includebots")]
-		public async Task IncludeBotsAsync()
+		public Task IncludeBotsAsync()
 		{
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
-
 			data.IncludeBots = !data.IncludeBots;
-
-			await ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
+			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
 		}
 
 		[Command("invites")]
-		public async Task InvitesAsync()
+		public Task InvitesAsync()
 		{
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
-
 			data.BlockServerInvites = !data.BlockServerInvites;
-
-			await ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
+			return ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
 		}
 
 		[Command("add")]
-		public async Task AddAsync(string url)
+		public Task AddAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
 
-			if (data.BannedUrls.Contains(newUrl)) {
-				await ReplyAsync("The Url specified is already listed.");
-				return;
-			}
+			if (data.BannedUrls.Contains(newUrl))
+				return ReplyAsync("The Url specified is already listed.");
 
 			data.BannedUrls.Add(newUrl);
-
 			if (!data.IsEnabled) data.IsEnabled = true;
 
-			await ReplyAsync($"The Url {Format.Bold(newUrl)} is now added to list.");
+			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now added to list.");
 		}
 
 		[Command("remove")]
-		public async Task RemoveAsync(string url)
+		public Task RemoveAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
 			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
 
-			if (data == null || !data.BannedUrls.Contains(newUrl)) {
-				await ReplyAsync("The Url specified is not listed.");
-				return;
-			}
+			if (data == null || !data.BannedUrls.Contains(newUrl))
+				return ReplyAsync("The Url specified is not listed.");
 
 			data.BannedUrls.Remove(newUrl);
-
-			await ReplyAsync($"The Url {Format.Bold(newUrl)} is now removed from list.");
+			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now removed from list.");
 		}
 
 		[Command("ignore")]
-		public async Task IgnoreAsync(ITextChannel pChannel = null)
+		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
 			var tc = pChannel ?? (ITextChannel)Context.Channel;
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
 
 			if (data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) {
 				data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
-
-				await ReplyAsync("Anti-Url is now monitoring this channel.");
+				return ReplyAsync("Anti-Url is now monitoring this channel.");
 			} else {
 				data.IgnoredChannels.Add(new IgnoredChannels(tc.Id));
-
-				await ReplyAsync("Anti-Url is no longer monitoring this channel.");
+				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
 			}
 		}
 
 		[Command("mode")]
-		public async Task ModeAsync()
+		public Task ModeAsync()
 		{
 			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
-
 			data.DenyMode = !data.DenyMode;
-
 			if (!data.IsEnabled) data.IsEnabled = true;
-
-			await ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
+			return ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
 		}
 
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
@@ -175,18 +158,15 @@ namespace Railgun.Commands
 		}
 
 		[Command("reset")]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
 
-			if (data == null) {
-				await ReplyAsync("Anti-Url has no data to reset.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync("Anti-Url has no data to reset.");
 
 			Context.Database.FilterUrls.Remove(data);
-
-			await ReplyAsync("Anti-Url has been reset & disabled.");
+			return ReplyAsync("Anti-Url has been reset & disabled.");
 		}
 	}
 }

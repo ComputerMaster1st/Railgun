@@ -15,73 +15,59 @@ namespace Railgun.Commands
 	public class AntiCaps : SystemBase
 	{
 		[Command]
-		public async Task EnableAsync()
+		public Task EnableAsync()
 		{
 			var data = Context.Database.FilterCapses.GetOrCreateData(Context.Guild.Id);
-
 			data.IsEnabled = !data.IsEnabled;
-
-			await ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
+			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
 
 		[Command("includebots")]
-		public async Task IncludeBotsAsync()
+		public Task IncludeBotsAsync()
 		{
 			var data = Context.Database.FilterCapses.GetOrCreateData(Context.Guild.Id);
-
 			data.IncludeBots = !data.IncludeBots;
-
-			await ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Monitoring" : "Ignoring")} bots.");
+			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Monitoring" : "Ignoring")} bots.");
 		}
 
 		[Command("percent")]
-		public async Task PercentAsync(int percent)
+		public Task PercentAsync(int percent)
 		{
-			if (percent < 50 || percent > 100) {
-				await ReplyAsync("Anti-Caps Percentage must be between 50-100.");
-				return;
-			}
+			if (percent < 50 || percent > 100) 
+				return ReplyAsync("Anti-Caps Percentage must be between 50-100.");
 
 			var data = Context.Database.FilterCapses.GetOrCreateData(Context.Guild.Id);
-
 			data.Percentage = percent;
-
 			if (!data.IsEnabled) data.IsEnabled = true;
 
-			await ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.");
+			return ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.");
 		}
 
 		[Command("minlength")]
-		public async Task MinLengthAsync(int length)
+		public Task MinLengthAsync(int length)
 		{
-			if (length < 0) {
-				await ReplyAsync("Please specify a minimum message length of 0 or above.");
-				return;
-			}
+			if (length < 0)
+				return ReplyAsync("Please specify a minimum message length of 0 or above.");
 
 			var data = Context.Database.FilterCapses.GetOrCreateData(Context.Guild.Id);
-
 			data.Length = length;
-
 			if (!data.IsEnabled) data.IsEnabled = true;
 
-			await ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.");
+			return ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.");
 		}
 
 		[Command("ignore")]
-		public async Task IgnoreAsync(ITextChannel pChannel = null)
+		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
-			var tc = pChannel ?? (ITextChannel)Context.Channel;
+			var tc = pChannel ?? Context.Channel as ITextChannel;
 			var data = Context.Database.FilterCapses.GetOrCreateData(Context.Guild.Id);
 
 			if (data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) {
 				data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
-
-				await ReplyAsync("Anti-Caps is now monitoring this channel.");
+				return ReplyAsync("Anti-Caps is now monitoring this channel.");
 			} else {
 				data.IgnoredChannels.Add(new IgnoredChannels(tc.Id));
-
-				await ReplyAsync("Anti-Caps is no longer monitoring this channel.");
+				return ReplyAsync("Anti-Caps is no longer monitoring this channel.");
 			}
 		}
 
@@ -126,18 +112,15 @@ namespace Railgun.Commands
 		}
 
 		[Command("reset")]
-		public async Task ResetAsync()
+		public Task ResetAsync()
 		{
 			var data = Context.Database.FilterCapses.GetData(Context.Guild.Id);
 
-			if (data == null) {
-				await ReplyAsync("Anti-Caps has no data to reset.");
-				return;
-			}
+			if (data == null)
+				return ReplyAsync("Anti-Caps has no data to reset.");
 
 			Context.Database.FilterCapses.Remove(data);
-
-			await ReplyAsync("Anti-Caps has been reset & disabled.");
+			return ReplyAsync("Anti-Caps has been reset & disabled.");
 		}
 	}
 }

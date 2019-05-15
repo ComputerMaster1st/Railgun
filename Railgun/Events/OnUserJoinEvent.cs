@@ -57,9 +57,7 @@ namespace Railgun.Events
 			if (string.IsNullOrEmpty(notification)) return Task.CompletedTask;
 
 			notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", username);
-			SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog).GetAwaiter();
-
-            return Task.CompletedTask;
+			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
     }
 }

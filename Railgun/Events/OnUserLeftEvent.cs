@@ -47,9 +47,7 @@ namespace Railgun.Events
 			var notification = data.GetMessage(MsgType.Leave);
 
 			if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<user>", user.Username);
-			SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog).GetAwaiter();
-            
-            return Task.CompletedTask;
+			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
     }
 }

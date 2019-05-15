@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using TreeDiagram;
@@ -15,7 +16,7 @@ namespace Railgun.Filters
 
         public void AddMessageFilter(IMessageFilter filter) => _filters.Add(filter);
 
-        public IUserMessage ApplyFilter(IUserMessage msg) {
+        public async Task<IUserMessage> ApplyFilterAsync(IUserMessage msg) {
             if (string.IsNullOrWhiteSpace(msg.Content)) return null;
 
             var tc = (ITextChannel)msg.Channel;
@@ -27,7 +28,7 @@ namespace Railgun.Filters
 
                 foreach (var filter in _filters) 
                 {
-                    result = filter.FilterAsync(tc, msg, db).GetAwaiter().GetResult();
+                    result = await filter.FilterAsync(tc, msg, db);
                     if (result != null) break;
                 }
             }

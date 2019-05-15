@@ -31,7 +31,6 @@ namespace Railgun.Commands.Music
 			{
 				if (Context.Message.Attachments.Count < 1) {
 					await ReplyAsync("Please specify a youtube link or upload a file.");
-
 					return;
 				}
 
