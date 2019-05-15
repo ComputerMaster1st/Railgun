@@ -30,7 +30,7 @@ namespace Railgun.Music.Events
         public void Load(PlayerContainer container)
 		{
             _container = container;
-			_container.Player.Playing += (s, a) => Task.Factory.StartNew(() => ExecuteAsync(a));
+			_container.Player.Playing += async (s, a) => await ExecuteAsync(a);
 		}
 
         private async Task ExecuteAsync(PlayingEventArgs args)
@@ -38,7 +38,6 @@ namespace Railgun.Music.Events
 			try {
 				ServerMusic data;
 				ITextChannel tc;
-				await _container.Lock.WaitAsync();
 				
 				using (var scope = _services.CreateScope()) {
 					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
@@ -57,11 +56,9 @@ namespace Railgun.Music.Events
 				}
 
 				await PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, _container);
-				_container.Lock.Release();
 			} catch {
 				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
 				_container.Player.CancelStream();
-				_container.Lock.Release();
 			}
         }
     }

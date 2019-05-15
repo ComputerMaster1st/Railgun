@@ -24,12 +24,11 @@ namespace Railgun.Music.Events
         public void Load(PlayerContainer container) 
         {
             _container = container;
-            _container.Player.Finished += (s, a) => Task.Factory.StartNew(() => ExecuteAsync(a));
+            _container.Player.Finished += async (s, a) => await ExecuteAsync(a);
         }
 
         private async Task ExecuteAsync(FinishedEventArgs args)
         {
-			await _container.Lock.WaitAsync();
 			var tc = _container.TextChannel;
 
 			try 
@@ -62,7 +61,6 @@ namespace Railgun.Music.Events
 			} 
             finally 
             {
-			    _container.Lock.Release();
 				await _container.LogEntry.DeleteAsync();
 				await _controller.StopPlayerAsync(args.GuildId, args.AutoDisconnected);
 			}

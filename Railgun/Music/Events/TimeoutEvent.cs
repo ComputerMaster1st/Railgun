@@ -21,12 +21,11 @@ namespace Railgun.Music.Events
         public void Load(PlayerContainer container)
 		{
 			_container = container;
-			_container.Player.Timeout += (s, a) => Task.Factory.StartNew(() => ExecuteAsync(a));
+			_container.Player.Timeout += async (s, a) => await ExecuteAsync(a);
 		}
 
         private async Task ExecuteAsync(TimeoutEventArgs args)
         {
-			await _container.Lock.WaitAsync();
 			var tc = _container.TextChannel;
 
 			try {
@@ -40,8 +39,6 @@ namespace Railgun.Music.Events
 
 				await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, output.ToString());
 			}
-
-			_container.Lock.Release();
         }
     }
 }

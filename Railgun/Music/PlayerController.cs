@@ -97,7 +97,6 @@ namespace Railgun.Music
                 .LoadEvent(new FinishedEvent(this, _botLog));
 
             container.AddEventLoader(loader);
-			await container.Lock.WaitAsync();
 
 			if (preRequestedSong != null) {
 				player.AddSongRequest(preRequestedSong);
@@ -109,7 +108,6 @@ namespace Railgun.Music
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
 			player.StartPlayer(playlist.Id);
 			PlayerContainers.Add(container);
-			container.Lock.Release();
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)
@@ -128,10 +126,7 @@ namespace Railgun.Music
 
 			if (!autoLeave) player.CancelStream();
 
-			while (player.PlayerTask.Status == TaskStatus.WaitingForActivation) await Task.Delay(500);
-
-			player.PlayerTask.Dispose();
-			container.Lock.Dispose();
+			while (player.Status == PlayerStatus.Disconnected) await Task.Delay(500);
 			PlayerContainers.Remove(PlayerContainers.First(cnt => cnt.GuildId == playerId));
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"));

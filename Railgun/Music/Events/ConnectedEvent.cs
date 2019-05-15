@@ -21,14 +21,10 @@ namespace Railgun.Music.Events
         public void Load(PlayerContainer container) 
         {
             _container = container;
-            _container.Player.Connected += (s, a) => Task.Factory.StartNew(() => ExecuteAsync());
+            _container.Player.Connected += async (s, a) => await ExecuteAsync();
         }
 
-        private async Task ExecuteAsync()
-        {
-			await _container.Lock.WaitAsync();
-			await PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, _container);
-			_container.Lock.Release();
-        }
+        private Task ExecuteAsync()
+			=> PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, _container);
     }
 }
