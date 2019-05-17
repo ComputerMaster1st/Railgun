@@ -31,17 +31,24 @@ namespace Railgun.Core
             WriteToLogFile(Directories.ConsoleLog, message.ToString());
         }
 
-        public static Task<Playlist> GetPlaylistAsync(MusicService service, ServerMusic data)
+        public static async Task<Playlist> GetPlaylistAsync(MusicService service, ServerMusic data)
 		{
-			if (data.PlaylistId != ObjectId.Empty) return service.Playlist.GetPlaylistAsync(data.PlaylistId);
+			Playlist playlist;
 
-			var playlist = new Playlist();
+			if (data.PlaylistId != ObjectId.Empty) {
+				try {
+					playlist = await service.Playlist.GetPlaylistAsync(data.PlaylistId);
+					return playlist;
+				} catch (ArgumentException) {
+					// Failed to get playlist as it most likely doesn't exist or corrupted.
+				}
+			}
 
+			playlist = new Playlist();
 			data.PlaylistId = playlist.Id;
 
-			service.Playlist.UpdateAsync(playlist).GetAwaiter().GetResult();
-
-			return Task.FromResult(playlist);
+			await service.Playlist.UpdateAsync(playlist);
+			return playlist;
 		}
 
         public static string GetUsernameOrMention(TreeDiagramContext db, IGuildUser user)
