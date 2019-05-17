@@ -23,7 +23,7 @@ namespace Railgun.Commands.Music
                 _musicService = musicService;
             }
 
-            [Command(), BotPerms(ChannelPermission.AttachFiles)]
+            [Command, BotPerms(ChannelPermission.AttachFiles)]
             public async Task PlaylistAsync() {
                 var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 
@@ -71,6 +71,29 @@ namespace Railgun.Commands.Music
 
                 await (Context.Channel as ITextChannel).SendStringAsFileAsync("Playlist.txt", output.ToString(), $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)");
                 await response.DeleteAsync();
+            }
+
+            [Command("export"), BotPerms(ChannelPermission.AttachFiles)]
+            public async Task ExportAsync() {
+                var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+
+                if (data == null || data.PlaylistId == ObjectId.Empty) {
+                    await ReplyAsync("There's no playlist data to export.");
+                    return;
+                }
+
+                var output = new StringBuilder()
+                    .AppendFormat("# {0}'s Playlist.", Context.Guild.Name).AppendLine()
+                    .AppendLine("#")
+                    .AppendLine("# !!! DO NOT CHANGE/MODIFY THIS FILE !!! ")
+                    .AppendLine();
+                
+                var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
+
+                foreach (var song in playlist.Songs)
+                    output.AppendLine(song.ToString());
+
+                await (Context.Channel as ITextChannel).SendStringAsFileAsync("playlist-export.txt", output.ToString());
             }
         }
     }
