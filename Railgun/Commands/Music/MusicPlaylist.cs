@@ -98,8 +98,10 @@ namespace Railgun.Commands.Music
                 
                 var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
-                foreach (var song in playlist.Songs)
+                foreach (var song in playlist.Songs) {
+                    if (song.ProcessorId != "YOUTUBE") continue;
                     output.AppendLine(song.ToString());
+                }
 
                 await (Context.Channel as ITextChannel).SendStringAsFileAsync("playlist-export.txt", output.ToString());
             }
