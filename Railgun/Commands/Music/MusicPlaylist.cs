@@ -134,6 +134,8 @@ namespace Railgun.Commands.Music
                     idList.Add($"https://youtu.be/{songId.SourceId}");
                 }
 
+                File.Delete(importFile);
+
                 await response.ModifyAsync(x => x.Content = $"Discovered {Format.Bold(idList.Count.ToString())} IDs! Beginning Import... Please note, this may take a while depending on how many songs there are.");
                 await Task.Factory.StartNew(async () => await _musicController.AddYoutubeSongsAsync(idList, Context.Channel as ITextChannel));
             }
