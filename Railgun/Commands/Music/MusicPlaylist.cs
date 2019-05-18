@@ -128,7 +128,7 @@ namespace Railgun.Commands.Music
                 var idList = new List<string>();
 
                 foreach (var line in importFile) {
-                    if (line.StartsWith('#')) continue;
+                    if (line.StartsWith('#') || string.IsNullOrWhiteSpace(line)) continue;
 
                     var songId = SongId.Parse(line);
                     idList.Add($"https://youtu.be/{songId.SourceId}");
