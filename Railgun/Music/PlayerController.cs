@@ -126,7 +126,7 @@ namespace Railgun.Music
 
 			if (!autoLeave) player.CancelStream();
 
-			while (player.Status == PlayerStatus.Disconnected) await Task.Delay(500);
+			while (player.Status != PlayerStatus.Disconnected) await Task.Delay(500);
 			PlayerContainers.Remove(PlayerContainers.First(cnt => cnt.GuildId == playerId));
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"));
