@@ -39,8 +39,13 @@ namespace Railgun.Commands.Music
 				var output = new StringBuilder();
 				var playlistUpdated = false;
 
-				foreach (var id in ids.Split(',', ' ')) {
-					if (!id.Contains("#")) continue;
+				foreach (var url in ids.Split(',', ' ')) {
+					var cleanUrl = url.Trim('<','>');
+					string id;
+
+					if (cleanUrl.Contains("#")) id = cleanUrl;
+					else if (_musicService.Youtube.TryParseYoutubeUrl(cleanUrl, out var tempId)) id = $"YOUTUBE#{tempId}";
+					else continue;
 
 					ISong song = null;
 
