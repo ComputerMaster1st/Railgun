@@ -45,8 +45,8 @@ namespace Railgun.Music
 			var imported = 0;
 			var encoded = 0;
 			var failed = 0;
-
-			await tc.SendMessageAsync($"Processing {Format.Bold(urls.Count().ToString())} song(s)... {(urls.Count() < 10 ? "" : "This may take some time depending on how many require downloading.")}");
+			var initialOutput = $"Processing {Format.Bold(urls.Count().ToString())} song(s)...";
+			var initialResponse = await tc.SendMessageAsync(initialOutput);
 
 			foreach (var url in urls) {
 				var cleanUrl = url.Trim(' ', '<', '>');
@@ -67,6 +67,8 @@ namespace Railgun.Music
 					continue;
 				}
 
+				await initialResponse.ModifyAsync(properties => properties.Content = $"{initialResponse} This may take some time depending on how many require downloading.");
+				await Task.Delay(1000);
 				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...");
 
 				try {
