@@ -40,7 +40,7 @@ namespace Railgun.Music
 			}
 
 			var playlistModified = false;
-			var invalidUrls = new List<string>();
+			var invalidUrls = 0;
 			var installed = 0;
 			var imported = 0;
 			var encoded = 0;
@@ -53,7 +53,8 @@ namespace Railgun.Music
 				ISong song = null;
 
 				if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId)) {
-					invalidUrls.Add(url);
+					invalidUrls++;
+					await tc.SendMessageAsync($"{Format.Bold("Invalid Url :")} {Format.EscapeUrl(url)}");
 					continue;
 				} 
 				if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), result => song = result)) {
@@ -69,7 +70,7 @@ namespace Railgun.Music
 
 				await initialResponse.ModifyAsync(properties => properties.Content = $"{initialResponse} This may take some time depending on how many require downloading.");
 				await Task.Delay(1000);
-				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} <{url}>...");
+				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} {Format.EscapeUrl(url)}...");
 
 				try {
 					song = await _musicService.Youtube.DownloadAsync(new Uri(url));
@@ -81,7 +82,7 @@ namespace Railgun.Music
 				} 
                 catch (Exception ex) {
 					failed++;
-					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Failed To Install :")} (<{cleanUrl}>), {ex.Message}");
+					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Failed To Install :")} ({Format.EscapeUrl(cleanUrl)}), {ex.Message}");
 				}
 			}
 
@@ -93,8 +94,7 @@ namespace Railgun.Music
 				.AppendFormat("{0} - Already Installed", Format.Code($"[{installed}]")).AppendLine()
 				.AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine()
 				.AppendFormat("{0} - Newly Encoded & Installed", Format.Code($"[{encoded}]")).AppendLine()
-				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed}]")).AppendLine()
-				.AppendFormat("{0} - Invalid Urls", Format.Code($"[{invalidUrls.Count}]")).AppendLine();
+				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed}]")).AppendLine();
 
 			await Task.Delay(1000);
 			await tc.SendMessageAsync("Done!");
