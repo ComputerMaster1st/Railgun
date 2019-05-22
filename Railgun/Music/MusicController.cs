@@ -94,7 +94,7 @@ namespace Railgun.Music
 				.AppendFormat("{0} - Already Installed", Format.Code($"[{installed}]")).AppendLine()
 				.AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine()
 				.AppendFormat("{0} - Newly Encoded & Installed", Format.Code($"[{encoded}]")).AppendLine()
-				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed}]")).AppendLine();
+				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed + invalidUrls}]")).AppendLine();
 
 			await Task.Delay(1000);
 			await tc.SendMessageAsync("Done!");
