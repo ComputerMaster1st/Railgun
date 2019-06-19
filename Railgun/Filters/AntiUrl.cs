@@ -14,7 +14,7 @@ namespace Railgun.Filters
 
 		private bool CheckContentForUrl(FilterUrl data, string content)
 		{
-			if (data.DenyMode && data.BannedUrls.Count < 1) return true;
+			if (data.DenyMode && data.BannedUrls.Count < 1 && _regex.IsMatch(content)) return true;
 
 			foreach (var url in data.BannedUrls)
 			{
