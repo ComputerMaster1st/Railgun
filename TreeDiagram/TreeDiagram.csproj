@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AudioChord" Version="1.0.9" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.1.8" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
+        <PackageReference Include="AudioChord" Version="*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="*" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
     </ItemGroup>
 </Project>
