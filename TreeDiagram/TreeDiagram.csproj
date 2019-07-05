@@ -1,13 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netcoreapp3.0</TargetFramework>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="AudioChord" Version="*" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="*" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="*" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AudioChord" Version="*"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="*"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="*"/>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="*"/>
+    <PackageReference Include="MongoDB.Driver" Version="2.9.0-beta2"/>
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.9.0-beta2"/>
+  </ItemGroup>
 </Project>
