@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
         <TieredCompilation>true</TieredCompilation>
         <LangVersion>7.2</LangVersion>
     </PropertyGroup>
@@ -15,9 +15,9 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpScriptSerializer" Version="1.6.1" />
+        <PackageReference Include="CSharpScriptSerializer" Version="*" />
         <!--<PackageReference Include="Discord.Net" Version="2.1.0-dev-20190504.10" /> -->
-        <PackageReference Include="Google.Apis.YouTube.v3" Version="1.38.0.1488" />
+        <PackageReference Include="Google.Apis.YouTube.v3" Version="*" />
         <PackageReference Include="Discord.Addons.Finite.Commands" Version="0.2.0-dev-00034" />
         <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
 
