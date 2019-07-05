@@ -36,7 +36,7 @@ namespace Railgun.Commands
         [Command]
         public Task MagicBallAsync([Remainder] string query = null) {
             var rand = new Random();
-            var index = rand.Next(0, (_responses.Length - 1));
+            var index = rand.Next(0, _responses.Length);
             var output = new StringBuilder()
                 .AppendFormat("{0}8Ball's Response: {1}", string.IsNullOrWhiteSpace(query) ? "" : 
                     string.Format("Your Question: {0} {1} ", query, SystemUtilities.GetSeparator, _responses[index]));
