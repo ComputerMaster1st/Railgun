@@ -10,7 +10,7 @@ namespace Railgun.Filters
 {
     public class AntiUrl : FilterBase, IMessageFilter
 	{
-		private readonly Regex _regex = new Regex("(http(s)?)://(www.)?");
+		private readonly Regex _regex = new Regex("(http(s)?)://(www.)?", RegexOptions.Compiled);
 
 		private bool CheckContentForUrl(FilterUrl data, string content)
 		{
