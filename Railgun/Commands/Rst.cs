@@ -134,6 +134,8 @@ namespace Railgun.Commands
 				}
 				if (line.StartsWith("<<<"))
 				{
+					if (data.Rst.Contains(rst.ToString())) continue;
+
 					data.Rst.Add(rst.ToString());
 					rstCount++;
 					continue;
