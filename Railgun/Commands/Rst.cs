@@ -149,7 +149,7 @@ namespace Railgun.Commands
 			await response.ModifyAsync(x => x.Content = $"RST data file processed! Added {Format.Bold(rstCount.ToString())} RST entries!");
 		}
 
-		[Command("export"), UserPerms(GuildPermission.ManageMessages)]
+		[Command("export"), UserPerms(GuildPermission.ManageMessages), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ExportAsync()
 		{
 			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
