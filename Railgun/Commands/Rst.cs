@@ -1,3 +1,6 @@
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -92,6 +95,55 @@ namespace Railgun.Commands
 			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
+		}
+
+		[Command("import"), UserPerms(GuildPermission.ManageMessages)]
+		public async Task ImportAsync()
+		{
+			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
+			
+			if (Context.Message.Attachments.Count < 1)
+			{
+                await ReplyAsync("Please attach the RST data file.");
+                return;
+            }
+
+			var response = await ReplyAsync("Processing RST data file. Standby...");
+			var importFileUrl = Context.Message.Attachments.First().Url;
+            var importFileName = Context.Guild.Name + "-rst-data.txt";
+
+			using (var webClient = new HttpClient())
+            using (var writer = File.OpenWrite(importFileName))
+			{
+                var importStream = await webClient.GetStreamAsync(importFileUrl);
+                await importStream.CopyToAsync(writer);
+            }
+
+			var importFile = await File.ReadAllLinesAsync(importFileName);
+			var rst = new StringBuilder();
+			var rstCount = 0;
+
+			foreach (var line in importFile) 
+			{
+				if (line.StartsWith('#')) continue;
+                if (line.StartsWith(">>>")) 
+				{
+					rst = new StringBuilder();
+					continue;
+				}
+				if (line.StartsWith("<<<"))
+				{
+					data.Rst.Add(rst.ToString());
+					rstCount++;
+					continue;
+				}
+
+                rst.AppendLine(line);
+            }
+
+            File.Delete(importFileName);
+
+			await response.ModifyAsync(x => x.Content = $"RST data file processed! Added {Format.Bold(rstCount.ToString())} RST entries!");
 		}
 
 		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
