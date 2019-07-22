@@ -111,7 +111,7 @@ namespace Railgun.Commands
 
 			var response = await ReplyAsync("Processing RST data file. Standby...");
 			var importFileUrl = Context.Message.Attachments.First().Url;
-            var importFileName = Context.Guild.Name + "-rst-data.txt";
+            var importFileName = Context.Guild.Name + $"-rst-data{SystemUtilities.FileExtension}";
 
 			using (var webClient = new HttpClient())
             using (var writer = File.OpenWrite(importFileName))
@@ -171,7 +171,7 @@ namespace Railgun.Commands
 					.AppendLine(rst)
 					.AppendLine("<<<");
 
-            await (Context.Channel as ITextChannel).SendStringAsFileAsync("rst-data.txt", output.ToString());
+            await (Context.Channel as ITextChannel).SendStringAsFileAsync($"rst-data{SystemUtilities.FileExtension}", output.ToString());
 			await response.DeleteAsync();
 		}
 

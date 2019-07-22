@@ -15,6 +15,7 @@ namespace Railgun.Core
     public static class SystemUtilities
     {
         public static string GetSeparator { get; } = "⬤";
+		public static string FileExtension { get; } = ".railgun";
 
         public static void WriteToLogFile(string directory, string message)
         {

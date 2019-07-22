@@ -104,7 +104,7 @@ namespace Railgun.Commands.Music
                     output.AppendLine(song.ToString());
                 }
 
-                await (Context.Channel as ITextChannel).SendStringAsFileAsync("playlist-data.txt", output.ToString());
+                await (Context.Channel as ITextChannel).SendStringAsFileAsync($"playlist-data{SystemUtilities.FileExtension}", output.ToString());
                 await response.DeleteAsync();
             }
 
@@ -120,7 +120,7 @@ namespace Railgun.Commands.Music
 
                 var response = await ReplyAsync("Processing playlist data, standby...");
                 var importFileUrl = Context.Message.Attachments.First().Url;
-                var importFileName = Context.Guild.Name + "-playlist-data.txt";
+                var importFileName = Context.Guild.Name + $"-playlist-data{SystemUtilities.FileExtension}";
 
                 using (var webClient = new HttpClient())
                 using (var writer = File.OpenWrite(importFileName)) {
