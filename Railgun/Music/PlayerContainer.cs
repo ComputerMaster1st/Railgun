@@ -13,12 +13,13 @@ namespace Railgun.Core.Containers
         public Player Player { get; }
         public IUserMessage LogEntry { get; set; }
 
-        public PlayerContainer(ITextChannel tc, Player player) {
+        public PlayerContainer(ITextChannel tc) {
             GuildId = tc.GuildId;
             TextChannel = tc;
-            Player = player;
         }
 
         public void AddEventLoader(PlayerEventLoader loader) => _loader = loader;
+
+        public void AddPlayer(Player player) => Player = player;
     }
 }

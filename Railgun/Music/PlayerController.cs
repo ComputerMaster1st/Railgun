@@ -41,6 +41,11 @@ namespace Railgun.Music
 			ServerMusic data;
             string username;
 
+			if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
+
+			var container = new PlayerContainer(tc);
+			PlayerContainers.Add(container);
+
 			using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
@@ -86,17 +91,17 @@ namespace Railgun.Music
 					.AppendFormat("{0} {1}", Format.Bold("ERROR :"), ex.Message);
 
 				await tc.SendMessageAsync(failOutput.ToString());
+				PlayerContainers.Remove(container);
 				return;
 			}
 
-			var container = new PlayerContainer(tc, player);
-            var loader = new PlayerEventLoader(container)
+			container.AddPlayer(player);
+            container.AddEventLoader(new PlayerEventLoader(container)
                 .LoadEvent(new ConnectedEvent(_config, _client))
                 .LoadEvent(new PlayingEvent(_config, _client, _services))
                 .LoadEvent(new TimeoutEvent(_botLog))
-                .LoadEvent(new FinishedEvent(this, _botLog));
-
-            container.AddEventLoader(loader);
+                .LoadEvent(new FinishedEvent(this, _botLog))
+			);
 
 			if (preRequestedSong != null) {
 				player.AddSongRequest(preRequestedSong);
@@ -107,7 +112,6 @@ namespace Railgun.Music
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
 			player.StartPlayer(playlist.Id);
-			PlayerContainers.Add(container);
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)
