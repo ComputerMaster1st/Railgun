@@ -50,17 +50,18 @@ namespace Railgun.Music
 
 			foreach (var url in urls) {
 				var cleanUrl = url.Trim(' ', '<', '>');
-				ISong song = null;
 
 				if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId)) {
 					invalidUrls++;
 					await tc.SendMessageAsync($"{Format.Bold("Invalid Url :")} {Format.EscapeUrl(url)}");
 					continue;
 				} 
-				if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), result => song = result)) {
-					if (playlist.Songs.Contains(song.Id)) installed++;
+
+				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
+				if (song.Item1) {
+					if (playlist.Songs.Contains(song.Item2.Id)) installed++;
 					else {
-						playlist.Songs.Add(song.Id);
+						playlist.Songs.Add(song.Item2.Id);
 						playlistModified = true;
 						imported++;
 					}
@@ -73,12 +74,12 @@ namespace Railgun.Music
 				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} {Format.EscapeUrl(url)}...");
 
 				try {
-					song = await _musicService.Youtube.DownloadAsync(new Uri(url));
-					playlist.Songs.Add(song.Id);
+					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(url));
+					playlist.Songs.Add(downloadedSong.Id);
 					playlistModified = true;
 					encoded++;
 
-					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Encoded & Installed :")} ({song.Id.ToString()}) {song.Metadata.Name}");
+					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Encoded & Installed :")} ({downloadedSong.Id.ToString()}) {downloadedSong.Metadata.Name}");
 				} 
                 catch (Exception ex) {
 					failed++;

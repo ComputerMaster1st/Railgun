@@ -67,7 +67,7 @@ namespace Railgun.Commands.Music
 			{
 				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
-				var repo = (await _musicService.GetAllSongsAsync()).ToList();
+				var repo = await _musicService.EnumerateSongMetadataAsync();
 				var existingSongs = 0;
 
 				foreach (var song in repo) {

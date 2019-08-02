@@ -136,8 +136,9 @@ namespace Railgun.Music
 
 				try {
 					var songId = remainingSongs[rand.Next(0, remainingSongs.Count)];
+					var song = await _musicService.TryGetSongAsync(songId);
 
-					if (!await _musicService.TryGetSongAsync(songId, song => request = song)) {
+					if (!song.Item1) {
 						playlist.Songs.Remove(songId);
 						remainingSongs.Remove(songId);
 
