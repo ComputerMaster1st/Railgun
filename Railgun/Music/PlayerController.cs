@@ -56,10 +56,10 @@ namespace Railgun.Music
 
 				await tc.SendMessageAsync("As this server has no music yet, I've decided to gather 100 random songs from my repository. One moment please...");
 
-				var repository = (await _musicService.GetAllSongsAsync()).ToList();
+				var repository = await _musicService.EnumerateSongMetadataAsync();
 				var rand = new Random();
 
-				if (repository.Count < 100) foreach (var song in repository) playlist.Songs.Add(song.Id);
+				if (repository.Count() < 100) foreach (var song in repository) playlist.Songs.Add(song.Id);
 				else while (playlist.Songs.Count < 100)
                     {
 						var i = rand.Next(0, repository.Count());

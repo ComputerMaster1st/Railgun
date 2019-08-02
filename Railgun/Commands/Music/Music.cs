@@ -61,18 +61,18 @@ namespace Railgun.Commands.Music
 		public async Task RepositoryAsync()
 		{
 			var response = await ReplyAsync("Generating repository list, standby...");
-			var repo = (await _musicService.GetAllSongsAsync()).ToList();
+			var repo = await _musicService.EnumerateSongMetadataAsync();
 			var output = new StringBuilder()
 				.AppendLine("Railgun Music Repository!")
 				.AppendFormat("Total Songs : {0}", repo.Count()).AppendLine()
 				.AppendLine();
 
 			foreach (var song in repo)
-				output.AppendFormat("--       Id => {0}", song.Id.ToString()).AppendLine()
-					.AppendFormat("--     Name => {0}", song.Metadata.Name).AppendLine()
-					.AppendFormat("--   Length => {0}", song.Metadata.Length).AppendLine()
-					.AppendFormat("--      Url => {0}", song.Metadata.Url).AppendLine()
-					.AppendFormat("-- Uploader => {0}", song.Metadata.Uploader).AppendLine()
+				output.AppendFormat("--       Id => {0}", song.Id).AppendLine()
+					.AppendFormat("--     Name => {0}", song.Name).AppendLine()
+					.AppendFormat("--   Length => {0}", song.Length).AppendLine()
+					.AppendFormat("--      Url => {0}", song.Url).AppendLine()
+					.AppendFormat("-- Uploader => {0}", song.Uploader).AppendLine()
 					.AppendLine();
 
 			output.AppendLine("End of Repository.");

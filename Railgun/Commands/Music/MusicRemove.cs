@@ -47,17 +47,17 @@ namespace Railgun.Commands.Music
 					else if (_musicService.Youtube.TryParseYoutubeUrl(cleanUrl, out var tempId)) id = $"YOUTUBE#{tempId}";
 					else continue;
 
-					ISong song = null;
+					var song = await _musicService.TryGetSongAsync(SongId.Parse(id));
 
-					if (!await _musicService.TryGetSongAsync(SongId.Parse(id), songOutput => song = songOutput)) {
+					if (!song.Item1) {
 						output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine();
 						continue;
-					} else if (!playlist.Songs.Contains(song.Id)) {
+					} else if (!playlist.Songs.Contains(song.Item2.Id)) {
 						output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine();
 						continue;
 					}
 
-					playlist.Songs.Remove(song.Id);
+					playlist.Songs.Remove(song.Item2.Id);
 					playlistUpdated = true;
 					output.AppendFormat("{0} - Song Removed", id);
 				}

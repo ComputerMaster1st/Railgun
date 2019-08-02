@@ -135,11 +135,10 @@ namespace Railgun.Commands.Music
 
 			private async Task AddByIdAsync(string input, PlayerContainer playerContainer, Playlist playlist, ServerMusic data, IUserMessage response)
 			{
-				ISong song = null;
+				var song = await _musicService.TryGetSongAsync(SongId.Parse(input));
 
-				if (await _musicService.TryGetSongAsync(SongId.Parse(input), result => song = result)) {
-					await QueueSongAsync(playerContainer, playlist, song, data, response);
-
+				if (song.Item1) {
+					await QueueSongAsync(playerContainer, playlist, song.Item2, data, response);
 					return;
 				} else if (!input.Contains("YOUTUBE#")) {
 					await response.ModifyAsync(x => x.Content = "Specified song does not exist.");
@@ -154,7 +153,7 @@ namespace Railgun.Commands.Music
 			private async Task AddByUrlAsync(string input, PlayerContainer playerContainer, Playlist playlist, ServerMusic data, IUserMessage response)
 			{
 				var videoId = string.Empty;
-				ISong song = null;
+				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
 
 				if (!input.Contains("youtu")) {
 					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
@@ -162,9 +161,9 @@ namespace Railgun.Commands.Music
 				} else if (!_musicService.Youtube.TryParseYoutubeUrl(input, out videoId)) {
 					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
 					return;
-				} else if (await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId), songOut => song = songOut)) {
-					if (playlist.Songs.Contains(song.Id)) {
-						await QueueSongAsync(playerContainer, playlist, song, data, response);
+				} else if (song.Item1) {
+					if (playlist.Songs.Contains(song.Item2.Id)) {
+						await QueueSongAsync(playerContainer, playlist, song.Item2, data, response);
 						return;
 					} else if (!data.AutoDownload) {
 						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
@@ -173,8 +172,8 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
-					song = await _musicService.Youtube.DownloadAsync(new Uri(input));
-					await QueueSongAsync(playerContainer, playlist, song, data, response);
+					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(input));
+					await QueueSongAsync(playerContainer, playlist, downloadedSong, data, response);
 				} catch (Exception ex) {
 					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}");
 
