@@ -1,4 +1,3 @@
-using System.Threading;
 using Discord;
 using Railgun.Music;
 
@@ -10,7 +9,7 @@ namespace Railgun.Core.Containers
 
         public ulong GuildId { get; }
         public ITextChannel TextChannel { get; }
-        public Player Player { get; }
+        public Player Player { get; private set; }
         public IUserMessage LogEntry { get; set; }
 
         public PlayerContainer(ITextChannel tc) {
