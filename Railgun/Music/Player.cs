@@ -116,7 +116,7 @@ namespace Railgun.Music
 
 			var playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
 
-			if (playlist == null) return null;
+			if (playlist == null || playlist.Songs.Count < 1) return null;
 
 			var rand = new Random();
 			var remainingSongs = new List<SongId>(playlist.Songs);
