@@ -19,6 +19,7 @@ namespace Railgun.Music
 		private bool _autoDisconnected;
 		private bool _musicCancelled;
 		private bool _streamCancelled;
+        private bool _queueFailed;
 		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
@@ -142,6 +143,7 @@ namespace Railgun.Music
                     retry--;
                     if (retry == 0) {
                         _exception = e;
+                        _queueFailed = true;
                         return null;
                     }
 				}
@@ -241,7 +243,10 @@ namespace Railgun.Music
 				if (_audioDisconnected) {
 					ex = new Exception("AudioClient Unexpected Disconnect!", _exception);
 					_autoDisconnected = false;
-				}
+				} else if (_queueFailed) {
+                    ex = new Exception("Music Auto-Selector Failed!", _exception);
+                    _autoDisconnected = false;
+                }
                 
 				Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _autoDisconnected, ex));
 				Status = PlayerStatus.Disconnected;
