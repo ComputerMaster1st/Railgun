@@ -14,7 +14,7 @@ namespace Railgun.Music
 	public class Player
 	{
 		private IAudioClient _client;
-		private Exception _audioDisconnectException;
+		private Exception _exception;
 		private bool _audioDisconnected;
 		private bool _autoDisconnected;
 		private bool _musicCancelled;
@@ -22,8 +22,9 @@ namespace Railgun.Music
 		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
+        private List<SongId> _remainingSongs = new List<SongId>();
 
-		public IVoiceChannel VoiceChannel { get; }
+        public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
 		public DateTime CreatedAt { get; } = DateTime.Now;
 		public DateTime SongStartedAt { get; private set; }
@@ -108,48 +109,45 @@ namespace Railgun.Music
 		private async Task<ISong> QueueSongAsync()
 		{
 			var request = GetFirstSongRequest();
+			if (request != null) return request;
 
-			if (request != null) {
-				if (!_playedSongs.Contains(request.Id)) _playedSongs.Add(request.Id);
-				return request;
-			}
+            var rand = new Random();
+            Playlist playlist = null;
+            var retry = 5;
 
-			var playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
+            while (request == null) {
+				if (_remainingSongs.Count == 0) {
+                    playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
 
-			if (playlist == null || playlist.Songs.Count < 1) return null;
-
-			var rand = new Random();
-			var remainingSongs = new List<SongId>(playlist.Songs);
-
-			foreach (SongId songId in _playedSongs) {
-				if (remainingSongs.Contains(songId)) remainingSongs.Remove(songId);
-			}
-
-			while (request == null) {
-				if (remainingSongs.Count < 1) {
-					if (playlist.Songs.Count < 1) return null;
+                    if (playlist == null || playlist.Songs.Count == 0) return null;
 					if (!PlaylistAutoLoop) return null;
 
 					_playedSongs.Clear();
-					remainingSongs = new List<SongId>(playlist.Songs);
-				}
+					_remainingSongs = new List<SongId>(playlist.Songs);
 
-				try {
-					var songId = remainingSongs[rand.Next(0, remainingSongs.Count)];
+                    foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
+                }
 
-					if (!await _musicService.TryGetSongAsync(songId, song => request = song)) {
-						playlist.Songs.Remove(songId);
-						remainingSongs.Remove(songId);
+				try
+                {
+                    var songId = _remainingSongs.Count == 1 ? _remainingSongs.First() : _remainingSongs[rand.Next(0, _remainingSongs.Count)];
 
-						await _musicService.Playlist.UpdateAsync(playlist);
-					} else _playedSongs.Add(songId);
-				}
-				catch {
-					// ignored
+                    if (await _musicService.TryGetSongAsync(songId, song => request = song)) break;
+                    playlist.Songs.Remove(songId);
+                    _remainingSongs.Remove(songId);
+
+                    await _musicService.Playlist.UpdateAsync(playlist);
+                }
+                catch (Exception e) {
+                    retry--;
+                    if (retry == 0) {
+                        _exception = e;
+                        return null;
+                    }
 				}
 			}
 
-			return request;
+            return request;
 		}
 
 		private async Task ForceTimeout(Task task, int ms, string errorMsg)
@@ -177,7 +175,7 @@ namespace Railgun.Music
 
 				_client.Disconnected += (audioEx) => {
 					if (!_autoDisconnected && !_streamCancelled) {
-						_audioDisconnectException = audioEx;
+						_exception = audioEx;
 
 						CancelStream(true);
 					}
@@ -222,7 +220,8 @@ namespace Railgun.Music
 							await ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
 						}
 
-						if (RepeatSong > 0) RepeatSong--;
+                        if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
+                        if (RepeatSong > 0) RepeatSong--;
 						else RemoveSongRequest(CurrentSong);
 
 						if (AutoSkipped && Requests.Count < 1) AutoSkipped = false;
@@ -240,10 +239,10 @@ namespace Railgun.Music
 				ex = inEx;
 			} finally {
 				if (_audioDisconnected) {
-					ex = new Exception("AudioClient Unexpected Disconnect!", _audioDisconnectException);
+					ex = new Exception("AudioClient Unexpected Disconnect!", _exception);
 					_autoDisconnected = false;
 				}
-
+                
 				Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _autoDisconnected, ex));
 				Status = PlayerStatus.Disconnected;
 			}
