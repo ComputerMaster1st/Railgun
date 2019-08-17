@@ -41,11 +41,6 @@ namespace Railgun.Music
 			ServerMusic data;
             string username;
 
-			if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
-
-			var container = new PlayerContainer(tc);
-			PlayerContainers.Add(container);
-
 			using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
@@ -77,7 +72,10 @@ namespace Railgun.Music
 
 			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
-			var player = new Player(_musicService, vc) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+            if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
+            var container = new PlayerContainer(tc);
+            PlayerContainers.Add(container);
+            var player = new Player(_musicService, vc) { PlaylistAutoLoop = data.PlaylistAutoLoop };
 
 			try
 			{
