@@ -48,8 +48,8 @@ namespace Railgun.Commands.Music
             
             [Command("kill")]
             public Task KillAsync(ulong id) {
-                _playerController.DisconnectPlayer(id);
-                return ReplyAsync($"Sent 'Kill Code' to Player ID {id}.");
+                if (_playerController.DisconnectPlayer(id)) return ReplyAsync($"Sent 'Kill Code' to Player ID {id}.");
+                return ReplyAsync($"No player found with ID {id}.");
             }
         }
     }

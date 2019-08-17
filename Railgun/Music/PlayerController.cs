@@ -117,9 +117,18 @@ namespace Railgun.Music
 		public PlayerContainer GetPlayer(ulong playerId)
 			=> PlayerContainers.FirstOrDefault(container => container.GuildId == playerId);
 		
-		public void DisconnectPlayer(ulong playerId) {
+		public bool DisconnectPlayer(ulong playerId) {
 			var container = PlayerContainers.FirstOrDefault(c => c.GuildId == playerId);
-			if (!(container is null)) container.Player.CancelStream();
+
+            if (container is null) return false;
+            if (container.Player is null)
+            {
+                PlayerContainers.Remove(container);
+                return true;
+            }
+
+			container.Player.CancelStream();
+            return true;
 		}
 		
 		public async Task StopPlayerAsync(ulong playerId, bool autoLeave = false)
