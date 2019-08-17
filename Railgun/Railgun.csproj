@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -16,15 +16,15 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="CSharpScriptSerializer" Version="*" />
-        <PackageReference Include="Discord.Net" Version="2.2.0-dev-20190730.2" />
+        <!--<PackageReference Include="Discord.Net" Version="2.2.0-dev-20190730.2" />-->
         <PackageReference Include="Google.Apis.YouTube.v3" Version="*" />
         <PackageReference Include="Discord.Addons.Finite.Commands" Version="0.2.0-dev-00034" />
         <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
 
 
-        <!-- <ProjectReference Include="..\Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj" />
+        <ProjectReference Include="..\Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj" />
         <ProjectReference Include="..\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.csproj" />
         <ProjectReference Include="..\Discord.Net\src\Discord.Net.Rest\Discord.Net.Rest.csproj" />
-        <ProjectReference Include="..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj" /> -->
+        <ProjectReference Include="..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj" /> 
     </ItemGroup>
 </Project>
