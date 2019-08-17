@@ -151,14 +151,18 @@ namespace Railgun.Commands.Root
             await ReplyAsync("Disconnecting ...");
             
             if (_playerController.PlayerContainers.Count > 0) {
-                var output = new StringBuilder()
-                    .AppendFormat("{0} : Stopping music stream due to the following reason... {1}", 
+                try
+                {
+                    var output = new StringBuilder()
+                    .AppendFormat("{0} : Stopping music stream due to the following reason... {1}",
                     Format.Bold("WARNING"), string.IsNullOrWhiteSpace(msg) ? Format.Bold("System Restart") : Format.Bold(msg));
-                
-                foreach (var playerInfo in _playerController.PlayerContainers) {
-                    await playerInfo.TextChannel.SendMessageAsync(output.ToString());
-                    playerInfo.Player.CancelStream();
-                }
+
+                    foreach (var playerInfo in _playerController.PlayerContainers)
+                    {
+                        await playerInfo.TextChannel.SendMessageAsync(output.ToString());
+                        playerInfo.Player.CancelStream();
+                    }
+                } catch { }
             }
             
             while (_playerController.PlayerContainers.Count > 0) await Task.Delay(1000);

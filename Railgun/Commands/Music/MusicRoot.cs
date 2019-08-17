@@ -27,7 +27,14 @@ namespace Railgun.Commands.Music
                     .AppendFormat("Active Music Streams ({0} Total):", _playerController.PlayerContainers.Count).AppendLine().AppendLine();
                 
                 foreach (var info in _playerController.PlayerContainers) {
-                    var player = info.Player;
+                    var player = info?.Player;
+
+                    if (player == null)
+                    {
+                        output.AppendFormat("Id : {0} {1} Error: Player Doesn't Exist!", info.GuildId, SystemUtilities.GetSeparator).AppendLine();
+                        continue;
+                    }
+
                     var song = player.GetFirstSongRequest();
                     
                     output.AppendFormat("Id : {0} {1} Spawned At : {2} {1} Status : {3}", info.GuildId, SystemUtilities.GetSeparator, player.CreatedAt, player.Status).AppendLine()
