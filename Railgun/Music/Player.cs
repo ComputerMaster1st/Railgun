@@ -223,7 +223,7 @@ namespace Railgun.Music
 						}
 
                         if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
-                        if (!_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
+                        if (_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
                         if (RepeatSong > 0) RepeatSong--;
 						else RemoveSongRequest(CurrentSong);
 
