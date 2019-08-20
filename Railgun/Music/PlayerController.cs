@@ -133,14 +133,14 @@ namespace Railgun.Music
 		{
 			var container = PlayerContainers.FirstOrDefault(cnt => cnt.GuildId == playerId);
 
-			if (container == null) return;
+			if (container is null) return;
 
 			var player = container.Player;
 
 			if (!autoLeave) player.CancelStream();
 
 			while (player.Status != PlayerStatus.Disconnected) await Task.Delay(500);
-			PlayerContainers.Remove(PlayerContainers.First(cnt => cnt.GuildId == playerId));
+			PlayerContainers.Remove(container);
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"Player ID '{playerId}' Destroyed"));
 		}
