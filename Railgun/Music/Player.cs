@@ -67,7 +67,7 @@ namespace Railgun.Music
 
 		public bool AddSongRequest(ISong song)
 		{
-			if (Requests.Contains(song)) return false;
+			if (Requests.Any(x => x.Id == song.Id)) return false;
 
 			Requests.Add(song);
 			return true;
