@@ -57,30 +57,6 @@ namespace Railgun.Commands.Music
 			return ReplyAsync("Repeating song after finishing.");
 		}
 
-		[Command("repo"), BotPerms(ChannelPermission.AttachFiles)]
-		public async Task RepositoryAsync()
-		{
-			var response = await ReplyAsync("Generating repository list, standby...");
-			var repo = await _musicService.EnumerateSongMetadataAsync();
-			var output = new StringBuilder()
-				.AppendLine("Railgun Music Repository!")
-				.AppendFormat("Total Songs : {0}", repo.Count()).AppendLine()
-				.AppendLine();
-
-			foreach (var song in repo)
-				output.AppendFormat("--       Id => {0}", song.Id).AppendLine()
-					.AppendFormat("--     Name => {0}", song.Name).AppendLine()
-					.AppendFormat("--   Length => {0}", song.Length).AppendLine()
-					.AppendFormat("--      Url => {0}", song.Url).AppendLine()
-					.AppendFormat("-- Uploader => {0}", song.Uploader).AppendLine()
-					.AppendLine();
-
-			output.AppendLine("End of Repository.");
-
-			await ((ITextChannel)Context.Channel).SendStringAsFileAsync("MusicRepo.txt", output.ToString(), $"Music Repository ({repo.Count()} songs)", includeGuildName: false);
-			await response.DeleteAsync();
-		}
-
 		[Command("ping")]
 		public Task PingAsync()
 		{
