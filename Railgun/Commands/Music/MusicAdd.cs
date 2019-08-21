@@ -61,23 +61,6 @@ namespace Railgun.Commands.Music
 					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
-
-			[Command("repo"), UserPerms(GuildPermission.ManageGuild)]
-			public async Task ImportRepoAsync()
-			{
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
-				var repo = await _musicService.EnumerateSongMetadataAsync();
-				var existingSongs = 0;
-
-				foreach (var song in repo) {
-					if (playlist.Songs.Contains(song.Id)) existingSongs++;
-					else playlist.Songs.Add(song.Id);
-				}
-
-				await _musicService.Playlist.UpdateAsync(playlist);
-				await ReplyAsync($"Processing Completed! {SystemUtilities.GetSeparator} Accepted : {Format.Bold((repo.Count() - existingSongs).ToString())} {SystemUtilities.GetSeparator} Already Installed : {Format.Bold(existingSongs.ToString())}");
-			}
 		}
 	}
 }
