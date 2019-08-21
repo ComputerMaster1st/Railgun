@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AudioChord" Version="1.0.9"/>
+    <PackageReference Include="AudioChord" Version="1.2.0"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="*"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="*"/>
