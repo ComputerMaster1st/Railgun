@@ -3,7 +3,7 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AudioChord" Version="1.2.1" />
+    <PackageReference Include="AudioChord" Version="1.2.2" />
     <PackageReference Include="AudioChord.Caching.FileSystem" Version="1.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*" />
