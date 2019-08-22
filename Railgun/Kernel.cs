@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using AudioChord;
+using AudioChord.Caching;
+using AudioChord.Caching.FileSystem;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
@@ -89,7 +91,8 @@ namespace Railgun
                 .AddSingleton(new MusicService(new MusicServiceConfiguration() {
                         Hostname = mongo.Hostname,
                         Username = mongo.Username,
-                        Password = mongo.Password
+                        Password = mongo.Password,
+                        SongCacheFactory = () => new FileSystemCache("/home/audiochord")
                     })
                 )
                 .AddDbContext<TreeDiagramContext>(options => {
