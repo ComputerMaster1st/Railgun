@@ -150,9 +150,9 @@ namespace Railgun.Music
 				.AppendFormat("---- Encoded/Installed  : {0}", newlyEncoded).AppendLine()
 				.AppendFormat("---- Failed To Install  : {0}", failed).AppendLine();
 
-			await tc.SendMessageAsync(output.ToString());
 			await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
-		}
+            await tc.SendMessageAsync(output.ToString());
+        }
 
 		public async Task YoutubePlaylistStatusUpdatedAsync(ITextChannel tc, SongProcessStatus status, ServerMusic data)
 		{
