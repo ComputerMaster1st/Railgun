@@ -19,7 +19,9 @@ namespace Railgun.Music
         private readonly MusicService _musicService;
         private readonly IServiceProvider _services;
 
-		public MusicController(BotLog botLog, MusicService musicService, IServiceProvider services)
+        private const string YoutubeBaseUrl = "https://youtu.be/";
+
+        public MusicController(BotLog botLog, MusicService musicService, IServiceProvider services)
 		{
             _botLog = botLog;
             _musicService = musicService;
@@ -33,8 +35,7 @@ namespace Railgun.Music
 			using (var scope = _services.CreateScope()) 
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var data = db.ServerMusics.GetOrCreateData(tc.GuildId);
-				playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
+				playlist = await SystemUtilities.GetPlaylistAsync(_musicService, db.ServerMusics.GetOrCreateData(tc.GuildId));
 
 				await db.SaveChangesAsync();
 			}
@@ -47,16 +48,22 @@ namespace Railgun.Music
 			var failed = 0;
 			var initialOutput = $"Processing {Format.Bold(urls.Count().ToString())} song(s)...";
 			var initialResponse = await tc.SendMessageAsync(initialOutput);
+            var videoIds = new List<string>();
 
-			foreach (var url in urls) {
-				var cleanUrl = url.Trim(' ', '<', '>');
+            foreach (var url in urls) {
+                var cleanUrl = url.Trim(' ', '<', '>');
 
-				if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId)) {
-					invalidUrls++;
-					await tc.SendMessageAsync($"{Format.Bold("Invalid Url :")} {Format.EscapeUrl(url)}");
-					continue;
-				} 
+                if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId)) {
+                    invalidUrls++;
+                    await tc.SendMessageAsync($"{Format.Bold("Invalid Url :")} {Format.EscapeUrl(url)}");
+                    continue;
+                }
 
+                videoIds.Add(videoId);
+            }
+
+            foreach (var videoId in videoIds)
+            { 
 				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
 				if (song.Item1) {
 					if (playlist.Songs.Contains(song.Item2.Id)) installed++;
@@ -70,11 +77,10 @@ namespace Railgun.Music
 				}
 
 				await initialResponse.ModifyAsync(properties => properties.Content = $"{initialResponse} This may take some time depending on how many require downloading.");
-				await Task.Delay(1000);
-				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} {Format.EscapeUrl(url)}...");
+				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} {Format.EscapeUrl(YoutubeBaseUrl + videoId)}...");
 
 				try {
-					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(url));
+					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(YoutubeBaseUrl + videoId));
 					playlist.Songs.Add(downloadedSong.Id);
 					playlistModified = true;
 					encoded++;
@@ -83,7 +89,7 @@ namespace Railgun.Music
 				} 
                 catch (Exception ex) {
 					failed++;
-					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Failed To Install :")} ({Format.EscapeUrl(cleanUrl)}), {ex.Message}");
+					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Failed To Install :")} ({Format.EscapeUrl(YoutubeBaseUrl + videoId)}), {ex.Message}");
 				}
 			}
 
@@ -95,13 +101,14 @@ namespace Railgun.Music
 				.AppendFormat("{0} - Already Installed", Format.Code($"[{installed}]")).AppendLine()
 				.AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine()
 				.AppendFormat("{0} - Newly Encoded & Installed", Format.Code($"[{encoded}]")).AppendLine()
-				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed + invalidUrls}]")).AppendLine();
+				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed}]")).AppendLine()
+                .AppendFormat("{0} - Invalid Urls", Format.Code($"[{invalidUrls}]")).AppendLine();
 
-			await Task.Delay(1000);
+            await Task.Delay(1000);
 			await tc.SendMessageAsync("Done!");
 		}
 
-		public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc)
+        public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc, PlaylistResult result)
 		{
 			var alreadyInstalled = 0;
 			var failed = 0;
@@ -126,7 +133,8 @@ namespace Railgun.Music
                 catch { failed++; }
 			}
 
-			var newlyEncoded = (resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs) - failed;
+			var newlyEncoded = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs - failed;
+            var errors = result.GetErrors();
 
 			var output = new StringBuilder()
 				.AppendLine("Finished Processing YouTube Playlist! Results...")
@@ -136,10 +144,10 @@ namespace Railgun.Music
 					SystemUtilities.GetSeparator,
 					Format.Bold(resolvingPlaylist.ExistingSongs.ToString()),
 					Format.Bold(newlyEncoded.ToString()),
-					Format.Bold(failed.ToString())
+					Format.Bold(errors.Failed.ToString())
 				);
 
-			var logOutput = new StringBuilder()
+            var logOutput = new StringBuilder()
 				.AppendFormat("<{0} <{1}>> YouTube Playlist Processed!", tc.Guild.Name, tc.GuildId).AppendLine()
 				.AppendFormat("---- Url                : {0}", url).AppendLine()
 				.AppendFormat("---- Started            : {0}", startedAt).AppendLine()
@@ -148,62 +156,16 @@ namespace Railgun.Music
 				.AppendFormat("---- Already Installed  : {0}", alreadyInstalled).AppendLine()
 				.AppendFormat("---- Imported From Repo : {0}", resolvingPlaylist.ExistingSongs).AppendLine()
 				.AppendFormat("---- Encoded/Installed  : {0}", newlyEncoded).AppendLine()
-				.AppendFormat("---- Failed To Install  : {0}", failed).AppendLine();
+				.AppendFormat("---- Failed To Install  : {0}", errors.Failed).AppendLine();
 
-			await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
+            if (errors.Failed > 0)
+            {
+                output.AppendLine().AppendLine().AppendLine(errors.Message);
+                logOutput.AppendLine().AppendLine(errors.Message);
+            }
+
+            await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
             await tc.SendMessageAsync(output.ToString());
         }
-
-		public async Task YoutubePlaylistStatusUpdatedAsync(ITextChannel tc, SongProcessStatus status, ServerMusic data)
-		{
-			switch (status.Status) 
-            {
-				case SongStatus.Errored: 
-                    {
-						var output = (SongProcessError)status;
-						var url = "https://youtu.be/" + output.Id.SourceId;
-						
-						try 
-                        {
-							await tc.SendMessageAsync($"{Format.Bold("Failed To Install :")} (<{url}>), {output.Exceptions.Message}");
-						} 
-                        catch (ArgumentException ex) 
-                        {
-							SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
-						} 
-                        catch (Exception ex) 
-                        {
-							SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing TC", ex));
-						}
-					}
-					break;
-				case SongStatus.Processed: 
-                    {
-						var output = (SongProcessResult)status;
-						var song = await output.Result;
-
-						try 
-                        {
-							var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
-
-							playlist.Songs.Add(song.Id);
-
-							await _musicService.Playlist.UpdateAsync(playlist);
-							await tc.SendMessageAsync($"{Format.Bold("Encoded & Installed :")} ({song.Id}) {song.Metadata.Name}");
-						} 
-                        catch (ArgumentException ex) 
-                        {
-							SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing Playlist", ex));
-						} 
-                        catch (Exception ex) 
-                        {
-							SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music Manager", "Missing TC", ex));
-						}
-					}
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
     }
 }

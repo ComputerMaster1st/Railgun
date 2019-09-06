@@ -46,19 +46,8 @@ namespace Railgun.Commands.Music
 
 					await Context.Database.SaveChangesAsync();
 
-					async void Handler(SongProcessStatus status) => await _musicController.YoutubePlaylistStatusUpdatedAsync((ITextChannel)Context.Channel, status, data);
-					var reporter = new Progress<SongProcessStatus>(Handler);
-					var resolvingPlaylist = await _musicService.Youtube.DownloadPlaylistAsync(new Uri(cleanUrl), reporter, CancellationToken.None);
-					var queued = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs;
-					var output = new StringBuilder()
-						.AppendFormat("Found In Repository : {0}", Format.Bold(resolvingPlaylist.ExistingSongs.ToString()));
-
-					if (queued > 0) output.AppendFormat(" {0} Queued For Installation : {1}", SystemUtilities.GetSeparator, Format.Bold(queued.ToString())).AppendLine();
-
-					output.AppendLine("Processing of YouTube Playlists may take some time... Just to let you know.");
-
-					await ReplyAsync(output.ToString());
-					await Task.Factory.StartNew(async () => await _musicController.ProcessYoutubePlaylistAsync(cleanUrl, playlist, resolvingPlaylist, (ITextChannel)Context.Channel));
+                    await new PlaylistResult(_musicService, Context.Channel as ITextChannel, data)
+                        .ProcessPlaylistAsync(_musicController, cleanUrl, playlist);
 				}
 			}
 		}
