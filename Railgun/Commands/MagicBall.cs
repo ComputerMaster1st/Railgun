@@ -54,8 +54,14 @@ namespace Railgun.Commands
         }
 
         [Command]
-        public Task MagicBallAsync([Remainder] string query = null) => ReplyAsync(new StringBuilder()
-                .AppendFormat("{0}8Ball's Response: {1}", string.IsNullOrWhiteSpace(query) ? "" :
-                    string.Format("Your Question: {0} {1} ", query, SystemUtilities.GetSeparator, RandomAnswer)).ToString());
+        public Task MagicBallAsync([Remainder] string query)
+        {
+            var output = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(query)) output.AppendFormat("Your Question: {0}", query).AppendLine();
+            output.AppendFormat("8Ball's Response: {0}", RandomAnswer);
+
+            return ReplyAsync(output.ToString());
+        }
     }
 }
