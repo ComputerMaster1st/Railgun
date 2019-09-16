@@ -120,7 +120,7 @@ namespace Railgun.Commands.Music
 
                 var response = await ReplyAsync("Processing playlist data, standby...");
                 var importFileUrl = Context.Message.Attachments.First().Url;
-                var importFileName = Context.Guild.Name + $"-playlist-data{SystemUtilities.FileExtension}";
+                var importFileName = Context.Guild.Id + $"-playlist-data{SystemUtilities.FileExtension}";
 
                 using (var webClient = new HttpClient())
                 using (var writer = File.OpenWrite(importFileName)) {
