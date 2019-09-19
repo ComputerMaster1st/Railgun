@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TreeDiagram", "TreeDiagram\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Railgun", "Railgun\Railgun.csproj", "{0AD77693-5A9C-445F-924F-30944A500810}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.Core", "Discord.Net\src\Discord.Net.Core\Discord.Net.Core.csproj", "{18CFC2C7-268B-444A-AFEA-AF5FC8A7FC86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.Rest", "Discord.Net\src\Discord.Net.Rest\Discord.Net.Rest.csproj", "{22F6CB2B-4AA3-45D7-8A89-178DC90EAD49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.WebSocket", "Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj", "{F3117918-CB87-419C-9849-58226B581889}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +27,18 @@ Global
 		{0AD77693-5A9C-445F-924F-30944A500810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AD77693-5A9C-445F-924F-30944A500810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AD77693-5A9C-445F-924F-30944A500810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18CFC2C7-268B-444A-AFEA-AF5FC8A7FC86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18CFC2C7-268B-444A-AFEA-AF5FC8A7FC86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18CFC2C7-268B-444A-AFEA-AF5FC8A7FC86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18CFC2C7-268B-444A-AFEA-AF5FC8A7FC86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22F6CB2B-4AA3-45D7-8A89-178DC90EAD49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F6CB2B-4AA3-45D7-8A89-178DC90EAD49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22F6CB2B-4AA3-45D7-8A89-178DC90EAD49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22F6CB2B-4AA3-45D7-8A89-178DC90EAD49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3117918-CB87-419C-9849-58226B581889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3117918-CB87-419C-9849-58226B581889}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3117918-CB87-419C-9849-58226B581889}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3117918-CB87-419C-9849-58226B581889}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

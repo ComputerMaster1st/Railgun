@@ -20,9 +20,6 @@
         <PackageReference Include="Google.Apis.YouTube.v3" Version="*" />
         <PackageReference Include="Discord.Addons.Finite.Commands" Version="0.2.0-dev-00034" />
         <ProjectReference Include="..\TreeDiagram\TreeDiagram.csproj" />
-
-
-        <ProjectReference Include="..\Discord.Net\src\Discord.Net.Commands\Discord.Net.Commands.csproj" />
         <ProjectReference Include="..\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.csproj" />
         <ProjectReference Include="..\Discord.Net\src\Discord.Net.Rest\Discord.Net.Rest.csproj" />
         <ProjectReference Include="..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj" /> 
