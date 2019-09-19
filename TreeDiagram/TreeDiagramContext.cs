@@ -22,6 +22,7 @@ namespace TreeDiagram
 		public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; } = null;
 		public DbSet<ServerMention> ServerMentions { get; internal set; } = null;
 		public DbSet<ServerMusic> ServerMusics { get; internal set; } = null;
+		public DbSet<ServerRoleRequest> ServerRoleRequests { get; internal set; } = null;
 		public DbSet<ServerWarning> ServerWarnings { get; internal set; } = null;
 
 	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
@@ -51,6 +52,7 @@ namespace TreeDiagram
             modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ServerRoleRequest>().HasMany(f => f.RoleIds).WithOne().OnDelete(DeleteBehavior.Cascade);
 			base.OnModelCreating(modelBuilder);
 		}
 
@@ -68,6 +70,7 @@ namespace TreeDiagram
 			ServerMusics.DeleteData(id);
 			ServerWarnings.DeleteData(id);
 			ServerJoinLeaves.DeleteData(id);
+			ServerRoleRequests.DeleteData(id);
 
 			SaveChanges();
 		}
