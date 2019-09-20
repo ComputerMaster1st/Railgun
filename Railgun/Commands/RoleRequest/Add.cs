@@ -22,8 +22,7 @@ namespace Railgun.Commands.RoleRequest
             {
                 if (role is null) 
                     return ReplyAsync("The role you tried to add does not exist. " +
-                                      "Please double-check in-case you mistyped. " +
-                                      "If it is correct, please contact your mod/admin to resolve this.");
+                                      "Please double-check in-case you mistyped.");
                 
                 var data = Context.Database.ServerRoleRequests.GetOrCreateData(Context.Guild.Id);
 
