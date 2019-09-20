@@ -32,7 +32,7 @@ namespace TreeDiagram
 	    public DbSet<UserCommand> UserCommands { get; internal set; } = null;
 		public DbSet<UserMention> UserMentions { get; internal set; } = null;
 
-        public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) => AppContext.SetSwitch("System.Net.Http.useSocketsHttpHandler", false);
+	    public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
 
 	    protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
