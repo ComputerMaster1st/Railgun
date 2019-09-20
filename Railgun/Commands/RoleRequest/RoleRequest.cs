@@ -20,17 +20,18 @@ namespace Railgun.Commands.RoleRequest
         [Command]
         public async Task RoleAsync(IRole role)
         {
+            if (role is null)
+            {
+                await ReplyAsync("The role you requested does not exist. Please double-check in-case you mistyped. " +
+                                 "If it is correct, please contact your mod/admin to resolve this.");
+                return;
+            }
+            
             var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
             if (data is null || data.RoleIds.Count == 0)
             {
                 await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
                                  "Please contact the server mod/admin to set it up.");
-                return;
-            }
-            if (role is null)
-            {
-                await ReplyAsync("The role you requested does not exist. Please double-check in-case you mistyped. " +
-                                 "If it is correct, please contact your mod/admin to resolve this.");
                 return;
             }
             if (data.RoleIds.All(x => x.RoleId != role.Id))
