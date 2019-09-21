@@ -87,5 +87,17 @@ namespace Railgun.Commands.RoleRequest
 
             await ReplyAsync(output.ToString());
         }
+
+        [Command("reset")]
+        public Task ResetAsync()
+        {
+            var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
+
+            if (data == null)
+                return ReplyAsync("Role-Request has no data to reset.");
+
+            Context.Database.ServerRoleRequests.Remove(data);
+            return ReplyAsync("Role-Request has been reset.");
+        }
     }
 }
