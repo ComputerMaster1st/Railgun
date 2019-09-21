@@ -67,7 +67,8 @@ namespace Railgun.Commands.RoleRequest
 
             var badIds = new List<ulong>();
             var output = new StringBuilder()
-                .AppendFormat("Publicly available roles on {0}", Context.Guild.Name).AppendLine()
+                .AppendFormat("{0} Publicly available roles on {1}", Format.Bold(data.RoleIds.Count.ToString()), 
+                    Format.Bold(Context.Guild.Name)).AppendLine()
                 .AppendLine();
             
             foreach (var id in data.RoleIds)
@@ -79,7 +80,7 @@ namespace Railgun.Commands.RoleRequest
                     continue;
                 }
                 
-                output.AppendFormat("", role.Name).AppendLine();
+                output.AppendFormat("{0}", role.Name).AppendLine();
             }
 
             foreach (var id in badIds) data.RemoveRole(id);
