@@ -14,7 +14,7 @@ namespace Railgun.Commands.RoleRequest
     public partial class RoleRequest : SystemBase
     {
         [Command]
-        public Task RoleAsync(string roleName) 
+        public Task RoleAsync([Remainder] string roleName) 
             => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == roleName));
 
         [Command]

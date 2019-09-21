@@ -14,7 +14,7 @@ namespace Railgun.Commands.RoleRequest
         public class Remove : SystemBase
         {
             [Command()]
-            public Task RemoveAsync(string role)
+            public Task RemoveAsync([Remainder] string role)
                 => RemoveAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
 
             [Command()]

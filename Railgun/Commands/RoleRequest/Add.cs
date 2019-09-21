@@ -14,7 +14,7 @@ namespace Railgun.Commands.RoleRequest
         public class Add : SystemBase
         {
             [Command()]
-            public Task AddAsync(string role)
+            public Task AddAsync([Remainder] string role)
                 => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
 
             [Command()]
