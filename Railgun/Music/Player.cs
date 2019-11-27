@@ -24,6 +24,7 @@ namespace Railgun.Music
 		private readonly MusicService _musicService;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
         private List<SongId> _remainingSongs = new List<SongId>();
+		private SongId _nextRandomSong = null;
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
@@ -229,7 +230,10 @@ namespace Railgun.Music
 
                         if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
                         if (_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
-                        if (RepeatSong > 0) RepeatSong--;
+                        if (RepeatSong > 0) {
+							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
+							RepeatSong--;
+						}
 						else RemoveSongRequest(CurrentSong);
 
 						if (AutoSkipped && Requests.Count < 1) AutoSkipped = false;
