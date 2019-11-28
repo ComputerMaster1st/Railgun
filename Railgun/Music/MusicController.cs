@@ -10,6 +10,8 @@ using Railgun.Core;
 using Railgun.Core.Enums;
 using TreeDiagram;
 using YoutubeExplode;
+using YoutubeExplode.Models;
+using Playlist = AudioChord.Playlist;
 
 namespace Railgun.Music
 {
@@ -125,15 +127,19 @@ namespace Railgun.Music
                 return;
             }
 
-            var msgOutput = new StringBuilder().AppendLine("Contacting YouTube...");
-            var msg = await tc.SendMessageAsync(msgOutput.ToString());
             var client = new YoutubeClient();
             var youtubePlaylist = await client.GetPlaylistAsync(playlistId);
 
-            msgOutput.AppendFormat("Found {0} songs! Now processing...", Format.Bold(youtubePlaylist.Videos.Count.ToString()));
-            await msg.ModifyAsync(x => x.Content = msgOutput.ToString());
+            await tc.SendMessageAsync($"Found {Format.Bold(youtubePlaylist.Videos.Count.ToString())} songs! Now processing...");
 
-            // TODO: convert video list to urls and process ids.
+            var urls = youtubePlaylist.Videos
+                .ToList()
+                .ConvertAll(new Converter<Video, string>((video) => { return video.GetShortUrl(); }));
+
+            var (InvalidUrls, Installed, Imported, NeedEncoding) = await ProcessSongIdsAsync(urls, tc);
+
+            await Task.Delay(1000);
+            await tc.SendMessageAsync(BuildMsgOutput(Installed, Imported, InvalidUrls, NeedEncoding));
         }
 
         public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc, PlaylistResult result)
