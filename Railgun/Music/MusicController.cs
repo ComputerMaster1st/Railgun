@@ -49,9 +49,9 @@ namespace Railgun.Music
                 .AppendLine(Format.Bold(Format.Underline("Processing Completed!")))
                 .AppendLine()
                 .AppendFormat("{0} - Already Installed", Format.Code($"[{installed}]")).AppendLine()
-                .AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine()
-                .AppendFormat("{0} - Invalid Urls", Format.Code($"[{invalidUrls}]")).AppendLine();
+                .AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine();
 
+            if (invalidUrls > 0) output.AppendFormat("{0} - Invalid Urls", Format.Code($"[{invalidUrls}]")).AppendLine();
             if (needEncoding > 0) output.AppendLine().AppendFormat("{0} - Need Checking/Downloading", Format.Code($"[{needEncoding}]")).AppendLine()
                 .AppendLine(Format.Italics("Music that require checking/downloading will be done when the player requests it. Expect playback to have a short delayed for these songs."));
 
@@ -119,7 +119,7 @@ namespace Railgun.Music
 			await tc.SendMessageAsync(BuildMsgOutput(Installed, Imported, InvalidUrls, NeedEncoding));
 		}
 
-        public async Task ProcessPlaylistAsync(string playlistUrl, ITextChannel tc)
+        public async Task ProcessYoutubePlaylistAsync(string playlistUrl, ITextChannel tc)
         {            
             if (!YoutubeClient.TryParsePlaylistId(playlistUrl, out var playlistId))
             {
@@ -127,6 +127,7 @@ namespace Railgun.Music
                 return;
             }
 
+            var startedAt = DateTime.Now;
             var client = new YoutubeClient();
             var youtubePlaylist = await client.GetPlaylistAsync(playlistId);
 
@@ -140,13 +141,26 @@ namespace Railgun.Music
 
             await Task.Delay(1000);
             await tc.SendMessageAsync(BuildMsgOutput(Installed, Imported, InvalidUrls, NeedEncoding));
+
+            var logOutput = new StringBuilder()
+                .AppendFormat("<{0} <{1}>> YouTube Playlist Processed!", tc.Guild.Name, tc.GuildId).AppendLine()
+                .AppendFormat("---- Url                : {0}", playlistUrl).AppendLine()
+                .AppendFormat("---- Started            : {0}", startedAt).AppendLine()
+                .AppendFormat("---- Finished           : {0}", DateTime.Now).AppendLine()
+                .AppendLine()
+                .AppendFormat("---- Already Installed  : {0}", Installed).AppendLine()
+                .AppendFormat("---- Imported From Repo : {0}", Imported).AppendLine();
+
+            if (InvalidUrls > 0) logOutput.AppendFormat("---- Invalid Urls       : {0}", InvalidUrls).AppendLine();
+            if (NeedEncoding > 0) logOutput.AppendFormat("---- Require Encoding   : {0}", NeedEncoding).AppendLine();
+
+            await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
         }
 
         public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc, PlaylistResult result)
 		{
 			var alreadyInstalled = 0;
 			var failed = 0;
-			var startedAt = DateTime.Now;
 
 			foreach (var songTask in resolvingPlaylist.Songs) 
             {
@@ -181,25 +195,7 @@ namespace Railgun.Music
 					Format.Bold(errors.Failed.ToString())
 				);
 
-            var logOutput = new StringBuilder()
-				.AppendFormat("<{0} <{1}>> YouTube Playlist Processed!", tc.Guild.Name, tc.GuildId).AppendLine()
-				.AppendFormat("---- Url                : {0}", url).AppendLine()
-				.AppendFormat("---- Started            : {0}", startedAt).AppendLine()
-				.AppendFormat("---- Finished           : {0}", DateTime.Now).AppendLine()
-				.AppendLine()
-				.AppendFormat("---- Already Installed  : {0}", alreadyInstalled).AppendLine()
-				.AppendFormat("---- Imported From Repo : {0}", resolvingPlaylist.ExistingSongs).AppendLine()
-				.AppendFormat("---- Encoded/Installed  : {0}", newlyEncoded).AppendLine()
-				.AppendFormat("---- Failed To Install  : {0}", errors.Failed).AppendLine();
-
-            if (errors.Failed > 0)
-            {
-                output.AppendLine().AppendLine().AppendLine(errors.Message);
-                logOutput.AppendLine().AppendLine(errors.Message);
-            }
-
-            await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
-            await tc.SendMessageAsync(output.ToString());
+            
         }
     }
 }
