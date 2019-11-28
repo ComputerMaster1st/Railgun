@@ -237,7 +237,7 @@ namespace Railgun.Music
 
 						Status = PlayerStatus.Queuing;
 						
-						CurrentSong = (onRepeat) ? await _musicService.GetSongAsync(CurrentSong.Id) : await QueueSongAsync();
+						CurrentSong = onRepeat ? await _musicService.GetSongAsync(CurrentSong.Id) : await QueueSongAsync();
 						if (CurrentSong == null) {
 							_autoDisconnected = true;
 							break;
