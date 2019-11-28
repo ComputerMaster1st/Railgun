@@ -77,7 +77,7 @@ namespace Railgun.Commands.Music
 
 			var player = playerContainer.Player;
 
-			if (!player.AutoSkipped && player.Requests.Count < 2)
+			if (!player.AutoSkipped && player.Requests.Count < 1)
 				return ReplyAsync("There are currently no music requests in the queue.");
 
 			var i = 0;
