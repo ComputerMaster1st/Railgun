@@ -18,15 +18,10 @@ namespace Railgun.Commands.Music
 			public class MusicAddYoutube : SystemBase
 			{
 				private readonly MusicController _musicController;
-				private readonly MusicService _musicService;
 
-				public MusicAddYoutube(MusicController musicController, MusicService musicService)
-				{
-					_musicController = musicController;
-					_musicService = musicService;
-				}
+                public MusicAddYoutube(MusicController musicController) => _musicController = musicController;
 
-				[Command("video")]
+                [Command("video")]
 				public Task AddVideoAsync([Remainder] string urls)
 				{
 					var urlList = (from url in urls.Split(new char[] {' ', ','}) where !string.IsNullOrWhiteSpace(url) 
@@ -34,13 +29,10 @@ namespace Railgun.Commands.Music
 					return Task.Factory.StartNew(async () => await _musicController.AddYoutubeSongsAsync(urlList, (ITextChannel)Context.Channel));
 				}
 
-				[Command("playlist"), UserPerms(GuildPermission.ManageGuild)]
-				public async Task AddPlaylistAsync(string url)
-				{
-					var cleanUrl = url.Trim(' ', '<', '>');
-                    await _musicController.ProcessYoutubePlaylistAsync(cleanUrl, Context.Channel as ITextChannel);
-				}
-			}
+                [Command("playlist"), UserPerms(GuildPermission.ManageGuild)]
+                public Task AddPlaylistAsync(string url) 
+                    => Task.Factory.StartNew(async () => await _musicController.ProcessYoutubePlaylistAsync(url.Trim(' ', '<', '>'), Context.Channel as ITextChannel));
+            }
 		}
 	}
 }
