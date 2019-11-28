@@ -24,7 +24,7 @@ namespace Railgun.Music
 		private readonly MusicService _musicService;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
         private List<SongId> _remainingSongs = new List<SongId>();
-		private SongId _nextRandomSong = null;
+		private List<SongId> _rateLimited = new List<SongId>();
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
@@ -108,6 +108,30 @@ namespace Railgun.Music
 			return false;
 		}
 
+		private async Task<(bool IsSuccess, string Error, ISong Song)> FetchSongAsync(SongId id)
+		{
+			(bool Success, ISong Song) result = await _musicService.TryGetSongAsync(id);
+			if (result.Success) return (result.Success, string.Empty, result.Song);
+
+			var isSuccess = false;
+			ISong song = null;
+			var error = string.Empty;
+
+			try 
+			{
+				if (id.ProcessorId == "DISCORD") return (isSuccess, error, song);
+
+				song = await _musicService.Youtube.DownloadAsync(new Uri("https://youtu.be/" + id.SourceId));
+				isSuccess = true;
+			}
+			catch (Exception ex)
+			{
+				error = ex.Message;
+			}
+			
+			return (isSuccess, error, song);
+		}
+
 		private async Task<ISong> QueueSongAsync()
 		{
 			var request = GetFirstSongRequest();
@@ -128,18 +152,26 @@ namespace Railgun.Music
 					_remainingSongs = new List<SongId>(playlist.Songs);
 
                     foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
+					foreach (SongId songId in _rateLimited) _remainingSongs.Remove(songId);
                 }
 
 				try
                 {
                     var songId = _remainingSongs.Count == 1 ? _remainingSongs.First() : _remainingSongs[rand.Next(0, _remainingSongs.Count)];
-                    var song = await _musicService.TryGetSongAsync(songId);
+                    var song = await FetchSongAsync(songId);
 
-                    if (song.Item1)
+                    if (song.IsSuccess)
                     {
-                        request = song.Item2;
+                        request = song.Song;
                         break;
                     }
+					else if (song.Error.Contains("Response status code does not indicate success: 429"))
+					{
+                    	_remainingSongs.Remove(songId);
+						_rateLimited.Add(songId);
+						continue;
+					}
+
                     playlist.Songs.Remove(songId);
                     _remainingSongs.Remove(songId);
 
@@ -194,6 +226,7 @@ namespace Railgun.Music
 				using (_client)
 				using (var discordStream = _client.CreateOpusStream()) {
 					Status = PlayerStatus.Connected;
+					var onRepeat = false;
 
 					while (!_streamCancelled) {
 						if (IsAlone() || LeaveAfterSong) {
@@ -203,15 +236,13 @@ namespace Railgun.Music
 						if (_musicCancelled) _musicCancelled = false;
 
 						Status = PlayerStatus.Queuing;
-
-						CurrentSong = await QueueSongAsync();
-
+						
+						CurrentSong = (onRepeat) ? await _musicService.GetSongAsync(CurrentSong.Id) : await QueueSongAsync();
 						if (CurrentSong == null) {
 							_autoDisconnected = true;
 							break;
 						}
 
-						AddSongRequest(CurrentSong);
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
 						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong));
@@ -228,13 +259,16 @@ namespace Railgun.Music
 							await ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
 						}
 
-                        if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
-                        if (_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
+            			if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
+            			if (_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
                         if (RepeatSong > 0) {
-							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
 							RepeatSong--;
+							onRepeat = true;
 						}
-						else RemoveSongRequest(CurrentSong);
+						else {
+							RemoveSongRequest(CurrentSong);
+							onRepeat = false;
+						}
 
 						if (AutoSkipped && Requests.Count < 1) AutoSkipped = false;
 
