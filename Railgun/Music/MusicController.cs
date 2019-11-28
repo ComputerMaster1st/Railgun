@@ -156,46 +156,5 @@ namespace Railgun.Music
 
             await _botLog.SendBotLogAsync(BotLogType.AudioChord, logOutput.ToString());
         }
-
-        public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc, PlaylistResult result)
-		{
-			var alreadyInstalled = 0;
-			var failed = 0;
-
-			foreach (var songTask in resolvingPlaylist.Songs) 
-            {
-				try 
-                {
-					var song = songTask.Result;
-
-					if (playlist.Songs.Contains(song.Id)) 
-                    {
-						alreadyInstalled++;
-						continue;
-					}
-
-					playlist.Songs.Add(song.Id);
-
-					await _musicService.Playlist.UpdateAsync(playlist);
-				} 
-                catch { failed++; }
-			}
-
-			var newlyEncoded = resolvingPlaylist.Songs.Count - resolvingPlaylist.ExistingSongs - failed;
-            var errors = result.GetErrors();
-
-			var output = new StringBuilder()
-				.AppendLine("Finished Processing YouTube Playlist! Results...")
-				.AppendFormat(
-				"Already Installed : {0} {1} Imported From Repository : {2} {1} Newly Encoded : {3} {1} Failed : {4}",
-					Format.Bold(alreadyInstalled.ToString()),
-					SystemUtilities.GetSeparator,
-					Format.Bold(resolvingPlaylist.ExistingSongs.ToString()),
-					Format.Bold(newlyEncoded.ToString()),
-					Format.Bold(errors.Failed.ToString())
-				);
-
-            
-        }
     }
 }
