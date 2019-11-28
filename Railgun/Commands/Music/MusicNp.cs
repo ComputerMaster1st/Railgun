@@ -34,7 +34,7 @@ namespace Railgun.Commands.Music
 				if (container == null) return ReplyAsync("I'm not playing anything at this time.");
 
 				var player = container.Player;
-				var meta = player.GetFirstSongRequest().Metadata;
+				var meta = player.CurrentSong.Metadata;
 				var currentTime = DateTime.Now - player.SongStartedAt;
 				var output = new StringBuilder()
 					.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine()
