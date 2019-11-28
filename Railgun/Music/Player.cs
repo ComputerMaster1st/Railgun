@@ -74,13 +74,9 @@ namespace Railgun.Music
 			return true;
 		}
 
-		public ISong GetFirstSongRequest()
-		{
-			if (Requests.Count < 1) return null;
-			return Requests[0];
-		}
+        public ISong GetFirstSongRequest() => Requests.FirstOrDefault();
 
-		public void RemoveSongRequest(ISong song)
+        public void RemoveSongRequest(ISong song)
 		{
 			if (Requests.Contains(song)) Requests.Remove(song);
 		}
