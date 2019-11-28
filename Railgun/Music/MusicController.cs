@@ -30,7 +30,9 @@ namespace Railgun.Music
 
 		public async Task AddYoutubeSongsAsync(IEnumerable<string> urls, ITextChannel tc)
 		{
-			Playlist playlist;
+            await tc.SendMessageAsync($"Processing {Format.Bold(urls.Count().ToString())} song(s)... This may take some time depending on how many songs there are.");
+
+            Playlist playlist;
 
 			using (var scope = _services.CreateScope()) 
             {
@@ -44,10 +46,7 @@ namespace Railgun.Music
 			var invalidUrls = 0;
 			var installed = 0;
 			var imported = 0;
-			var encoded = 0;
-			var failed = 0;
-			var initialOutput = $"Processing {Format.Bold(urls.Count().ToString())} song(s)...";
-			var initialResponse = await tc.SendMessageAsync(initialOutput);
+			var needEncoding = 0;
             var videoIds = new List<string>();
 
             foreach (var url in urls) {
@@ -63,8 +62,9 @@ namespace Railgun.Music
             }
 
             foreach (var videoId in videoIds)
-            { 
-				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
+            {
+                var songId = new SongId("YOUTUBE", videoId);
+                var song = await _musicService.TryGetSongAsync(songId);
 				if (song.Item1) {
 					if (playlist.Songs.Contains(song.Item2.Id)) installed++;
 					else {
@@ -76,21 +76,9 @@ namespace Railgun.Music
 					continue;
 				}
 
-				await initialResponse.ModifyAsync(properties => properties.Content = $"{initialResponse} This may take some time depending on how many require downloading.");
-				var response = await tc.SendMessageAsync($"{Format.Bold("Processing :")} {Format.EscapeUrl(YoutubeBaseUrl + videoId)}...");
-
-				try {
-					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(YoutubeBaseUrl + videoId));
-					playlist.Songs.Add(downloadedSong.Id);
-					playlistModified = true;
-					encoded++;
-
-					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Encoded & Installed :")} ({downloadedSong.Id.ToString()}) {downloadedSong.Metadata.Name}");
-				} 
-                catch (Exception ex) {
-					failed++;
-					await response.ModifyAsync(properties => properties.Content = $"{Format.Bold("Failed To Install :")} ({Format.EscapeUrl(YoutubeBaseUrl + videoId)}), {ex.Message}");
-				}
+				playlist.Songs.Add(songId);
+				playlistModified = true;
+				needEncoding++;
 			}
 
 			if (playlistModified) await _musicService.Playlist.UpdateAsync(playlist);
@@ -100,12 +88,13 @@ namespace Railgun.Music
 				.AppendLine()
 				.AppendFormat("{0} - Already Installed", Format.Code($"[{installed}]")).AppendLine()
 				.AppendFormat("{0} - Imported From Repository", Format.Code($"[{imported}]")).AppendLine()
-				.AppendFormat("{0} - Newly Encoded & Installed", Format.Code($"[{encoded}]")).AppendLine()
-				.AppendFormat("{0} - Failed To Install", Format.Code($"[{failed}]")).AppendLine()
                 .AppendFormat("{0} - Invalid Urls", Format.Code($"[{invalidUrls}]")).AppendLine();
 
+            if (needEncoding > 0) output.AppendLine().AppendFormat("{0} - Need Checking/Downloading", Format.Code($"[{needEncoding}]")).AppendLine()
+                    .AppendLine(Format.Italics("Music that require checking/downloading will be done when the player requests it. Expect playback to have a short delayed for these songs."));
+
             await Task.Delay(1000);
-			await tc.SendMessageAsync("Done!");
+			await tc.SendMessageAsync(output.ToString());
 		}
 
         public async Task ProcessYoutubePlaylistAsync(string url, Playlist playlist, ResolvingPlaylist resolvingPlaylist, ITextChannel tc, PlaylistResult result)
