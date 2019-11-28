@@ -37,14 +37,8 @@ namespace Railgun.Commands.Music
 				[Command("playlist"), UserPerms(GuildPermission.ManageGuild)]
 				public async Task AddPlaylistAsync(string url)
 				{
-					var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-					var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 					var cleanUrl = url.Trim(' ', '<', '>');
-
-					await Context.Database.SaveChangesAsync();
-
-                    await new PlaylistResult(_musicService, Context.Channel as ITextChannel, data)
-                        .ProcessPlaylistAsync(_musicController, cleanUrl, playlist);
+                    await _musicController.ProcessYoutubePlaylistAsync(cleanUrl, Context.Channel as ITextChannel);
 				}
 			}
 		}
