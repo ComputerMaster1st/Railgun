@@ -10,6 +10,7 @@ using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
+using TreeDiagram.Models.User;
 
 namespace Railgun.Events
 {
@@ -31,7 +32,8 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
-            ServerMention mention;
+            ServerMention sMention;
+            UserMention uMention;
 
             using (var scope = _services.CreateScope())
             {
@@ -41,7 +43,8 @@ namespace Railgun.Events
 				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
 
 				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
-                mention = db.ServerMentions.GetData(user.Guild.Id);
+                sMention = db.ServerMentions.GetData(user.Guild.Id);
+                uMention = db.UserMentions.GetData(user.Id);
             }
 
 			if (data == null) return Task.CompletedTask;
@@ -49,7 +52,7 @@ namespace Railgun.Events
 			var notification = data.GetMessage(MsgType.Leave);
 
 			if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", user.Username);
-            if (mention.DisableMentions) notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
+            if (sMention.DisableMentions || uMention.DisableMentions) notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
 
             return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
