@@ -33,7 +33,7 @@ namespace Railgun.Events
         {
             ServerJoinLeave data;
             ServerMention sMention;
-            UserMention uMention;
+            UserMention uMention = null;
             string username;
 
 			using (var scope = _services.CreateScope())
