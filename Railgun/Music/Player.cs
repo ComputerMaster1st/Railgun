@@ -77,9 +77,9 @@ namespace Railgun.Music
 
         public SongRequest GetFirstSongRequest() => Requests.FirstOrDefault();
 
-        public void RemoveSongRequest(SongRequest song) => Requests.RemoveAll(x => x == song);
+        public void RemoveSongRequest(SongRequest song) => Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
 
-        public void RemoveSongRequest(ISong song) => Requests.RemoveAll(x => x.Id == song.Id);
+        public void RemoveSongRequest(ISong song) => Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
 
         public bool VoteSkip(ulong userId)
 		{
