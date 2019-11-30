@@ -173,8 +173,6 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
-					var downloadedSong = await _musicService.Youtube.DownloadAsync(new Uri(input));
-
                     var client = new YoutubeClient();
                     var video = await client.GetVideoAsync(YoutubeClient.ParseVideoId(input));
 
