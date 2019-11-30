@@ -87,31 +87,30 @@ namespace Railgun.Commands.Music
 
 			while (player.Requests.Count > i) {
 				var song = player.Requests[i];
-				var meta = song.Metadata;
 
 				switch (i) {
 					case 0:
 						var currentTime = DateTime.Now - player.SongStartedAt;
 
 						output.AppendFormat("Now : {0} {1} Length : {2}/{3}",
-											Format.Bold(meta.Name),
+											Format.Bold(song.Name),
 											SystemUtilities.GetSeparator,
 											Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-											Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"))
+											Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"))
 							.AppendLine();
 						break;
 					case 1:
 						output.AppendFormat("Next : {0} {1} Length : {2}",
-											Format.Bold(meta.Name),
+											Format.Bold(song.Name),
 											SystemUtilities.GetSeparator,
-											Format.Bold(meta.Length.ToString()));
+											Format.Bold(song.Length.ToString()));
 						break;
 					default:
 						output.AppendFormat("{0} : {1} {2} Length : {3}",
 											Format.Code($"[{i}]"),
-											Format.Bold(meta.Name),
+											Format.Bold(song.Name),
 											SystemUtilities.GetSeparator,
-											Format.Bold(meta.Length.ToString()));
+											Format.Bold(song.Length.ToString()));
 						break;
 				}
 

@@ -25,12 +25,13 @@ namespace Railgun.Music
 		private readonly List<SongId> _playedSongs = new List<SongId>();
         private List<SongId> _remainingSongs = new List<SongId>();
 		private List<SongId> _rateLimited = new List<SongId>();
+        private bool _nowRateLimited = false;
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
 		public DateTime CreatedAt { get; } = DateTime.Now;
 		public DateTime SongStartedAt { get; private set; }
-		public List<ISong> Requests { get; } = new List<ISong>();
+		public List<SongRequest> Requests { get; } = new List<SongRequest>();
 		public List<ulong> VoteSkipped { get; } = new List<ulong>();
 		public PlayerStatus Status { get; private set; } = PlayerStatus.Connecting;
 		public bool AutoSkipped { get; set; }
@@ -66,7 +67,7 @@ namespace Railgun.Music
 			_audioDisconnected = audioDisconnected;
 		}
 
-		public bool AddSongRequest(ISong song)
+		public bool AddSongRequest(SongRequest song)
 		{
 			if (Requests.Any(x => x.Id == song.Id)) return false;
 
@@ -74,14 +75,13 @@ namespace Railgun.Music
 			return true;
 		}
 
-        public ISong GetFirstSongRequest() => Requests.FirstOrDefault();
+        public SongRequest GetFirstSongRequest() => Requests.FirstOrDefault();
 
-        public void RemoveSongRequest(ISong song)
-		{
-			if (Requests.Contains(song)) Requests.Remove(song);
-		}
+        public void RemoveSongRequest(SongRequest song) => Requests.RemoveAll(x => x == song);
 
-		public bool VoteSkip(ulong userId)
+        public void RemoveSongRequest(ISong song) => Requests.RemoveAll(x => x.Id == song.Id);
+
+        public bool VoteSkip(ulong userId)
 		{
 			if (VoteSkipped.Contains(userId)) return false;
 
@@ -128,14 +128,43 @@ namespace Railgun.Music
 			return (isSuccess, error, song);
 		}
 
-		private async Task<ISong> QueueSongAsync()
-		{
-			var request = GetFirstSongRequest();
-			if (request != null) return request;
+        private async Task<ISong> QueueFirstRequestedSong(Playlist playlist)
+        {
+            while (Requests.Count > 0)
+            {
+                var request = GetFirstSongRequest();
+                if (request != null)
+                {
+                    if (request.Song != null) return request.Song;
+                    var fetchedSong = await FetchSongAsync(request.Id);
 
+                    if (fetchedSong.IsSuccess) return fetchedSong.Song;
+                    if (fetchedSong.Error.Contains("Response status code does not indicate success: 429"))
+                    {
+                        _remainingSongs.Remove(request.Id);
+                        _rateLimited.Add(request.Id);
+                        RemoveSongRequest(request);
+                        continue;
+                    }
+
+                    playlist.Songs.Remove(request.Id);
+                    _remainingSongs.Remove(request.Id);
+                    RemoveSongRequest(request);
+
+                    await _musicService.Playlist.UpdateAsync(playlist);
+                }
+            }
+
+            return null;
+        }
+
+		private async Task<ISong> QueueSongAsync()
+        {
+            Playlist playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
+            var request = await QueueFirstRequestedSong(playlist);
             var rand = new Random();
-            Playlist playlist = null;
             var retry = 5;
+            _remainingSongs = new List<SongId>(playlist.Songs);
 
             while (request == null) {
 				if (_remainingSongs.Count == 0) {
@@ -145,15 +174,15 @@ namespace Railgun.Music
 					if (!PlaylistAutoLoop) return null;
 
 					_playedSongs.Clear();
+                    _rateLimited.Clear();
 					_remainingSongs = new List<SongId>(playlist.Songs);
 
                     foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
-					foreach (SongId songId in _rateLimited) _remainingSongs.Remove(songId);
                 }
 
 				try
                 {
-                    var songId = _remainingSongs.Count == 1 ? _remainingSongs.First() : _remainingSongs[rand.Next(0, _remainingSongs.Count)];
+                    var songId = _remainingSongs.Count < 2 ? _remainingSongs.First() : _remainingSongs[rand.Next(0, _remainingSongs.Count)];
                     var song = await FetchSongAsync(songId);
 
                     if (song.IsSuccess)
@@ -241,7 +270,8 @@ namespace Railgun.Music
 
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
-						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong));
+						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, (_rateLimited.Count > 0) ? (!_nowRateLimited ? true : false) : false));
+                        if (!_nowRateLimited && _rateLimited.Count > 0) _nowRateLimited = true;
 
 						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
 						using (var opusStream = new OpusOggReadStream(databaseStream)) {

@@ -36,7 +36,7 @@ namespace Railgun.Commands.Music
 				_musicService = musicService;
 			}
 
-			private async Task QueueSongAsync(PlayerContainer playerContainer, Playlist playlist, ISong song, ServerMusic data, IUserMessage response)
+			private async Task QueueSongAsync(PlayerContainer playerContainer, Playlist playlist, SongRequest song, ServerMusic data, IUserMessage response)
 			{
 				var nowInstalled = false;
 
@@ -49,7 +49,7 @@ namespace Railgun.Commands.Music
 				var output = new StringBuilder()
 					.AppendFormat("{0} Queued {1} as requested by {2}. {3}",
 						nowInstalled ? "Installed &" : _playOneTimeOnly ? "One-Time Only &" : "",
-						Format.Bold(song.Metadata.Name),
+						Format.Bold(song.Name),
 						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser)),
 						playerContainer == null ? "Now starting music player..." : "").AppendLine();
 
