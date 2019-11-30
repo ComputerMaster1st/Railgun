@@ -9,7 +9,7 @@ using TreeDiagram;
 
 namespace Railgun.Commands.JoinLeave
 {
-	[Alias("joinleave"), UserPerms(GuildPermission.ManageGuild)]
+	[Alias("joinleave", "jl"), UserPerms(GuildPermission.ManageGuild)]
 	public partial class JoinLeave : SystemBase
 	{
 		[Command]

@@ -9,7 +9,7 @@ namespace Railgun.Commands.JoinLeave
 {
 	public partial class JoinLeave : SystemBase
 	{
-		[Alias("remove")]
+		[Alias("remove", "-")]
 		public class JoinLeaveRemove : SystemBase
 		{
 			private Task MsgHandlerAsync(int index, MsgType type)

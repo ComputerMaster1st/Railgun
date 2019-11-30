@@ -10,7 +10,7 @@ namespace Railgun.Commands.JoinLeave
 {
 	public partial class JoinLeave : SystemBase
 	{
-		[Alias("add")]
+		[Alias("add", "+")]
 		public class JoinLeaveAdd : SystemBase
 		{
 			private Task MsgHandlerAsync(string msg, MsgType type)
