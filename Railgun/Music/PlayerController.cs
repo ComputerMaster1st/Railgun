@@ -35,7 +35,7 @@ namespace Railgun.Music
             _services = services;
         }
 
-        public async Task CreatePlayerAsync(IGuildUser user, IVoiceChannel vc, ITextChannel tc, bool autoJoin = false, ISong preRequestedSong = null)
+        public async Task CreatePlayerAsync(IGuildUser user, IVoiceChannel vc, ITextChannel tc, bool autoJoin = false, SongRequest preRequestedSong = null)
 		{
 			Playlist playlist;
 			ServerMusic data;
