@@ -62,7 +62,7 @@ namespace Railgun.Events
 			if (string.IsNullOrEmpty(notification)) return Task.CompletedTask;
 
 			notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", username);
-            if (sMention.DisableMentions || uMention.DisableMentions) notification.Replace("<user#disc>", $"{username}#{user.DiscriminatorValue}");
+            if (sMention.DisableMentions || (uMention != null && uMention.DisableMentions)) notification.Replace("<user#disc>", $"{username}#{user.DiscriminatorValue}");
             
 			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
