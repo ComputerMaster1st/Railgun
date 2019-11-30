@@ -31,8 +31,9 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
+            ServerMention mention;
 
-			using (var scope = _services.CreateScope())
+            using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
@@ -40,14 +41,17 @@ namespace Railgun.Events
 				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
 
 				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
-			}
+                mention = db.ServerMentions.GetData(user.Guild.Id);
+            }
 
 			if (data == null) return Task.CompletedTask;
 
 			var notification = data.GetMessage(MsgType.Leave);
 
 			if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", user.Username);
-			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
+            if (mention.DisableMentions) notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
+
+            return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
     }
 }
