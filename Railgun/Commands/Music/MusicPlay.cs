@@ -49,7 +49,7 @@ namespace Railgun.Commands.Music
 
 				var output = new StringBuilder()
 					.AppendFormat("{0} Queued {1} as requested by {2}. {3}",
-						nowInstalled ? "Installed &" : _playOneTimeOnly ? "One-Time Only &" : "",
+						nowInstalled ? "Queued &" : _playOneTimeOnly ? "One-Time Only &" : "",
 						Format.Bold(song.Name),
 						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser)),
 						playerContainer == null ? "Now starting music player..." : "").AppendLine();
