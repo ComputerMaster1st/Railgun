@@ -33,7 +33,7 @@ namespace Railgun.Events
         {
             ServerJoinLeave data;
             ServerMention sMention;
-            UserMention uMention = null;
+            UserMention uMention;
 
             using (var scope = _services.CreateScope())
             {
@@ -52,7 +52,7 @@ namespace Railgun.Events
 			var notification = data.GetMessage(MsgType.Leave);
 
 			if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", user.Username);
-            if (sMention.DisableMentions || (uMention != null && uMention.DisableMentions)) notification = notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
+            if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions)) notification = notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
 
             return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
