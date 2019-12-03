@@ -86,14 +86,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var playlist = await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
-				var song = player.GetFirstSongRequest();
-
-				if (song == null) {
-					await ReplyAsync("No song has been selected yet. Try this command again once a song starts playing.");
-					return;
-				}
-
-				playlist.Songs.Remove(song.Id);
+				playlist.Songs.Remove(player.CurrentSong.Id);
 
 				await _musicService.Playlist.UpdateAsync(playlist);
 				await ReplyAsync("Removed from playlist. Skipping to next song...");
