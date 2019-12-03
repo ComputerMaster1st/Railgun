@@ -26,6 +26,7 @@ namespace Railgun.Music
         private List<SongId> _remainingSongs = new List<SongId>();
 		private List<SongId> _rateLimited = new List<SongId>();
         private bool _nowRateLimited = false;
+		private bool _firstLoop = true;
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
@@ -164,18 +165,18 @@ namespace Railgun.Music
             var request = await QueueFirstRequestedSong(playlist);
             var rand = new Random();
             var retry = 5;
-            _remainingSongs = new List<SongId>(playlist.Songs);
 
             while (request == null) {
-				if (_remainingSongs.Count == 0) {
+				if (_remainingSongs.Count < 1) {
                     playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
 
                     if (playlist == null || playlist.Songs.Count == 0) return null;
-					if (!PlaylistAutoLoop) return null;
-
+					if (!PlaylistAutoLoop && !_firstLoop) return null;
+					
 					_playedSongs.Clear();
                     _rateLimited.Clear();
 					_remainingSongs = new List<SongId>(playlist.Songs);
+					_firstLoop = false;
 
                     foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
                 }
