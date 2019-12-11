@@ -23,9 +23,9 @@ namespace Railgun.Events
             _controller = services.GetService<PlayerController>();
         }
 
-        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, after));
+        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, before, after));
 
-        private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState after)
+        private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after)
         {
             if (sUser.IsBot || after.VoiceChannel == null) return;
 
@@ -46,6 +46,9 @@ namespace Railgun.Events
 			var tc = data.AutoTextChannel != 0 ? await guild.GetTextChannelAsync(data.AutoTextChannel) : null;
 			var vc = user.VoiceChannel;
 
+            if (before.VoiceChannel == after.VoiceChannel)
+                if (after.IsDeafened || after.IsMuted) return;
+            
 			if (vc.Id == data.AutoVoiceChannel && tc != null) await _controller.CreatePlayerAsync(user, vc, tc, true);
         }
     }
