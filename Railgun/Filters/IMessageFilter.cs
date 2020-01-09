@@ -6,6 +6,6 @@ namespace Railgun.Filters
 {
     public interface IMessageFilter
     {
-        Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context);
+        Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context);
     }
 }

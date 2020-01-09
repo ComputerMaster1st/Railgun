@@ -8,14 +8,12 @@ namespace Railgun.Filters
 {
     public class AntiCaps : FilterBase, IMessageFilter
 	{
-		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
+		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context)
 		{
 			var data = context.FilterCapses.GetData(tc.GuildId);
 
 			if (!CheckConditions(data as ITreeFilter, message)) return null;
 			if (message.Content.Length < data.Length) return null;
-
-			var self = await tc.Guild.GetCurrentUserAsync();
 
 			if (message.Author.Id == self.Id) return null;
 			else if (!self.GetPermissions(tc).ManageMessages)

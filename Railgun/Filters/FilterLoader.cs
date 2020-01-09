@@ -20,6 +20,7 @@ namespace Railgun.Filters
             if (string.IsNullOrWhiteSpace(msg.Content)) return null;
 
             var tc = (ITextChannel)msg.Channel;
+            var self = await tc.Guild.GetCurrentUserAsync();
             IUserMessage result = null;
 
             using (var scope = _services.CreateScope())
@@ -28,7 +29,7 @@ namespace Railgun.Filters
 
                 foreach (var filter in _filters) 
                 {
-                    result = await filter.FilterAsync(tc, msg, db);
+                    result = await filter.FilterAsync(tc, msg, self, db);
                     if (result != null) break;
                 }
             }

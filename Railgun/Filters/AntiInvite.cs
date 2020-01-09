@@ -8,7 +8,7 @@ namespace Railgun.Filters
 {
     public class AntiInvite : FilterBase, IMessageFilter
     {
-        public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
+        public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context)
         {
             var data = context.FilterUrls.GetData(tc.GuildId);
 

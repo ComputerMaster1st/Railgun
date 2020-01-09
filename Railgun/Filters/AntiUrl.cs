@@ -25,13 +25,11 @@ namespace Railgun.Filters
 			return false;
 		}
 
-		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, TreeDiagramContext context)
+		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context)
 		{
 			var data = context.FilterUrls.GetData(tc.GuildId);
 
 			if (!CheckConditions(data as ITreeFilter, message)) return null;
-
-			var self = await tc.Guild.GetCurrentUserAsync();
 			var user = message.Author;
 
 			if (message.Author.Id == self.Id) return null;
