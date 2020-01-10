@@ -57,6 +57,7 @@ namespace Railgun.Inactivity
                 {
                     var guild = await _client.GetGuildAsync(config.Id);
                     var alreadyInactiveUsers = new List<UserActivityContainer>();
+                    var badUserIds = new List<ulong>();
     
                     foreach (var container in config.Users) {
                         var currentTime = DateTime.Now;
@@ -64,6 +65,11 @@ namespace Railgun.Inactivity
                         if (container.LastActive.AddDays(config.InactiveDaysThreshold) > currentTime) continue;
     
                         var user = await guild.GetUserAsync(container.UserId);
+                        if (user == null)
+                        {
+                            badUserIds.Add(container.UserId);
+                            continue;
+                        }
     
                         if (user.RoleIds.Contains(config.InactiveRoleId))
                         {
@@ -77,7 +83,8 @@ namespace Railgun.Inactivity
     
                         _timerController.CreateAndStartTimer<AssignRoleTimerContainer>(timer);
                     }
-    
+
+                    foreach (var id in badUserIds) config.Users.RemoveAll(u => u.UserId == id); 
                     if (alreadyInactiveUsers.Count < 1) return;
                     if (config.KickDaysThreshold == 0) return;
     
