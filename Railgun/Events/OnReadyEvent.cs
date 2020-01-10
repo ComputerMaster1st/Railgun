@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -9,6 +10,7 @@ using Railgun.Core.Configuration;
 using Railgun.Inactivity;
 using Railgun.Music;
 using Railgun.Timers;
+using TreeDiagram;
 
 namespace Railgun.Events
 {
@@ -50,18 +52,26 @@ namespace Railgun.Events
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, $"SHARD {sClient.ShardId}",
 				$"Shard {(_shardsReady[sClient.ShardId] ? "Re-" : "")}Connected! ({sClient.Guilds.Count} Servers)"));
 
-			_timerController.Initialize();
-			_inactivityController.Initialize();
-
 			if (_initialized) return;
 			if (_shardsReady.Count < _client.Shards.Count) return;
 
 			_initialized = true;
 			_count.PreviousGuildCount = _client.Guilds.Count;
 
+            using (var scope = _services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                db.CheckForBadConfigs(_client.Guilds.ToList().ConvertAll(new Converter<SocketGuild, ulong>(guild => {
+                    return guild.Id;
+                })));
+            }
+
 			await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} {_client.Guilds.Count} Servers!",
 				type: ActivityType.Watching);
 			await _client.SetStatusAsync(UserStatus.Online);
+
+			_timerController.Initialize();
+			_inactivityController.Initialize();
         }
     }
 }

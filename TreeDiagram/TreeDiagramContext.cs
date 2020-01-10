@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Models.Filter;
@@ -54,6 +55,28 @@ namespace TreeDiagram
 			modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<ServerRoleRequest>().HasMany(f => f.RoleIds).WithOne().OnDelete(DeleteBehavior.Cascade);
 			base.OnModelCreating(modelBuilder);
+		}
+
+		public int CheckForBadConfigs(IEnumerable<ulong> ids)
+		{
+			var badConfigCount = 0;
+
+			badConfigCount += FilterCapses.ConfigCheck(ids);
+			badConfigCount += FilterUrls.ConfigCheck(ids);
+			
+			badConfigCount += FunBites.ConfigCheck(ids);
+			badConfigCount += FunRsts.ConfigCheck(ids);
+			
+			badConfigCount += ServerCommands.ConfigCheck(ids);
+            badConfigCount += ServerInactivities.ConfigCheck(ids);
+            badConfigCount += ServerMentions.ConfigCheck(ids);
+			badConfigCount += ServerMusics.ConfigCheck(ids);
+			badConfigCount += ServerWarnings.ConfigCheck(ids);
+			badConfigCount += ServerJoinLeaves.ConfigCheck(ids);
+			badConfigCount += ServerRoleRequests.ConfigCheck(ids);
+
+			if (badConfigCount > 0) SaveChanges();
+			return badConfigCount;
 		}
 
 		public void DeleteGuildData(ulong id)

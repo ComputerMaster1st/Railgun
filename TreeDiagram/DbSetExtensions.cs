@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TreeDiagram.Interfaces;
@@ -31,6 +32,14 @@ namespace TreeDiagram
 
 		public static TEntity GetData<TEntity>(this DbSet<TEntity> set, ulong guildId) where TEntity : class, ITreeModel
 			=> set.FirstOrDefault(find => find.Id == guildId);
+		
+		public static int ConfigCheck<TEntity>(this DbSet<TEntity> set, IEnumerable<ulong> ids) where TEntity : class, ITreeModel
+		{
+			var badIds = new List<ulong>();
+			foreach (var config in set) if (!ids.Contains(config.Id)) badIds.Add(config.Id);
+			foreach (var id in badIds) set.DeleteData(id);
+			return badIds.Count;
+		}
 
 		internal static void DeleteData<TEntity>(this DbSet<TEntity> set, ulong guildId) where TEntity : class, ITreeModel
 		{
