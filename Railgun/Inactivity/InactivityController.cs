@@ -46,7 +46,7 @@ namespace Railgun.Inactivity
 
                 if (!db.ServerInactivities.Any((f) => f.IsEnabled)) return;
 
-                var configs = new List<ServerInactivity>(db.ServerInactivities.Where(
+                var configs = new List<ServerInactivity>(db.ServerInactivities.AsQueryable().Where(
                     (f) => f.IsEnabled 
                            && f.InactiveRoleId != 0 
                            && f.InactiveDaysThreshold != 0));

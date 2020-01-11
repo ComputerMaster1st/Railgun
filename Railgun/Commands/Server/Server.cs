@@ -9,7 +9,6 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
 using Railgun.Core.Extensions;
-using Railgun.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Commands.Server
