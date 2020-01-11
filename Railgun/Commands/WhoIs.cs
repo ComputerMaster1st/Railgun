@@ -50,6 +50,7 @@ namespace Railgun.Commands
                     case GuildPermission.ChangeNickname:
                     case GuildPermission.EmbedLinks:
                     case GuildPermission.ReadMessageHistory:
+                    case GuildPermission.Stream:
                         score += 2;
                         break;
                     default:
@@ -58,7 +59,7 @@ namespace Railgun.Commands
                 }
             }
 
-            var percent = Math.Round((score / 140) * 100.00);
+            var percent = Math.Round((score / 142) * 100.00);
 
             if (percent < 10) return 0;
             else if (percent < 20) return 1;
