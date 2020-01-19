@@ -6,6 +6,7 @@ using AudioChord;
 using Discord;
 using Discord.Audio;
 using MongoDB.Bson;
+using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
 
@@ -124,6 +125,7 @@ namespace Railgun.Music
 			catch (Exception ex)
 			{
 				error = ex.Message;
+				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
 			}
 			
 			return (isSuccess, error, song);
