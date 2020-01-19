@@ -41,6 +41,8 @@ namespace Railgun
         private Analytics _analytics = null;
         private FilterLoader _filterLoader = null;
         private IServiceProvider _serviceProvider = null;
+        private MusicServiceConfiguration _musicServiceConfig = null;
+        private MusicService _musicService = null;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
@@ -69,13 +71,15 @@ namespace Railgun
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
-            var musicConfig = new MusicServiceConfiguration() {
+            _musicServiceConfig = new MusicServiceConfiguration() {
                 Hostname = mongo.Hostname,
                 Username = mongo.Username,
                 Password = mongo.Password,
-                SongCacheFactory = () => new FileSystemCache("/home/audiochord")
+                SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
+                
             };
-            
+            _musicService = new MusicService(_musicServiceConfig);
+
             _botLog = new BotLog(_config, _client);
             _serverCount = new ServerCount(_config, _client);
             _analytics = new Analytics(_botLog);
@@ -88,14 +92,14 @@ namespace Railgun
                 .AddSingleton(_botLog)
                 .AddSingleton(_analytics)
                 .AddSingleton(_commandService)
-                .AddSingleton(musicConfig)
+                .AddSingleton(_musicServiceConfig)
+                .AddSingleton(_musicService)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
                 .AddSingleton<TimerController>()
                 .AddSingleton<InactivityController>()
                 .AddSingleton<MusicController>()
-                .AddSingleton(new MusicService(musicConfig))
                 .AddDbContext<TreeDiagramContext>(options => {
                     options.UseNpgsql($"Server={postgre.Hostname};Port=5432;Database={postgre.Database};UserId={postgre.Username};Password={postgre.Password};")
                         .EnableSensitiveDataLogging()
