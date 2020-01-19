@@ -10,18 +10,19 @@ namespace Railgun.Commands
     [Alias("whois")]
     public class WhoIs : SystemBase
     {
-        private (double Percent, int Level) GetEsperLevel(IGuildUser user) 
+        private (double Percent, int Level, int PermissionCount) GetEsperLevel(IGuildUser user) 
         {
-            if (Context.Guild.OwnerId == user.Id) return (-1, 6);
-
             var score = 0;
+            var permList = user.GuildPermissions.ToList();
+            
+            if (Context.Guild.OwnerId == user.Id) return (-1, 6, permList.Count);
 
-            foreach (var perm in user.GuildPermissions.ToList()) 
+            foreach (var perm in permList) 
             {
                 switch (perm) 
                 {
                     case GuildPermission.Administrator:
-                        return (-1, 5);
+                        return (-1, 5, permList.Count);
                     case GuildPermission.ManageChannels:
                     case GuildPermission.ManageEmojis:
                     case GuildPermission.ManageGuild:
@@ -68,7 +69,7 @@ namespace Railgun.Commands
             else if (percent < 60.00) level = 3;
             else level = 4;
 
-            return (percent, level);
+            return (percent, level, permList.Count);
         }
 
         [Command]
@@ -105,7 +106,7 @@ namespace Railgun.Commands
                 embedBuilder.AddField("Server Nickname:", gUser.Nickname ?? Format.Bold("N/A"), true)
                     .AddField("Joined Server At:", gUser.JoinedAt.ToString() ?? Format.Bold("Recently"), true)
                     .AddField("Current Server Roles:", roles.ToString() ?? Format.Bold("N/A"))
-                    .AddField("ESPer Level:", $"{result.Level} ({result.Percent}%)");
+                    .AddField("ESPer Level:", $"{result.Level} ({result.Percent}% - {result.PermissionCount} Guild Permissions)");
             }
 
             await ReplyAsync(embed:embedBuilder.Build());
