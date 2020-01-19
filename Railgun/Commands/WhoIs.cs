@@ -10,9 +10,9 @@ namespace Railgun.Commands
     [Alias("whois")]
     public class WhoIs : SystemBase
     {
-        private int GetEsperLevel(IGuildUser user) 
+        private (double Percent, int Level) GetEsperLevel(IGuildUser user) 
         {
-            if (Context.Guild.OwnerId == user.Id) return 6;
+            if (Context.Guild.OwnerId == user.Id) return (-1, 6);
 
             var score = 0;
 
@@ -21,7 +21,7 @@ namespace Railgun.Commands
                 switch (perm) 
                 {
                     case GuildPermission.Administrator:
-                        return 5;
+                        return (-1, 5);
                     case GuildPermission.ManageChannels:
                     case GuildPermission.ManageEmojis:
                     case GuildPermission.ManageGuild:
@@ -60,12 +60,15 @@ namespace Railgun.Commands
             }
 
             var percent = Math.Round((score / 142) * 100.00);
+            int level;
 
-            if (percent < 10) return 0;
-            else if (percent < 20) return 1;
-            else if (percent < 40) return 2;
-            else if (percent < 60) return 3;
-            else return 4;
+            if (percent < 10.00) level = 0;
+            else if (percent < 20.00) level = 1;
+            else if (percent < 40.00) level = 2;
+            else if (percent < 60.00) level = 3;
+            else level = 4;
+
+            return (percent, level);
         }
 
         [Command]
@@ -95,13 +98,14 @@ namespace Railgun.Commands
             if (gUser != null) 
             {
                 var roles = new StringBuilder();
+                var result = GetEsperLevel(gUser);
 
                 foreach (var roleId in gUser.RoleIds) roles.AppendFormat("{0} ", Context.Guild.GetRole(roleId).Mention);
 
                 embedBuilder.AddField("Server Nickname:", gUser.Nickname ?? Format.Bold("N/A"), true)
                     .AddField("Joined Server At:", gUser.JoinedAt.ToString() ?? Format.Bold("Recently"), true)
                     .AddField("Current Server Roles:", roles.ToString() ?? Format.Bold("N/A"))
-                    .AddField("ESPer Level:", GetEsperLevel(gUser));
+                    .AddField("ESPer Level:", $"{result.Level} ({result.Percent}%)");
             }
 
             await ReplyAsync(embed:embedBuilder.Build());
