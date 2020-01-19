@@ -69,6 +69,12 @@ namespace Railgun
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
+            var musicConfig = new MusicServiceConfiguration() {
+                Hostname = mongo.Hostname,
+                Username = mongo.Username,
+                Password = mongo.Password,
+                SongCacheFactory = () => new FileSystemCache("/home/audiochord")
+            };
             
             _botLog = new BotLog(_config, _client);
             _serverCount = new ServerCount(_config, _client);
@@ -82,19 +88,14 @@ namespace Railgun
                 .AddSingleton(_botLog)
                 .AddSingleton(_analytics)
                 .AddSingleton(_commandService)
+                .AddSingleton(musicConfig)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
                 .AddSingleton<TimerController>()
                 .AddSingleton<InactivityController>()
                 .AddSingleton<MusicController>()
-                .AddSingleton(new MusicService(new MusicServiceConfiguration() {
-                        Hostname = mongo.Hostname,
-                        Username = mongo.Username,
-                        Password = mongo.Password,
-                        SongCacheFactory = () => new FileSystemCache("/home/audiochord")
-                    })
-                )
+                .AddSingleton(new MusicService(musicConfig))
                 .AddDbContext<TreeDiagramContext>(options => {
                     options.UseNpgsql($"Server={postgre.Hostname};Port=5432;Database={postgre.Database};UserId={postgre.Username};Password={postgre.Password};")
                         .EnableSensitiveDataLogging()
