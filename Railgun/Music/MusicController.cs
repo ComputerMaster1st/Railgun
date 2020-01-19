@@ -19,12 +19,14 @@ namespace Railgun.Music
     {
         private readonly BotLog _botLog;
         private readonly MusicService _musicService;
+        private readonly MusicServiceConfiguration _musicConfig;
         private readonly IServiceProvider _services;
 
-        public MusicController(BotLog botLog, MusicService musicService, IServiceProvider services)
+        public MusicController(BotLog botLog, MusicService musicService, MusicServiceConfiguration musicConfig, IServiceProvider services)
 		{
             _botLog = botLog;
             _musicService = musicService;
+            _musicConfig = musicConfig;
             _services = services;
 		}
 
@@ -133,9 +135,10 @@ namespace Railgun.Music
 
             await tc.SendMessageAsync($"Found {Format.Bold(youtubePlaylist.Videos.Count.ToString())} songs! Now processing...");
 
-            var urls = youtubePlaylist.Videos
-                .ToList()
-                .ConvertAll(new Converter<Video, string>((video) => { return video.GetShortUrl(); }));
+            var urls = new List<string>();
+            foreach (var video in youtubePlaylist.Videos)
+                if (video.Duration <= _musicConfig.ExtractorConfiguration.MaxSongDuration)
+                    urls.Add(video.GetShortUrl());
 
             var (InvalidUrls, Installed, Imported, NeedEncoding) = await ProcessSongIdsAsync(urls, tc);
 
