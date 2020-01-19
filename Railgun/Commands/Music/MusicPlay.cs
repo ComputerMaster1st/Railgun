@@ -156,20 +156,24 @@ namespace Railgun.Commands.Music
 				var videoId = string.Empty;
 				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
 
-				if (!input.Contains("youtu")) {
-					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
-					return;
-				} else if (!_musicService.Youtube.TryParseYoutubeUrl(input, out videoId)) {
-					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
-					return;
-				} else if (song.Item1) {
+				if (song.Item1) {
 					if (playlist.Songs.Contains(song.Item2.Id)) {
 						await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
 						return;
-					} else if (!data.AutoDownload) {
+					}
+					if (!data.AutoDownload) {
 						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
 						return;
 					}
+				}
+
+				if (!input.Contains("youtu")) {
+					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
+					return;
+				} 
+				if (!_musicService.Youtube.TryParseYoutubeUrl(input, out videoId)) {
+					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
+					return;
 				}
 
 				try {
