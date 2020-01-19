@@ -129,17 +129,17 @@ namespace Railgun.Music
 			return (isSuccess, error, song);
 		}
 
-        private async Task<ISong> QueueFirstRequestedSong(Playlist playlist)
+        private async Task<(bool IsSuccess, string Error, ISong song)> QueueFirstRequestedSong(Playlist playlist)
         {
             while (Requests.Count > 0)
             {
                 var request = GetFirstSongRequest();
                 if (request != null)
                 {
-                    if (request.Song != null) return request.Song;
+                    if (request.Song != null) return (true, string.Empty, request.Song);
                     var fetchedSong = await FetchSongAsync(request.Id);
 
-                    if (fetchedSong.IsSuccess) return fetchedSong.Song;
+                    if (fetchedSong.IsSuccess) return fetchedSong;
                     if (fetchedSong.Error.Contains("Response status code does not indicate success: 429"))
                     {
                         _remainingSongs.Remove(request.Id);
@@ -156,22 +156,23 @@ namespace Railgun.Music
                 }
             }
 
-            return null;
+            return (false, null, null);
         }
 
-		private async Task<ISong> QueueSongAsync()
+		private async Task<(bool IsSuccess, string Error, ISong song)> QueueSongAsync()
         {
             Playlist playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
             var request = await QueueFirstRequestedSong(playlist);
             var rand = new Random();
             var retry = 5;
 
-            while (request == null) {
+            while (!request.IsSuccess && string.IsNullOrEmpty(request.Error)) {
 				if (_remainingSongs.Count < 1) {
                     playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
 
-                    if (playlist == null || playlist.Songs.Count == 0) return null;
-					if (!PlaylistAutoLoop && !_firstLoop) return null;
+                    if (playlist == null || playlist.Songs.Count == 0) return (false, null, null);
+					if (!PlaylistAutoLoop && !_firstLoop) return (false, null, null);
+					if (playlist.Songs.Count <= _rateLimited.Count) return (false, "Playlist:429", null);
 					
 					_playedSongs.Clear();
                     _rateLimited.Clear();
@@ -188,7 +189,7 @@ namespace Railgun.Music
 
                     if (song.IsSuccess)
                     {
-                        request = song.Song;
+                        request = song;
                         break;
                     }
 					else if (song.Error.Contains("Response status code does not indicate success: 429"))
@@ -208,7 +209,7 @@ namespace Railgun.Music
                     if (retry == 0) {
                         _exception = e;
                         _queueFailed = true;
-                        return null;
+                        return (false, null, null);
                     }
 				}
 			}
@@ -262,8 +263,18 @@ namespace Railgun.Music
 						if (_musicCancelled) _musicCancelled = false;
 
 						Status = PlayerStatus.Queuing;
-						
-						CurrentSong = onRepeat ? await _musicService.GetSongAsync(CurrentSong.Id) : await QueueSongAsync();
+
+						if (onRepeat) CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
+						else
+						{
+							var result = await QueueSongAsync();
+							if (result.IsSuccess) CurrentSong = result.song;
+							else
+							{
+								if (result.Error == "Playlist:429")
+									throw new Exception("YouTube (429) block in effect. No music in the playlist can be played. Sorry. Please allow upto 24 hours for the block to clear.");
+							}
+						}
 						if (CurrentSong == null) {
 							_autoDisconnected = true;
 							break;
