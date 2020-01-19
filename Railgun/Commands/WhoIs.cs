@@ -30,7 +30,7 @@ namespace Railgun.Commands
                     case GuildPermission.ViewAuditLog:
                     case GuildPermission.ManageNicknames:
                     case GuildPermission.ManageMessages:
-                        score += 10;
+                        score = score + 10;
                         continue;
                     case GuildPermission.BanMembers:
                     case GuildPermission.DeafenMembers:
@@ -40,7 +40,7 @@ namespace Railgun.Commands
                     case GuildPermission.MentionEveryone:
                     case GuildPermission.SendTTSMessages:
                     case GuildPermission.PrioritySpeaker:
-                        score += 5;
+                        score = score + 5;
                         continue;
                     case GuildPermission.UseVAD:
                     case GuildPermission.UseExternalEmojis:
@@ -51,15 +51,15 @@ namespace Railgun.Commands
                     case GuildPermission.EmbedLinks:
                     case GuildPermission.ReadMessageHistory:
                     case GuildPermission.Stream:
-                        score += 2;
+                        score = score + 2;
                         continue;
                     default:
-                        score += 1;
+                        score = score + 1;
                         continue;
                 }
             }
 
-            var percent = Math.Round((score / 142) * 100.00);
+            var percent = Math.Round((score / 142.00) * 100.00);
             int level;
 
             if (percent < 10.00) level = 0;
