@@ -16,13 +16,12 @@ namespace Railgun.Commands
             var permList = user.GuildPermissions.ToList();
             
             if (Context.Guild.OwnerId == user.Id) return (-1, 6, permList.Count);
+            if (permList.Contains(GuildPermission.Administrator)) return (-1, 5, permList.Count);
 
             foreach (var perm in permList) 
             {
                 switch (perm) 
                 {
-                    case GuildPermission.Administrator:
-                        return (-1, 5, permList.Count);
                     case GuildPermission.ManageChannels:
                     case GuildPermission.ManageEmojis:
                     case GuildPermission.ManageGuild:
@@ -32,7 +31,7 @@ namespace Railgun.Commands
                     case GuildPermission.ManageNicknames:
                     case GuildPermission.ManageMessages:
                         score += 10;
-                        break;
+                        continue;
                     case GuildPermission.BanMembers:
                     case GuildPermission.DeafenMembers:
                     case GuildPermission.KickMembers:
@@ -42,7 +41,7 @@ namespace Railgun.Commands
                     case GuildPermission.SendTTSMessages:
                     case GuildPermission.PrioritySpeaker:
                         score += 5;
-                        break;
+                        continue;
                     case GuildPermission.UseVAD:
                     case GuildPermission.UseExternalEmojis:
                     case GuildPermission.AttachFiles:
@@ -53,10 +52,10 @@ namespace Railgun.Commands
                     case GuildPermission.ReadMessageHistory:
                     case GuildPermission.Stream:
                         score += 2;
-                        break;
+                        continue;
                     default:
                         score += 1;
-                        break;
+                        continue;
                 }
             }
 
