@@ -14,22 +14,22 @@ namespace Railgun.Commands.RoleRequest
         public class Add : SystemBase
         {
             [Command()]
-            public Task AddAsync([Remainder] string role)
-                => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
-
-            [Command()]
             public Task AddAsync(IRole role)
             {
-                if (role is null) 
+                if (role is null)
                     return ReplyAsync("The role you tried to add does not exist. " +
                                       "Please double-check in-case you mistyped.");
-                
+
                 var data = Context.Database.ServerRoleRequests.GetOrCreateData(Context.Guild.Id);
 
-                return ReplyAsync(data.AddRole(role.Id) ? 
-                    $"Role {Format.Bold(role.Name)} is now available for role-request." : 
+                return ReplyAsync(data.AddRole(role.Id) ?
+                    $"Role {Format.Bold(role.Name)} is now available for role-request." :
                     $"Role {Format.Bold(role.Name)} is already available for role-request.");
             }
+
+            [Command()]
+            public Task AddAsync([Remainder] string role)
+                => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
         }
     }
 }
