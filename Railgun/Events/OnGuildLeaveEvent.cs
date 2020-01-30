@@ -43,7 +43,7 @@ namespace Railgun.Events
 				db.DeleteGuildData(guild.Id);
 			}
 
-			await _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Left");
+			await _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name.Replace("@", "(at)")} ({guild.Id})> Left");
         }
     }
 }

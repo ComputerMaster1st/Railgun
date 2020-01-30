@@ -18,6 +18,6 @@ namespace Railgun.Events
         public void Load() => _client.JoinedGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
 
         private Task ExecuteAsync(SocketGuild guild)
-            => _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name} ({guild.Id})> Joined");
+            => _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name.Replace("@", "(at)")} ({guild.Id})> Joined");
     }
 }
