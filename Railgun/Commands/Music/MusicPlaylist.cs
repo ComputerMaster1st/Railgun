@@ -47,7 +47,6 @@ namespace Railgun.Commands.Music
                 }
 
                 var response = await ReplyAsync("Generating playlist file, standby...");
-                var removedSongs = new List<SongId>();
                 var output = new StringBuilder()
                     .AppendFormat("{0} Music Playlist!", Context.Guild.Name).AppendLine()
                     .AppendFormat("Total Songs : {0}", playlist.Songs.Count).AppendLine()
@@ -57,7 +56,7 @@ namespace Railgun.Commands.Music
                     var song = await _musicService.TryGetSongAsync(songId);
 
                     if (!song.Item1) {
-                        removedSongs.Add(songId);
+                        output.AppendFormat("--       Id => {0} (ENCODING REQUIRED)", songId.ToString()).AppendLine();
                         continue;
                     }
 
@@ -70,11 +69,6 @@ namespace Railgun.Commands.Music
                 }
 
                 output.AppendLine("End of Playlist.");
-
-                if (removedSongs.Count > 0) {
-                    foreach (var songId in removedSongs) playlist.Songs.Remove(songId);
-                    await _musicService.Playlist.UpdateAsync(playlist);
-                }
 
                 await (Context.Channel as ITextChannel).SendStringAsFileAsync("Playlist.txt", output.ToString(), $"{Context.Guild.Name} Music Playlist ({playlist.Songs.Count} songs)");
                 await response.DeleteAsync();
