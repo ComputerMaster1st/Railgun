@@ -44,18 +44,12 @@ namespace Railgun.Commands.Music
 			}
 
 			[Command("play")]
-			public async Task PlayAsync(string songId = "")
+			public async Task PlayAsync(string songId)
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 				if (data == null)
 				{
 					await ReplyAsync("Music has not been configured yet! Please add/configure music to generate config.");
-					return;
-				}
-				if (string.IsNullOrWhiteSpace(songId))
-				{
-					data.AutoPlaySong = string.Empty;
-					await ReplyAsync("Will no longer play specific song on auto-join.");
 					return;
 				}
 
@@ -73,6 +67,16 @@ namespace Railgun.Commands.Music
 
 				data.AutoPlaySong = songId;
 				await ReplyAsync("Will now play specified song on auto-join!");
+			}
+
+			[Command("play")]
+			public Task PlayAsync()
+			{
+				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				if (data == null) return ReplyAsync("Music has not been configured yet! Please add/configure music to generate config.");
+
+				data.AutoPlaySong = string.Empty;
+				return ReplyAsync("Will no longer play specific song on auto-join.");
 			}
 
 			[Command("skip")]
