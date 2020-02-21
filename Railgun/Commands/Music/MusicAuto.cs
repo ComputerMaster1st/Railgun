@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using AudioChord;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
@@ -14,8 +15,13 @@ namespace Railgun.Commands.Music
 		public class MusicAuto : SystemBase
 		{
 			private readonly PlayerController _playerController;
+			private readonly MusicService _music;
 
-			public MusicAuto(PlayerController playerController) => _playerController = playerController;
+			public MusicAuto(PlayerController playerController, MusicService music)
+			{
+				_playerController = playerController;
+				_music = music;
+			}
 
 			[Command("join")]
 			public Task JoinAsync()
@@ -35,6 +41,38 @@ namespace Railgun.Commands.Music
 				data.AutoTextChannel = Context.Channel.Id;
 
 				return ReplyAsync($"{(data.AutoVoiceChannel == 0 ? "Music Auto-Join is now enabled!" : "")} Will automatically join {Format.Bold(vc.Name)} and use {Format.Bold("#" + Context.Channel.Name)} to post status messages.");
+			}
+
+			[Command("play")]
+			public async Task PlayAsync(string songId = "")
+			{
+				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				if (data == null)
+				{
+					await ReplyAsync("Music has not been configured yet! Please add/configure music to generate config.");
+					return;
+				}
+				if (string.IsNullOrWhiteSpace(songId))
+				{
+					data.AutoPlaySong = string.Empty;
+					await ReplyAsync("Will no longer play specific song on auto-join.");
+					return;
+				}
+
+				var playlist = await SystemUtilities.GetPlaylistAsync(_music, data);
+				if (!playlist.Songs.Contains(SongId.Parse(songId)))
+				{
+					await ReplyAsync("Unable to find song in playlist! Please add it to playlist.");
+					return;
+				}
+				if (data.AutoPlaySong == songId)
+				{
+					await ReplyAsync("This song is already set to play on auto-join.");
+					return;
+				}
+
+				data.AutoPlaySong = songId;
+				await ReplyAsync("Will now play specified song on auto-join!");
 			}
 
 			[Command("skip")]
