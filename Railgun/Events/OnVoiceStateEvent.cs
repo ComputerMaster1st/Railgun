@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using AudioChord;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ namespace Railgun.Events
     {
         private readonly DiscordShardedClient _client;
         private readonly PlayerController _controller;
+        private readonly MusicService _music;
         private readonly IServiceProvider _services;
 
         public OnVoiceStateEvent(DiscordShardedClient client, IServiceProvider services)
@@ -21,6 +23,7 @@ namespace Railgun.Events
             _services = services;
 
             _controller = services.GetService<PlayerController>();
+            _music = services.GetService<MusicService>();
         }
 
         public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, before, after));
@@ -48,8 +51,13 @@ namespace Railgun.Events
 
             if (before.VoiceChannel == after.VoiceChannel)
                 if (after.IsDeafened || after.IsMuted) return;
-            
-			if (vc.Id == data.AutoVoiceChannel && tc != null) await _controller.CreatePlayerAsync(user, vc, tc, true);
+
+            if (vc.Id == data.AutoVoiceChannel && tc != null)
+            {
+                (bool Success, ISong Song) song = (false, null);
+                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.TryGetSongAsync(SongId.Parse(data.AutoPlaySong));
+                await _controller.CreatePlayerAsync(user, vc, tc, true, song.Success ? new SongRequest(song.Song) : null);
+            }
         }
     }
 }

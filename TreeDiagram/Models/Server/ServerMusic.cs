@@ -10,6 +10,7 @@ namespace TreeDiagram.Models.Server
 		public ulong AutoVoiceChannel { get; set; }
 		public bool AutoSkip { get; set; }
 		public bool AutoDownload { get; set; }
+		public string AutoPlaySong { get; set; } = string.Empty;
 		public bool PlaylistAutoLoop { get; set; } = true;
 		public ObjectId PlaylistId { get; set; } = ObjectId.Empty;
 		public bool VoteSkipEnabled { get; set; }
