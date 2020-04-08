@@ -37,6 +37,7 @@ namespace Railgun.Events
         private async Task ExecuteUpdatedAsync(SocketMessage message)
         {
             _analytics.UpdatedMessages++;
+            if (message.IsPinned) return;
             await ExecuteAsync(message);          
         }
 
