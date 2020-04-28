@@ -30,8 +30,14 @@ namespace Railgun.Commands.Music
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 
-				if (data == null || data.PlaylistId == ObjectId.Empty) {
+				if (data == null || data.PlaylistId == ObjectId.Empty)
+				{
 					await ReplyAsync("Unknown Music Id Given!");
+					return;
+				}
+				if (string.IsNullOrWhiteSpace(ids))
+				{
+					await ReplyAsync("Please specify a song to remove by using it's ID. An example of an ID is \"YOUTUBE#abcde123456\". To remove the currently playing song, please type \"current\" instead of the ID.");
 					return;
 				}
 
