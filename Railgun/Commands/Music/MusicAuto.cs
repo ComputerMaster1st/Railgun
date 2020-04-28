@@ -6,6 +6,7 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
+using YoutubeExplode;
 
 namespace Railgun.Commands.Music
 {
@@ -44,7 +45,7 @@ namespace Railgun.Commands.Music
 			}
 
 			[Command("play")]
-			public async Task PlayAsync(string songId)
+			public async Task PlayAsync(string input)
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
 				if (data == null)
@@ -54,18 +55,26 @@ namespace Railgun.Commands.Music
 				}
 
 				var playlist = await SystemUtilities.GetPlaylistAsync(_music, data);
-				if (!playlist.Songs.Contains(SongId.Parse(songId)))
+
+				SongId songId;
+
+				if (input.Contains("http") && YoutubeClient.TryParseVideoId(input, out string videoId))
+					songId = SongId.Parse("YOUTUBE#" + videoId);
+				else
+					songId = SongId.Parse(input);
+
+				if (!playlist.Songs.Contains(songId))
 				{
 					await ReplyAsync("Unable to find song in playlist! Please add it to playlist.");
 					return;
 				}
-				if (data.AutoPlaySong == songId)
+				if (data.AutoPlaySong == songId.ToString())
 				{
 					await ReplyAsync("This song is already set to play on auto-join.");
 					return;
 				}
 
-				data.AutoPlaySong = songId;
+				data.AutoPlaySong = songId.ToString();
 				await ReplyAsync("Will now play specified song on auto-join!");
 			}
 
