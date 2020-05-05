@@ -104,9 +104,9 @@ namespace Railgun.Commands.Music
 
 				if (Context.Message.Attachments.Count > 0)
 					await UploadAsync(playerContainer, playlist, data, response);
-				else if (input.Contains("YOUTUBE#") || input.Contains("DISCORD#"))
+				else if (input.StartsWith("YOUTUBE#") || input.StartsWith("DISCORD#"))
 					await AddByIdAsync(input, playerContainer, playlist, data, response);
-				else if (input.Contains("http://") || input.Contains("https://"))
+				else if (input.StartsWith("http://") || input.StartsWith("https://"))
 					await AddByUrlAsync(input.Trim('<', '>'), playerContainer, playlist, data, response);
 				else await SearchAsync(input, playerContainer, playlist, data, response);
 			}
