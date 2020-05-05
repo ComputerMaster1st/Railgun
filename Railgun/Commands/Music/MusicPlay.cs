@@ -155,26 +155,32 @@ namespace Railgun.Commands.Music
 
 			private async Task AddByUrlAsync(string input, PlayerContainer playerContainer, Playlist playlist, ServerMusic data, IUserMessage response)
 			{
-				var videoId = string.Empty;
-				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
-
-				if (song.Item1) {
-					if (playlist.Songs.Contains(song.Item2.Id)) {
-						await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
-						return;
-					}
-					if (!data.AutoDownload) {
-						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
-						return;
-					}
-				}
-
 				if (!input.Contains("youtu")) {
 					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
 					return;
 				} 
-				if (!_musicService.Youtube.TryParseYoutubeUrl(input, out videoId)) {
+				if (!_musicService.Youtube.TryParseYoutubeUrl(input, out string videoId)) {
 					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
+					return;
+				}
+
+				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
+
+				if (song.Item1)
+				{
+					if (playlist.Songs.Contains(song.Item2.Id))
+					{
+						await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
+						return;
+					}
+					if (!data.AutoDownload)
+					{
+						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
+						return;
+					}
+					if (!_playOneTimeOnly) playlist.Songs.Add(song.Item2.Id);
+
+					await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
 					return;
 				}
 
@@ -183,7 +189,7 @@ namespace Railgun.Commands.Music
                     var video = await client.GetVideoAsync(YoutubeClient.ParseVideoId(input));
 
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
-						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"mm\:ss"))}");
+						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(new SongId("YOUTUBE", video.Id), video.Title, video.Duration), data, response);
 				} catch (Exception ex) {
