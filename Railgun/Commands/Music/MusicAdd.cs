@@ -49,7 +49,7 @@ namespace Railgun.Commands.Music
 					playlist.Songs.Add(song.Id);
 
 					await _musicService.Playlist.UpdateAsync(playlist);
-					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Name)} {SystemUtilities.GetSeparator} ID : {Format.Bold(song.Id.ToString())}");
+					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Title)} {SystemUtilities.GetSeparator} ID : {Format.Bold(song.Id.ToString())}");
 				} catch (Exception ex) {
 					await response.ModifyAsync(c => c.Content = $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}");
 
