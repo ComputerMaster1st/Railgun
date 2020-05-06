@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AudioChord;
-using AudioChord.Caching;
 using AudioChord.Caching.FileSystem;
 using AudioChord.Extractors;
 using AudioChord.Extractors.Discord;
@@ -74,13 +73,14 @@ namespace Railgun
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
+            var enricher = new DiscordMetaDataEnricher();
             _musicServiceConfig = new MusicServiceConfiguration() {
                 Hostname = mongo.Hostname,
                 Username = mongo.Username,
                 Password = mongo.Password,
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
-                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() }
-                
+                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() },
+                Enrichers = () => new List<IAudioMetadataEnricher> { enricher } // Make class
             };
             _musicService = new MusicService(_musicServiceConfig);
 
@@ -112,6 +112,7 @@ namespace Railgun
                     ServiceLifetime.Transient
                 )
                 .AddTransient<RandomCat>()
+                .AddSingleton(enricher)
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
