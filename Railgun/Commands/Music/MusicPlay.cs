@@ -28,15 +28,17 @@ namespace Railgun.Commands.Music
 			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 			private readonly MusicServiceConfiguration _musicConfig;
+			private readonly DiscordMetaDataEnricher _enricher;
 			private bool _playOneTimeOnly;
 
-			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig)
+			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, DiscordMetaDataEnricher enricher)
 			{
 				_config = config;
 				_botLog = botLog;
 				_playerController = playerController;
 				_musicService = musicService;
 				_musicConfig = musicConfig;
+				_enricher = enricher;
 			}
 
 			private async Task QueueSongAsync(PlayerContainer playerContainer, Playlist playlist, SongRequest song, ServerMusic data, IUserMessage response)
@@ -122,6 +124,7 @@ namespace Railgun.Commands.Music
 			{
 				try {
 					var attachment = Context.Message.Attachments.FirstOrDefault();
+					_enricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
 					var song = await _musicService.DownloadSongAsync(attachment.ProxyUrl);
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);
@@ -158,8 +161,11 @@ namespace Railgun.Commands.Music
 				if (!input.Contains("youtu")) {
 					await response.ModifyAsync(x => x.Content = "Only YouTube links can be processed.");
 					return;
-				} 
-				if (!_musicService.Youtube.TryParseYoutubeUrl(input, out string videoId)) {
+				}
+
+				var videoId = YoutubeExplode.Videos.VideoId.TryParse(input);
+
+				if (videoId == null) {
 					await response.ModifyAsync(x => x.Content = "Invalid Youtube Video Link");
 					return;
 				}
@@ -186,15 +192,7 @@ namespace Railgun.Commands.Music
 
 				try {
                     var client = new YoutubeClient();
-					var ytVideoId = YoutubeExplode.Videos.VideoId.TryParse(input);
-
-					if (ytVideoId == null)
-					{
-						await response.ModifyAsync(x => x.Content = string.Format("An error has occured! {0} YouTube Link is invalid!", Format.Bold("ERROR :")));
-						return;
-					}
-
-					var video = await client.Videos.GetAsync(ytVideoId.Value);
+					var video = await client.Videos.GetAsync(videoId.Value);
 
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
 						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");

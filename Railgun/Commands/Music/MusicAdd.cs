@@ -7,6 +7,7 @@ using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Enums;
+using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -18,11 +19,13 @@ namespace Railgun.Commands.Music
 		{
 			private readonly BotLog _botLog;
 			private readonly MusicService _musicService;
+			private readonly DiscordMetaDataEnricher _encricher;
 
-			public MusicAdd(BotLog log, MusicService musicService)
+			public MusicAdd(BotLog log, MusicService musicService, DiscordMetaDataEnricher enricher)
 			{
 				_botLog = log;
 				_musicService = musicService;
+				_encricher = enricher;
 			}
 
 			[Command("upload")]
@@ -44,6 +47,7 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
+					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
 					var song = await _musicService.DownloadSongAsync(attachment.Url);
 
 					playlist.Songs.Add(song.Id);
