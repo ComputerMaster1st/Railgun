@@ -124,7 +124,7 @@ namespace Railgun.Commands.Music
 			{
 				try {
 					var attachment = Context.Message.Attachments.FirstOrDefault();
-					_enricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
+					_enricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id, attachment.Filename);
 					var song = await _musicService.DownloadSongAsync(attachment.ProxyUrl);
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);

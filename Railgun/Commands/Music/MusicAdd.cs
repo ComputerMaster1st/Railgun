@@ -47,7 +47,7 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
-					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
+					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id, attachment.Filename);
 					var song = await _musicService.DownloadSongAsync(attachment.Url);
 
 					playlist.Songs.Add(song.Id);
