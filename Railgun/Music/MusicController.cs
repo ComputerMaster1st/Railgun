@@ -121,8 +121,10 @@ namespace Railgun.Music
 		}
 
         public async Task ProcessYoutubePlaylistAsync(string playlistUrl, ITextChannel tc)
-        {            
-            if (!YoutubeClient.TryParsePlaylistId(playlistUrl, out var playlistId))
+        {
+            var playlistId = YoutubeExplode.Playlists.PlaylistId.TryParse(playlistUrl);
+
+            if (playlistId == null)
             {
                 await tc.SendMessageAsync("Invalid Playlist Url! Please double-check it.");
                 return;
@@ -130,14 +132,14 @@ namespace Railgun.Music
 
             var startedAt = DateTime.Now;
             var client = new YoutubeClient();
-            var youtubePlaylist = await client.GetPlaylistAsync(playlistId);
+            var youtubePlaylist = await client.Playlists.GetVideosAsync(playlistId.Value);
 
-            await tc.SendMessageAsync($"Found {Format.Bold(youtubePlaylist.Videos.Count.ToString())} songs! Now processing...");
+            await tc.SendMessageAsync($"Found {Format.Bold(youtubePlaylist.Count().ToString())} songs! Now processing...");
 
             var urls = new List<string>();
-            foreach (var video in youtubePlaylist.Videos)
+            foreach (var video in youtubePlaylist)
                 if (video.Duration <= _musicConfig.ExtractorConfiguration.MaxSongDuration)
-                    urls.Add(video.GetShortUrl());
+                    urls.Add(video.Url);
 
             var (InvalidUrls, Installed, Imported, NeedEncoding) = await ProcessSongIdsAsync(urls, tc);
 
