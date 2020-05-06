@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Finite.Commands;
+using Google.Apis.YouTube.v3.Data;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
@@ -57,9 +58,10 @@ namespace Railgun.Commands.Music
 				var playlist = await SystemUtilities.GetPlaylistAsync(_music, data);
 
 				SongId songId;
+				var videoId = YoutubeExplode.Videos.VideoId.TryParse(input);
 
-				if (input.Contains("http") && YoutubeClient.TryParseVideoId(input, out string videoId))
-					songId = SongId.Parse("YOUTUBE#" + videoId);
+				if (input.Contains("http") && videoId != null)
+					songId = SongId.Parse("YOUTUBE#" + videoId.Value);
 				else
 					songId = SongId.Parse(input);
 
