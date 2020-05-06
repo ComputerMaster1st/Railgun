@@ -122,7 +122,7 @@ namespace Railgun.Commands.Music
 			{
 				try {
 					var attachment = Context.Message.Attachments.FirstOrDefault();
-					var song = await _musicService.Discord.DownloadAsync(attachment.ProxyUrl, $"{Context.Message.Author.Username}#{Context.Message.Author.DiscriminatorValue}", attachment.Id);
+					var song = await _musicService.DownloadSongAsync(attachment.ProxyUrl);
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);
 				} catch (Exception ex) {
@@ -186,7 +186,15 @@ namespace Railgun.Commands.Music
 
 				try {
                     var client = new YoutubeClient();
-                    var video = await client.GetVideoAsync(YoutubeClient.ParseVideoId(input));
+					var ytVideoId = YoutubeExplode.Videos.VideoId.TryParse(input);
+
+					if (ytVideoId == null)
+					{
+						await response.ModifyAsync(x => x.Content = string.Format("An error has occured! {0} YouTube Link is invalid!", Format.Bold("ERROR :")));
+						return;
+					}
+
+					var video = await client.Videos.GetAsync(ytVideoId.Value);
 
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
 						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");

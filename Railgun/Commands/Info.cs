@@ -7,7 +7,6 @@ using AudioChord;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
-using Microsoft.EntityFrameworkCore;
 using Railgun.Core;
 using Railgun.Core.Configuration;
 using Railgun.Music;
