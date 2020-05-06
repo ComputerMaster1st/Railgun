@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AudioChord;
 using AudioChord.Caching;
 using AudioChord.Caching.FileSystem;
+using AudioChord.Extractors;
+using AudioChord.Extractors.Discord;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
@@ -76,6 +79,7 @@ namespace Railgun
                 Username = mongo.Username,
                 Password = mongo.Password,
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
+                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() }
                 
             };
             _musicService = new MusicService(_musicServiceConfig);

@@ -10,7 +10,6 @@ using Railgun.Core;
 using Railgun.Core.Enums;
 using TreeDiagram;
 using YoutubeExplode;
-using YoutubeExplode.Models;
 using Playlist = AudioChord.Playlist;
 
 namespace Railgun.Music
