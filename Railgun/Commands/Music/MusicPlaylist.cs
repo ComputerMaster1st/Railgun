@@ -61,8 +61,8 @@ namespace Railgun.Commands.Music
                     }
 
                     output.AppendFormat("--       Id => {0}", song.Item2.Id.ToString()).AppendLine()
-                        .AppendFormat("--     Name => {0}", song.Item2.Metadata.Name).AppendLine()
-                        .AppendFormat("--   Length => {0}", song.Item2.Metadata.Length).AppendLine()
+                        .AppendFormat("--     Name => {0}", song.Item2.Metadata.Title).AppendLine()
+                        .AppendFormat("--   Length => {0}", song.Item2.Metadata.Duration).AppendLine()
                         .AppendFormat("--      Url => {0}", song.Item2.Metadata.Url).AppendLine()
                         .AppendFormat("-- Uploader => {0}", song.Item2.Metadata.Uploader).AppendLine()
                         .AppendLine();

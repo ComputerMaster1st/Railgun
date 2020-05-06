@@ -37,11 +37,11 @@ namespace Railgun.Commands.Music
 				var meta = player.CurrentSong.Metadata;
 				var currentTime = DateTime.Now - player.SongStartedAt;
 				var output = new StringBuilder()
-					.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Name)).AppendLine()
+					.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Title)).AppendLine()
 					.AppendFormat("Url: {0} {1} Length: {2}/{3}", Format.Bold($"<{meta.Url}>"),
 								  SystemUtilities.GetSeparator,
 								  Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-								  Format.Bold($"{meta.Length.Minutes}:{meta.Length.Seconds}"));
+								  Format.Bold($"{meta.Duration.Minutes}:{meta.Duration.Seconds}"));
 
 				return ReplyAsync(output.ToString());
 			}
