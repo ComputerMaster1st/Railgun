@@ -6,7 +6,6 @@ using AudioChord;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
 using TreeDiagram;
 
@@ -45,7 +44,7 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
-					var song = await _musicService.Discord.DownloadAsync(attachment.Url, $"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id);
+					var song = await _musicService.DownloadSongAsync(attachment.Url);
 
 					playlist.Songs.Add(song.Id);
 

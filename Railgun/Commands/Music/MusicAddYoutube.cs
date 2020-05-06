@@ -1,12 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
-using AudioChord;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
-using TreeDiagram;
 
 namespace Railgun.Commands.Music
 {
