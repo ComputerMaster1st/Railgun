@@ -49,25 +49,28 @@ namespace Railgun.Commands.Music
 						case 0:
 							var currentTime = DateTime.Now - player.SongStartedAt;
 
-							output.AppendFormat("Now : {0} {1} Length : {2}/{3}",
+							output.AppendFormat("Now : {0} {1} Length : {2}/{3} {1} ID: {4}",
 												Format.Bold(song.Name),
 												SystemUtilities.GetSeparator,
 												Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-												Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"))
+												Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"),
+												Format.Bold(song.Id.ToString()))
 								.AppendLine();
 							break;
 						case 1:
-							output.AppendFormat("Next : {0} {1} Length : {2}",
+							output.AppendFormat("Next : {0} {1} Length : {2} {1} ID: {3}",
 												Format.Bold(song.Name),
 												SystemUtilities.GetSeparator,
-												Format.Bold(song.Length.ToString()));
+												Format.Bold(song.Length.ToString()),
+												Format.Bold(song.Id.ToString()));
 							break;
 						default:
-							output.AppendFormat("{0} : {1} {2} Length : {3}",
+							output.AppendFormat("{0} : {1} {2} Length : {3} {1} ID: {3}",
 												Format.Code($"[{i}]"),
 												Format.Bold(song.Name),
 												SystemUtilities.GetSeparator,
-												Format.Bold(song.Length.ToString()));
+												Format.Bold(song.Length.ToString()),
+												Format.Bold(song.Id.ToString()));
 							break;
 					}
 
