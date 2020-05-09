@@ -48,9 +48,10 @@ namespace Railgun.Commands.Music
 				foreach (var url in ids.Split(',', ' ')) {
 					var cleanUrl = url.Trim('<','>');
 					string id;
+					var tempId = YoutubeExplode.Videos.VideoId.TryParse(cleanUrl);
 
 					if (cleanUrl.Contains("#")) id = cleanUrl;
-					else if (_musicService.Youtube.TryParseYoutubeUrl(cleanUrl, out var tempId)) id = $"YOUTUBE#{tempId}";
+					else if (tempId != null) id = $"YOUTUBE#{tempId.Value}";
 					else continue;
 
 					var song = await _musicService.TryGetSongAsync(SongId.Parse(id));
