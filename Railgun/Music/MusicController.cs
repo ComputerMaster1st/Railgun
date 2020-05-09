@@ -72,8 +72,9 @@ namespace Railgun.Music
             foreach (var url in urls)
             {
                 var cleanUrl = url.Trim(' ', '<', '>');
+                var videoId = YoutubeExplode.Videos.VideoId.TryParse(url);
 
-                if (!_musicService.Youtube.TryParseYoutubeUrl(url, out var videoId))
+                if (videoId == null)
                 {
                     invalidUrls++;
                     await tc.SendMessageAsync($"{Format.Bold("Invalid Url :")} {Format.EscapeUrl(url)}");
