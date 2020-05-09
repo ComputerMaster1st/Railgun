@@ -52,11 +52,15 @@ namespace Railgun.Commands.Music
 				}
 
 				var output = new StringBuilder()
-					.AppendFormat("{0} {1} as requested by {2}. {3}",
+					.AppendFormat("{0} {1} {2} Url: {3} {2} ID: {4} {2} Requested by {5}. {6}",
 						nowInstalled ? "Queued" : _playOneTimeOnly ? "Queued (One-Time Only)" : "",
 						Format.Bold(song.Name),
+						SystemUtilities.GetSeparator,
+						song.Id.ProcessorId == "YOUTUBE" ? Format.Bold($"https://youtu.be/{song.Id.SourceId}") : Format.Bold("Unknown"),
+						song.Id.ToString(),
 						Format.Bold(SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser)),
-						playerContainer == null ? "Now starting music player..." : "").AppendLine();
+						playerContainer == null ? "Now starting music player..." : "")
+					.AppendLine();
 
 				var user = (IGuildUser)Context.Author;
 				var vc = user.VoiceChannel;
