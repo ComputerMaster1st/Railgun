@@ -1,10 +1,12 @@
-﻿using Discord;
+﻿using AudioChord;
+using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using Railgun.Music;
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,6 +84,25 @@ namespace Railgun.Commands.Music
 					return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
 				return ReplyAsync(output.ToString());
 			}
+
+			[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
+			public Task RemoveAsync(string songIdRaw)
+			{
+				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
+
+				if (playerContainer == null)
+                    return ReplyAsync("There is no music player active at this time.");
+
+				var songId = SongId.Parse(songIdRaw);
+				var player = playerContainer.Player;
+				var request = player.Requests.FirstOrDefault(f => f.Id.ToString() == songId.ToString());
+
+				if (request == null)
+					return ReplyAsync("Specified song is not in the queue.");
+
+				player.RemoveSongRequest(request);
+				return ReplyAsync("Song removed from queue!");
+            }
 		}
     }
 }
