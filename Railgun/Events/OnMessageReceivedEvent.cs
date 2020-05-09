@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Railgun.Utilities;
 
@@ -19,7 +20,7 @@ namespace Railgun.Events
 
         public void Load() {
             _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (oldMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
+            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(cachedMessage, newMessage));
         }
 
         public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)
@@ -34,11 +35,14 @@ namespace Railgun.Events
             await ExecuteAsync(message);
         }
 
-        private async Task ExecuteUpdatedAsync(SocketMessage message)
+        private async Task ExecuteUpdatedAsync(Cacheable<IMessage, ulong> cachedMsg, SocketMessage newMsg)
         {
             _analytics.UpdatedMessages++;
-            if (message.IsPinned) return;
-            await ExecuteAsync(message);          
+
+            var oldMsg = await cachedMsg.GetOrDownloadAsync();
+            if ((newMsg.IsPinned && !oldMsg.IsPinned) || (!newMsg.IsPinned && oldMsg.IsPinned)) return;
+
+            await ExecuteAsync(newMsg);          
         }
 
         private async Task ExecuteAsync(SocketMessage message)
