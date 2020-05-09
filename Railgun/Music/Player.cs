@@ -119,7 +119,7 @@ namespace Railgun.Music
 			{
 				if (id.ProcessorId == "DISCORD") return (isSuccess, error, song);
 
-				song = await _musicService.Youtube.DownloadAsync(new Uri("https://youtu.be/" + id.SourceId));
+				song = await _musicService.DownloadSongAsync("https://youtu.be/" + id.SourceId);
 				isSuccess = true;
 			}
 			catch (Exception ex)
