@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
@@ -10,7 +8,6 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
-using Railgun.Core.Extensions;
 using Railgun.Music;
 using TreeDiagram;
 
@@ -65,62 +62,6 @@ namespace Railgun.Commands.Music
 		{
 			var container = _playerController.GetPlayer(Context.Guild.Id);
 			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
-		}
-
-		[Command("queue"), BotPerms(ChannelPermission.AttachFiles)]
-		public Task QueueAsync()
-		{
-			var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-
-			if (playerContainer == null)
-				return ReplyAsync("I'm not playing anything at this time.");
-
-			var player = playerContainer.Player;
-
-			if (!player.AutoSkipped && player.Requests.Count < 1)
-				return ReplyAsync("There are currently no music requests in the queue.");
-
-			var i = 0;
-			var output = new StringBuilder()
-				.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), player.Requests.Count).AppendLine()
-				.AppendLine();
-
-			while (player.Requests.Count > i) {
-				var song = player.Requests[i];
-
-				switch (i) {
-					case 0:
-						var currentTime = DateTime.Now - player.SongStartedAt;
-
-						output.AppendFormat("Now : {0} {1} Length : {2}/{3}",
-											Format.Bold(song.Name),
-											SystemUtilities.GetSeparator,
-											Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-											Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"))
-							.AppendLine();
-						break;
-					case 1:
-						output.AppendFormat("Next : {0} {1} Length : {2}",
-											Format.Bold(song.Name),
-											SystemUtilities.GetSeparator,
-											Format.Bold(song.Length.ToString()));
-						break;
-					default:
-						output.AppendFormat("{0} : {1} {2} Length : {3}",
-											Format.Code($"[{i}]"),
-											Format.Bold(song.Name),
-											SystemUtilities.GetSeparator,
-											Format.Bold(song.Length.ToString()));
-						break;
-				}
-
-				output.AppendLine();
-				i++;
-			}
-
-			if (output.Length > 1950) 
-				return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
-			return ReplyAsync(output.ToString());
 		}
 
 		[Command("show")]

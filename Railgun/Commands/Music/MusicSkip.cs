@@ -45,7 +45,7 @@ namespace Railgun.Commands.Music
 				return ReplyAsync("Vote-Skipping music now...");
 			}
 
-			[Command("force"), UserPerms(GuildPermission.ManageGuild)]
+			[Command("force"), UserPerms(GuildPermission.ManageMessages)]
 			public Task ForceAsync()
 			{
 				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
