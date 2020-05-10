@@ -127,7 +127,7 @@ namespace Railgun
             _eventLoader = new EventLoader()
                 .LoadEvent(new ConsoleLogEvent(_config, _client))
                 .LoadEvent(new UnobservedEvent(_botLog))
-                .LoadEvent(new OnMessageReceivedEvent(_client, _analytics)
+                .LoadEvent(new OnMessageReceivedEvent(_client, _analytics, _serviceProvider)
                     .AddSubEvent(new OnInactivitySubEvent(_serviceProvider))
                     .AddSubEvent(new OnFilterSubEvent(_filterLoader, _analytics))
                     .AddSubEvent(new OnCommandSubEvent(_client, _commandService, _analytics, _botLog, _serviceProvider))

@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Railgun.Utilities;
+using TreeDiagram;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Events
 {
@@ -10,12 +14,14 @@ namespace Railgun.Events
     {
         private readonly DiscordShardedClient _client;
         private readonly Analytics _analytics;
+        private readonly IServiceProvider _services;
         private readonly List<IOnMessageSubEvent> _subEvents = new List<IOnMessageSubEvent>();
 
-        public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics)
+        public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics, IServiceProvider services)
         {
             _client = client;
             _analytics = analytics;
+            _services = services;
         }
 
         public void Load() {
@@ -40,8 +46,16 @@ namespace Railgun.Events
             _analytics.UpdatedMessages++;
 
             var oldMsg = await cachedMsg.GetOrDownloadAsync();
-            if ((newMsg.IsPinned && !oldMsg.IsPinned) || (!newMsg.IsPinned && oldMsg.IsPinned)) return;
+            ServerCommand data;
 
+            using (var scope = _services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                var channel = newMsg.Channel as ITextChannel;
+                data = db.ServerCommands.GetData(channel.GuildId);
+            }
+
+            if (data.IgnoreModifiedMessages) return;
             await ExecuteAsync(newMsg);          
         }
 
