@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Railgun.Utilities;
+using TreeDiagram;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Events
 {
@@ -10,17 +14,19 @@ namespace Railgun.Events
     {
         private readonly DiscordShardedClient _client;
         private readonly Analytics _analytics;
+        private readonly IServiceProvider _services;
         private readonly List<IOnMessageSubEvent> _subEvents = new List<IOnMessageSubEvent>();
 
-        public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics)
+        public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics, IServiceProvider services)
         {
             _client = client;
             _analytics = analytics;
+            _services = services;
         }
 
         public void Load() {
             _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(cachedMessage, newMessage));
+            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
         }
 
         public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)
@@ -35,13 +41,20 @@ namespace Railgun.Events
             await ExecuteAsync(message);
         }
 
-        private async Task ExecuteUpdatedAsync(Cacheable<IMessage, ulong> cachedMsg, SocketMessage newMsg)
+        private async Task ExecuteUpdatedAsync(SocketMessage newMsg)
         {
             _analytics.UpdatedMessages++;
 
-            var oldMsg = await cachedMsg.GetOrDownloadAsync();
-            if ((newMsg.IsPinned && !oldMsg.IsPinned) || (!newMsg.IsPinned && oldMsg.IsPinned)) return;
+            ServerCommand data = null;
 
+            using (var scope = _services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                var channel = newMsg.Channel as ITextChannel;
+                data = db.ServerCommands.GetData(channel.GuildId);
+            }
+
+            if (data != null && data.IgnoreModifiedMessages) return;
             await ExecuteAsync(newMsg);          
         }
 
