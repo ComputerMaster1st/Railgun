@@ -26,7 +26,7 @@ namespace Railgun.Events
 
         public void Load() {
             _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(cachedMessage, newMessage));
+            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
         }
 
         public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)
@@ -41,12 +41,11 @@ namespace Railgun.Events
             await ExecuteAsync(message);
         }
 
-        private async Task ExecuteUpdatedAsync(Cacheable<IMessage, ulong> cachedMsg, SocketMessage newMsg)
+        private async Task ExecuteUpdatedAsync(SocketMessage newMsg)
         {
             _analytics.UpdatedMessages++;
 
-            var oldMsg = await cachedMsg.GetOrDownloadAsync();
-            ServerCommand data;
+            ServerCommand data = null;
 
             using (var scope = _services.CreateScope())
             {
@@ -55,7 +54,7 @@ namespace Railgun.Events
                 data = db.ServerCommands.GetData(channel.GuildId);
             }
 
-            if (data.IgnoreModifiedMessages) return;
+            if (data != null && data.IgnoreModifiedMessages) return;
             await ExecuteAsync(newMsg);          
         }
 
