@@ -123,11 +123,26 @@ namespace Railgun.Music
 			{
 				if (id.ProcessorId == "DISCORD") return (isSuccess, error, song);
 
+				var request = Requests.FirstOrDefault(f => f.Id == id);
 				var ytUrl = "https://youtu.be/" + id.SourceId;
-				var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
-				var video = await (new YoutubeClient()).Videos.GetAsync(videoId.Value);
+				string title;
+				string uploader;
 
-				_enricher.AddMapping(video.Author, id, video.Title);
+				if (request == null)
+                {
+					var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
+					var video = await new YoutubeClient().Videos.GetAsync(videoId.Value);
+
+					title = video.Title;
+					uploader = video.Author;
+				}
+                else
+                {
+					title = request.Name;
+					uploader = request.Uploader;
+                }
+
+				_enricher.AddMapping(uploader, id, title);
 				song = await _musicService.DownloadSongAsync(ytUrl);
 				isSuccess = true;
 			}
