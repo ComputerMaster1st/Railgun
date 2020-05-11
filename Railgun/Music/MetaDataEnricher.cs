@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Railgun.Music
 {
-    public class YoutubeMetaDataEnricher : IAudioMetadataEnricher
+    public class MetaDataEnricher : IAudioMetadataEnricher
     {
         private Dictionary<SongId, (string Username, string Title)> _mapping = new Dictionary<SongId, (string, string)>();
 
