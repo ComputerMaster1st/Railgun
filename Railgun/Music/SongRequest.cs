@@ -17,6 +17,7 @@ namespace Railgun.Music
             Id = song.Id;
             Name = song.Metadata.Title;
             Length = song.Metadata.Duration;
+            Uploader = song.Metadata.Uploader;
             Song = song;
         }
 
