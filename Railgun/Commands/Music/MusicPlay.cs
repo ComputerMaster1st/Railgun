@@ -28,10 +28,10 @@ namespace Railgun.Commands.Music
 			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 			private readonly MusicServiceConfiguration _musicConfig;
-			private readonly MetaDataEnricher _enricher;
+			private readonly DiscordMetaDataEnricher _enricher;
 			private bool _playOneTimeOnly;
 
-			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, MetaDataEnricher enricher)
+			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, DiscordMetaDataEnricher enricher)
 			{
 				_config = config;
 				_botLog = botLog;

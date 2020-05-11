@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Railgun.Music
 {
-    public class MetaDataEnricher : IAudioMetadataEnricher
+    public class YoutubeMetaDataEnricher : IAudioMetadataEnricher
     {
         private Dictionary<SongId, (string Username, string Title)> _mapping = new Dictionary<SongId, (string, string)>();
 
@@ -14,6 +14,7 @@ namespace Railgun.Music
         {
             song.Metadata.Uploader = _mapping.GetValueOrDefault(song.Id).Username;
             song.Metadata.Title = _mapping.GetValueOrDefault(song.Id).Title;
+            song.Metadata.Name = _mapping.GetValueOrDefault(song.Id).Title;
             _mapping.Remove(song.Id);
             return Task.FromResult(song);
         }

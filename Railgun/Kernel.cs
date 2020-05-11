@@ -73,14 +73,15 @@ namespace Railgun
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
-            var enricher = new MetaDataEnricher();
+            var discordEnricher = new DiscordMetaDataEnricher();
+            var youtubeEncricher = new YoutubeMetaDataEnricher();
             _musicServiceConfig = new MusicServiceConfiguration() {
                 Hostname = mongo.Hostname,
                 Username = mongo.Username,
                 Password = mongo.Password,
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
                 Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() },
-                Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
+                Enrichers = () => new List<IAudioMetadataEnricher> { discordEnricher, youtubeEncricher }
             };
             _musicService = new MusicService(_musicServiceConfig);
 
@@ -112,7 +113,7 @@ namespace Railgun
                     ServiceLifetime.Transient
                 )
                 .AddTransient<RandomCat>()
-                .AddSingleton(enricher)
+                .AddSingleton(discordEnricher)
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));

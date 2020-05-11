@@ -23,11 +23,11 @@ namespace Railgun.Music
         private readonly BotLog _botLog;
         private readonly IServiceProvider _services;
         private readonly MusicService _musicService;
-		private readonly MetaDataEnricher _enricher;
+		private readonly YoutubeMetaDataEnricher _enricher;
 
         public List<PlayerContainer> PlayerContainers { get; } = new List<PlayerContainer>();
 
-        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, IServiceProvider services)
+        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, YoutubeMetaDataEnricher enricher, IServiceProvider services)
         {
             _config = config;
             _client = client;

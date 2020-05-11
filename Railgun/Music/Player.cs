@@ -24,7 +24,7 @@ namespace Railgun.Music
         private bool _queueFailed;
 		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
-		private readonly MetaDataEnricher _enricher;
+		private readonly YoutubeMetaDataEnricher _enricher;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
         private List<SongId> _remainingSongs = new List<SongId>();
 		private List<SongId> _rateLimited = new List<SongId>();
@@ -56,7 +56,7 @@ namespace Railgun.Music
 			}
 		}
 
-		public Player(MusicService musicService, IVoiceChannel vc, MetaDataEnricher enricher)
+		public Player(MusicService musicService, IVoiceChannel vc, YoutubeMetaDataEnricher enricher)
 		{
 			_musicService = musicService;
 			VoiceChannel = vc;

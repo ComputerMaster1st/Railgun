@@ -19,9 +19,9 @@ namespace Railgun.Commands.Music
 		{
 			private readonly BotLog _botLog;
 			private readonly MusicService _musicService;
-			private readonly MetaDataEnricher _encricher;
+			private readonly DiscordMetaDataEnricher _encricher;
 
-			public MusicAdd(BotLog log, MusicService musicService, MetaDataEnricher enricher)
+			public MusicAdd(BotLog log, MusicService musicService, DiscordMetaDataEnricher enricher)
 			{
 				_botLog = log;
 				_musicService = musicService;
