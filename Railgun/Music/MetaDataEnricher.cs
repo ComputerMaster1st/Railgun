@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Railgun.Music
 {
-    public class DiscordMetaDataEnricher : IAudioMetadataEnricher
+    public class MetaDataEnricher : IAudioMetadataEnricher
     {
         private Dictionary<SongId, (string Username, string Title)> _mapping = new Dictionary<SongId, (string, string)>();
 
-        public void AddMapping(string user, ulong id, string title) => _mapping.Add(SongId.Parse($"DISCORD#{id}"), (user, title));
+        public void AddMapping(string user, SongId id, string title) => _mapping.Add(id, (user, title));
 
         public Task<ISong> EnrichAsync(ISong song)
         {

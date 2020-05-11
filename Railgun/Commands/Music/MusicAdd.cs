@@ -19,9 +19,9 @@ namespace Railgun.Commands.Music
 		{
 			private readonly BotLog _botLog;
 			private readonly MusicService _musicService;
-			private readonly DiscordMetaDataEnricher _encricher;
+			private readonly MetaDataEnricher _encricher;
 
-			public MusicAdd(BotLog log, MusicService musicService, DiscordMetaDataEnricher enricher)
+			public MusicAdd(BotLog log, MusicService musicService, MetaDataEnricher enricher)
 			{
 				_botLog = log;
 				_musicService = musicService;
@@ -47,7 +47,7 @@ namespace Railgun.Commands.Music
 				}
 
 				try {
-					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id, attachment.Filename);
+					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", SongId.Parse($"DISCORD#{attachment.Id}"), attachment.Filename);
 					var song = await _musicService.DownloadSongAsync(attachment.Url);
 
 					playlist.Songs.Add(song.Id);

@@ -28,10 +28,10 @@ namespace Railgun.Commands.Music
 			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
 			private readonly MusicServiceConfiguration _musicConfig;
-			private readonly DiscordMetaDataEnricher _enricher;
+			private readonly MetaDataEnricher _enricher;
 			private bool _playOneTimeOnly;
 
-			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, DiscordMetaDataEnricher enricher)
+			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, MetaDataEnricher enricher)
 			{
 				_config = config;
 				_botLog = botLog;
@@ -128,7 +128,7 @@ namespace Railgun.Commands.Music
 			{
 				try {
 					var attachment = Context.Message.Attachments.FirstOrDefault();
-					_enricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", attachment.Id, attachment.Filename);
+					_enricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", SongId.Parse($"DISCORD#{attachment.Id}"), attachment.Filename);
 					var song = await _musicService.DownloadSongAsync(attachment.ProxyUrl);
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);

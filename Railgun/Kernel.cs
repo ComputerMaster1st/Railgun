@@ -73,14 +73,14 @@ namespace Railgun
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
-            var enricher = new DiscordMetaDataEnricher();
+            var enricher = new MetaDataEnricher();
             _musicServiceConfig = new MusicServiceConfiguration() {
                 Hostname = mongo.Hostname,
                 Username = mongo.Username,
                 Password = mongo.Password,
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
                 Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() },
-                Enrichers = () => new List<IAudioMetadataEnricher> { enricher } // Make class
+                Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
             };
             _musicService = new MusicService(_musicServiceConfig);
 
