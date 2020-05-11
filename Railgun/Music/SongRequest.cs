@@ -8,6 +8,7 @@ namespace Railgun.Music
         public SongId Id { get; }
         public string Name { get; }
         public TimeSpan Length { get; }
+        public string Uploader { get;  }
 
         public ISong Song { get; } = null;
 
@@ -19,11 +20,12 @@ namespace Railgun.Music
             Song = song;
         }
 
-        public SongRequest(SongId id, string name, TimeSpan length)
+        public SongRequest(SongId id, string name, TimeSpan length, string uploader)
         {
             Id = id;
             Name = name;
             Length = length;
+            Uploader = uploader;
         }
     }
 }
