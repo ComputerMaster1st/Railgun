@@ -14,7 +14,6 @@ namespace Railgun.Music
         {
             song.Metadata.Uploader = _mapping.GetValueOrDefault(song.Id).Username;
             song.Metadata.Title = _mapping.GetValueOrDefault(song.Id).Title;
-            song.Metadata.Name = _mapping.GetValueOrDefault(song.Id).Title;
             _mapping.Remove(song.Id);
             return Task.FromResult(song);
         }
