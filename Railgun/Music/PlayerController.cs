@@ -23,15 +23,17 @@ namespace Railgun.Music
         private readonly BotLog _botLog;
         private readonly IServiceProvider _services;
         private readonly MusicService _musicService;
+		private readonly MetaDataEnricher _enricher;
 
         public List<PlayerContainer> PlayerContainers { get; } = new List<PlayerContainer>();
 
-        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, IServiceProvider services)
+        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, IServiceProvider services)
         {
             _config = config;
             _client = client;
             _botLog = botLog;
 			_musicService = musicService;
+			_enricher = enricher;
             _services = services;
         }
 
@@ -66,7 +68,7 @@ namespace Railgun.Music
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+            var player = new Player(_musicService, vc, _enricher) { PlaylistAutoLoop = data.PlaylistAutoLoop };
 
 			try
 			{

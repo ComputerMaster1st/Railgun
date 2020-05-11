@@ -9,6 +9,7 @@ using MongoDB.Bson;
 using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
+using YoutubeExplode;
 
 namespace Railgun.Music
 {
@@ -23,6 +24,7 @@ namespace Railgun.Music
         private bool _queueFailed;
 		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
+		private readonly MetaDataEnricher _enricher;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
         private List<SongId> _remainingSongs = new List<SongId>();
 		private List<SongId> _rateLimited = new List<SongId>();
@@ -54,10 +56,11 @@ namespace Railgun.Music
 			}
 		}
 
-		public Player(MusicService musicService, IVoiceChannel vc)
+		public Player(MusicService musicService, IVoiceChannel vc, MetaDataEnricher enricher)
 		{
 			_musicService = musicService;
 			VoiceChannel = vc;
+			_enricher = enricher;
 		}
 
 		public void CancelMusic() => _musicCancelled = true;
@@ -119,7 +122,12 @@ namespace Railgun.Music
 			{
 				if (id.ProcessorId == "DISCORD") return (isSuccess, error, song);
 
-				song = await _musicService.DownloadSongAsync("https://youtu.be/" + id.SourceId);
+				var ytUrl = "https://youtu.be/" + id.SourceId;
+				var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
+				var video = await (new YoutubeClient()).Videos.GetAsync(videoId.Value);
+
+				_enricher.AddMapping(video.Author, id, video.Title);
+				song = await _musicService.DownloadSongAsync(ytUrl);
 				isSuccess = true;
 			}
 			catch (Exception ex)
