@@ -10,6 +10,7 @@ using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
 using YoutubeExplode;
+using YoutubeExplode.Exceptions;
 
 namespace Railgun.Music
 {
@@ -130,8 +131,13 @@ namespace Railgun.Music
 				song = await _musicService.DownloadSongAsync(ytUrl);
 				isSuccess = true;
 			}
-			catch (Exception ex)
+			catch (RequestLimitExceededException ex)
 			{
+				error = "Youtube Rate-Limited (Error Code: 429)";
+				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
+			}
+			catch (Exception ex)
+            {
 				error = ex.Message;
 				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
 			}
@@ -150,7 +156,7 @@ namespace Railgun.Music
                     var fetchedSong = await FetchSongAsync(request.Id);
 
                     if (fetchedSong.IsSuccess) return fetchedSong;
-                    if (fetchedSong.Error.Contains("Response status code does not indicate success: 429"))
+                    if (fetchedSong.Error.Contains("Error Code: 429"))
                     {
                         _remainingSongs.Remove(request.Id);
                         _rateLimited.Add(request.Id);

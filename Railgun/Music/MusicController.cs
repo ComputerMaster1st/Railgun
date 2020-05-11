@@ -10,6 +10,8 @@ using Railgun.Core;
 using Railgun.Core.Enums;
 using TreeDiagram;
 using YoutubeExplode;
+using YoutubeExplode.Exceptions;
+using YoutubeExplode.Videos;
 using Playlist = AudioChord.Playlist;
 
 namespace Railgun.Music
@@ -72,7 +74,7 @@ namespace Railgun.Music
             foreach (var url in urls)
             {
                 var cleanUrl = url.Trim(' ', '<', '>');
-                var videoId = YoutubeExplode.Videos.VideoId.TryParse(url);
+                var videoId = VideoId.TryParse(url);
 
                 if (videoId == null)
                 {
@@ -133,7 +135,17 @@ namespace Railgun.Music
 
             var startedAt = DateTime.Now;
             var client = new YoutubeClient();
-            var youtubePlaylist = await client.Playlists.GetVideosAsync(playlistId.Value);
+            IReadOnlyList<Video> youtubePlaylist;
+
+            try
+            {
+                youtubePlaylist = await client.Playlists.GetVideosAsync(playlistId.Value);
+            }
+            catch (RequestLimitExceededException)
+            {
+                await tc.SendMessageAsync($"Unable to process playlist! Youtube Rate-Limited (Error Code: 429)! Please try again later.");
+                return;
+            }
 
             await tc.SendMessageAsync($"Found {Format.Bold(youtubePlaylist.Count().ToString())} songs! Now processing...");
 

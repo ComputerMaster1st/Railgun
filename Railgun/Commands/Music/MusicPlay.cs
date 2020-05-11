@@ -15,6 +15,7 @@ using TreeDiagram;
 using TreeDiagram.Models.Server;
 using Railgun.Music;
 using YoutubeExplode;
+using YoutubeExplode.Exceptions;
 
 namespace Railgun.Commands.Music
 {
@@ -194,14 +195,21 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				try {
-                    var client = new YoutubeClient();
+				try
+				{
+					var client = new YoutubeClient();
 					var video = await client.Videos.GetAsync(videoId.Value);
 
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
 						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(new SongId("YOUTUBE", video.Id), video.Title, video.Duration), data, response);
+                } catch (RequestLimitExceededException ex) {
+					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + "Youtube Rate-Limited (Error Code: 429)! Please try again later."}");
+
+					var output = new StringBuilder()
+						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.Message);
+					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				} catch (Exception ex) {
 					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}");
 
