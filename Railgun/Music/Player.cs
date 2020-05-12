@@ -27,6 +27,7 @@ namespace Railgun.Music
 		private readonly MusicService _musicService;
 		private readonly MetaDataEnricher _enricher;
 		private readonly List<SongId> _playedSongs = new List<SongId>();
+		private readonly YoutubeClient _ytClient;
         private List<SongId> _remainingSongs = new List<SongId>();
 		private List<SongId> _rateLimited = new List<SongId>();
         private bool _nowRateLimited = false;
@@ -57,11 +58,12 @@ namespace Railgun.Music
 			}
 		}
 
-		public Player(MusicService musicService, IVoiceChannel vc, MetaDataEnricher enricher)
+		public Player(MusicService musicService, IVoiceChannel vc, MetaDataEnricher enricher, YoutubeClient ytClient)
 		{
 			_musicService = musicService;
 			VoiceChannel = vc;
 			_enricher = enricher;
+			_ytClient = ytClient;
 		}
 
 		public void CancelMusic() => _musicCancelled = true;
@@ -131,7 +133,7 @@ namespace Railgun.Music
 				if (request == null)
                 {
 					var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
-					var video = await new YoutubeClient().Videos.GetAsync(videoId.Value);
+					var video = await _ytClient.Videos.GetAsync(videoId.Value);
 
 					title = video.Title;
 					uploader = video.Author;

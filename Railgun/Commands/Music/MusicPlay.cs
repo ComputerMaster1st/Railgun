@@ -30,9 +30,10 @@ namespace Railgun.Commands.Music
 			private readonly MusicService _musicService;
 			private readonly MusicServiceConfiguration _musicConfig;
 			private readonly MetaDataEnricher _enricher;
+			private readonly YoutubeClient _ytClient;
 			private bool _playOneTimeOnly;
 
-			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, MetaDataEnricher enricher)
+			public MusicPlay(MasterConfig config, BotLog botLog, PlayerController playerController, MusicService musicService, MusicServiceConfiguration musicConfig, MetaDataEnricher enricher, YoutubeClient ytClient)
 			{
 				_config = config;
 				_botLog = botLog;
@@ -40,6 +41,7 @@ namespace Railgun.Commands.Music
 				_musicService = musicService;
 				_musicConfig = musicConfig;
 				_enricher = enricher;
+				_ytClient = ytClient;
 			}
 
 			private async Task QueueSongAsync(PlayerContainer playerContainer, Playlist playlist, SongRequest song, ServerMusic data, IUserMessage response)
@@ -197,8 +199,7 @@ namespace Railgun.Commands.Music
 
 				try
 				{
-					var client = new YoutubeClient();
-					var video = await client.Videos.GetAsync(videoId.Value);
+					var video = await _ytClient.Videos.GetAsync(videoId.Value);
 
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
 						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");

@@ -13,6 +13,7 @@ using Railgun.Core.Enums;
 using Railgun.Music.Events;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
+using YoutubeExplode;
 
 namespace Railgun.Music
 {
@@ -24,16 +25,18 @@ namespace Railgun.Music
         private readonly IServiceProvider _services;
         private readonly MusicService _musicService;
 		private readonly MetaDataEnricher _enricher;
+		private readonly YoutubeClient _ytClient;
 
         public List<PlayerContainer> PlayerContainers { get; } = new List<PlayerContainer>();
 
-        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, IServiceProvider services)
+        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, YoutubeClient ytClient, IServiceProvider services)
         {
             _config = config;
             _client = client;
             _botLog = botLog;
 			_musicService = musicService;
 			_enricher = enricher;
+			_ytClient = ytClient;
             _services = services;
         }
 
@@ -68,7 +71,7 @@ namespace Railgun.Music
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc, _enricher) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+            var player = new Player(_musicService, vc, _enricher, _ytClient) { PlaylistAutoLoop = data.PlaylistAutoLoop };
 
 			try
 			{

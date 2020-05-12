@@ -21,13 +21,15 @@ namespace Railgun.Music
         private readonly BotLog _botLog;
         private readonly MusicService _musicService;
         private readonly MusicServiceConfiguration _musicConfig;
+        private readonly YoutubeClient _ytClient;
         private readonly IServiceProvider _services;
 
-        public MusicController(BotLog botLog, MusicService musicService, MusicServiceConfiguration musicConfig, IServiceProvider services)
+        public MusicController(BotLog botLog, MusicService musicService, MusicServiceConfiguration musicConfig, YoutubeClient ytClient, IServiceProvider services)
 		{
             _botLog = botLog;
             _musicService = musicService;
             _musicConfig = musicConfig;
+            _ytClient = ytClient;
             _services = services;
 		}
 
@@ -134,12 +136,11 @@ namespace Railgun.Music
             }
 
             var startedAt = DateTime.Now;
-            var client = new YoutubeClient();
             IReadOnlyList<Video> youtubePlaylist;
 
             try
             {
-                youtubePlaylist = await client.Playlists.GetVideosAsync(playlistId.Value);
+                youtubePlaylist = await _ytClient.Playlists.GetVideosAsync(playlistId.Value);
             }
             catch (RequestLimitExceededException)
             {

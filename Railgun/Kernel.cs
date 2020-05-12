@@ -28,6 +28,7 @@ using Railgun.Music;
 using Railgun.Timers;
 using Railgun.Utilities;
 using TreeDiagram;
+using YoutubeExplode;
 
 namespace Railgun
 {
@@ -113,6 +114,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
+                .AddSingleton<YoutubeClient>()
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
