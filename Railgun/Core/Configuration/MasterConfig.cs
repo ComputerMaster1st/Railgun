@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Railgun.Core.Enums;
@@ -10,16 +11,20 @@ namespace Railgun.Core.Configuration
     {
         [JsonIgnore]
         private const string Filename = "masterconfig.json";
+        [JsonIgnore]
+        public string YoutubeDirectory { get; } = "/";
+        [JsonIgnore]
+        public string YoutubeDomain { get; } = "youtube.com";
 
-        public DiscordConfig DiscordConfig { get; }
-        public DatabaseConfig PostgreSqlConfig { get; }
-        public DatabaseConfig MongoDbConfig { get; }
-        public YoutubeCookies YoutubeCookies { get; }
+        public DiscordConfig DiscordConfig { get; private set; }
+        public DatabaseConfig PostgreSqlConfig { get; private set; }
+        public DatabaseConfig MongoDbConfig { get; private set; }
 
-        public string GoogleApiToken { get; }
-        public string RandomCatApiToken { get; }
+        public Dictionary<string, string> YoutubeCookies { get; private set; } = new Dictionary<string, string>();
 
-        [JsonConstructor]
+        public string GoogleApiToken { get; private set; }
+        public string RandomCatApiToken { get; private set; }
+
         public MasterConfig(DiscordConfig discordConfig, DatabaseConfig postgresql, DatabaseConfig mongodb, string googleApiToken, string randomCatApiKey)
         {
             DiscordConfig = discordConfig;
@@ -28,6 +33,9 @@ namespace Railgun.Core.Configuration
             GoogleApiToken = googleApiToken;
             RandomCatApiToken = randomCatApiKey;
         }
+
+        [JsonConstructor]
+        private MasterConfig() {}
 
         private static string SetupInput(string query)
         {
@@ -108,6 +116,12 @@ namespace Railgun.Core.Configuration
             if (!DiscordConfig.RemoveAdmin(userId)) return false;
             Save();
             return true;
+        }
+
+        public void UpdateYoutubeCookies(Dictionary<string, string> cookies)
+        {
+            YoutubeCookies = cookies;
+            Save();
         }
     }
 }

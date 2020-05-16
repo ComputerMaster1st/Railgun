@@ -161,15 +161,9 @@ namespace Railgun
 
             var container = _youtubeHttpClientHandler.CookieContainer;
 
-            container.Add(new Cookie("LOGIN_INFO", _config.YoutubeCookies.LOGIN_INFO, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("SAPISID", _config.YoutubeCookies.SAPISID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("APISID", _config.YoutubeCookies.APISID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("SSID", _config.YoutubeCookies.SSID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("HSID", _config.YoutubeCookies.HSID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("SID", _config.YoutubeCookies.SID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("VISITOR_INFO1_LIVE", _config.YoutubeCookies.VISITOR_INFO1_LIVE, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("PREF", _config.YoutubeCookies.PREF, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
-            container.Add(new Cookie("YSC", _config.YoutubeCookies.YSC, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
+            foreach (var keyvaluepair in _config.YoutubeCookies)
+                container.Add(new Cookie(keyvaluepair.Key, keyvaluepair.Value, _config.YoutubeDirectory, _config.YoutubeDomain));
 
             _youtubeHttpClientHandler.UseCookies = true;
 

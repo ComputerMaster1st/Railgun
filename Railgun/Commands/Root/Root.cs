@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,12 +26,14 @@ namespace Railgun.Commands.Root
         private readonly DiscordShardedClient _client;
         private readonly PlayerController _playerController;
         private readonly TimerController _timerManager;
+        private readonly HttpClientHandler _youtubeHandler;
 
-        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController) {
+        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController, HttpClientHandler handler) {
             _config = config;
             _client = client;
             _playerController = playerController;
             _timerManager = timerController;
+            _youtubeHandler = handler;
         }
         
         [Command("show")]
@@ -169,6 +172,30 @@ namespace Railgun.Commands.Root
             
             await _client.StopAsync();
             await _client.LogoutAsync();
+
+            var container = _youtubeHandler.CookieContainer;
+            var collection = container.GetCookies(new Uri(_config.YoutubeDomain));
+
+            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
+            _config.UpdateYoutubeCookies(collection.ToDictionary(cookie => cookie.Name, cookie => cookie.Value));
+        }
+
+        [Command("cookies")]
+        public Task CookiesAsync()
+        {
+            var container = _youtubeHandler.CookieContainer;
+            var collection = container.GetCookies(new Uri(_config.YoutubeDomain));
+
+            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
+            _config.UpdateYoutubeCookies(collection.ToDictionary(cookie => cookie.Name, cookie => cookie.Value));
+
+            var output = new StringBuilder();
+
+            foreach (var cookie in _config.YoutubeCookies)
+                output.AppendFormat("{0}: {1}", Format.Bold(cookie.Key), cookie.Value).AppendLine();
+
+            output.AppendLine("All current cookies for Youtube.");
+            return ReplyAsync(output.ToString());
         }
         
         [Command("prefix")]
