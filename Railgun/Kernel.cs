@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using AudioChord;
 using AudioChord.Caching.FileSystem;
@@ -46,6 +48,8 @@ namespace Railgun
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
+        private HttpClientHandler _youtubeHttpClientHandler = null;
+        private HttpClient _youtubehttpClient = null;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
@@ -99,6 +103,7 @@ namespace Railgun
                 .AddSingleton(_commandService)
                 .AddSingleton(_musicServiceConfig)
                 .AddSingleton(_musicService)
+                .AddSingleton(_youtubeHttpClientHandler)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
@@ -114,7 +119,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
-                .AddSingleton<YoutubeClient>()
+                .AddSingleton(new YoutubeClient(CreateYoutubeHttpClient()))
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
@@ -143,6 +148,34 @@ namespace Railgun
                 .LoadEvent(new OnReadyEvent(_config, _client, _serverCount, _serviceProvider));
 
             _serverCount.Start();
+        }
+
+        private HttpClient CreateYoutubeHttpClient()
+        {
+            _youtubeHttpClientHandler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
+            
+            if (_youtubeHttpClientHandler.SupportsAutomaticDecompression)
+                _youtubeHttpClientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            var container = _youtubeHttpClientHandler.CookieContainer;
+
+            container.Add(new Cookie("LOGIN_INFO", _config.YoutubeCookies.LOGIN_INFO, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("SAPISID", _config.YoutubeCookies.SAPISID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("APISID", _config.YoutubeCookies.APISID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("SSID", _config.YoutubeCookies.SSID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("HSID", _config.YoutubeCookies.HSID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("SID", _config.YoutubeCookies.SID, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("VISITOR_INFO1_LIVE", _config.YoutubeCookies.VISITOR_INFO1_LIVE, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("PREF", _config.YoutubeCookies.PREF, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+            container.Add(new Cookie("YSC", _config.YoutubeCookies.YSC, _config.YoutubeCookies.Directory, _config.YoutubeCookies.Domain));
+
+            _youtubeHttpClientHandler.UseCookies = true;
+
+            _youtubehttpClient = new HttpClient(_youtubeHttpClientHandler, true);
+            _youtubehttpClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36");
+
+            return _youtubehttpClient;
         }
     }
 }
