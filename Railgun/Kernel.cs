@@ -55,6 +55,8 @@ namespace Railgun
         {
             _config = config;
             _client = client;
+
+            CreateYoutubeHttpClient();
         }
 
         public void Boot()
@@ -84,7 +86,7 @@ namespace Railgun
                 Username = mongo.Username,
                 Password = mongo.Password,
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
-                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor() },
+                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor(_youtubehttpClient) },
                 Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
             };
             _musicService = new MusicService(_musicServiceConfig);
@@ -119,7 +121,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
-                .AddSingleton(new YoutubeClient(CreateYoutubeHttpClient()))
+                .AddSingleton(new YoutubeClient(_youtubehttpClient))
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
@@ -150,7 +152,7 @@ namespace Railgun
             _serverCount.Start();
         }
 
-        private HttpClient CreateYoutubeHttpClient()
+        private void CreateYoutubeHttpClient()
         {
             _youtubeHttpClientHandler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
             
@@ -174,8 +176,6 @@ namespace Railgun
             _youtubehttpClient = new HttpClient(_youtubeHttpClientHandler, true);
             _youtubehttpClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36");
-
-            return _youtubehttpClient;
         }
     }
 }
