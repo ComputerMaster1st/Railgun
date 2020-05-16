@@ -14,6 +14,7 @@ namespace Railgun.Core.Configuration
         public DiscordConfig DiscordConfig { get; }
         public DatabaseConfig PostgreSqlConfig { get; }
         public DatabaseConfig MongoDbConfig { get; }
+        public YoutubeCookies YoutubeCookies { get; }
 
         public string GoogleApiToken { get; }
         public string RandomCatApiToken { get; }
