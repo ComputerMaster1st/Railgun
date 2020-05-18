@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
 using Newtonsoft.Json;
 using Railgun.Core.Enums;
 
@@ -118,9 +120,22 @@ namespace Railgun.Core.Configuration
             return true;
         }
 
-        public void UpdateYoutubeCookies(Dictionary<string, string> cookies)
+        public void UpdateYoutubeCookies(IEnumerable<Cookie> cookies)
         {
-            YoutubeCookies = cookies;
+            var newCookies = new Dictionary<string, string>();
+
+            foreach (var cookie in cookies)
+            {
+                if (newCookies.ContainsKey(cookie.Name))
+                {
+                    newCookies[cookie.Name] = cookie.Value;
+                    continue;
+                }
+
+                newCookies.Add(cookie.Name, cookie.Value);
+            }
+
+            YoutubeCookies = newCookies;
             Save();
         }
     }

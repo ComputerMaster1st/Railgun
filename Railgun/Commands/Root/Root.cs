@@ -174,20 +174,20 @@ namespace Railgun.Commands.Root
             await _client.LogoutAsync();
 
             var container = _youtubeHandler.CookieContainer;
-            var collection = container.GetCookies(new Uri(_config.YoutubeDomain));
+            var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
 
             // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-            _config.UpdateYoutubeCookies(collection.ToDictionary(cookie => cookie.Name, cookie => cookie.Value));
+            _config.UpdateYoutubeCookies(collection.ToList());
         }
 
         [Command("cookies")]
         public Task CookiesAsync()
         {
             var container = _youtubeHandler.CookieContainer;
-            var collection = container.GetCookies(new Uri(_config.YoutubeDomain));
+            var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
 
             // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-            _config.UpdateYoutubeCookies(collection.ToDictionary(cookie => cookie.Name, cookie => cookie.Value));
+            _config.UpdateYoutubeCookies(collection.ToList());
 
             var output = new StringBuilder();
 
