@@ -180,7 +180,7 @@ namespace Railgun.Music.Scheduler
 
         private void PopulateSongList(Playlist playlist)
         {
-            var repopulatedSongs = playlist.Songs.ToDictionary(x => x, y =>
+            var repopulatedSongs = playlist.Songs.Distinct().ToDictionary(x => x, y =>
             {
                 return _playlist.GetValueOrDefault(y, SongQueueStatus.Queued);
             });

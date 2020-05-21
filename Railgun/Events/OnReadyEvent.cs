@@ -58,6 +58,7 @@ namespace Railgun.Events
 			_initialized = true;
 			_count.PreviousGuildCount = _client.Guilds.Count;
 
+#if RELEASE
             using (var scope = _services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
@@ -65,8 +66,9 @@ namespace Railgun.Events
                     return guild.Id;
                 })));
             }
+#endif
 
-			await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} {_client.Guilds.Count} Servers!",
+            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} {_client.Guilds.Count} Servers!",
 				type: ActivityType.Watching);
 			await _client.SetStatusAsync(UserStatus.Online);
 
