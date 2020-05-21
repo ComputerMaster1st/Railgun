@@ -74,9 +74,9 @@ namespace Railgun.Music.Scheduler
             while (!request.IsSuccess)
             {
                 // Check if all songs are either played or ratelimited. Convert played to queued.
-                if ((_playlist.Count(x => x.Value == SongQueueStatus.Played) + _playlist.Count(x => x.Value == SongQueueStatus.RateLimited)) < 1)
+                if (!_playlist.Any(x => x.Value == SongQueueStatus.Queued))
                 {
-                    if (!PlaylistAutoLoop || !_playlist.Any()) return (false, null, null);
+                    if (!PlaylistAutoLoop) return (false, null, null);
 
                     // All songs ratelimited, return null + error
                     if (_playlist.All(x => x.Value == SongQueueStatus.RateLimited)) throw new MusicSchedulerException("Server playlist has been rate-limited (429) by YouTube.");
