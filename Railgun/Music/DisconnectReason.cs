@@ -3,7 +3,6 @@
     public enum DisconnectReason
     {
         Auto,
-        Timeout,
         Manual,
         Exception
     }

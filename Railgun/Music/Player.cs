@@ -20,7 +20,7 @@ namespace Railgun.Music
 		private IAudioClient _client;
 		private Exception _exception;
 		private bool _audioDisconnected;
-		private DisconnectReason _disconnectReason;
+		private DisconnectReason _disconnectReason = DisconnectReason.Manual;
 		private bool _skipSong;
 		private CancellationTokenSource _streamCancelled = new CancellationTokenSource();
         private bool _queueFailed;
