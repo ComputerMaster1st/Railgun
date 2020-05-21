@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
 using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
-using Railgun.Events;
 using Railgun.Music.PlayerEventArgs;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
