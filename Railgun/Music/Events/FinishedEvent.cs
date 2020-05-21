@@ -48,7 +48,7 @@ namespace Railgun.Music.Events
 					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.");
 				}
 
-				var autoOutput = args.Reason ? "Auto-" : "";
+				var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";
 
 				output.AppendFormat("{0}Left Voice Channel", autoOutput);
 
@@ -62,7 +62,7 @@ namespace Railgun.Music.Events
             finally 
             {
 				await _container.LogEntry.DeleteAsync();
-				await _controller.StopPlayerAsync(args.GuildId, args.Reason);
+				await _controller.StopPlayerAsync(args.GuildId, true);
 			}
         }
     }

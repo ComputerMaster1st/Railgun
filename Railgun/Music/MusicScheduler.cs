@@ -16,11 +16,6 @@ namespace Railgun.Music.Scheduler
     {
         private readonly MusicService _musicService;
         private readonly ObjectId _playlistId;
-
-        /// <summary>
-        /// This is a priority queue. This will always take priority over the dictionary.
-        /// </summary>
-        private readonly List<SongRequest> _requests = new List<SongRequest>();
         private readonly SemaphoreSlim _requestLock = new SemaphoreSlim(1);
         private readonly Random _random = new Random();
 
@@ -29,11 +24,16 @@ namespace Railgun.Music.Scheduler
         /// </summary>
         private Dictionary<SongId, SongQueueStatus> _playlist = new Dictionary<SongId, SongQueueStatus>();
 
+        /// <summary>
+        /// This is a priority queue. This will always take priority over the dictionary.
+        /// </summary>
+        public List<SongRequest> Requests { get; } = new List<SongRequest>();
+
         public bool PlaylistAutoLoop { get; set; }
 
         public bool IsRateLimited => _playlist.Any(x => x.Value == SongQueueStatus.RateLimited);
 
-        public bool IsRequestsPopulated => _requests.Any();
+        public bool IsRequestsPopulated => Requests.Any();
 
         public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop)
         {
@@ -112,32 +112,32 @@ namespace Railgun.Music.Scheduler
 
         private async Task<(bool IsSuccess, Exception Error, ISong song)> FetchFromQueueAsync(Playlist playlist)
         {
-            while (_requests.Count > 0)
+            while (Requests.Count > 0)
             {
-                var request = _requests.FirstOrDefault();
+                var request = Requests.FirstOrDefault();
                 if (request != null)
                 {
                     if (request.Song != null)
                     {
-                        _requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
                         return (true, null, request.Song);
                     }
                     var fetchedSong = await FetchSongAsync(request.Id);
 
                     if (fetchedSong.IsSuccess) {
-                        _requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
                         return fetchedSong;
                     }
                     if (fetchedSong.Error is RequestLimitExceededException)
                     {
                         _playlist[request.Id] = SongQueueStatus.RateLimited;
-                        _requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
                         continue;
                     }
 
                     playlist.Songs.Remove(request.Id);
                     _playlist.Remove(request.Id);
-                    _requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                    Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
 
                     await _musicService.Playlist.UpdateAsync(playlist);
                 }
@@ -159,7 +159,7 @@ namespace Railgun.Music.Scheduler
 
                 if (id.ProcessorId == "DISCORD") return (false, null, null);
 
-                if (!_requests.Any(x => x.Id == id))
+                if (!Requests.Any(x => x.Id == id))
                     song = await _musicService.DownloadSongAsync("https://youtu.be/" + id.SourceId);
                 
                 return (true, error, song);
@@ -192,8 +192,8 @@ namespace Railgun.Music.Scheduler
         {
             await _requestLock.WaitAsync();
 
-            if (_requests.Count(x => x.Id.ToString() == song.Id.ToString()) < 1)
-                _requests.Add(song);
+            if (Requests.Count(x => x.Id.ToString() == song.Id.ToString()) < 1)
+                Requests.Add(song);
 
             _requestLock.Release();
         }
@@ -202,7 +202,7 @@ namespace Railgun.Music.Scheduler
         {
             await _requestLock.WaitAsync();
 
-            _requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
+            Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
 
             _requestLock.Release();
         }
@@ -211,7 +211,7 @@ namespace Railgun.Music.Scheduler
         {
             await _requestLock.WaitAsync();
 
-            _requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
+            Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
 
             _requestLock.Release();
         }

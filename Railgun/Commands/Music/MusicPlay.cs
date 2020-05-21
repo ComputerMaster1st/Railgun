@@ -81,7 +81,7 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				player.AddSongRequest(song);
+				await player.MusicScheduler.AddSongRequestAsync(song);
 
 				if (data.AutoSkip && !player.AutoSkipped) {
 					output.AppendLine("Auto-Skipping current song as requested.");
