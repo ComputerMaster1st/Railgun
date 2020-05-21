@@ -45,7 +45,8 @@ namespace Railgun.Music.Events
 
 					await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, logOutput.ToString());
 
-					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.");
+					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.")
+                        .AppendFormat("{0} {1}", Format.Bold("ERROR:"), args.Exception.Message);
 				}
 
 				var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";

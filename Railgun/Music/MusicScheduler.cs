@@ -59,7 +59,7 @@ namespace Railgun.Music.Scheduler
                 if (!song.IsSuccess && song.Error == null)
                     song = await FetchFromPlaylistAsync(playlist);
 
-                return song.song ?? throw new MusicSchedulerException("Song Is Null!");
+                return song.song ?? throw new NullReferenceException("No song to play!");
             }
             finally
             {

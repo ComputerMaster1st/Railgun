@@ -121,7 +121,17 @@ namespace Railgun.Music
 						if (onRepeat)
 							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
 						else
-							CurrentSong = await MusicScheduler.RequestNextSongAsync();
+							try
+                            {
+								CurrentSong = await MusicScheduler.RequestNextSongAsync();
+							}
+							catch (NullReferenceException inEx)
+                            {
+								ex = inEx;
+								_disconnectReason = DisconnectReason.Auto;
+								break;
+							}
+							
 
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
