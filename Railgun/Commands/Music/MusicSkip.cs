@@ -26,12 +26,12 @@ namespace Railgun.Commands.Music
 				if (data == null || container == null) 
 					return ReplyAsync("Can not skip current song because I am not in voice channel.");
 				if (!data.VoteSkipEnabled) {
-					container.Player.CancelMusic();
+					container.Player.SkipMusic();
 					return ReplyAsync("Skipping music now...");
 				}
 
 				var player = container.Player;
-				var userCount = player.GetUserCount();
+				var userCount = player.GetUserCountAsync();
 				var voteSkipResult = player.VoteSkip(Context.Author.Id);
 				var percent = (player.VoteSkipped.Count / userCount) * 100;
 
@@ -41,7 +41,7 @@ namespace Railgun.Commands.Music
 				} else if (!voteSkipResult)
 					return ReplyAsync("You've already voted to skip!");
 
-				player.CancelMusic();
+				player.SkipMusic();
 				return ReplyAsync("Vote-Skipping music now...");
 			}
 
@@ -56,7 +56,7 @@ namespace Railgun.Commands.Music
 				if (container == null)
 					return ReplyAsync("Can not skip current song because I am not in voice channel.");
 
-				container.Player.CancelMusic();
+				container.Player.SkipMusic();
 				return ReplyAsync("Force-Skipping music now...");
 			}
 		}

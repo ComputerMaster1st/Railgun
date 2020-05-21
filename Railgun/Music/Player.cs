@@ -29,9 +29,8 @@ namespace Railgun.Music
 		private readonly List<SongId> _playedSongs = new List<SongId>();
 		private readonly YoutubeClient _ytClient;
         private List<SongId> _remainingSongs = new List<SongId>();
-		private List<SongId> _rateLimited = new List<SongId>();
+		private readonly List<SongId> _rateLimited = new List<SongId>();
         private bool _nowRateLimited = false;
-		private bool _firstLoop = true;
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
@@ -66,7 +65,7 @@ namespace Railgun.Music
 			_ytClient = ytClient;
 		}
 
-		public void CancelMusic() => _musicCancelled = true;
+		public void SkipMusic() => _musicCancelled = true;
 
 		public void CancelStream(bool audioDisconnected = false)
 		{
@@ -97,8 +96,8 @@ namespace Railgun.Music
 			return true;
 		}
 
-		public int GetUserCount()
-			=> (VoiceChannel.GetUsersAsync().FlattenAsync().GetAwaiter().GetResult()).Count(user => !user.IsBot);
+		public async Task<int> GetUserCountAsync()
+			=> (await VoiceChannel.GetUsersAsync().FlattenAsync()).Count(user => !user.IsBot);
 
 		public void StartPlayer(ObjectId playlistId)
 		{
@@ -106,13 +105,9 @@ namespace Railgun.Music
 			PlayerTask = Task.Run(StartAsync);
 		}
 
-		private bool IsAlone()
-		{
-			if (GetUserCount() < 1) return true;
-			return false;
-		}
+        private async Task<bool> IsAloneAsync() => await GetUserCountAsync() < 1;
 
-		private async Task<(bool IsSuccess, string Error, ISong Song)> FetchSongAsync(SongId id)
+        private async Task<(bool IsSuccess, string Error, ISong Song)> FetchSongAsync(SongId id)
 		{
 			(bool Success, ISong Song) result = await _musicService.TryGetSongAsync(id);
 			if (result.Success) return (result.Success, string.Empty, result.Song);
@@ -200,17 +195,18 @@ namespace Railgun.Music
             var retry = 5;
 
             while (!request.IsSuccess && string.IsNullOrEmpty(request.Error)) {
-				if (_remainingSongs.Count < 1) {
-                    playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
+				if (_remainingSongs.Count < 1)
+				{
+					if (!PlaylistAutoLoop) return (false, null, null);
+
+					playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
 
                     if (playlist == null || playlist.Songs.Count == 0) return (false, null, null);
-					if (!PlaylistAutoLoop && !_firstLoop) return (false, null, null);
 					if (playlist.Songs.Count <= _rateLimited.Count) return (false, "Playlist:429", null);
 					
 					_playedSongs.Clear();
                     _rateLimited.Clear();
 					_remainingSongs = new List<SongId>(playlist.Songs);
-					_firstLoop = false;
 
                     foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
                 }
@@ -247,7 +243,10 @@ namespace Railgun.Music
 				}
 			}
 
-            return request;
+			if (!_playedSongs.Contains(request.song.Id)) _playedSongs.Add(request.song.Id);
+			if (_remainingSongs.Contains(request.song.Id)) _remainingSongs.Remove(request.song.Id);
+
+			return request;
 		}
 
 		private async Task ForceTimeout(Task task, int ms, string errorMsg)
@@ -255,7 +254,7 @@ namespace Railgun.Music
 			await Task.WhenAny(task, Task.Delay(ms));
 
 			if (!task.IsCompleted)
-				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status.ToString()})", task.Exception);
+				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status})", task.Exception);
 		}
 
 		public async Task ConnectToVoiceAsync()
@@ -289,7 +288,7 @@ namespace Railgun.Music
 					var onRepeat = false;
 
 					while (!_streamCancelled) {
-						if (IsAlone() || LeaveAfterSong) {
+						if (await IsAloneAsync() || LeaveAfterSong) {
 							_autoDisconnected = true;
 							break;
 						}
@@ -300,14 +299,17 @@ namespace Railgun.Music
 						if (onRepeat) CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
 						else
 						{
-							var result = await QueueSongAsync();
-							if (result.IsSuccess) CurrentSong = result.song;
+							var (IsSuccess, Error, song) = await QueueSongAsync();
+
+							if (IsSuccess)
+								CurrentSong = song;
 							else
-							{
-								if (result.Error == "Playlist:429")
+								if (Error == "Playlist:429")
 									throw new Exception("YouTube (429) block in effect. No music in the playlist can be played. Sorry. Please allow upto 24 hours for the block to clear.");
-							}
+								else
+									CurrentSong = null;
 						}
+
 						if (CurrentSong == null) {
 							_autoDisconnected = true;
 							break;
@@ -315,7 +317,7 @@ namespace Railgun.Music
 
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
-						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, (_rateLimited.Count > 0) ? (!_nowRateLimited ? true : false) : false));
+						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, (_rateLimited.Count > 0) && (!_nowRateLimited)));
                         if (!_nowRateLimited && _rateLimited.Count > 0) _nowRateLimited = true;
 
 						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
@@ -330,8 +332,6 @@ namespace Railgun.Music
 							await ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
 						}
 
-            			if (!_playedSongs.Contains(CurrentSong.Id)) _playedSongs.Add(CurrentSong.Id);
-            			if (_remainingSongs.Contains(CurrentSong.Id)) _remainingSongs.Remove(CurrentSong.Id);
                         if (RepeatSong > 0) {
 							RepeatSong--;
 							onRepeat = true;

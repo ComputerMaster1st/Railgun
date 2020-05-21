@@ -85,7 +85,7 @@ namespace Railgun.Commands.Music
 
 				if (data.AutoSkip && !player.AutoSkipped) {
 					output.AppendLine("Auto-Skipping current song as requested.");
-					player.CancelMusic();
+					player.SkipMusic();
 				}
 
 				player.AutoSkipped = true;

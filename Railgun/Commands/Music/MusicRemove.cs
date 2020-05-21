@@ -98,7 +98,7 @@ namespace Railgun.Commands.Music
 				await _musicService.Playlist.UpdateAsync(playlist);
 				await ReplyAsync("Removed from playlist. Skipping to next song...");
 
-				player.CancelMusic();
+				player.SkipMusic();
 			}
 		}
 	}
