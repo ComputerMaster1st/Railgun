@@ -93,7 +93,6 @@ namespace Railgun.Music
             container.AddEventLoader(new PlayerEventLoader(container)
                 .LoadEvent(new ConnectedEvent(_config, _client))
                 .LoadEvent(new PlayingEvent(_config, _client, _services))
-                .LoadEvent(new TimeoutEvent(_botLog))
                 .LoadEvent(new FinishedEvent(this, _botLog))
 			);
 
