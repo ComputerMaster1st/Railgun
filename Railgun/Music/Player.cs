@@ -172,7 +172,7 @@ namespace Railgun.Music
 				Status = PlayerStatus.FailSafe;
 				ex = inEx;
 			} finally {
-				if (_audioDisconnected) {
+				if (_audioDisconnected && !_streamCancelled.IsCancellationRequested) {
 					ex = new Exception("AudioClient Unexpected Disconnect!", _exception);
 					_disconnectReason = DisconnectReason.Exception;
 				}
