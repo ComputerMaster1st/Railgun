@@ -9,7 +9,6 @@ namespace Railgun.Core.Enums
         Finishing,
         Disconnecting,
         FailSafe,
-        Disconnected,
-        Timeout
+        Disconnected
     }
 }

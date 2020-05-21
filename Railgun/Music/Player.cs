@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
@@ -19,9 +20,9 @@ namespace Railgun.Music
 		private IAudioClient _client;
 		private Exception _exception;
 		private bool _audioDisconnected;
-		private bool _autoDisconnected;
-		private bool _musicCancelled;
-		private bool _streamCancelled;
+		private DisconnectReason _disconnectReason;
+		private bool _skipSong;
+		private CancellationTokenSource _streamCancelled = new CancellationTokenSource();
         private bool _queueFailed;
 		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
@@ -47,7 +48,6 @@ namespace Railgun.Music
 
 		public event EventHandler<ConnectedEventArgs> Connected;
 		public event EventHandler<PlayingEventArgs> Playing;
-		public event EventHandler<TimeoutEventArgs> Timeout;
 		public event EventHandler<FinishedEventArgs> Finished;
 
 		public int Latency {
@@ -65,13 +65,12 @@ namespace Railgun.Music
 			_ytClient = ytClient;
 		}
 
-		public void SkipMusic() => _musicCancelled = true;
+		public void SkipMusic() => _skipSong = true;
 
 		public void CancelStream(bool audioDisconnected = false)
 		{
-			_musicCancelled = true;
-			_streamCancelled = true;
 			_audioDisconnected = audioDisconnected;
+			_streamCancelled.Cancel();
 		}
 
 		public bool AddSongRequest(SongRequest song)
@@ -249,14 +248,6 @@ namespace Railgun.Music
 			return request;
 		}
 
-		private async Task ForceTimeout(Task task, int ms, string errorMsg)
-		{
-			await Task.WhenAny(task, Task.Delay(ms));
-
-			if (!task.IsCompleted)
-				throw new TimeoutException($"{errorMsg} (Task Status : {task.Status})", task.Exception);
-		}
-
 		public async Task ConnectToVoiceAsync()
 		{
 			_client = await VoiceChannel.ConnectAsync();
@@ -273,11 +264,8 @@ namespace Railgun.Music
 				Connected?.Invoke(this, new ConnectedEventArgs(VoiceChannel.GuildId));
 
 				_client.Disconnected += (audioEx) => {
-					if (!_autoDisconnected && !_streamCancelled) {
-						_exception = audioEx;
-
-						CancelStream(true);
-					}
+					_exception = audioEx;
+					CancelStream(true);
 
 					return Task.CompletedTask;
 				};
@@ -287,12 +275,12 @@ namespace Railgun.Music
 					Status = PlayerStatus.Connected;
 					var onRepeat = false;
 
-					while (!_streamCancelled) {
+					while (!_streamCancelled.IsCancellationRequested) {
 						if (await IsAloneAsync() || LeaveAfterSong) {
-							_autoDisconnected = true;
+							_disconnectReason = DisconnectReason.Auto;
 							break;
 						}
-						if (_musicCancelled) _musicCancelled = false;
+						if (_skipSong) _skipSong = false;
 
 						Status = PlayerStatus.Queuing;
 
@@ -311,7 +299,7 @@ namespace Railgun.Music
 						}
 
 						if (CurrentSong == null) {
-							_autoDisconnected = true;
+							_disconnectReason = DisconnectReason.Auto;
 							break;
 						}
 
@@ -322,14 +310,14 @@ namespace Railgun.Music
 
 						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
 						using (var opusStream = new OpusOggReadStream(databaseStream)) {
-							while (opusStream.HasNextPacket && !_musicCancelled) {
+							while (opusStream.HasNextPacket && !_skipSong && !_streamCancelled.IsCancellationRequested) {
 								var bytes = opusStream.RetrieveNextPacket();
-								await ForceTimeout(discordStream.WriteAsync(bytes, 0, bytes.Length), 5000, "WriteAsync has timed out!");
+								await discordStream.WriteAsync(bytes, 0, bytes.Length, _streamCancelled.Token);
 							}
 
 							Status = PlayerStatus.Finishing;
 
-							await ForceTimeout(discordStream.FlushAsync(), 5000, "FlushAsync has timed out!");
+							await discordStream.FlushAsync(_streamCancelled.Token);
 						}
 
                         if (RepeatSong > 0) {
@@ -348,22 +336,19 @@ namespace Railgun.Music
 
 					Status = PlayerStatus.Disconnecting;
 				}
-			} catch (TimeoutException timeEx) {
-				Status = PlayerStatus.Timeout;
-				Timeout?.Invoke(this, new TimeoutEventArgs(VoiceChannel.GuildId, timeEx));
 			} catch (Exception inEx) {
 				Status = PlayerStatus.FailSafe;
 				ex = inEx;
 			} finally {
 				if (_audioDisconnected) {
 					ex = new Exception("AudioClient Unexpected Disconnect!", _exception);
-					_autoDisconnected = false;
+					_disconnectReason = DisconnectReason.Exception;
 				} else if (_queueFailed) {
                     ex = new Exception("Music Auto-Selector Failed!", _exception);
-                    _autoDisconnected = false;
-                }
+					_disconnectReason = DisconnectReason.Exception;
+				}
                 
-				Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _autoDisconnected, ex));
+				Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _disconnectReason, ex));
 				Status = PlayerStatus.Disconnected;
 			}
 		}

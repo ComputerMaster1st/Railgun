@@ -4,11 +4,11 @@ namespace Railgun.Music.PlayerEventArgs
 {
     public class FinishedEventArgs : PlayerEventArgs
     {
-        public bool AutoDisconnected { get; }
+        public DisconnectReason Reason { get; }
         public Exception Exception { get; }
 
-        public FinishedEventArgs(ulong guildId, bool autoDisconnected, Exception ex = null) : base(guildId) {
-            AutoDisconnected = autoDisconnected;
+        public FinishedEventArgs(ulong guildId, DisconnectReason reason, Exception ex = null) : base(guildId) {
+            Reason = reason;
             Exception = ex;
         }
     }
