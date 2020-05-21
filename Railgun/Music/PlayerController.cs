@@ -11,6 +11,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
 using Railgun.Core.Enums;
 using Railgun.Music.Events;
+using Railgun.Music.Scheduler;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 using YoutubeExplode;
@@ -71,7 +72,7 @@ namespace Railgun.Music
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc, _enricher, _ytClient) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop));
 
 			try
 			{
@@ -97,14 +98,14 @@ namespace Railgun.Music
 			);
 
 			if (preRequestedSong != null) {
-				player.AddSongRequest(preRequestedSong);
+				await player.MusicScheduler.AddSongRequestAsync(preRequestedSong);
 				player.AutoSkipped = true;
 			}
 
 			await PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, container);
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
-			player.StartPlayer(playlist.Id);
+			player.StartPlayer();
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)

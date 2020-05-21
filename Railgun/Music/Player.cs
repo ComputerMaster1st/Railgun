@@ -7,15 +7,14 @@ using AudioChord;
 using Discord;
 using Discord.Audio;
 using MongoDB.Bson;
-using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
+using Railgun.Music.Scheduler;
 using YoutubeExplode;
-using YoutubeExplode.Exceptions;
 
 namespace Railgun.Music
 {
-	public class Player
+    public class Player
 	{
 		private IAudioClient _client;
 		private Exception _exception;
@@ -23,28 +22,19 @@ namespace Railgun.Music
 		private DisconnectReason _disconnectReason = DisconnectReason.Manual;
 		private bool _skipSong;
 		private CancellationTokenSource _streamCancelled = new CancellationTokenSource();
-        private bool _queueFailed;
-		private ObjectId _playlistId = ObjectId.Empty;
 		private readonly MusicService _musicService;
-		private readonly MetaDataEnricher _enricher;
-		private readonly List<SongId> _playedSongs = new List<SongId>();
-		private readonly YoutubeClient _ytClient;
-        private List<SongId> _remainingSongs = new List<SongId>();
-		private readonly List<SongId> _rateLimited = new List<SongId>();
         private bool _nowRateLimited = false;
 
         public IVoiceChannel VoiceChannel { get; }
 		public Task PlayerTask { get; private set; }
-		public DateTime CreatedAt { get; } = DateTime.Now;
 		public DateTime SongStartedAt { get; private set; }
-		public List<SongRequest> Requests { get; } = new List<SongRequest>();
 		public List<ulong> VoteSkipped { get; } = new List<ulong>();
 		public PlayerStatus Status { get; private set; } = PlayerStatus.Connecting;
 		public bool AutoSkipped { get; set; }
-		public bool PlaylistAutoLoop { get; set; } = true;
 		public int RepeatSong { get; set; }
 		public bool LeaveAfterSong { get; set; }
 		public ISong CurrentSong { get; private set; }
+		public MusicScheduler MusicScheduler { get; }
 
 		public event EventHandler<ConnectedEventArgs> Connected;
 		public event EventHandler<PlayingEventArgs> Playing;
@@ -57,12 +47,11 @@ namespace Railgun.Music
 			}
 		}
 
-		public Player(MusicService musicService, IVoiceChannel vc, MetaDataEnricher enricher, YoutubeClient ytClient)
+		public Player(MusicService musicService, IVoiceChannel vc, MusicScheduler musicScheduler)
 		{
 			_musicService = musicService;
 			VoiceChannel = vc;
-			_enricher = enricher;
-			_ytClient = ytClient;
+			MusicScheduler = musicScheduler;
 		}
 
 		public void SkipMusic() => _skipSong = true;
@@ -72,20 +61,6 @@ namespace Railgun.Music
 			_audioDisconnected = audioDisconnected;
 			_streamCancelled.Cancel();
 		}
-
-		public bool AddSongRequest(SongRequest song)
-		{
-			if (Requests.Count(x => x.Id.ToString() == song.Id.ToString()) > 0) return false;
-
-			Requests.Add(song);
-			return true;
-		}
-
-        public SongRequest GetFirstSongRequest() => Requests.FirstOrDefault();
-
-        public void RemoveSongRequest(SongRequest song) => Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
-
-        public void RemoveSongRequest(ISong song) => Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
 
         public bool VoteSkip(ulong userId)
 		{
@@ -98,155 +73,9 @@ namespace Railgun.Music
 		public async Task<int> GetUserCountAsync()
 			=> (await VoiceChannel.GetUsersAsync().FlattenAsync()).Count(user => !user.IsBot);
 
-		public void StartPlayer(ObjectId playlistId)
-		{
-			_playlistId = playlistId;
-			PlayerTask = Task.Run(StartAsync);
-		}
+        public void StartPlayer() => PlayerTask = Task.Run(StartAsync);
 
         private async Task<bool> IsAloneAsync() => await GetUserCountAsync() < 1;
-
-        private async Task<(bool IsSuccess, string Error, ISong Song)> FetchSongAsync(SongId id)
-		{
-			(bool Success, ISong Song) result = await _musicService.TryGetSongAsync(id);
-			if (result.Success) return (result.Success, string.Empty, result.Song);
-
-			var isSuccess = false;
-			ISong song = null;
-			var error = string.Empty;
-
-			try 
-			{
-				if (id.ProcessorId == "DISCORD") return (isSuccess, error, song);
-
-				var request = Requests.FirstOrDefault(f => f.Id == id);
-				var ytUrl = "https://youtu.be/" + id.SourceId;
-				string title;
-				string uploader;
-
-				if (request == null)
-                {
-					var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
-					var video = await _ytClient.Videos.GetAsync(videoId.Value);
-
-					title = video.Title;
-					uploader = video.Author;
-				}
-                else
-                {
-					title = request.Name;
-					uploader = request.Uploader;
-                }
-
-				_enricher.AddMapping(uploader, id, title);
-				song = await _musicService.DownloadSongAsync(ytUrl);
-				isSuccess = true;
-			}
-			catch (RequestLimitExceededException ex)
-			{
-				error = "Youtube Rate-Limited (Error Code: 429)";
-				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
-			}
-			catch (Exception ex)
-            {
-				error = ex.Message;
-				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
-			}
-			
-			return (isSuccess, error, song);
-		}
-
-        private async Task<(bool IsSuccess, string Error, ISong song)> QueueFirstRequestedSong(Playlist playlist)
-        {
-            while (Requests.Count > 0)
-            {
-                var request = GetFirstSongRequest();
-                if (request != null)
-                {
-                    if (request.Song != null) return (true, string.Empty, request.Song);
-                    var fetchedSong = await FetchSongAsync(request.Id);
-
-                    if (fetchedSong.IsSuccess) return fetchedSong;
-                    if (fetchedSong.Error.Contains("Error Code: 429"))
-                    {
-                        _remainingSongs.Remove(request.Id);
-                        _rateLimited.Add(request.Id);
-                        RemoveSongRequest(request);
-                        continue;
-                    }
-
-                    playlist.Songs.Remove(request.Id);
-                    _remainingSongs.Remove(request.Id);
-                    RemoveSongRequest(request);
-
-                    await _musicService.Playlist.UpdateAsync(playlist);
-                }
-            }
-
-            return (false, null, null);
-        }
-
-		private async Task<(bool IsSuccess, string Error, ISong song)> QueueSongAsync()
-        {
-            Playlist playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
-            var request = await QueueFirstRequestedSong(playlist);
-            var rand = new Random();
-            var retry = 5;
-
-            while (!request.IsSuccess && string.IsNullOrEmpty(request.Error)) {
-				if (_remainingSongs.Count < 1)
-				{
-					if (!PlaylistAutoLoop) return (false, null, null);
-
-					playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
-
-                    if (playlist == null || playlist.Songs.Count == 0) return (false, null, null);
-					if (playlist.Songs.Count <= _rateLimited.Count) return (false, "Playlist:429", null);
-					
-					_playedSongs.Clear();
-                    _rateLimited.Clear();
-					_remainingSongs = new List<SongId>(playlist.Songs);
-
-                    foreach (SongId songId in _playedSongs) _remainingSongs.Remove(songId);
-                }
-
-				try
-                {
-                    var songId = _remainingSongs.Count < 2 ? _remainingSongs.First() : _remainingSongs[rand.Next(0, _remainingSongs.Count)];
-                    var song = await FetchSongAsync(songId);
-
-                    if (song.IsSuccess)
-                    {
-                        request = song;
-                        break;
-                    }
-					else if (song.Error.Contains("Response status code does not indicate success: 429"))
-					{
-                    	_remainingSongs.Remove(songId);
-						_rateLimited.Add(songId);
-						continue;
-					}
-
-                    playlist.Songs.Remove(songId);
-                    _remainingSongs.Remove(songId);
-
-                    await _musicService.Playlist.UpdateAsync(playlist);
-                }
-                catch (Exception e) {
-                    retry--;
-                    if (retry == 0) {
-                        _exception = e;
-                        _queueFailed = true;
-                        return (false, null, null);
-                    }
-				}
-			}
-
-			if (!_playedSongs.Contains(request.song.Id)) _playedSongs.Add(request.song.Id);
-			if (_remainingSongs.Contains(request.song.Id)) _remainingSongs.Remove(request.song.Id);
-
-			return request;
-		}
 
 		public async Task ConnectToVoiceAsync()
 		{
@@ -260,10 +89,12 @@ namespace Railgun.Music
 		{
 			Exception ex = null;
 
-			try {
+			try
+			{
 				Connected?.Invoke(this, new ConnectedEventArgs(VoiceChannel.GuildId));
 
-				_client.Disconnected += (audioEx) => {
+				_client.Disconnected += (audioEx) =>
+				{
 					_exception = audioEx;
 					CancelStream(true);
 
@@ -271,12 +102,15 @@ namespace Railgun.Music
 				};
 
 				using (_client)
-				using (var discordStream = _client.CreateOpusStream()) {
+				using (var discordStream = _client.CreateOpusStream())
+				{
 					Status = PlayerStatus.Connected;
 					var onRepeat = false;
 
-					while (!_streamCancelled.IsCancellationRequested) {
-						if (await IsAloneAsync() || LeaveAfterSong) {
+					while (!_streamCancelled.IsCancellationRequested)
+					{
+						if (await IsAloneAsync() || LeaveAfterSong)
+						{
 							_disconnectReason = DisconnectReason.Auto;
 							break;
 						}
@@ -284,33 +118,21 @@ namespace Railgun.Music
 
 						Status = PlayerStatus.Queuing;
 
-						if (onRepeat) CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
+						if (onRepeat)
+							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
 						else
-						{
-							var (IsSuccess, Error, song) = await QueueSongAsync();
-
-							if (IsSuccess)
-								CurrentSong = song;
-							else
-								if (Error == "Playlist:429")
-									throw new Exception("YouTube (429) block in effect. No music in the playlist can be played. Sorry. Please allow upto 24 hours for the block to clear.");
-								else
-									CurrentSong = null;
-						}
-
-						if (CurrentSong == null) {
-							_disconnectReason = DisconnectReason.Auto;
-							break;
-						}
+							CurrentSong = await MusicScheduler.RequestNextSongAsync();
 
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
-						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, (_rateLimited.Count > 0) && (!_nowRateLimited)));
-                        if (!_nowRateLimited && _rateLimited.Count > 0) _nowRateLimited = true;
+						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, MusicScheduler.IsRateLimited && !_nowRateLimited));
+						if (!_nowRateLimited && MusicScheduler.IsRateLimited) _nowRateLimited = true;
 
 						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
-						using (var opusStream = new OpusOggReadStream(databaseStream)) {
-							while (opusStream.HasNextPacket && !_skipSong && !_streamCancelled.IsCancellationRequested) {
+						using (var opusStream = new OpusOggReadStream(databaseStream))
+						{
+							while (opusStream.HasNextPacket && !_skipSong && !_streamCancelled.IsCancellationRequested)
+							{
 								var bytes = opusStream.RetrieveNextPacket();
 								await discordStream.WriteAsync(bytes, 0, bytes.Length, _streamCancelled.Token);
 							}
@@ -320,16 +142,15 @@ namespace Railgun.Music
 							await discordStream.FlushAsync(_streamCancelled.Token);
 						}
 
-                        if (RepeatSong > 0) {
+						if (RepeatSong > 0)
+						{
 							RepeatSong--;
 							onRepeat = true;
 						}
-						else {
-							RemoveSongRequest(CurrentSong);
+						else
 							onRepeat = false;
-						}
 
-						if (AutoSkipped && Requests.Count < 1) AutoSkipped = false;
+						if (AutoSkipped && !MusicScheduler.IsRequestsPopulated) AutoSkipped = false;
 
 						VoteSkipped.Clear();
 					}
@@ -337,14 +158,12 @@ namespace Railgun.Music
 					Status = PlayerStatus.Disconnecting;
 				}
 			} catch (Exception inEx) {
+				_disconnectReason = DisconnectReason.Exception;
 				Status = PlayerStatus.FailSafe;
 				ex = inEx;
 			} finally {
 				if (_audioDisconnected) {
 					ex = new Exception("AudioClient Unexpected Disconnect!", _exception);
-					_disconnectReason = DisconnectReason.Exception;
-				} else if (_queueFailed) {
-                    ex = new Exception("Music Auto-Selector Failed!", _exception);
 					_disconnectReason = DisconnectReason.Exception;
 				}
                 
