@@ -42,6 +42,16 @@ namespace Railgun.Commands.Music
 					.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), player.MusicScheduler.Requests.Count).AppendLine()
 					.AppendLine();
 
+				var currentTime = DateTime.Now - player.SongStartedAt;
+
+				output.AppendFormat("Now : {0} {1} Length : {2}/{3} {1} ID: {4}",
+									Format.Bold(player.CurrentSong.Metadata.Title),
+									SystemUtilities.GetSeparator,
+									Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
+												Format.Bold($"{player.CurrentSong.Metadata.Duration.Minutes}:{player.CurrentSong.Metadata.Duration.Seconds}"),
+												Format.Bold(player.CurrentSong.Id.ToString()))
+								.AppendLine();
+
 				while (player.MusicScheduler.Requests.Count > i)
 				{
 					var song = player.MusicScheduler.Requests[i];
@@ -49,17 +59,6 @@ namespace Railgun.Commands.Music
 					switch (i)
 					{
 						case 0:
-							var currentTime = DateTime.Now - player.SongStartedAt;
-
-							output.AppendFormat("Now : {0} {1} Length : {2}/{3} {1} ID: {4}",
-												Format.Bold(song.Name),
-												SystemUtilities.GetSeparator,
-												Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-												Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"),
-												Format.Bold(song.Id.ToString()))
-								.AppendLine();
-							break;
-						case 1:
 							output.AppendFormat("Next : {0} {1} Length : {2} {1} ID: {3}",
 												Format.Bold(song.Name),
 												SystemUtilities.GetSeparator,
