@@ -16,6 +16,8 @@ namespace Railgun.Music.Scheduler
     {
         private readonly MusicService _musicService;
         private readonly ObjectId _playlistId;
+        private readonly YoutubeClient _ytClient;
+        private readonly MetaDataEnricher _enricher;
         private readonly SemaphoreSlim _requestLock = new SemaphoreSlim(1);
         private readonly Random _random = new Random();
 
@@ -35,11 +37,13 @@ namespace Railgun.Music.Scheduler
 
         public bool IsRequestsPopulated => Requests.Any();
 
-        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop)
+        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher)
         {
             _musicService = musicService;
             _playlistId = playlistId;
             PlaylistAutoLoop = playlistAutoLoop;
+            _ytClient = ytClient;
+            _enricher = enricher;
         }
 
         public async Task<ISong> RequestNextSongAsync()
@@ -95,13 +99,13 @@ namespace Railgun.Music.Scheduler
 
             if (request.IsSuccess)
             {
-                _playlist[request.song.Id] = SongQueueStatus.Played;
+                AssignQueueStatus(request.song.Id, SongQueueStatus.Played);
                 return request;
             }
 
             if (request.Error is RequestLimitExceededException)
             {
-                _playlist[songId] = SongQueueStatus.RateLimited;
+                AssignQueueStatus(songId, SongQueueStatus.RateLimited);
                 return request;
             } 
 
@@ -125,7 +129,7 @@ namespace Railgun.Music.Scheduler
             if (request.Song != null)
             {
                 Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                _playlist[request.Id] = SongQueueStatus.Played;
+                AssignQueueStatus(request.Id, SongQueueStatus.Played);
                 return (true, null, request.Song);
             }
 
@@ -134,14 +138,14 @@ namespace Railgun.Music.Scheduler
             if (song.IsSuccess) 
             {
                 Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                _playlist[request.Id] = SongQueueStatus.Played;
+                AssignQueueStatus(request.Id, SongQueueStatus.Played);
                 return song;
             }
 
             if (song.Error is RequestLimitExceededException)
             {
                 Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                _playlist[request.Id] = SongQueueStatus.RateLimited;
+                AssignQueueStatus(request.Id, SongQueueStatus.RateLimited);
                 return song;
             }
 
@@ -154,6 +158,11 @@ namespace Railgun.Music.Scheduler
 
             await _musicService.Playlist.UpdateAsync(playlist);
             return song;
+        }
+
+        private void AssignQueueStatus(SongId id, SongQueueStatus status)
+        {
+            if (_playlist.ContainsKey(id)) _playlist[id] = status;
         }
 
         private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchSongAsync(SongId id)
@@ -169,8 +178,27 @@ namespace Railgun.Music.Scheduler
 
                 if (id.ProcessorId == "DISCORD") return (false, null, null);
 
-                if (!Requests.Any(x => x.Id == id))
-                    song = await _musicService.DownloadSongAsync("https://youtu.be/" + id.SourceId);
+                var request = Requests.FirstOrDefault(f => f.Id == id);
+				var ytUrl = "https://youtu.be/" + id.SourceId;
+				string title;
+				string uploader;
+
+				if (request == null)
+                {
+					var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
+					var video = await _ytClient.Videos.GetAsync(videoId.Value);
+
+					title = video.Title;
+					uploader = video.Author;
+				}
+                else
+                {
+					title = request.Name;
+					uploader = request.Uploader;
+                }
+
+				_enricher.AddMapping(uploader, id, title);
+				song = await _musicService.DownloadSongAsync(ytUrl);
                 
                 return (true, error, song);
             }
