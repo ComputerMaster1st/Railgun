@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -9,6 +10,7 @@ using Railgun.Core.Configuration;
 using Railgun.Inactivity;
 using Railgun.Music;
 using Railgun.Timers;
+using TreeDiagram;
 
 namespace Railgun.Events
 {

@@ -87,6 +87,13 @@ namespace Railgun.Music
 				throw new TimeoutException("Unable to establish a connection to voice server! Try changing regions if this problem persists.");
 		}
 
+		private async Task DisconnectFromVoiceAsync()
+		{
+			Status = PlayerStatus.Disconnecting;
+			await _client.StopAsync();
+			await Task.Delay(1000);
+        }
+
 		private async Task StartAsync()
 		{
 			Exception ex = null;
@@ -122,9 +129,10 @@ namespace Railgun.Music
 
 						if (onRepeat)
 							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
-						else {
+						else
+						{
 							try
-                            {
+							{
 								CurrentSong = await MusicScheduler.RequestNextSongAsync();
 							}
 							catch (RequestLimitExceededException) { continue; }
@@ -134,7 +142,7 @@ namespace Railgun.Music
 								continue;
 							}
 							catch (NullReferenceException inEx)
-                            {
+							{
 								ex = inEx;
 								_disconnectReason = DisconnectReason.Auto;
 								break;
@@ -146,38 +154,41 @@ namespace Railgun.Music
 						Playing?.Invoke(this, new PlayingEventArgs(VoiceChannel.GuildId, CurrentSong, MusicScheduler.IsRateLimited && !_nowRateLimited));
 						if (!_nowRateLimited && MusicScheduler.IsRateLimited) _nowRateLimited = true;
 
-						using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
-						using (var opusStream = new OpusOggReadStream(databaseStream))
+						try
 						{
-							while (opusStream.HasNextPacket && !_skipSong && !_streamCancelled.IsCancellationRequested)
+							using (var databaseStream = await CurrentSong.GetMusicStreamAsync())
+							using (var opusStream = new OpusOggReadStream(databaseStream))
 							{
-								var bytes = opusStream.RetrieveNextPacket();
-								await discordStream.WriteAsync(bytes, 0, bytes.Length, _streamCancelled.Token);
+								while (opusStream.HasNextPacket && !_skipSong && !_streamCancelled.IsCancellationRequested)
+								{
+									var bytes = opusStream.RetrieveNextPacket();
+									await discordStream.WriteAsync(bytes, 0, bytes.Length, _streamCancelled.Token);
+								}
+
+								Status = PlayerStatus.Finishing;
+
+								await discordStream.FlushAsync(_streamCancelled.Token);
 							}
 
-							Status = PlayerStatus.Finishing;
+							if (RepeatSong > 0)
+							{
+								RepeatSong--;
+								onRepeat = true;
+							}
+							else
+								onRepeat = false;
 
-							await discordStream.FlushAsync(_streamCancelled.Token);
+							if (AutoSkipped && !MusicScheduler.IsRequestsPopulated) AutoSkipped = false;
+
+							VoteSkipped.Clear();
 						}
-
-						if (RepeatSong > 0)
-						{
-							RepeatSong--;
-							onRepeat = true;
-						}
-						else
-							onRepeat = false;
-
-						if (AutoSkipped && !MusicScheduler.IsRequestsPopulated) AutoSkipped = false;
-
-						VoteSkipped.Clear();
+						catch (OperationCanceledException) { await DisconnectFromVoiceAsync(); }
 					}
 
-					Status = PlayerStatus.Disconnecting;
-					await _client.StopAsync();
-					await Task.Delay(1000);
+					await DisconnectFromVoiceAsync();
 				}
-			} catch (Exception inEx) {
+            } catch (OperationCanceledException) {
+            } catch (Exception inEx) {
 				_disconnectReason = DisconnectReason.Exception;
 				Status = PlayerStatus.FailSafe;
 				ex = inEx;
