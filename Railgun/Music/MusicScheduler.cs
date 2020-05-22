@@ -56,10 +56,15 @@ namespace Railgun.Music.Scheduler
 
                 var song = await FetchFromQueueAsync(playlist);
 
-                if (!song.IsSuccess && song.Error == null)
+                if (!song.IsSuccess)
                     song = await FetchFromPlaylistAsync(playlist);
 
-                return song.song ?? throw new NullReferenceException("No song to play!");
+                if (!song.IsSuccess && song.Error == null)
+                    throw new NullReferenceException("No song to play!");
+                if (!song.IsSuccess && song.Error != null)
+                    throw song.Error;
+                
+                return song.song;
             }
             finally
             {
@@ -71,79 +76,84 @@ namespace Railgun.Music.Scheduler
         {
             (bool IsSuccess, Exception Error, ISong song) request = (false, null, null);
 
-            while (!request.IsSuccess)
+            // Check if all songs are either played or ratelimited. Convert played to queued.
+            if (!_playlist.Any(x => x.Value == SongQueueStatus.Queued))
             {
-                // Check if all songs are either played or ratelimited. Convert played to queued.
-                if (!_playlist.Any(x => x.Value == SongQueueStatus.Queued))
-                {
-                    if (!PlaylistAutoLoop) return (false, null, null);
+                if (!PlaylistAutoLoop) return request;
 
-                    // All songs ratelimited, return null + error
-                    if (_playlist.All(x => x.Value == SongQueueStatus.RateLimited)) throw new MusicSchedulerException("Server playlist has been rate-limited (429) by YouTube.");
+                // All songs ratelimited, return null + error
+                if (_playlist.All(x => x.Value == SongQueueStatus.RateLimited)) 
+                    throw new MusicSchedulerException("Server playlist has been rate-limited (429) by YouTube.");
 
-                    foreach (var loopSongId in _playlist.Where(x => x.Value == SongQueueStatus.Played).Select(x => x.Key))
-                        _playlist[loopSongId] = SongQueueStatus.Queued;
-                }
-
-                var songIds = _playlist.Where(x => x.Value == SongQueueStatus.Queued).Select(x => x.Key).ToList();
-                var songId = songIds[_random.Next(0, songIds.Count())];
-                var song = await FetchSongAsync(songId);
-
-                if (song.IsSuccess)
-                {
-                    request = song;
-                    break;
-                }
-                else if (song.Error is RequestLimitExceededException)
-                {
-                    _playlist[songId] = SongQueueStatus.RateLimited;
-                    continue;
-                }
-
-                playlist.Songs.Remove(songId);
-                _playlist.Remove(songId);
-
-                await _musicService.Playlist.UpdateAsync(playlist);
+                foreach (var loopSongId in _playlist.Where(x => x.Value == SongQueueStatus.Played).Select(x => x.Key))
+                    _playlist[loopSongId] = SongQueueStatus.Queued;
             }
 
-            _playlist[request.song.Id] = SongQueueStatus.Played;
+            var songIds = _playlist.Where(x => x.Value == SongQueueStatus.Queued).Select(x => x.Key).ToList();
+            var songId = songIds[_random.Next(0, songIds.Count())];
+            request = await FetchSongAsync(songId);
+
+            if (request.IsSuccess)
+            {
+                _playlist[request.song.Id] = SongQueueStatus.Played;
+                return request;
+            }
+
+            if (request.Error is RequestLimitExceededException)
+            {
+                _playlist[songId] = SongQueueStatus.RateLimited;
+                return request;
+            } 
+
+            playlist.Songs.Remove(songId);
+            _playlist.Remove(songId);
+                    
+            var ex = new SongQueueException($"A song failed to queue! - {songId}", request.Error);
+            request.Error = ex;
+
+            await _musicService.Playlist.UpdateAsync(playlist);
             return request;
         }
 
         private async Task<(bool IsSuccess, Exception Error, ISong song)> FetchFromQueueAsync(Playlist playlist)
-        {
-            while (Requests.Count > 0)
+        {   
+            (bool IsSuccess, Exception Error, ISong song) song = (false, null, null);
+            var request = Requests.FirstOrDefault();
+
+            if (request == null) return song;
+
+            if (request.Song != null)
             {
-                var request = Requests.FirstOrDefault();
-                if (request != null)
-                {
-                    if (request.Song != null)
-                    {
-                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                        return (true, null, request.Song);
-                    }
-                    var fetchedSong = await FetchSongAsync(request.Id);
-
-                    if (fetchedSong.IsSuccess) {
-                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                        return fetchedSong;
-                    }
-                    if (fetchedSong.Error is RequestLimitExceededException)
-                    {
-                        _playlist[request.Id] = SongQueueStatus.RateLimited;
-                        Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                        continue;
-                    }
-
-                    playlist.Songs.Remove(request.Id);
-                    _playlist.Remove(request.Id);
-                    Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-
-                    await _musicService.Playlist.UpdateAsync(playlist);
-                }
+                Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                _playlist[request.Id] = SongQueueStatus.Played;
+                return (true, null, request.Song);
             }
 
-            return (false, null, null);
+            song = await FetchSongAsync(request.Id);
+
+            if (song.IsSuccess) 
+            {
+                Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                _playlist[request.Id] = SongQueueStatus.Played;
+                return song;
+            }
+
+            if (song.Error is RequestLimitExceededException)
+            {
+                Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                _playlist[request.Id] = SongQueueStatus.RateLimited;
+                return song;
+            }
+
+            playlist.Songs.Remove(request.Id);
+            _playlist.Remove(request.Id);
+            Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
+                    
+            var ex = new SongQueueException($"A song failed to queue! - {request.Id}", song.Error);
+            song.Error = ex;
+
+            await _musicService.Playlist.UpdateAsync(playlist);
+            return song;
         }
 
         private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchSongAsync(SongId id)
@@ -167,7 +177,7 @@ namespace Railgun.Music.Scheduler
             catch (RequestLimitExceededException ex)
             {
                 error = ex;
-                SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "FetchSongAsync Failed to get song!", ex));
+                SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "Youtube Rate-Limited (429)!", ex));
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
 using Railgun.Music.Scheduler;
 using YoutubeExplode;
+using YoutubeExplode.Exceptions;
 
 namespace Railgun.Music
 {
@@ -38,6 +39,7 @@ namespace Railgun.Music
 
 		public event EventHandler<ConnectedEventArgs> Connected;
 		public event EventHandler<PlayingEventArgs> Playing;
+		public event EventHandler<QueueFailEventArgs> QueueFailed;
 		public event EventHandler<FinishedEventArgs> Finished;
 
 		public int Latency {
@@ -120,10 +122,16 @@ namespace Railgun.Music
 
 						if (onRepeat)
 							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
-						else
+						else {
 							try
                             {
 								CurrentSong = await MusicScheduler.RequestNextSongAsync();
+							}
+							catch (RequestLimitExceededException) { continue; }
+							catch (SongQueueException inEx)
+							{
+								QueueFailed?.Invoke(this, new QueueFailEventArgs(VoiceChannel.GuildId, inEx));
+								continue;
 							}
 							catch (NullReferenceException inEx)
                             {
@@ -131,7 +139,7 @@ namespace Railgun.Music
 								_disconnectReason = DisconnectReason.Auto;
 								break;
 							}
-							
+						}
 
 						Status = PlayerStatus.Playing;
 						SongStartedAt = DateTime.Now;
