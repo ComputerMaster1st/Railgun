@@ -89,7 +89,8 @@ namespace Railgun.Music.Scheduler
                 if (_playlist.All(x => x.Value == SongQueueStatus.RateLimited)) 
                     throw new MusicSchedulerException("Server playlist has been rate-limited (429) by YouTube.");
 
-                foreach (var loopSongId in _playlist.Where(x => x.Value == SongQueueStatus.Played).Select(x => x.Key))
+                var playedSongs = _playlist.Where(x => x.Value == SongQueueStatus.Played).Select(x => x.Key);
+                foreach (var loopSongId in playedSongs)
                     _playlist[loopSongId] = SongQueueStatus.Queued;
             }
 
