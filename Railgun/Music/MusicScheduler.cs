@@ -63,12 +63,12 @@ namespace Railgun.Music.Scheduler
                 if (!song.IsSuccess)
                     song = await FetchFromPlaylistAsync(playlist);
 
-                if (!song.IsSuccess && song.Error == null)
+                if (!song.IsSuccess && song.Error == null && song.Song == null)
                     throw new NullReferenceException("No song to play!");
                 if (!song.IsSuccess && song.Error != null)
                     throw song.Error;
                 
-                return song.song;
+                return song.Song;
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace Railgun.Music.Scheduler
             }
         }
 
-        private async Task<(bool IsSuccess, Exception Error, ISong song)> FetchFromPlaylistAsync(Playlist playlist)
+        private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchFromPlaylistAsync(Playlist playlist)
         {
             (bool IsSuccess, Exception Error, ISong song) request = (false, null, null);
 
@@ -120,9 +120,9 @@ namespace Railgun.Music.Scheduler
             return request;
         }
 
-        private async Task<(bool IsSuccess, Exception Error, ISong song)> FetchFromQueueAsync(Playlist playlist)
+        private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchFromQueueAsync(Playlist playlist)
         {   
-            (bool IsSuccess, Exception Error, ISong song) song = (false, null, null);
+            (bool IsSuccess, Exception Error, ISong Song) song = (false, null, null);
             var request = Requests.FirstOrDefault();
 
             if (request == null) return song;

@@ -174,6 +174,8 @@ namespace Railgun.Music
 					}
 
 					Status = PlayerStatus.Disconnecting;
+					await _client.StopAsync();
+					await Task.Delay(1000);
 				}
 			} catch (Exception inEx) {
 				_disconnectReason = DisconnectReason.Exception;
