@@ -64,7 +64,7 @@ namespace Railgun.Music.Scheduler
                     song = await FetchFromPlaylistAsync(playlist);
 
                 if (!song.IsSuccess && song.Error == null && song.Song == null)
-                    throw new NullReferenceException("No song to play! If you believe there is an issue, please report to our developers with the SongID.");
+                    throw new NullReferenceException("No song to play! If you believe there is an issue, please report to our developers.");
                 if (!song.IsSuccess && song.Error != null)
                     throw song.Error;
                 
