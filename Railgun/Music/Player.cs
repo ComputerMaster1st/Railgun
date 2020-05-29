@@ -7,6 +7,7 @@ using AudioChord;
 using Discord;
 using Discord.Audio;
 using MongoDB.Bson;
+using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
 using Railgun.Music.Scheduler;
@@ -182,13 +183,17 @@ namespace Railgun.Music
 
 							VoteSkipped.Clear();
 						}
-						catch (OperationCanceledException) { await DisconnectFromVoiceAsync(); }
+						catch (OperationCanceledException inEx) {
+							SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music Player", "Player Inner OperationCancelledException!", inEx));
+							await DisconnectFromVoiceAsync(); 
+						}
 					}
 
 					await DisconnectFromVoiceAsync();
 				}
-            } catch (OperationCanceledException) {
-            } catch (Exception inEx) {
+            } catch (OperationCanceledException inEx) {
+				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music Player", "Player Outer OperationCancelledException!", inEx));
+			} catch (Exception inEx) {
 				_disconnectReason = DisconnectReason.Exception;
 				Status = PlayerStatus.FailSafe;
 				ex = inEx;
