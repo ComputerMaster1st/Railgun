@@ -67,7 +67,10 @@ namespace Railgun.Music
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
-			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
+			if (data.SilentNowPlaying && autoJoin)
+				await tc.SendMessageAsync($"Music Auto-Join triggered by {Format.Bold(username)}. Standby...");
+			else
+				await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
@@ -95,7 +98,7 @@ namespace Railgun.Music
                 .LoadEvent(new ConnectedEvent(_config, _client))
                 .LoadEvent(new PlayingEvent(_config, _client, _services))
 				.LoadEvent(new QueueFailEvent(this, _botLog))
-                .LoadEvent(new FinishedEvent(this, _botLog))
+                .LoadEvent(new FinishedEvent(this, _botLog, _services))
 			);
 
 			if (preRequestedSong != null) {

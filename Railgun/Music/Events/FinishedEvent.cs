@@ -1,11 +1,14 @@
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
-using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
+using TreeDiagram;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Music.Events
 {
@@ -14,11 +17,13 @@ namespace Railgun.Music.Events
         private readonly PlayerController _controller;
         private readonly BotLog _botLog;
         private PlayerContainer _container;
+        private readonly IServiceProvider _services;
 
-        public FinishedEvent(PlayerController controller, BotLog botLog)
+        public FinishedEvent(PlayerController controller, BotLog botLog, IServiceProvider services)
         {
             _controller = controller;
             _botLog = botLog;
+            _services = services;
         }
 
         public void Load(PlayerContainer container) 
@@ -33,21 +38,30 @@ namespace Railgun.Music.Events
 
 			try 
             {
-				var output = new StringBuilder();
+                ServerMusic data;
 
-				if (args.Exception != null) 
+                using (var scope = _services.CreateScope())
                 {
-					SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
+                    var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                    data = db.ServerMusics.GetData(tc.GuildId);
+                }
 
-					var logOutput = new StringBuilder()
-						.AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
-						.AppendFormat("---- Error : {0}", args.Exception.ToString());
+                if (data != null && data.SilentNowPlaying && args.Exception == null) return;
 
-					await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, logOutput.ToString());
+                var output = new StringBuilder();
+                if (args.Exception != null)
+                {
+                    SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
 
-					output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.")
+                    var logOutput = new StringBuilder()
+                        .AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
+                        .AppendFormat("---- Error : {0}", args.Exception.ToString());
+
+                    await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, logOutput.ToString());
+
+                    output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.")
                         .AppendFormat("{0} {1}", Format.Bold("ERROR:"), args.Exception.Message).AppendLine();
-				}
+                }
 
 				var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";
 
