@@ -1,5 +1,6 @@
 using Discord;
 using Railgun.Music;
+using System;
 
 namespace Railgun.Core.Containers
 {
@@ -11,6 +12,7 @@ namespace Railgun.Core.Containers
         public ITextChannel TextChannel { get; }
         public Player Player { get; private set; }
         public IUserMessage LogEntry { get; set; }
+        public DateTime CreatedAt { get; } = DateTime.Now;
 
         public PlayerContainer(ITextChannel tc) {
             GuildId = tc.GuildId;

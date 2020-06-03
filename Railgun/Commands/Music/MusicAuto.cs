@@ -113,7 +113,7 @@ namespace Railgun.Commands.Music
 				data.PlaylistAutoLoop = !data.PlaylistAutoLoop;
 
 				var container = _playerController.GetPlayer(Context.Guild.Id);
-				if (container != null) container.Player.PlaylistAutoLoop = data.PlaylistAutoLoop;
+				if (container != null) container.Player.MusicScheduler.PlaylistAutoLoop = data.PlaylistAutoLoop;
 
 				return ReplyAsync($"Music Playlist Auto-Loop is now {Format.Bold(data.PlaylistAutoLoop ? "Enabled" : "Disabled")}.");
 			}

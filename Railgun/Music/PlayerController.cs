@@ -11,6 +11,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Containers;
 using Railgun.Core.Enums;
 using Railgun.Music.Events;
+using Railgun.Music.Scheduler;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 using YoutubeExplode;
@@ -66,12 +67,15 @@ namespace Railgun.Music
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
-			await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
+			if (data.SilentNowPlaying && autoJoin)
+				await tc.SendMessageAsync($"Music Auto-Join triggered by {Format.Bold(username)}. Standby...");
+			else
+				await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc, _enricher, _ytClient) { PlaylistAutoLoop = data.PlaylistAutoLoop };
+            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop, _ytClient, _enricher));
 
 			try
 			{
@@ -93,19 +97,19 @@ namespace Railgun.Music
             container.AddEventLoader(new PlayerEventLoader(container)
                 .LoadEvent(new ConnectedEvent(_config, _client))
                 .LoadEvent(new PlayingEvent(_config, _client, _services))
-                .LoadEvent(new TimeoutEvent(_botLog))
-                .LoadEvent(new FinishedEvent(this, _botLog))
+				.LoadEvent(new QueueFailEvent(this, _botLog))
+                .LoadEvent(new FinishedEvent(this, _botLog, _services))
 			);
 
 			if (preRequestedSong != null) {
-				player.AddSongRequest(preRequestedSong);
+				await player.MusicScheduler.AddSongRequestAsync(preRequestedSong);
 				player.AutoSkipped = true;
 			}
 
 			await PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, container);
 
 			SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Music", $"{(autoJoin ? "Auto-" : "")}Connecting..."));
-			player.StartPlayer(playlist.Id);
+			player.StartPlayer();
 		}
 
 		public PlayerContainer GetPlayer(ulong playerId)

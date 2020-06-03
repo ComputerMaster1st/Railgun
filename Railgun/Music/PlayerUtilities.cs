@@ -27,7 +27,7 @@ namespace Railgun.Music
 			var output = new StringBuilder()
 				.AppendFormat("Music Player {0} <{1} <{2}>>", SystemUtilities.GetSeparator, container.TextChannel.Guild.Name,
 					container.TextChannel.GuildId).AppendLine()
-				.AppendFormat("---- Created At      : {0}", container.Player.CreatedAt).AppendLine()
+				.AppendFormat("---- Created At      : {0}", container.CreatedAt).AppendLine()
 				.AppendFormat("---- Latency         : {0}ms", container.Player.Latency).AppendLine()
 				.AppendFormat("---- Status          : {0}", container.Player.Status).AppendLine()
 				.AppendFormat("---- Song Started At : {0}", songStarted).AppendLine()

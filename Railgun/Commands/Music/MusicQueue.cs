@@ -34,32 +34,31 @@ namespace Railgun.Commands.Music
 
 				var player = playerContainer.Player;
 
-				if (!player.AutoSkipped && player.Requests.Count < 1)
+				if (!player.AutoSkipped && !player.MusicScheduler.IsRequestsPopulated)
 					return ReplyAsync("There are currently no music requests in the queue.");
 
 				var i = 0;
 				var output = new StringBuilder()
-					.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), player.Requests.Count).AppendLine()
+					.AppendFormat(Format.Bold("Queued Music Requests ({0}) :"), player.MusicScheduler.Requests.Count).AppendLine()
 					.AppendLine();
 
-				while (player.Requests.Count > i)
+				var currentTime = DateTime.Now - player.SongStartedAt;
+
+				output.AppendFormat("Now : {0} {1} Length : {2}/{3} {1} ID: {4}",
+									Format.Bold(player.CurrentSong.Metadata.Title),
+									SystemUtilities.GetSeparator,
+									Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
+												Format.Bold($"{player.CurrentSong.Metadata.Duration.Minutes}:{player.CurrentSong.Metadata.Duration.Seconds}"),
+												Format.Bold(player.CurrentSong.Id.ToString()))
+								.AppendLine();
+
+				while (player.MusicScheduler.Requests.Count > i)
 				{
-					var song = player.Requests[i];
+					var song = player.MusicScheduler.Requests[i];
 
 					switch (i)
 					{
 						case 0:
-							var currentTime = DateTime.Now - player.SongStartedAt;
-
-							output.AppendFormat("Now : {0} {1} Length : {2}/{3} {1} ID: {4}",
-												Format.Bold(song.Name),
-												SystemUtilities.GetSeparator,
-												Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
-												Format.Bold($"{song.Length.Minutes}:{song.Length.Seconds}"),
-												Format.Bold(song.Id.ToString()))
-								.AppendLine();
-							break;
-						case 1:
 							output.AppendFormat("Next : {0} {1} Length : {2} {1} ID: {3}",
 												Format.Bold(song.Name),
 												SystemUtilities.GetSeparator,
@@ -81,27 +80,34 @@ namespace Railgun.Commands.Music
 				}
 
 				if (output.Length > 1950)
-					return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.Requests.Count})");
+					return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.MusicScheduler.Requests.Count})");
 				return ReplyAsync(output.ToString());
 			}
 
 			[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-			public Task RemoveAsync(string songIdRaw)
+			public async Task RemoveAsync(string songIdRaw)
 			{
 				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
 
 				if (playerContainer == null)
-                    return ReplyAsync("There is no music player active at this time.");
+				{
+					await ReplyAsync("There is no music player active at this time.");
+					return;
+				}
 
 				var songId = SongId.Parse(songIdRaw);
 				var player = playerContainer.Player;
-				var request = player.Requests.FirstOrDefault(f => f.Id.ToString() == songId.ToString());
+				var request = player.MusicScheduler.Requests.FirstOrDefault(f => f.Id.ToString() == songId.ToString());
 
 				if (request == null)
-					return ReplyAsync("Specified song is not in the queue.");
+				{
+					await ReplyAsync("Specified song is not in the queue.");
+					return;
+				}
 
-				player.RemoveSongRequest(request);
-				return ReplyAsync("Song removed from queue!");
+				await player.MusicScheduler.RemoveSongRequestAsync(request);
+				await ReplyAsync("Song removed from queue!");
+				return;
             }
 		}
     }

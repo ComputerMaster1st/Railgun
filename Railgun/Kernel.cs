@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -78,6 +79,10 @@ namespace Railgun
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", $"Loaded {_commandService.GetAllCommands().Count()} Commands!"));
 
+#if DEBUG
+            DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+#endif
+
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
             var enricher = new MetaDataEnricher();
@@ -85,7 +90,12 @@ namespace Railgun
                 Hostname = mongo.Hostname,
                 Username = mongo.Username,
                 Password = mongo.Password,
+
+#if DEBUG
+                SongCacheFactory = () => new FileSystemCache(dir.ToString()),
+#else
                 SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
+#endif
                 Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor(_youtubehttpClient) },
                 Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
             };
