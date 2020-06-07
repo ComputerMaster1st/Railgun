@@ -67,9 +67,7 @@ namespace Railgun.Music
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}
 
-			if (data.SilentNowPlaying && autoJoin)
-				await tc.SendMessageAsync($"Music Auto-Join triggered by {Format.Bold(username)}. Standby...");
-			else
+			if (!data.SilentNowPlaying)
 				await tc.SendMessageAsync($"{(autoJoin ? "Music Auto-Join triggered by" : "Joining now")} {Format.Bold(username)}. Standby...");
 
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
