@@ -41,8 +41,6 @@ namespace Railgun.Music
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 playlist = await SystemUtilities.GetPlaylistAsync(_musicService, db.ServerMusics.GetOrCreateData(tc.GuildId));
-
-                await db.SaveChangesAsync();
             }
 
             return playlist;
@@ -105,7 +103,7 @@ namespace Railgun.Music
                     continue;
                 }
 
-                playlist.Songs.Add(songId);
+                if (!playlist.Songs.Contains(songId)) playlist.Songs.Add(songId);
                 playlistModified = true;
                 needEncoding++;
             }
