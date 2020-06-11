@@ -19,6 +19,7 @@ namespace TreeDiagram.Models.Server
 		public bool SilentSongProcessing { get; set; }
 		public ulong NowPlayingChannel { get; set; }
 		public virtual List<UlongRoleId> AllowedRoles { get; private set; } = new List<UlongRoleId>();
+		public bool WhitelistMode { get; set; }
 
 		public ServerMusic(ulong id) : base(id) { }
 	}

@@ -48,6 +48,12 @@ namespace Railgun.Commands.Music
 			{
 				var nowInstalled = false;
 
+				if (data.WhitelistMode && !playlist.Songs.Contains(song.Id))
+                {
+                    await response.Channel.SendMessageAsync($"{song.Name} from {song.Uploader} needs to be approved before it can play.");
+					return;
+                }
+
 				if (!playlist.Songs.Contains(song.Id) && !_playOneTimeOnly) {
 					playlist.Songs.Add(song.Id);
 					await _musicService.Playlist.UpdateAsync(playlist);

@@ -64,6 +64,14 @@ namespace Railgun.Commands.Music
 			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
 		}
 
+		[Command("whitelist")]
+		public Task WhitelistAsync()
+        {
+			var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+			data.WhitelistMode = !data.WhitelistMode;
+			return ReplyAsync($"Music Whitelist Mode is now {Format.Bold(data.WhitelistMode ? "Enabled" : "Disabled")}.");
+        }
+
 		[Command("show")]
 		public async Task ShowAsync()
 		{
