@@ -50,7 +50,8 @@ namespace Railgun.Commands.Music
 
 				if (data.WhitelistMode && !playlist.Songs.Contains(song.Id))
                 {
-                    await response.Channel.SendMessageAsync($"{song.Name} from {song.Uploader} needs to be approved before it can play.");
+                    await response.Channel.SendMessageAsync($"{Format.Bold(song.Name)} from {Format.Bold(song.Uploader)} needs to be approved before it can play.");
+					await response.DeleteAsync();
 					return;
                 }
 
@@ -197,7 +198,6 @@ namespace Railgun.Commands.Music
 						await response.ModifyAsync(x => x.Content = "Unable to queue song! Auto-Download is disabled!");
 						return;
 					}
-					if (!_playOneTimeOnly) playlist.Songs.Add(song.Item2.Id);
 
 					await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
 					return;
