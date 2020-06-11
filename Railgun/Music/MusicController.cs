@@ -103,7 +103,7 @@ namespace Railgun.Music
                     continue;
                 }
 
-                playlist.Songs.Add(songId);
+                if (!playlist.Songs.Contains(songId)) playlist.Songs.Add(songId);
                 playlistModified = true;
                 needEncoding++;
             }
