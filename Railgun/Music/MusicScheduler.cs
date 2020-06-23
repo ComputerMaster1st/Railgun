@@ -106,7 +106,7 @@ namespace Railgun.Music.Scheduler
 
             if (request.IsSuccess)
             {
-                AssignQueueStatus(request.song.Id, SongQueueStatus.Played);
+                AssignQueueStatus(request.song.Metadata.Id, SongQueueStatus.Played);
                 return request;
             }
 
@@ -174,8 +174,8 @@ namespace Railgun.Music.Scheduler
 
         private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchSongAsync(SongId id)
         {
-            (bool Success, ISong Song) result = await _musicService.TryGetSongAsync(id);
-            if (result.Success) return (result.Success, null, result.Song);
+            ISong result = await _musicService.GetSongAsync(id);
+            if (result != null) return (true, null, result);
 
             Exception error = null;
 
@@ -256,7 +256,7 @@ namespace Railgun.Music.Scheduler
         {
             await _requestLock.WaitAsync();
 
-            Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
+            Requests.RemoveAll(x => x.Id.ToString() == song.Metadata.Id.ToString());
 
             _requestLock.Release();
         }

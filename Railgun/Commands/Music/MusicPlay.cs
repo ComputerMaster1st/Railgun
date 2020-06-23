@@ -155,10 +155,10 @@ namespace Railgun.Commands.Music
 
 			private async Task AddByIdAsync(string input, PlayerContainer playerContainer, Playlist playlist, ServerMusic data, IUserMessage response)
 			{
-				var song = await _musicService.TryGetSongAsync(SongId.Parse(input));
+				var song = await _musicService.GetSongAsync(SongId.Parse(input));
 
-				if (song.Item1) {
-					await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
+				if (song != null) {
+					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);
 					return;
 				} else if (!input.Contains("YOUTUBE#")) {
 					await response.ModifyAsync(x => x.Content = "Specified song does not exist.");
@@ -184,13 +184,13 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				var song = await _musicService.TryGetSongAsync(new SongId("YOUTUBE", videoId));
+				var song = await _musicService.GetSongAsync(new SongId("YOUTUBE", videoId));
 
-				if (song.Item1)
+				if (song != null)
 				{
-					if (playlist.Songs.Contains(song.Item2.Id))
+					if (playlist.Songs.Contains(song.Metadata.Id))
 					{
-						await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
+						await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);
 						return;
 					}
 					if (!data.AutoDownload)
@@ -199,7 +199,7 @@ namespace Railgun.Commands.Music
 						return;
 					}
 
-					await QueueSongAsync(playerContainer, playlist, new SongRequest(song.Item2), data, response);
+					await QueueSongAsync(playerContainer, playlist, new SongRequest(song), data, response);
 					return;
 				}
 

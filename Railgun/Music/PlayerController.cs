@@ -62,7 +62,7 @@ namespace Railgun.Music
 
 				await tc.SendMessageAsync("As this server has no music yet, I've decided to gather some random songs from my repository. One moment please...");
 
-                playlist.Songs.AddRange(_musicService.GetRandomSongs().Where(id => !playlist.Songs.Contains(id)).Select(id => id));
+                playlist.Songs.AddRange((await _musicService.GetRandomSongs()).Where(id => !playlist.Songs.Contains(id)).Select(id => id));
 
 				await _musicService.Playlist.UpdateAsync(playlist);
 			}

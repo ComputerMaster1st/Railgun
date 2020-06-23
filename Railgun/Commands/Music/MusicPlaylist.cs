@@ -53,18 +53,18 @@ namespace Railgun.Commands.Music
                     .AppendLine();
 
                 foreach (var songId in playlist.Songs) {
-                    var song = await _musicService.TryGetSongAsync(songId);
+                    var song = await _musicService.GetSongAsync(songId);
 
-                    if (!song.Item1) {
+                    if (song == null) {
                         output.AppendFormat("--       Id => {0} (ENCODING REQUIRED)", songId.ToString()).AppendLine();
                         continue;
                     }
 
-                    output.AppendFormat("--       Id => {0}", song.Item2.Id.ToString()).AppendLine()
-                        .AppendFormat("--     Name => {0}", song.Item2.Metadata.Title).AppendLine()
-                        .AppendFormat("--   Length => {0}", song.Item2.Metadata.Duration).AppendLine()
-                        .AppendFormat("--      Url => {0}", song.Item2.Metadata.Url).AppendLine()
-                        .AppendFormat("-- Uploader => {0}", song.Item2.Metadata.Uploader).AppendLine()
+                    output.AppendFormat("--       Id => {0}", song.Metadata.Id.ToString()).AppendLine()
+                        .AppendFormat("--     Name => {0}", song.Metadata.Title).AppendLine()
+                        .AppendFormat("--   Length => {0}", song.Metadata.Duration).AppendLine()
+                        .AppendFormat("--      Url => {0}", song.Metadata.Source).AppendLine()
+                        .AppendFormat("-- Uploader => {0}", song.Metadata.Uploader).AppendLine()
                         .AppendLine();
                 }
 

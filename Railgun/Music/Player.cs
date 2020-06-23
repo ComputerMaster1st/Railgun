@@ -129,7 +129,7 @@ namespace Railgun.Music
 						Status = PlayerStatus.Queuing;
 
 						if (onRepeat)
-							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Id);
+							CurrentSong = await _musicService.GetSongAsync(CurrentSong.Metadata.Id);
 						else
 						{
 							try

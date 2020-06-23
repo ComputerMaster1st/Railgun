@@ -49,7 +49,7 @@ namespace Railgun.Commands.Music
 									SystemUtilities.GetSeparator,
 									Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
 												Format.Bold($"{player.CurrentSong.Metadata.Duration.Minutes}:{player.CurrentSong.Metadata.Duration.Seconds}"),
-												Format.Bold(player.CurrentSong.Id.ToString()))
+												Format.Bold(player.CurrentSong.Metadata.Id.ToString()))
 								.AppendLine();
 
 				while (player.MusicScheduler.Requests.Count > i)

@@ -18,7 +18,7 @@ namespace Railgun.Music
 			var songStarted = "N/A";
 
 			if (song != null) {
-				songId = song.Id.ToString();
+				songId = song.Metadata.Id.ToString();
 				songName = song.Metadata.Title;
 				songLength = song.Metadata.Duration.ToString();
 				songStarted = container.Player.SongStartedAt.ToString(CultureInfo.CurrentCulture);

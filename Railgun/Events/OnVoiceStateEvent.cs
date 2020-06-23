@@ -54,9 +54,9 @@ namespace Railgun.Events
 
             if (vc.Id == data.AutoVoiceChannel && tc != null)
             {
-                (bool Success, ISong Song) song = (false, null);
-                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.TryGetSongAsync(SongId.Parse(data.AutoPlaySong));
-                await _controller.CreatePlayerAsync(user, vc, tc, true, song.Success ? new SongRequest(song.Song) : null);
+                ISong song = null; 
+                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
+                await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
             }
         }
     }

@@ -54,17 +54,17 @@ namespace Railgun.Commands.Music
 					else if (tempId != null) id = $"YOUTUBE#{tempId.Value}";
 					else continue;
 
-					var song = await _musicService.TryGetSongAsync(SongId.Parse(id));
+					var song = await _musicService.GetSongAsync(SongId.Parse(id));
 
-					if (!song.Item1) {
+					if (song == null) {
 						output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine();
 						continue;
-					} else if (!playlist.Songs.Contains(song.Item2.Id)) {
+					} else if (!playlist.Songs.Contains(song.Metadata.Id)) {
 						output.AppendFormat("{0} - Unknown Music Id Given!", id).AppendLine();
 						continue;
 					}
 
-					playlist.Songs.Remove(song.Item2.Id);
+					playlist.Songs.Remove(song.Metadata.Id);
 					playlistUpdated = true;
 					output.AppendFormat("{0} - Song Removed", id);
 				}
@@ -93,7 +93,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var playlist = await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
-				playlist.Songs.Remove(player.CurrentSong.Id);
+				playlist.Songs.Remove(player.CurrentSong.Metadata.Id);
 
 				await _musicService.Playlist.UpdateAsync(playlist);
 				await ReplyAsync("Removed from playlist. Skipping to next song...");

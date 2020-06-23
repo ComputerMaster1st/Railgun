@@ -50,10 +50,10 @@ namespace Railgun.Commands.Music
 					_encricher.AddMapping($"{Context.Author.Username}#{Context.Author.DiscriminatorValue}", SongId.Parse($"DISCORD#{attachment.Id}"), attachment.Filename);
 					var song = await _musicService.DownloadSongAsync(attachment.Url);
 
-					playlist.Songs.Add(song.Id);
+					playlist.Songs.Add(song.Metadata.Id);
 
 					await _musicService.Playlist.UpdateAsync(playlist);
-					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Title)} {SystemUtilities.GetSeparator} ID : {Format.Bold(song.Id.ToString())}");
+					await response.ModifyAsync(c => c.Content = $"Installed To Playlist - {Format.Bold(song.Metadata.Title)} {SystemUtilities.GetSeparator} ID : {Format.Bold(song.Metadata.Id.ToString())}");
 				} catch (Exception ex) {
 					await response.ModifyAsync(c => c.Content = $"Install Failure - {Format.Bold("(Attached File)")} {ex.Message}");
 
