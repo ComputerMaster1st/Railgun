@@ -93,6 +93,11 @@ namespace Railgun
                 .WithExtractor<YouTubeExtractor>()
                 .WithExtractor<DiscordExtractor>()
                 .WithEnRicher(enricher)
+                .Configure(f => {
+                    f.Hostname = mongo.Hostname;
+                    f.Username = mongo.Username;
+                    f.Password = mongo.Password;
+                })
                 .Build();
             _musicService = new MusicService(_musicServiceConfig);
             _botLog = new BotLog(_config, _client);
