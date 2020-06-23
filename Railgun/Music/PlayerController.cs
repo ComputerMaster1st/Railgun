@@ -64,7 +64,7 @@ namespace Railgun.Music
 
                 playlist.Songs.AddRange((await _musicService.GetRandomSongs()).Where(id => !playlist.Songs.Contains(id)).Select(id => id));
 
-				await _musicService.Playlist.UpdateAsync(playlist);
+				await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 			}
 
 			if (!data.SilentNowPlaying)

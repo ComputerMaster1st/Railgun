@@ -57,7 +57,7 @@ namespace Railgun.Commands.Music
 
 				if (!playlist.Songs.Contains(song.Id) && !_playOneTimeOnly) {
 					playlist.Songs.Add(song.Id);
-					await _musicService.Playlist.UpdateAsync(playlist);
+					await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 					nowInstalled = true;
 				}
 

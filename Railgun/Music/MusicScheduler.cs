@@ -52,7 +52,7 @@ namespace Railgun.Music.Scheduler
 
             try
             {
-                var playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
+                var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, _playlistId);
 
                 if (playlist == null) throw new MusicSchedulerException("No playlist has been found in the database. Please generate a new playlist.");
 
@@ -122,7 +122,7 @@ namespace Railgun.Music.Scheduler
             var ex = new SongQueueException($"A song failed to queue! - {songId}", request.Error);
             request.Error = ex;
 
-            await _musicService.Playlist.UpdateAsync(playlist);
+            await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
             return request;
         }
 
@@ -163,7 +163,7 @@ namespace Railgun.Music.Scheduler
             var ex = new SongQueueException($"A song failed to queue! - {request.Id}", song.Error);
             song.Error = ex;
 
-            await _musicService.Playlist.UpdateAsync(playlist);
+            await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
             return song;
         }
 

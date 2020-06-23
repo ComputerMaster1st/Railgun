@@ -82,7 +82,7 @@ namespace Railgun.Commands.Music
 				await ReplyAsync("There are no settings available for Music.");
 				return;
 			} else if (data.PlaylistId != ObjectId.Empty) {
-				var playlist = await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
+				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				songCount = playlist.Songs.Count;
 			}
 

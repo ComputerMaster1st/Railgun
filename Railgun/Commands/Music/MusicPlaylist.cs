@@ -39,7 +39,7 @@ namespace Railgun.Commands.Music
                     return;
                 }
 
-                var playlist = await _musicService.Playlist.GetPlaylistAsync(data.PlaylistId);
+                var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
                 if (playlist == null || playlist.Songs.Count < 1) {
                     await ReplyAsync("Server playlist == currently empty.");

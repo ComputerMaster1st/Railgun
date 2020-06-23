@@ -108,7 +108,7 @@ namespace Railgun.Music
                 needEncoding++;
             }
 
-            if (playlistModified) await _musicService.Playlist.UpdateAsync(playlist);
+            if (playlistModified) await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 
             return (invalidUrls, installed, imported, needEncoding);
         }
