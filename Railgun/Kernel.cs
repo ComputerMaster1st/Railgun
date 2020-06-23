@@ -89,7 +89,11 @@ namespace Railgun
 
             _musicServiceConfig = new MusicServiceBuilder()
                 .WithPostgresMetadataProvider($"Server={postgre.Hostname};Port=5432;Database=AudioChord;UserId={postgre.Username};Password={postgre.Password};")
+#if DEBUG
                 .WithCache(new FileSystemCache(dir.ToString()))
+#else
+                .WithCache(new FileSystemCache("/home/audiochord"))
+#endif
                 .WithExtractor<YouTubeExtractor>()
                 .WithExtractor<DiscordExtractor>()
                 .WithEnRicher(enricher)
