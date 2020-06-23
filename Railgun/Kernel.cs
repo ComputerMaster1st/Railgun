@@ -9,6 +9,7 @@ using AudioChord;
 using AudioChord.Caching.FileSystem;
 using AudioChord.Extractors;
 using AudioChord.Extractors.Discord;
+using AudioChord.Metadata.Postgres;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
@@ -86,21 +87,15 @@ namespace Railgun
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
             var enricher = new MetaDataEnricher();
-            _musicServiceConfig = new MusicServiceConfiguration() {
-                Hostname = mongo.Hostname,
-                Username = mongo.Username,
-                Password = mongo.Password,
 
-#if DEBUG
-                SongCacheFactory = () => new FileSystemCache(dir.ToString()),
-#else
-                SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
-#endif
-                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor(_youtubehttpClient) },
-                Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
-            };
+            _musicServiceConfig = new MusicServiceBuilder()
+                .WithPostgresMetadataProvider("")
+                .WithCache(new FileSystemCache(dir.ToString()))
+                .WithExtractor<YouTubeExtractor>()
+                .WithExtractor<DiscordExtractor>()
+                .WithEnRicher(enricher)
+                .Build();
             _musicService = new MusicService(_musicServiceConfig);
-
             _botLog = new BotLog(_config, _client);
             _serverCount = new ServerCount(_config, _client);
             _analytics = new Analytics(_botLog);
