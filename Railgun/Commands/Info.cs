@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +42,7 @@ namespace Railgun.Commands
             var installedCommands = _commandService.GetAllCommands().Count();
             var self = Process.GetCurrentProcess();
             var guilds = await Context.Client.GetGuildsAsync();
+            var directorySize = new DirectoryInfo("/home/audiochord").EnumerateFiles().Sum(file => file.Length);
 
             foreach (var guild in guilds) {
                 channelCount += (await guild.GetChannelsAsync()).Count();
@@ -71,7 +73,7 @@ namespace Railgun.Commands
                 .AppendFormat(" Connected Servers : {0}", guilds.Count).AppendLine()
                 .AppendFormat("    Total Channels : {0}", channelCount).AppendLine()
                 .AppendFormat("       Total Users : {0}", userCount).AppendLine()
-                .AppendFormat("  Music Repository : {0} ({1} GB)", await _musicService.EnumerateSongMetadataAsync().CountAsync(), Math.Round((((await _musicService.GetTotalBytesUsedAsync()) / 1024) / 1024) / 1024, 2)).AppendLine()
+                .AppendFormat("  Music Repository : {0} ({1} GB)", await _musicService.EnumerateSongMetadataAsync().CountAsync(), Math.Round((((Convert.ToDecimal(directorySize)) / 1024) / 1024) / 1024, 2)).AppendLine()
                 .AppendLine()
                 .AppendFormat("     Avg. Channels : {0}/server", Math.Round(channelCount / guilds.Count, 0)).AppendLine()
                 .AppendFormat("        Avg. Users : {0}/server", Math.Round(userCount / guilds.Count, 0)).AppendLine()
