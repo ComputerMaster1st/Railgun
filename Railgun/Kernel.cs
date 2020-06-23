@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -89,7 +88,7 @@ namespace Railgun
             var enricher = new MetaDataEnricher();
 
             _musicServiceConfig = new MusicServiceBuilder()
-                .WithPostgresMetadataProvider("")
+                .WithPostgresMetadataProvider($"Server={postgre.Hostname};Port=5432;Database=AudioChord;UserId={postgre.Username};Password={postgre.Password};")
                 .WithCache(new FileSystemCache(dir.ToString()))
                 .WithExtractor<YouTubeExtractor>()
                 .WithExtractor<DiscordExtractor>()
