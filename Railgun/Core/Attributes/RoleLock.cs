@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
-using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core.Results;
 using Railgun.Core.Enums;
 using TreeDiagram;

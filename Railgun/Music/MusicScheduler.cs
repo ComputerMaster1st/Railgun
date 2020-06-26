@@ -52,7 +52,7 @@ namespace Railgun.Music.Scheduler
 
             try
             {
-                var playlist = await _musicService.Playlist.GetPlaylistAsync(_playlistId);
+                var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, _playlistId);
 
                 if (playlist == null) throw new MusicSchedulerException("No playlist has been found in the database. Please generate a new playlist.");
 
@@ -106,7 +106,7 @@ namespace Railgun.Music.Scheduler
 
             if (request.IsSuccess)
             {
-                AssignQueueStatus(request.song.Id, SongQueueStatus.Played);
+                AssignQueueStatus(request.song.Metadata.Id, SongQueueStatus.Played);
                 return request;
             }
 
@@ -122,7 +122,7 @@ namespace Railgun.Music.Scheduler
             var ex = new SongQueueException($"A song failed to queue! - {songId}", request.Error);
             request.Error = ex;
 
-            await _musicService.Playlist.UpdateAsync(playlist);
+            await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
             return request;
         }
 
@@ -163,7 +163,7 @@ namespace Railgun.Music.Scheduler
             var ex = new SongQueueException($"A song failed to queue! - {request.Id}", song.Error);
             song.Error = ex;
 
-            await _musicService.Playlist.UpdateAsync(playlist);
+            await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
             return song;
         }
 
@@ -174,8 +174,8 @@ namespace Railgun.Music.Scheduler
 
         private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchSongAsync(SongId id)
         {
-            (bool Success, ISong Song) result = await _musicService.TryGetSongAsync(id);
-            if (result.Success) return (result.Success, null, result.Song);
+            ISong result = await _musicService.GetSongAsync(id);
+            if (result != null) return (true, null, result);
 
             Exception error = null;
 
@@ -256,7 +256,7 @@ namespace Railgun.Music.Scheduler
         {
             await _requestLock.WaitAsync();
 
-            Requests.RemoveAll(x => x.Id.ToString() == song.Id.ToString());
+            Requests.RemoveAll(x => x.Id.ToString() == song.Metadata.Id.ToString());
 
             _requestLock.Release();
         }

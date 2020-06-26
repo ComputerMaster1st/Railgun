@@ -14,7 +14,7 @@ namespace Railgun.Music
 
         public SongRequest(ISong song)
         {
-            Id = song.Id;
+            Id = song.Metadata.Id;
             Name = song.Metadata.Title;
             Length = song.Metadata.Duration;
             Uploader = song.Metadata.Uploader;

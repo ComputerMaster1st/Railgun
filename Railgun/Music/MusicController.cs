@@ -89,13 +89,13 @@ namespace Railgun.Music
             foreach (var videoId in videoIds)
             {
                 var songId = new SongId("YOUTUBE", videoId);
-                var song = await _musicService.TryGetSongAsync(songId);
-                if (song.Item1)
+                var song = await _musicService.GetSongAsync(songId);
+                if (song != null)
                 {
-                    if (playlist.Songs.Contains(song.Item2.Id)) installed++;
+                    if (playlist.Songs.Contains(song.Metadata.Id)) installed++;
                     else
                     {
-                        playlist.Songs.Add(song.Item2.Id);
+                        playlist.Songs.Add(song.Metadata.Id);
                         playlistModified = true;
                         imported++;
                     }
@@ -108,7 +108,7 @@ namespace Railgun.Music
                 needEncoding++;
             }
 
-            if (playlistModified) await _musicService.Playlist.UpdateAsync(playlist);
+            if (playlistModified) await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 
             return (invalidUrls, installed, imported, needEncoding);
         }

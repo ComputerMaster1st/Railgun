@@ -38,7 +38,7 @@ namespace Railgun.Commands.Music
 				var currentTime = DateTime.Now - player.SongStartedAt;
 				var output = new StringBuilder()
 					.AppendFormat("Currently playing {0} at the moment.", Format.Bold(meta.Title)).AppendLine()
-					.AppendFormat("Url: {0} {1} Length: {2}/{3}", Format.Bold($"<{meta.Url}>"),
+					.AppendFormat("Url: {0} {1} Length: {2}/{3}", Format.Bold($"<{meta.Source}>"),
 								  SystemUtilities.GetSeparator,
 								  Format.Bold($"{currentTime.Minutes}:{currentTime.Seconds}"),
 								  Format.Bold($"{meta.Duration.Minutes}:{meta.Duration.Seconds}"));

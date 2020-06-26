@@ -52,6 +52,12 @@ namespace Railgun.Core
 			return playlist;
 		}
 
+        public static async Task<Playlist> GetPlaylistAsync(MusicService service, ObjectId id) => await service.Playlist.GetPlaylistAsync(id);
+
+		public static async Task UpdatePlaylistAsync(MusicService service, Playlist playlist) => await service.Playlist.UpdateAsync(playlist);
+
+		public static async Task DeletePlaylistAsync(MusicService service, ObjectId playlistId) => await service.Playlist.DeleteAsync(playlistId);
+
         public static string GetUsernameOrMention(TreeDiagramContext db, IGuildUser user)
 		{
 			ServerMention sMention = db.ServerMentions.GetData(user.GuildId);;

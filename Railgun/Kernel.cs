@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,6 +8,7 @@ using AudioChord;
 using AudioChord.Caching.FileSystem;
 using AudioChord.Extractors;
 using AudioChord.Extractors.Discord;
+using AudioChord.Metadata.Postgres;
 using Discord;
 using Discord.WebSocket;
 using Finite.Commands;
@@ -86,21 +86,24 @@ namespace Railgun
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
             var enricher = new MetaDataEnricher();
-            _musicServiceConfig = new MusicServiceConfiguration() {
-                Hostname = mongo.Hostname,
-                Username = mongo.Username,
-                Password = mongo.Password,
 
+            _musicServiceConfig = new MusicServiceBuilder()
+                .WithPostgresMetadataProvider($"Server={postgre.Hostname};Port=5432;Database=AudioChord;UserId={postgre.Username};Password={postgre.Password};")
 #if DEBUG
-                SongCacheFactory = () => new FileSystemCache(dir.ToString()),
+                .WithCache(new FileSystemCache(dir.ToString()))
 #else
-                SongCacheFactory = () => new FileSystemCache("/home/audiochord"),
+                .WithCache(new FileSystemCache("/home/audiochord"))
 #endif
-                Extractors = () => new List<IAudioExtractor>() { new DiscordExtractor(), new YouTubeExtractor(_youtubehttpClient) },
-                Enrichers = () => new List<IAudioMetadataEnricher> { enricher }
-            };
+                .WithExtractor<YouTubeExtractor>()
+                .WithExtractor<DiscordExtractor>()
+                .WithEnRicher(enricher)
+                .Configure(f => {
+                    f.Hostname = mongo.Hostname;
+                    f.Username = mongo.Username;
+                    f.Password = mongo.Password;
+                })
+                .Build();
             _musicService = new MusicService(_musicServiceConfig);
-
             _botLog = new BotLog(_config, _client);
             _serverCount = new ServerCount(_config, _client);
             _analytics = new Analytics(_botLog);

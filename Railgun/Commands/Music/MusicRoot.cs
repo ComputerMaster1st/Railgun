@@ -38,7 +38,7 @@ namespace Railgun.Commands.Music
                     var song = player.CurrentSong;
                     
                     output.AppendFormat("Id : {0} {1} Spawned At : {2} {1} Status : {3}", info.GuildId, SystemUtilities.GetSeparator, info.CreatedAt, player.Status).AppendLine()
-                        .AppendFormat("\\--> Latency : {0}ms {1} Playing : {2} {1} Since : {3}", player.Latency, SystemUtilities.GetSeparator, song == null ? "Searching..." : song.Id.ToString(), player.SongStartedAt).AppendLine().AppendLine();
+                        .AppendFormat("\\--> Latency : {0}ms {1} Playing : {2} {1} Since : {3}", player.Latency, SystemUtilities.GetSeparator, song == null ? "Searching..." : song.Metadata.Id.ToString(), player.SongStartedAt).AppendLine().AppendLine();
                 }
                 
                 if (output.Length < 1950)

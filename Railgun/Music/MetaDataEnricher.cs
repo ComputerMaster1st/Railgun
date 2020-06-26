@@ -12,9 +12,9 @@ namespace Railgun.Music
 
         public Task<ISong> EnrichAsync(ISong song)
         {
-            song.Metadata.Uploader = _mapping.GetValueOrDefault(song.Id).Username;
-            song.Metadata.Title = _mapping.GetValueOrDefault(song.Id).Title;
-            _mapping.Remove(song.Id);
+            song.Metadata.Uploader = _mapping.GetValueOrDefault(song.Metadata.Id).Username;
+            song.Metadata.Title = _mapping.GetValueOrDefault(song.Metadata.Id).Title;
+            _mapping.Remove(song.Metadata.Id);
             return Task.FromResult(song);
         }
     }

@@ -4,6 +4,7 @@ using AudioChord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
+using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music;
 using TreeDiagram;
@@ -38,7 +39,7 @@ namespace Railgun.Events
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 				var data = db.ServerMusics.GetData(guild.Id);
 
-				if (data != null && data.PlaylistId != ObjectId.Empty) await _musicService.Playlist.DeleteAsync(data.PlaylistId);
+				if (data != null && data.PlaylistId != ObjectId.Empty) await SystemUtilities.DeletePlaylistAsync(_musicService, data.PlaylistId);
 
 				db.DeleteGuildData(guild.Id);
 			}

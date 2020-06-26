@@ -48,8 +48,8 @@ namespace Railgun.Music.Events
 
 				if (!data.SilentNowPlaying) {
 					var output = new StringBuilder()
-						.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Title), SystemUtilities.GetSeparator, Format.Bold(args.Song.Id.ToString())).AppendLine()
-						.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Duration.ToString()), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Url}>"));
+						.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Title), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Id.ToString())).AppendLine()
+						.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Duration.ToString()), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Source}>"));
 
                     if (args.IsRatelimited) output.AppendLine().AppendLine(Format.Italics(Format.Bold("WARNING :") + " YouTube Rate-Limits (429) are currently in effect. Some songs may not work, however will still remain inside the playlist and be encoded/downloaded once the rate-limit has been cleared."));
 

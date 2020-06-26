@@ -50,7 +50,7 @@ namespace Railgun.Commands.Music
 				}
 
 				await StreamAsync();
-				await _musicService.Playlist.DeleteAsync(data.PlaylistId);
+				await SystemUtilities.DeletePlaylistAsync(_musicService, data.PlaylistId);
 
 				data.PlaylistId = ObjectId.Empty;
 
