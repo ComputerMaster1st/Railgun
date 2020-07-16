@@ -32,19 +32,21 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
-            ServerMention sMention;
-            UserMention uMention;
+            ServerGlobals sMention;
+            UserGlobals uMention;
 
             using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+                var profile = db.ServerProfiles.GetOrCreateData(user.Guild.Id);
+                var inactivityData = profile.Inactivity;
 
 				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
 
-				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
-                sMention = db.ServerMentions.GetData(user.Guild.Id);
-                uMention = db.UserMentions.GetData(user.Id);
+				data = profile.JoinLeave;
+                sMention = profile.Globals;
+                var userProfile = db.UserProfiles.GetOrCreateData(user.Id);
+                uMention = userProfile.Globals;
             }
 
 			if (data == null) return Task.CompletedTask;

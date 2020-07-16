@@ -41,7 +41,9 @@ namespace Railgun.Events
 
 			using (var scope = _services.CreateScope())
             {
-				data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(guild.Id);
+				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                var profile = db.ServerProfiles.GetOrCreateData(guild.Id);
+                data = profile.Music;
 			}
 
 			if (data == null) return;

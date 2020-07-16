@@ -19,12 +19,14 @@ namespace Railgun.Core.Pipelines
 			var ctx = context.Context as SystemContext;
 			var msg = (IUserMessage)ctx.Message;
 			var content = msg.Content;
-			var sCommand = ctx.Database.ServerCommands.GetData(ctx.Guild.Id);
+			var profile = ctx.Database.ServerProfiles.GetOrCreateData(ctx.Guild.Id);
+            var sCommand = profile.Command;
 
 			if (((sCommand == null || !sCommand.RespondToBots) && msg.Author.IsBot) || msg.Author.IsWebhook)
 				return new PrefixResult();
 
-			var uCommand = ctx.Database.UserCommands.GetData(msg.Author.Id);
+			var userProfile = ctx.Database.UserProfiles.GetOrCreateData(ctx.Guild.Id);
+            var uCommand = userProfile.Globals;
 
 			if (content.StartsWith(_config.DiscordConfig.Prefix, StringComparison.CurrentCultureIgnoreCase))
 				return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix.Length, msg, next);

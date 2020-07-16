@@ -56,7 +56,8 @@ namespace Railgun.Events.OnMessageEvents
 
 								await _analytics.ExecutedCommand(context, cmdResult);
 
-								var data = context.Database.ServerCommands.GetData(guild.Id);
+                                var profile = context.Database.ServerProfiles.GetOrCreateData(guild.Id);
+                                var data = profile.Command;
 
 								if (data != null && data.DeleteCmdAfterUse) 
                                 {

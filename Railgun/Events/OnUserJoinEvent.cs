@@ -32,14 +32,15 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
-            ServerMention sMention;
-            UserMention uMention = null;
+            ServerGlobals sMention;
+            UserGlobals uMention = null;
             string username;
 
 			using (var scope = _services.CreateScope())
 			{
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+                var profile = db.ServerProfiles.GetOrCreateData(user.Guild.Id);
+                var inactivityData = profile.Inactivity;
 
 				if (inactivityData != null && inactivityData.IsEnabled && inactivityData.InactiveDaysThreshold != 0 && 
 				    inactivityData.InactiveRoleId != 0)
@@ -49,9 +50,11 @@ namespace Railgun.Events
 					else inactivityData.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
 				}
 				
-				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
-                sMention = db.ServerMentions.GetData(user.Guild.Id);
-                uMention = db.UserMentions.GetData(user.Id);
+				data = profile.JoinLeave;
+                sMention = profile.Globals;
+
+                var userProfile = db.UserProfiles.GetOrCreateData(user.Id);
+                uMention = userProfile.Globals;
                 username = SystemUtilities.GetUsernameOrMention(db, user);
 			}
 

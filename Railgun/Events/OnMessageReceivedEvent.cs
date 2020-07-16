@@ -51,7 +51,8 @@ namespace Railgun.Events
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var channel = newMsg.Channel as ITextChannel;
-                data = db.ServerCommands.GetData(channel.GuildId);
+                var profile = db.ServerProfiles.GetOrCreateData(channel.GuildId);
+                data = profile.Command;
             }
 
             if (data != null && data.IgnoreModifiedMessages) return;

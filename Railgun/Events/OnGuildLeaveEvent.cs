@@ -37,7 +37,8 @@ namespace Railgun.Events
 
 			using (var scope = _services.CreateScope()) {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var data = db.ServerMusics.GetData(guild.Id);
+                var profile = db.ServerProfiles.GetOrCreateData(guild.Id);
+                var data = profile.Music;
 
 				if (data != null && data.PlaylistId != ObjectId.Empty) await SystemUtilities.DeletePlaylistAsync(_musicService, data.PlaylistId);
 
