@@ -4,8 +4,6 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using System.Threading.Tasks;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Inactivity
 {
@@ -14,32 +12,13 @@ namespace Railgun.Commands.Inactivity
         [Alias("threshold")]
         public class Threshold : SystemBase
         {
-            private ServerInactivity GetData(ulong guildId, bool create = false)
-            {
-                ServerProfile data;
-
-                if (create)
-                    data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-                else {
-                    data = Context.Database.ServerProfiles.GetData(guildId);
-
-                    if (data == null) 
-                        return null;
-                }
-
-                if (data.Inactivity == null)
-                    if (create)
-                        data.Inactivity = new ServerInactivity();
-                
-                return data.Inactivity;
-            }
-
             [Command("inactive")]
             public Task SetInactiveAsync(int threshold)
             {
                 if (threshold < 0) return ReplyAsync($"Inactivity Threshold can {Format.Bold("NOT")} be below 1!");
 
-                var data = GetData(Context.Guild.Id, true);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
                 if (threshold == 0)
                 {
@@ -59,7 +38,8 @@ namespace Railgun.Commands.Inactivity
             {
                 if (threshold < 0) return ReplyAsync($"Inactivity Threshold can {Format.Bold("NOT")} be below 1!");
 
-                var data = GetData(Context.Guild.Id, true);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
                 if (threshold == 0)
                 {

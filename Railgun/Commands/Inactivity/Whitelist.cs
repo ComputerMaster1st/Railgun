@@ -4,8 +4,6 @@ using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Inactivity
@@ -15,32 +13,13 @@ namespace Railgun.Commands.Inactivity
         [Alias("whitelist")]
         public class Whitelist : SystemBase
         {
-            private ServerInactivity GetData(ulong guildId, bool create = false)
-            {
-                ServerProfile data;
-
-                if (create)
-                    data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-                else {
-                    data = Context.Database.ServerProfiles.GetData(guildId);
-
-                    if (data == null) 
-                        return null;
-                }
-
-                if (data.Inactivity == null)
-                    if (create)
-                        data.Inactivity = new ServerInactivity();
-                
-                return data.Inactivity;
-            }
-
             [Command("user")]
             public Task UserAsync(IGuildUser user)
             {
                 if (user.IsBot || user.IsWebhook) return ReplyAsync("This user is a bot! Bots will always be ignored/whitelisted.");
 
-                var data = GetData(Context.Guild.Id, true);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
                 if (data.UserWhitelist.Any(f => f == user.Id))
                 {
@@ -57,7 +36,8 @@ namespace Railgun.Commands.Inactivity
             [Command("role")]
             public async Task RoleAsync(IRole role)
             {
-                var data = GetData(Context.Guild.Id, true);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
                 var users = (await Context.Guild.GetUsersAsync())
                     .Where(f => f.RoleIds.Contains(role.Id));
 
