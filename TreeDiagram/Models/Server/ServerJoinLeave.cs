@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TreeDiagram.Enums;
 
 namespace TreeDiagram.Models.Server
 {
     public class ServerJoinLeave
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
         public bool SendToDM { get; set; }
         public ulong ChannelId { get; set; }
         public int DeleteAfterMinutes { get; set; }

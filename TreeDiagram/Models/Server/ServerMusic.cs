@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 
@@ -6,6 +7,9 @@ namespace TreeDiagram.Models.Server
 {
 	public class ServerMusic
 	{
+		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+		
 		public ulong AutoTextChannel { get; set; }
 		public ulong AutoVoiceChannel { get; set; }
 		public bool AutoSkip { get; set; }

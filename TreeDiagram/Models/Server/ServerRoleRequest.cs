@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -6,6 +7,9 @@ namespace TreeDiagram.Models.Server
 {
     public class ServerRoleRequest
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        
         [Column(TypeName="jsonb")]
         public virtual List<ulong> RoleIds { get; private set; } = new List<ulong>();
 
