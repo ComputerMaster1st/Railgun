@@ -36,23 +36,9 @@ namespace TreeDiagram
 			base.OnModelCreating(modelBuilder);
 		}
 
-		public int CheckForBadConfigs(IEnumerable<ulong> ids)
+		public int CheckForBadConfigs(IEnumerable<ulong> serverIds)
 		{
-			var badConfigCount = 0;
-
-			badConfigCount += FilterCapses.ConfigCheck(ids);
-			badConfigCount += FilterUrls.ConfigCheck(ids);
-			
-			badConfigCount += FunBites.ConfigCheck(ids);
-			badConfigCount += FunRsts.ConfigCheck(ids);
-			
-			badConfigCount += ServerCommands.ConfigCheck(ids);
-            badConfigCount += ServerInactivities.ConfigCheck(ids);
-            badConfigCount += ServerMentions.ConfigCheck(ids);
-			badConfigCount += ServerMusics.ConfigCheck(ids);
-			badConfigCount += ServerWarnings.ConfigCheck(ids);
-			badConfigCount += ServerJoinLeaves.ConfigCheck(ids);
-			badConfigCount += ServerRoleRequests.ConfigCheck(ids);
+			var badConfigCount = ServerProfiles.ConfigCheck(serverIds);
 
 			if (badConfigCount > 0) SaveChanges();
 			return badConfigCount;
@@ -60,20 +46,7 @@ namespace TreeDiagram
 
 		public void DeleteGuildData(ulong id)
 		{
-			FilterCapses.DeleteData(id);
-			FilterUrls.DeleteData(id);
-			
-			FunBites.DeleteData(id);
-			FunRsts.DeleteData(id);
-			
-			ServerCommands.DeleteData(id);
-            ServerInactivities.DeleteData(id);
-            ServerMentions.DeleteData(id);
-			ServerMusics.DeleteData(id);
-			ServerWarnings.DeleteData(id);
-			ServerJoinLeaves.DeleteData(id);
-			ServerRoleRequests.DeleteData(id);
-
+			ServerProfiles.DeleteData(id);
 			SaveChanges();
 		}
 
