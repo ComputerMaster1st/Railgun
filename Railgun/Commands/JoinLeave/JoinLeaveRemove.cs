@@ -4,6 +4,8 @@ using Finite.Commands;
 using Railgun.Core;
 using TreeDiagram;
 using TreeDiagram.Enums;
+using TreeDiagram.Models;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.JoinLeave
 {
@@ -12,11 +14,31 @@ namespace Railgun.Commands.JoinLeave
 		[Alias("remove", "-")]
 		public class JoinLeaveRemove : SystemBase
 		{
+			private ServerJoinLeave GetData(ulong guildId, bool create = false)
+			{
+				ServerProfile data;
+
+				if (create)
+					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+				else {
+					data = Context.Database.ServerProfiles.GetData(guildId);
+
+					if (data == null) 
+						return null;
+				}
+
+				if (data.JoinLeave == null)
+					if (create)
+						data.JoinLeave = new ServerJoinLeave();
+				
+				return data.JoinLeave;
+			}
+			
 			private Task MsgHandlerAsync(int index, MsgType type)
 			{
 				if (index < 0) return ReplyAsync("The specified Id can not be lower than 0.");
 
-				var data = Context.Database.ServerJoinLeaves.GetData(Context.Guild.Id);
+				var data = GetData(Context.Guild.Id);
 
 				if (data == null) return ReplyAsync("Join/Leave has yet to be configured.");
 				if ((type == MsgType.Join && data.JoinMessages.Count <= index) || (type == MsgType.Leave && data.LeaveMessages.Count <= index))
