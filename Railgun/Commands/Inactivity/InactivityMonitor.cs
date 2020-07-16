@@ -9,8 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Inactivity
@@ -18,30 +16,11 @@ namespace Railgun.Commands.Inactivity
     [Alias("inactive-monitor", "inactive", "imon"), UserPerms(GuildPermission.ManageGuild), BotPerms(GuildPermission.ManageRoles)]
     public partial class InactivityMonitor : SystemBase
     {
-        protected ServerInactivity GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.Inactivity == null)
-				if (create)
-					data.Inactivity = new ServerInactivity();
-			
-			return data.Inactivity;
-		}
-
         [Command("enable")]
         public Task EnableAsync()
         {
-            var data = GetData(Context.Guild.Id, true);
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Inactivity;
             data.IsEnabled = !data.IsEnabled;
             return ReplyAsync($"Inactivity Monitor has now been turned {Format.Bold(data.IsEnabled ? "On" : "Off")}.");
         }
@@ -55,7 +34,8 @@ namespace Railgun.Commands.Inactivity
 
             if (selfHighestRole < role.Position) await ReplyAsync("Please make sure the inactivity role is in a lower role position than me.");
 
-            var data = GetData(Context.Guild.Id, true);
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Inactivity;
             data.InactiveRoleId = role.Id;
             await ReplyAsync($"Inactive Role has been set! ({Format.Bold(role.Name)})");
         }
@@ -70,7 +50,8 @@ namespace Railgun.Commands.Inactivity
         [Command("initialize")]
         public async Task InitializeAsync()
         {
-            var data = GetData(Context.Guild.Id, true);
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Inactivity;
 
             if (!data.IsEnabled || data.InactiveRoleId == 0 || data.InactiveDaysThreshold == 0)
             {
@@ -131,14 +112,8 @@ namespace Railgun.Commands.Inactivity
         [Command("list"), BotPerms(ChannelPermission.AttachFiles)]
         public async Task ListAsync()
         {
-            var data = GetData(Context.Guild.Id);
-
-            if (data == null)
-            {
-                await ReplyAsync("No Inactivity Monitor Config has been generated!");
-                return;
-            }
-
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Inactivity;
             var users = await Context.Guild.GetUsersAsync();
             var inactiveUsers = users.Count((u) => u.RoleIds.Contains(data.InactiveRoleId));
             var output = new StringBuilder()
@@ -174,9 +149,8 @@ namespace Railgun.Commands.Inactivity
         [Command("show")]
         public async Task ShowAsync()
         {
-            var data = GetData(Context.Guild.Id);
-
-            if (data == null) await ReplyAsync("No Inactivity Monitor Config has been generated!");
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Inactivity;
 
             var whitelistedRoles = new StringBuilder();
             var whitelistedUsers = new StringBuilder();
