@@ -8,7 +8,5 @@ namespace TreeDiagram.Models.Filter
         public bool DenyMode { get; set; }
 
         public List<string> BannedUrls { get; private set; } = new List<string>();
-        
-        public FilterUrl(ulong id) : base(id) { }
     }
 }

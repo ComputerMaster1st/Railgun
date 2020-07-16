@@ -1,16 +1,25 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
+using TreeDiagram.Models;
 using TreeDiagram.Models.Filter;
 using TreeDiagram.Models.Fun;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.TreeTimer;
-using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
     public sealed class TreeDiagramContext : DbContext
     {
+		public DbSet<ServerProfile> ServerProfiles { get; internal set; } = null;
+		public DbSet<UserProfile> UserProfiles { get; internal set; } = null;
+
+		public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
+	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
+	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
+
+
+		// OLD DBSETS
 	    public DbSet<FilterCaps> FilterCapses { get; internal set; } = null;
         public DbSet<FilterUrl> FilterUrls { get; internal set; } = null;
 
@@ -24,13 +33,6 @@ namespace TreeDiagram
 		public DbSet<ServerMusic> ServerMusics { get; internal set; } = null;
 		public DbSet<ServerRoleRequest> ServerRoleRequests { get; internal set; } = null;
 		public DbSet<ServerWarning> ServerWarnings { get; internal set; } = null;
-
-	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
-	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
-	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
-
-	    public DbSet<UserCommand> UserCommands { get; internal set; } = null;
-		public DbSet<UserMention> UserMentions { get; internal set; } = null;
 
 	    public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
 
