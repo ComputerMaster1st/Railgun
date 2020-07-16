@@ -96,7 +96,8 @@ namespace Railgun.Commands.JoinLeave
 		{
 			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-			if (data == null || data.JoinLeave == null) return ReplyAsync("Join/Leave Notifications has no data to reset.");
+			if (data == null)
+				return ReplyAsync("Join/Leave Notifications has no data to reset.");
 
 			data.ResetJoinLeave();
 			return ReplyAsync("Join/Leave Notifications has been reset & disabled.");

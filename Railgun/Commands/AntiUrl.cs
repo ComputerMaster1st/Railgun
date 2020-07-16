@@ -16,26 +16,6 @@ namespace Railgun.Commands
     [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiUrl : SystemBase
 	{
-		private FilterUrl GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.Filters.Urls == null)
-				if (create)
-					data.Filters.Urls = new FilterUrl();
-			
-			return data.Filters.Urls;
-		}
-
 		private string ProcessUrl(string url)
 		{
 			var cleanUrl = url;
@@ -50,7 +30,9 @@ namespace Railgun.Commands
 		[Command]
 		public Task EnableAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
@@ -58,7 +40,9 @@ namespace Railgun.Commands
 		[Command("includebots")]
 		public Task IncludeBotsAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.IncludeBots = !data.IncludeBots;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
 		}
@@ -66,7 +50,9 @@ namespace Railgun.Commands
 		[Command("invites")]
 		public Task InvitesAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.BlockServerInvites = !data.BlockServerInvites;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
 		}
@@ -75,7 +61,8 @@ namespace Railgun.Commands
 		public Task AddAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
 			if (data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is already listed.");
@@ -90,9 +77,10 @@ namespace Railgun.Commands
 		public Task RemoveAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
-			if (data == null || !data.BannedUrls.Contains(newUrl))
+			if (!data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is not listed.");
 
 			data.BannedUrls.Remove(newUrl);
@@ -103,7 +91,8 @@ namespace Railgun.Commands
 		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
 			var tc = pChannel ?? (ITextChannel)Context.Channel;
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
 			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
 				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
@@ -117,7 +106,9 @@ namespace Railgun.Commands
 		[Command("mode")]
 		public Task ModeAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.DenyMode = !data.DenyMode;
 			if (!data.IsEnabled) data.IsEnabled = true;
 			return ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
@@ -126,12 +117,8 @@ namespace Railgun.Commands
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ShowAsync()
 		{
-			var data = GetData(Context.Guild.Id);
-
-			if (data == null) {
-				await ReplyAsync("There are no settings available for Anti-Url. Currently disabled.");
-				return;
-			}
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
 			var initial = true;
 
@@ -182,10 +169,10 @@ namespace Railgun.Commands
 		{
 			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-			if (data == null || data.Filters.Urls == null)
+			if (data == null)
 				return ReplyAsync("Anti-Url has no data to reset.");
 
-			data.Filters.Urls = null;
+			data.Filters.ResetUrls();
 			return ReplyAsync("Anti-Url has been reset & disabled.");
 		}
 	}

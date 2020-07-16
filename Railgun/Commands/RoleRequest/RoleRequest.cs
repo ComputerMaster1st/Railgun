@@ -97,7 +97,7 @@ namespace Railgun.Commands.RoleRequest
         {
             var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-            if (data == null || data.RoleRequest == null)
+            if (data == null)
                 return ReplyAsync("Role-Request has no data to reset.");
 
             data.ResetRoleRequest();

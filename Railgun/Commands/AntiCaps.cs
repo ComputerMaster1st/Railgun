@@ -7,38 +7,18 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Filter;
 
 namespace Railgun.Commands
 {
-	[Alias("anticaps"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
+    [Alias("anticaps"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiCaps : SystemBase
 	{
-		private FilterCaps GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.Filters.Caps == null)
-				if (create)
-					data.Filters.Caps = new FilterCaps();
-			
-			return data.Filters.Caps;
-		}
-
 		[Command]
 		public Task EnableAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
+
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
@@ -46,7 +26,9 @@ namespace Railgun.Commands
 		[Command("includebots")]
 		public Task IncludeBotsAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
+
 			data.IncludeBots = !data.IncludeBots;
 			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Monitoring" : "Ignoring")} bots.");
 		}
@@ -57,7 +39,9 @@ namespace Railgun.Commands
 			if (percent < 50 || percent > 100) 
 				return ReplyAsync("Anti-Caps Percentage must be between 50-100.");
 
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
+
 			data.Percentage = percent;
 			if (!data.IsEnabled) data.IsEnabled = true;
 
@@ -70,7 +54,9 @@ namespace Railgun.Commands
 			if (length < 0)
 				return ReplyAsync("Please specify a minimum message length of 0 or above.");
 
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
+
 			data.Length = length;
 			if (!data.IsEnabled) data.IsEnabled = true;
 
@@ -81,7 +67,8 @@ namespace Railgun.Commands
 		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
 			var tc = pChannel ?? Context.Channel as ITextChannel;
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
 
 			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
 				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
@@ -95,12 +82,8 @@ namespace Railgun.Commands
 		[Command("show")]
 		public async Task ShowAsync()
 		{
-			var data = GetData(Context.Guild.Id);
-
-			if (data == null) {
-				await ReplyAsync("There are no settings available for Anti-Caps. Currently disabled.");
-				return;
-			}
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Caps;
 
 			var output = new StringBuilder()
 				.AppendLine("Anti-Caps Settings").AppendLine()
@@ -137,10 +120,10 @@ namespace Railgun.Commands
 		{
 			var profile = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-			if (profile == null || profile.Filters.Caps == null)
+			if (profile == null)
 				return ReplyAsync("Anti-Caps has no data to reset.");
 
-			profile.Filters.Caps = null;
+			profile.Filters.ResetCaps();
 			return ReplyAsync("Anti-Caps has been reset & disabled.");
 		}
 	}

@@ -208,7 +208,7 @@ namespace Railgun.Commands.Inactivity
         {
             var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-            if (data == null || data.Inactivity == null) 
+            if (data == null) 
                 return ReplyAsync("Inactivity Monitor has no data to reset.");
 
             data.ResetInactivity();

@@ -67,7 +67,7 @@ namespace Railgun.Commands.Music
 
 				var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-				if (data == null || data.Music == null) {
+				if (data == null) {
 					await ReplyAsync("Music has no data to reset.");
 					return;
 				}
