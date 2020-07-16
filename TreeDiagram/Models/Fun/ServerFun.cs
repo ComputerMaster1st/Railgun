@@ -10,5 +10,9 @@ namespace TreeDiagram.Models.Fun
 
         public virtual FunBite Bites { get; private set; } = new FunBite();
         public virtual FunRst Rst { get; private set; } = new FunRst();
+
+        public void ResetBites() => Bites = new FunBite();
+
+        public void ResetRst() => Rst = new FunRst();
     }
 }

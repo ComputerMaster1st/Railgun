@@ -10,5 +10,9 @@ namespace TreeDiagram.Models.Filter
 
         public virtual FilterCaps Caps { get; private set; } = new FilterCaps();
         public virtual FilterUrl Urls { get; private set; } = new FilterUrl();
+
+        public void ResetCaps() => Caps = new FilterCaps();
+        
+        public void ResetUrls() => Urls = new FilterUrl();
     }
 }

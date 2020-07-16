@@ -17,5 +17,19 @@ namespace TreeDiagram.Models
         public virtual ServerWarning Warning { get; private set; } = new ServerWarning();
         
         public ServerProfile(ulong id) : base(id) {}
+
+        public void ResetCommands() => Command = new ServerCommand();
+
+        public void ResetGlobals() => Globals = new ServerGlobals();
+
+        public void ResetInactivity() => Inactivity = new ServerInactivity();
+
+        public void ResetJoinLeave() => JoinLeave = new ServerJoinLeave();
+
+        public void ResetMusic() => Music = new ServerMusic();
+
+        public void ResetRoleRequest() => RoleRequest = new ServerRoleRequest();
+
+        public void ResetWarning() => Warning = new ServerWarning();
     }
 }
