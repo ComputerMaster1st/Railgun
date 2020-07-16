@@ -16,38 +16,31 @@ namespace Railgun.Commands.Server
 			[Command("mention")]
 			public Task MentionAsync()
 			{
-				var data = Context.Database.ServerMentions.GetData(Context.Guild.Id);
-
-				if (data != null) {
-					Context.Database.ServerMentions.Remove(data);
-					return ReplyAsync($"Server mentions are now {Format.Bold("Enabled")}.");
-				}
-
-				data = Context.Database.ServerMentions.GetOrCreateData(Context.Guild.Id);
-				data.DisableMentions = true;
-				return ReplyAsync($"Server mentions are now {Format.Bold("Disabled")}.");
+				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+				data.Globals.DisableMentions = !data.Globals.DisableMentions;
+				return ReplyAsync($"Server mentions are now {(data.Globals.DisableMentions ? Format.Bold("Enabled") : Format.Bold("Disabled"))}.");
 			}
 
 			[Command("prefix")]
 			public Task PrefixAsync([Remainder] string input = null)
 			{
-				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
+				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 
-				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Prefix))
+				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Command.Prefix))
 					return ReplyAsync("No prefix has been specified. Please specify a prefix.");
-				if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Prefix)) {
-					data.Prefix = string.Empty;
+				if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Command.Prefix)) {
+					data.Command.Prefix = string.Empty;
 					return ReplyAsync("Server prefix has been removed.");
 				}
 
-				data.Prefix = input;
+				data.Command.Prefix = input;
 				return ReplyAsync($"Server prefix has been set! {Format.Code(input = "<command>")}!");
 			}
 
 			[Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)]
 			public Task DeleteCmdAsync()
 			{
-				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
+				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 				data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
 				return ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
 			}
