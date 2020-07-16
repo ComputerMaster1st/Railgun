@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 
 namespace TreeDiagram.Models.Server
@@ -17,7 +18,8 @@ namespace TreeDiagram.Models.Server
 		public bool SilentNowPlaying { get; set; }
 		public bool SilentSongProcessing { get; set; }
 		public ulong NowPlayingChannel { get; set; }
-		public virtual List<UlongRoleId> AllowedRoles { get; private set; } = new List<UlongRoleId>();
+		[Column(TypeName="jsonb")]
+		public virtual List<ulong> AllowedRoles { get; private set; } = new List<ulong>();
 		public bool WhitelistMode { get; set; }
 	}
 }

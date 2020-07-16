@@ -1,22 +1,24 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace TreeDiagram.Models.Server
 {
     public class ServerRoleRequest
     {
-        public virtual List<UlongRoleId> RoleIds { get; private set; } = new List<UlongRoleId>();
+        [Column(TypeName="jsonb")]
+        public virtual List<ulong> RoleIds { get; private set; } = new List<ulong>();
 
         public bool AddRole(ulong roleId)
         {
-            if (RoleIds.Any(x => x.RoleId == roleId)) return false;
-            RoleIds.Add(new UlongRoleId(roleId));
+            if (RoleIds.Any(x => x == roleId)) return false;
+            RoleIds.Add(roleId);
             return true;
         }
 
         public bool RemoveRole(ulong roleId)
         {
-            if (RoleIds.RemoveAll(x => x.RoleId == roleId) > 0) return true;
+            if (RoleIds.RemoveAll(x => x == roleId) > 0) return true;
             return false;
         }
     }
