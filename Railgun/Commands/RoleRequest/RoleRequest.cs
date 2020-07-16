@@ -7,34 +7,12 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.RoleRequest
 {
     [Alias("role"), BotPerms(GuildPermission.ManageRoles)]
     public partial class RoleRequest : SystemBase
     {
-        private ServerRoleRequest GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.RoleRequest == null)
-				if (create)
-					data.RoleRequest = new ServerRoleRequest();
-			
-			return data.RoleRequest;
-		}
-
         [Command]
         public Task RoleAsync([Remainder] string roleName) 
             => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == roleName));
@@ -49,8 +27,10 @@ namespace Railgun.Commands.RoleRequest
                 return;
             }
             
-            var data = GetData(Context.Guild.Id);
-            if (data is null || data.RoleIds.Count == 0)
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
+
+            if (data.RoleIds.Count == 0)
             {
                 await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
                                  "Please contact the server mod/admin to set it up.");
@@ -79,8 +59,10 @@ namespace Railgun.Commands.RoleRequest
         [Command("list")]
         public async Task ListAsync()
         {
-            var data = GetData(Context.Guild.Id);
-            if (data is null || data.RoleIds.Count == 0)
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
+
+            if (data.RoleIds.Count == 0)
             {
                 await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
                                  "Please contact the server mod/admin to set it up.");
@@ -118,7 +100,7 @@ namespace Railgun.Commands.RoleRequest
             if (data == null || data.RoleRequest == null)
                 return ReplyAsync("Role-Request has no data to reset.");
 
-            data.RoleRequest = null;
+            data.ResetRoleRequest();
             return ReplyAsync("Role-Request has been reset.");
         }
     }
