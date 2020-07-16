@@ -24,10 +24,9 @@ namespace Railgun.Commands
 		[Command]
 		public Task RstAsync()
 		{
-			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 
-			if (data == null)
-				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
 			if (!data.IsEnabled)
 				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
 
@@ -45,7 +44,8 @@ namespace Railgun.Commands
 			if (string.IsNullOrWhiteSpace(msg))
 				return ReplyAsync("Your message was empty. Please add a message to add.");
 
-			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 
 			if (!data.IsEnabled)
 				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
@@ -57,9 +57,10 @@ namespace Railgun.Commands
 		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
 		public Task RemoveAsync(int index)
 		{
-			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 
-			if (data == null)
+			if (data.Rst.Count < 1)
 				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
 			if (!data.IsEnabled)
 				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
@@ -73,9 +74,10 @@ namespace Railgun.Commands
 		[Command("list"), BotPerms(ChannelPermission.AttachFiles)]
 		public Task ListAsync()
 		{
-			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 
-			if (data == null)
+			if (data.Rst.Count < 1)
 				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
 			if (!data.IsEnabled)
 				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
@@ -93,7 +95,9 @@ namespace Railgun.Commands
 		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
 		public Task AllowDenyAsync()
 		{
-			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
+
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
 		}
@@ -101,7 +105,8 @@ namespace Railgun.Commands
 		[Command("import"), UserPerms(GuildPermission.ManageMessages)]
 		public async Task ImportAsync()
 		{
-			var data = Context.Database.FunRsts.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 			
 			if (Context.Message.Attachments.Count < 1)
 			{
@@ -152,9 +157,10 @@ namespace Railgun.Commands
 		[Command("export"), UserPerms(GuildPermission.ManageMessages), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ExportAsync()
 		{
-			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Fun.Rst;
 
-			if (data == null || data.Rst.Count < 1)
+			if (data.Rst.Count < 1)
 			{
                 await ReplyAsync("There's no RST data to export.");
                 return;
@@ -180,12 +186,12 @@ namespace Railgun.Commands
 		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
 		public Task ResetAsync()
 		{
-			var data = Context.Database.FunRsts.GetData(Context.Guild.Id);
+			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
 			if (data == null)
 				return ReplyAsync("RST has no data to reset.");
 
-			Context.Database.FunRsts.Remove(data);
+			data.Fun.ResetRst();
 			return ReplyAsync("RST has been reset.");
 		}
 	}
