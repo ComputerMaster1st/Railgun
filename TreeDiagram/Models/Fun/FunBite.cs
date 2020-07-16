@@ -7,8 +7,6 @@ namespace TreeDiagram.Models.Fun
     {
         public List<string> Bites { get; private set; } = new List<string>();
         
-        public FunBite(ulong id) : base(id) { }
-        
         public void AddBite(string message) {
             if (!Bites.Contains(message)) Bites.Add(message);
         }

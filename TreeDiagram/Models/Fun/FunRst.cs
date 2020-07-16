@@ -7,8 +7,6 @@ namespace TreeDiagram.Models.Fun
     {
         public List<string> Rst { get; private set; } = new List<string>();
         
-        public FunRst(ulong id) : base(id) { }
-        
         public void AddRst(string message) {
             if (!Rst.Contains(message)) Rst.Add(message);
         }
