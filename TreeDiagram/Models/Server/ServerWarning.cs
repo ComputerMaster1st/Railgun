@@ -4,12 +4,10 @@ using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerWarning : ConfigBase
+    public class ServerWarning
     {
         public int WarnLimit { get; set; }
         public virtual List<ServerWarningInfo> Warnings { get; private set; } = new List<ServerWarningInfo>();
-
-        public ServerWarning(ulong id) : base(id) { }
         
         public void AddWarning(ulong userId, string reason)
         {
