@@ -10,5 +10,6 @@ namespace TreeDiagram.Models
         public virtual ServerFun Fun { get; private set; } = new ServerFun();
         public virtual ServerCommand Command { get; set; } = null;
         public virtual ServerInactivity Inactivity { get; set; } = null;
+        public virtual ServerJoinLeave JoinLeave { get; set; } = null;
     }
 }

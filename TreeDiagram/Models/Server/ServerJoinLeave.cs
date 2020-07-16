@@ -4,7 +4,7 @@ using TreeDiagram.Enums;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerJoinLeave : ConfigBase
+    public class ServerJoinLeave
     {
         public bool SendToDM { get; set; }
         public ulong ChannelId { get; set; }
@@ -12,8 +12,6 @@ namespace TreeDiagram.Models.Server
 
         public List<string> JoinMessages { get; private set; } = new List<string>() { "Welcome to **<server>**, **<user>**!" };
         public List<string> LeaveMessages { get; private set; } = new List<string>() { "Goodbye, **<user>**." };
-
-        public ServerJoinLeave(ulong id) : base(id) { }
 
         public void AddMessage(string message, MsgType type) {
             switch (type) {
