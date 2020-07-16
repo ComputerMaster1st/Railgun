@@ -6,9 +6,9 @@ namespace TreeDiagram.Models.Fun
     public class ServerFun
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
-        public virtual FunBite Bites { get; set; } = null;
-        public virtual FunRst Rst { get; set; } = null;
+        public virtual FunBite Bites { get; private set; } = new FunBite();
+        public virtual FunRst Rst { get; private set; } = new FunRst();
     }
 }
