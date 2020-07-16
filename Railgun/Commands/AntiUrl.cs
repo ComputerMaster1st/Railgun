@@ -29,7 +29,7 @@ namespace Railgun.Commands
 					return null;
 			}
 
-			if (data.Filters.Caps == null)
+			if (data.Filters.Urls == null)
 				if (create)
 					data.Filters.Urls = new FilterUrl();
 			
