@@ -18,7 +18,7 @@ namespace Railgun.Commands.Inactivity
     [Alias("inactive-monitor", "inactive", "imon"), UserPerms(GuildPermission.ManageGuild), BotPerms(GuildPermission.ManageRoles)]
     public partial class InactivityMonitor : SystemBase
     {
-        private ServerInactivity GetData(ulong guildId, bool create = false)
+        protected ServerInactivity GetData(ulong guildId, bool create = false)
 		{
 			ServerProfile data;
 
