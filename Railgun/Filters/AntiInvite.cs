@@ -10,7 +10,8 @@ namespace Railgun.Filters
     {
         public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context)
         {
-            var data = context.FilterUrls.GetData(tc.GuildId);
+            var profile = context.ServerProfiles.GetOrCreateData(tc.GuildId);
+            var data = profile.Filters.Urls;
 
             if (!CheckConditions(data as ITreeFilter, message)) return null;
 

@@ -39,7 +39,9 @@ namespace Railgun.Music.Events
 				ITextChannel tc;
 				
 				using (var scope = _services.CreateScope()) {
-					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
+					var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+					var profile = db.ServerProfiles.GetOrCreateData(args.GuildId);
+                    data = profile.Music;
 				}
 
 				if (data.NowPlayingChannel != 0)

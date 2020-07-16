@@ -43,7 +43,8 @@ namespace Railgun.Music.Events
                 using (var scope = _services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                    data = db.ServerMusics.GetData(tc.GuildId);
+                    var profile = db.ServerProfiles.GetOrCreateData(tc.GuildId);
+                    data = profile.Music;
                 }
 
                 if (data != null && data.SilentNowPlaying && args.Exception == null) return;
