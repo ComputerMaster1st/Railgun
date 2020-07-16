@@ -211,7 +211,7 @@ namespace Railgun.Commands.Inactivity
             if (data == null || data.Inactivity == null) 
                 return ReplyAsync("Inactivity Monitor has no data to reset.");
 
-            data.Inactivity = null;
+            data.ResetInactivity();
             return ReplyAsync("Inactivity Monitor has been reset & disabled. All active timers will continue until finished.");
         }
     }
