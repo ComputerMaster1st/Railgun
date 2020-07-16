@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using MongoDB.Bson;
-using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-	public class ServerMusic : ConfigBase
+	public class ServerMusic
 	{
 		public ulong AutoTextChannel { get; set; }
 		public ulong AutoVoiceChannel { get; set; }
@@ -20,7 +19,5 @@ namespace TreeDiagram.Models.Server
 		public ulong NowPlayingChannel { get; set; }
 		public virtual List<UlongRoleId> AllowedRoles { get; private set; } = new List<UlongRoleId>();
 		public bool WhitelistMode { get; set; }
-
-		public ServerMusic(ulong id) : base(id) { }
 	}
 }

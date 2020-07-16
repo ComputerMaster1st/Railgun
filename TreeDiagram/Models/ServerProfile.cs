@@ -12,5 +12,6 @@ namespace TreeDiagram.Models
         public virtual ServerGlobals Globals { get; set; } = new ServerGlobals();
         public virtual ServerInactivity Inactivity { get; set; } = null;
         public virtual ServerJoinLeave JoinLeave { get; set; } = null;
+        public virtual ServerMusic Music { get; set; } = null;
     }
 }
