@@ -8,6 +8,8 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
+using TreeDiagram.Models;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -25,10 +27,30 @@ namespace Railgun.Commands.Music
 				_musicService = musicService;
 			}
 
+			private ServerMusic GetData(ulong guildId, bool create = false)
+			{
+				ServerProfile data;
+
+				if (create)
+					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+				else {
+					data = Context.Database.ServerProfiles.GetData(guildId);
+
+					if (data == null) 
+						return null;
+				}
+
+				if (data.Music == null)
+					if (create)
+						data.Music = new ServerMusic();
+				
+				return data.Music;
+			}
+
 			[Command]
 			public async Task RemoveAsync([Remainder] string ids)
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var data = GetData(Context.Guild.Id);
 
 				if (data == null || data.PlaylistId == ObjectId.Empty)
 				{
@@ -85,7 +107,7 @@ namespace Railgun.Commands.Music
 				}
 
 				var player = playerContainer.Player;
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var data = GetData(Context.Guild.Id);
 
 				if (data == null || data.PlaylistId == ObjectId.Empty || player == null) {
 					await ReplyAsync("Can not remove current song because I am not in voice channel.");

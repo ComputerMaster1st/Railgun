@@ -5,21 +5,41 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
+using TreeDiagram.Models;
 using TreeDiagram.Models.Server;
-using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("rolelock"), UserPerms(GuildPermission.ManageGuild)]
 		public class MusicRoleLock : SystemBase
 		{
+			private ServerMusic GetData(ulong guildId, bool create = false)
+			{
+				ServerProfile data;
+
+				if (create)
+					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+				else {
+					data = Context.Database.ServerProfiles.GetData(guildId);
+
+					if (data == null) 
+						return null;
+				}
+
+				if (data.Music == null)
+					if (create)
+						data.Music = new ServerMusic();
+				
+				return data.Music;
+			}
+
 			[Command("add")]
 			public Task AddRoleAsync(IRole role)
 			{
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				data.AllowedRoles.Add(new UlongRoleId(role.Id));
+				var data = GetData(Context.Guild.Id, true);
+				data.AllowedRoles.Add(role.Id);
 
 				if (data.AllowedRoles.Count < 2) 
 					return ReplyAsync($"All music commands are now role-locked to {role.Name}.");
@@ -38,8 +58,8 @@ namespace Railgun.Commands.Music
 			[Command("remove")]
 			public Task RemoveRoleAsync(IRole role)
 			{
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
-				var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole.RoleId == role.Id);
+				var data = GetData(Context.Guild.Id, true);
+				var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole == role.Id);
 
 				if (count < 1)
 					return ReplyAsync("The role specified was never role-locked.");

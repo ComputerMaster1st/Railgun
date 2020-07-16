@@ -8,6 +8,8 @@ using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Music;
 using TreeDiagram;
+using TreeDiagram.Models;
+using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -28,6 +30,26 @@ namespace Railgun.Commands.Music
 				_musicService = musicService;
 			}
 
+			private ServerMusic GetData(ulong guildId, bool create = false)
+			{
+				ServerProfile data;
+
+				if (create)
+					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+				else {
+					data = Context.Database.ServerProfiles.GetData(guildId);
+
+					if (data == null) 
+						return null;
+				}
+
+				if (data.Music == null)
+					if (create)
+						data.Music = new ServerMusic();
+				
+				return data.Music;
+			}
+
 			[Command("stream")]
 			public Task StreamAsync()
 			{
@@ -42,7 +64,7 @@ namespace Railgun.Commands.Music
 			[Command("playlist")]
 			public async Task PlaylistAsync()
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var data = GetData(Context.Guild.Id);
 
 				if (data == null || data.PlaylistId == ObjectId.Empty && !_full) {
 					await ReplyAsync("Server playlist is already empty.");
@@ -64,14 +86,14 @@ namespace Railgun.Commands.Music
 
 				await PlaylistAsync();
 
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-				if (data == null) {
+				if (data == null || data.Music == null) {
 					await ReplyAsync("Music has no data to reset.");
 					return;
 				}
 
-				Context.Database.ServerMusics.Remove(data);
+				data.Music = null;
 				await ReplyAsync("Music settings & playlist has been reset.");
 			}
 		}

@@ -7,6 +7,7 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
+using TreeDiagram.Models;
 using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
@@ -24,6 +25,26 @@ namespace Railgun.Commands.Music
 			{
 				data.NowPlayingChannel = locked ? tc.Id : 0;
 				return ReplyAsync($"{Format.Bold("Now Playing")} messages are {Format.Bold(locked ? "Now" : "No Longer")} locked to #{tc.Name}.");
+			}
+
+			private ServerMusic GetData(ulong guildId, bool create = false)
+			{
+				ServerProfile data;
+
+				if (create)
+					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+				else {
+					data = Context.Database.ServerProfiles.GetData(guildId);
+
+					if (data == null) 
+						return null;
+				}
+
+				if (data.Music == null)
+					if (create)
+						data.Music = new ServerMusic();
+				
+				return data.Music;
 			}
 
 			[Command]
@@ -49,7 +70,7 @@ namespace Railgun.Commands.Music
 			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
 			public Task SetNpChannelAsync(ITextChannel tcParam = null)
 			{
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+				var data = GetData(Context.Guild.Id, true);
 				var tc = tcParam ?? Context.Channel as ITextChannel;
 
 				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel)
