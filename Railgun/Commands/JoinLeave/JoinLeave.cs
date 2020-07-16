@@ -6,38 +6,17 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.JoinLeave
 {
 	[Alias("joinleave", "jl"), UserPerms(GuildPermission.ManageGuild)]
 	public partial class JoinLeave : SystemBase
 	{
-		private ServerJoinLeave GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.JoinLeave == null)
-				if (create)
-					data.JoinLeave = new ServerJoinLeave();
-			
-			return data.JoinLeave;
-		}
-
 		[Command]
 		public Task EnableAsync()
 		{
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.JoinLeave;
 
 			if (data.ChannelId == Context.Channel.Id) {
 				data.ChannelId = 0;
@@ -53,7 +32,8 @@ namespace Railgun.Commands.JoinLeave
 		{
 			if (minutes < 0) return ReplyAsync("Minutes can not be less than 0.");
 
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.JoinLeave;
 
 			if (minutes == 0 && data.DeleteAfterMinutes == 0) {
 				return ReplyAsync("Already set to not delete Join/Leave notifications.");
@@ -69,9 +49,10 @@ namespace Railgun.Commands.JoinLeave
 		[Command("sendtodm")]
 		public Task DmAsync()
 		{
-			var data = GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.JoinLeave;
 
-			if (data == null || data.ChannelId == 0) 
+			if (data.ChannelId == 0) 
 				return ReplyAsync("Join/Leave Notifications is currently turned off. Please turn on before using this command.");
 
 			data.SendToDM = !data.SendToDM;
@@ -81,13 +62,8 @@ namespace Railgun.Commands.JoinLeave
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ShowAsync()
 		{
-			var data = GetData(Context.Guild.Id);
-
-			if (data == null) {
-				await ReplyAsync("Join/Leave Notifications has not been configured!");
-				return;
-			}
-
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.JoinLeave;
 			var tc = data.ChannelId != 0 ? await Context.Guild.GetTextChannelAsync(data.ChannelId) : null;
 			var tempString = string.Empty;
 			var output = new StringBuilder();
@@ -122,7 +98,7 @@ namespace Railgun.Commands.JoinLeave
 
 			if (data == null || data.JoinLeave == null) return ReplyAsync("Join/Leave Notifications has no data to reset.");
 
-			data.JoinLeave = null;
+			data.ResetJoinLeave();
 			return ReplyAsync("Join/Leave Notifications has been reset & disabled.");
 		}
 	}
