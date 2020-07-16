@@ -14,10 +14,8 @@ using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
-namespace Railgun.Commands.Music 
+namespace Railgun.Commands.Music
 {
     public partial class Music
     {
@@ -32,29 +30,10 @@ namespace Railgun.Commands.Music
                 _musicController = musicController;
             }
 
-            private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
             [Command, BotPerms(ChannelPermission.AttachFiles)]
             public async Task PlaylistAsync() {
-                var data = GetData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
                 if (data == null || data.PlaylistId == ObjectId.Empty) {
                     await ReplyAsync("Server playlist == currently empty.");
@@ -98,7 +77,8 @@ namespace Railgun.Commands.Music
 
             [Command("export"), BotPerms(ChannelPermission.AttachFiles), UserPerms(GuildPermission.ManageGuild)]
             public async Task ExportAsync() {
-                var data = GetData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
                 if (data == null || data.PlaylistId == ObjectId.Empty) {
                     await ReplyAsync("There's no playlist data to export.");
@@ -126,7 +106,8 @@ namespace Railgun.Commands.Music
 
             [Command("import"), UserPerms(GuildPermission.ManageGuild)]
             public async Task ImportAsync() {
-                var data = GetData(Context.Guild.Id, true);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
                 var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
                 if (Context.Message.Attachments.Count < 1) {

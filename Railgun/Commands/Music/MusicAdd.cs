@@ -9,8 +9,6 @@ using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -30,26 +28,6 @@ namespace Railgun.Commands.Music
 				_encricher = enricher;
 			}
 
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
 			[Command("upload")]
 			public async Task UploadAsync()
 			{
@@ -58,7 +36,8 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				var response = await ReplyAsync("Processing Attachment! Standby...");
 				var attachment = Context.Message.Attachments.FirstOrDefault();

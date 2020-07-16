@@ -5,12 +5,10 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("skip")]
 		public class MusicSkip : SystemBase
@@ -19,33 +17,14 @@ namespace Railgun.Commands.Music
 
 			public MusicSkip(PlayerController playerManager) => _playerController = playerManager;
 
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
 			[Command]
 			public async Task SkipAsync()
 			{
-				var data = GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || container == null) {
+				if (container == null) {
 					await ReplyAsync("Can not skip current song because I am not in voice channel.");
 					return;
 				}
@@ -76,10 +55,11 @@ namespace Railgun.Commands.Music
 			[Command("force"), UserPerms(GuildPermission.ManageMessages)]
 			public Task ForceAsync()
 			{
-				var data = GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || !data.VoteSkipEnabled) 
+				if (!data.VoteSkipEnabled) 
 					return ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");
 				if (container == null)
 					return ReplyAsync("Can not skip current song because I am not in voice channel.");

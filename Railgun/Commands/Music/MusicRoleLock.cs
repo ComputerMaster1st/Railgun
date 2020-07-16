@@ -5,8 +5,6 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -15,30 +13,11 @@ namespace Railgun.Commands.Music
 		[Alias("rolelock"), UserPerms(GuildPermission.ManageGuild)]
 		public class MusicRoleLock : SystemBase
 		{
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
 			[Command("add")]
 			public Task AddRoleAsync(IRole role)
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				data.AllowedRoles.Add(role.Id);
 
 				if (data.AllowedRoles.Count < 2) 
@@ -58,7 +37,8 @@ namespace Railgun.Commands.Music
 			[Command("remove")]
 			public Task RemoveRoleAsync(IRole role)
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole == role.Id);
 
 				if (count < 1)

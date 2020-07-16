@@ -10,8 +10,6 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -27,26 +25,6 @@ namespace Railgun.Commands.Music
 			_config = config;
 			_playerController = playerController;
 			_musicService = musicService;
-		}
-
-		private ServerMusic GetData(ulong guildId, bool create = false)
-		{
-			ServerProfile data;
-
-			if (create)
-				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-			else {
-				data = Context.Database.ServerProfiles.GetData(guildId);
-
-				if (data == null) 
-					return null;
-			}
-
-			if (data.Music == null)
-				if (create)
-					data.Music = new ServerMusic();
-			
-			return data.Music;
 		}
 
 		[Command("join"), BotPerms(GuildPermission.Connect | GuildPermission.Speak)]
@@ -89,7 +67,8 @@ namespace Railgun.Commands.Music
 		[Command("whitelist")]
 		public Task WhitelistAsync()
         {
-			var data = GetData(Context.Guild.Id, true);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Music;
 			data.WhitelistMode = !data.WhitelistMode;
 			return ReplyAsync($"Music Whitelist Mode is now {Format.Bold(data.WhitelistMode ? "Enabled" : "Disabled")}.");
         }
@@ -97,13 +76,11 @@ namespace Railgun.Commands.Music
 		[Command("show")]
 		public async Task ShowAsync()
 		{
-			var data = GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Music;
 			var songCount = 0;
 
-			if (data == null) {
-				await ReplyAsync("There are no settings available for Music.");
-				return;
-			} else if (data.PlaylistId != ObjectId.Empty) {
+			if (data.PlaylistId != ObjectId.Empty) {
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				songCount = playlist.Songs.Count;
 			}

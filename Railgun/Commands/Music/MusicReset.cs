@@ -8,8 +8,6 @@ using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -30,26 +28,6 @@ namespace Railgun.Commands.Music
 				_musicService = musicService;
 			}
 
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
 			[Command("stream")]
 			public Task StreamAsync()
 			{
@@ -64,9 +42,10 @@ namespace Railgun.Commands.Music
 			[Command("playlist")]
 			public async Task PlaylistAsync()
 			{
-				var data = GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
-				if (data == null || data.PlaylistId == ObjectId.Empty && !_full) {
+				if (data.PlaylistId == ObjectId.Empty && !_full) {
 					await ReplyAsync("Server playlist is already empty.");
 					return;
 				}
@@ -93,7 +72,7 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				data.Music = null;
+				data.ResetMusic();
 				await ReplyAsync("Music settings & playlist has been reset.");
 			}
 		}

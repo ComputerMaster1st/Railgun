@@ -6,8 +6,6 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
@@ -25,30 +23,11 @@ namespace Railgun.Commands.Music
 				_music = music;
 			}
 
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
-			}
-
 			[Command("join")]
 			public Task JoinAsync()
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var vc = (Context.Author as IGuildUser).VoiceChannel;
 
 				if (vc == null && data.AutoVoiceChannel == 0)
@@ -68,13 +47,8 @@ namespace Railgun.Commands.Music
 			[Command("play")]
 			public async Task PlayAsync(string input)
 			{
-				var data = GetData(Context.Guild.Id);
-				if (data == null)
-				{
-					await ReplyAsync("Music has not been configured yet! Please add/configure music to generate config.");
-					return;
-				}
-
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var playlist = await SystemUtilities.GetPlaylistAsync(_music, data);
 
 				SongId songId;
@@ -103,8 +77,8 @@ namespace Railgun.Commands.Music
 			[Command("play")]
 			public Task PlayAsync()
 			{
-				var data = GetData(Context.Guild.Id);
-				if (data == null) return ReplyAsync("Music has not been configured yet! Please add/configure music to generate config.");
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
 				data.AutoPlaySong = string.Empty;
 				return ReplyAsync("Will no longer play specific song on auto-join.");
@@ -113,7 +87,9 @@ namespace Railgun.Commands.Music
 			[Command("skip")]
 			public Task SkipAsync()
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
+
 				data.AutoSkip = !data.AutoSkip;
 				return ReplyAsync($"Music Auto-Skip is now {Format.Bold(data.AutoSkip ? "Enabled" : "Disabled")}.");
 			}
@@ -121,7 +97,9 @@ namespace Railgun.Commands.Music
 			[Command("download")]
 			public Task DownloadAsync()
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
+
 				data.AutoDownload = !data.AutoDownload;
 				return ReplyAsync($"Music Auto-Download is now {Format.Bold(data.AutoDownload ? "Enabled" : "Disabled")}.");
 			}
@@ -129,7 +107,9 @@ namespace Railgun.Commands.Music
 			[Command("loop")]
 			public Task AutoLoopAsync()
 			{
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
+				
 				data.PlaylistAutoLoop = !data.PlaylistAutoLoop;
 
 				var container = _playerController.GetPlayer(Context.Guild.Id);

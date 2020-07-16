@@ -16,7 +16,6 @@ using TreeDiagram.Models.Server;
 using Railgun.Music;
 using YoutubeExplode;
 using YoutubeExplode.Exceptions;
-using TreeDiagram.Models;
 
 namespace Railgun.Commands.Music
 {
@@ -43,26 +42,6 @@ namespace Railgun.Commands.Music
 				_musicConfig = musicConfig;
 				_enricher = enricher;
 				_ytClient = ytClient;
-			}
-
-			private ServerMusic GetData(ulong guildId, bool create = false)
-			{
-				ServerProfile data;
-
-				if (create)
-					data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
-				else {
-					data = Context.Database.ServerProfiles.GetData(guildId);
-
-					if (data == null) 
-						return null;
-				}
-
-				if (data.Music == null)
-					if (create)
-						data.Music = new ServerMusic();
-				
-				return data.Music;
 			}
 
 			private async Task QueueSongAsync(PlayerContainer playerContainer, Playlist playlist, SongRequest song, ServerMusic data, IUserMessage response)
@@ -132,7 +111,8 @@ namespace Railgun.Commands.Music
 				}
 
 				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-				var data = GetData(Context.Guild.Id, true);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
 				await Context.Database.SaveChangesAsync();
