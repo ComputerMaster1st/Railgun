@@ -16,31 +16,36 @@ namespace Railgun.Commands.Server
 			[Command("mention")]
 			public Task MentionAsync()
 			{
-				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-				data.Globals.DisableMentions = !data.Globals.DisableMentions;
-				return ReplyAsync($"Server mentions are now {(data.Globals.DisableMentions ? Format.Bold("Enabled") : Format.Bold("Disabled"))}.");
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Globals;
+
+				data.DisableMentions = !data.DisableMentions;
+				return ReplyAsync($"Server mentions are now {(data.DisableMentions ? Format.Bold("Enabled") : Format.Bold("Disabled"))}.");
 			}
 
 			[Command("prefix")]
 			public Task PrefixAsync([Remainder] string input = null)
 			{
-				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Command;
 
-				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Command.Prefix))
+				if (string.IsNullOrWhiteSpace(input) && string.IsNullOrEmpty(data.Prefix))
 					return ReplyAsync("No prefix has been specified. Please specify a prefix.");
-				if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Command.Prefix)) {
-					data.Command.Prefix = string.Empty;
+				if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrEmpty(data.Prefix)) {
+					data.Prefix = string.Empty;
 					return ReplyAsync("Server prefix has been removed.");
 				}
 
-				data.Command.Prefix = input;
+				data.Prefix = input;
 				return ReplyAsync($"Server prefix has been set! {Format.Code(input = "<command>")}!");
 			}
 
 			[Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)]
 			public Task DeleteCmdAsync()
 			{
-				var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Command;
+
 				data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
 				return ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
 			}
@@ -48,7 +53,9 @@ namespace Railgun.Commands.Server
 			[Command("respondtobots")]
 			public Task RespondAsync()
 			{
-				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Command;
+
 				data.RespondToBots = !data.RespondToBots;
 				return ReplyAsync($"I will {Format.Bold(data.RespondToBots ? "now" : "no longer")} respond to other bots.");
 			}
@@ -56,7 +63,9 @@ namespace Railgun.Commands.Server
 			[Command("ignoreoldmsgs")]
 			public Task IgnoreOldMessagesAsync()
 			{
-				var data = Context.Database.ServerCommands.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Command;
+
 				data.IgnoreModifiedMessages = !data.IgnoreModifiedMessages;
 				return ReplyAsync($"I will {Format.Bold(data.IgnoreModifiedMessages ? "now" : "no longer")} ignore modified messages. This includes pinned messages from now on.");
 			}
@@ -64,8 +73,9 @@ namespace Railgun.Commands.Server
 			[Command("show")]
 			public Task ShowAsync()
 			{
-				var command = Context.Database.ServerCommands.GetData(Context.Guild.Id);
-				var mention = Context.Database.ServerMentions.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var command = profile.Command;
+				var mention = profile.Globals;
 				var output = new StringBuilder()
 					.AppendLine("Railgun Server Configuration").AppendLine()
 					.AppendFormat("    Server Name : {0}", Context.Guild.Name).AppendLine()
