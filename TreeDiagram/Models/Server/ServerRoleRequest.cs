@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerRoleRequest : ConfigBase
+    public class ServerRoleRequest
     {
         public virtual List<UlongRoleId> RoleIds { get; private set; } = new List<UlongRoleId>();
-
-        public ServerRoleRequest(ulong id) : base(id) { }
 
         public bool AddRole(ulong roleId)
         {
