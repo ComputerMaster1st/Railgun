@@ -7,15 +7,35 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
-using Railgun.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.SubModels;
+using TreeDiagram.Models;
+using TreeDiagram.Models.Filter;
 
 namespace Railgun.Commands
 {
-	[Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
+    [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiUrl : SystemBase
 	{
+		private FilterUrl GetData(ulong guildId, bool create = false)
+		{
+			ServerProfile data;
+
+			if (create)
+				data = Context.Database.ServerProfiles.GetOrCreateData(guildId);
+			else {
+				data = Context.Database.ServerProfiles.GetData(guildId);
+
+				if (data == null) 
+					return null;
+			}
+
+			if (data.Filters.Caps == null)
+				if (create)
+					data.Filters.Urls = new FilterUrl();
+			
+			return data.Filters.Urls;
+		}
+
 		private string ProcessUrl(string url)
 		{
 			var cleanUrl = url;
@@ -30,7 +50,7 @@ namespace Railgun.Commands
 		[Command]
 		public Task EnableAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
@@ -38,7 +58,7 @@ namespace Railgun.Commands
 		[Command("includebots")]
 		public Task IncludeBotsAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 			data.IncludeBots = !data.IncludeBots;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
 		}
@@ -46,7 +66,7 @@ namespace Railgun.Commands
 		[Command("invites")]
 		public Task InvitesAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 			data.BlockServerInvites = !data.BlockServerInvites;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
 		}
@@ -55,7 +75,7 @@ namespace Railgun.Commands
 		public Task AddAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 
 			if (data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is already listed.");
@@ -70,7 +90,7 @@ namespace Railgun.Commands
 		public Task RemoveAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id);
 
 			if (data == null || !data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is not listed.");
@@ -83,13 +103,13 @@ namespace Railgun.Commands
 		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
 			var tc = pChannel ?? (ITextChannel)Context.Channel;
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 
-			if (data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) {
-				data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
+			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
+				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
 				return ReplyAsync("Anti-Url is now monitoring this channel.");
 			} else {
-				data.IgnoredChannels.Add(new IgnoredChannels(tc.Id));
+				data.IgnoredChannels.Add(tc.Id);
 				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
 			}
 		}
@@ -97,7 +117,7 @@ namespace Railgun.Commands
 		[Command("mode")]
 		public Task ModeAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id, true);
 			data.DenyMode = !data.DenyMode;
 			if (!data.IsEnabled) data.IsEnabled = true;
 			return ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
@@ -106,7 +126,7 @@ namespace Railgun.Commands
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ShowAsync()
 		{
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
+			var data = GetData(Context.Guild.Id);
 
 			if (data == null) {
 				await ReplyAsync("There are no settings available for Anti-Url. Currently disabled.");
@@ -124,12 +144,12 @@ namespace Railgun.Commands
 
 			if (data.IgnoredChannels.Count < 1) output.AppendLine("Ignored Channels : None");
 			else {
-				var deletedChannels = new List<IgnoredChannels>();
+				var deletedChannels = new List<ulong>();
 
-				foreach (var channel in data.IgnoredChannels) {
-					var tc = await Context.Guild.GetTextChannelAsync(channel.ChannelId);
+				foreach (var channelId in data.IgnoredChannels) {
+					var tc = await Context.Guild.GetTextChannelAsync(channelId);
 
-					if (tc == null) deletedChannels.Add(channel);
+					if (tc == null) deletedChannels.Add(channelId);
 					else if (initial) {
 						output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine();
 						initial = false;
@@ -160,12 +180,12 @@ namespace Railgun.Commands
 		[Command("reset")]
 		public Task ResetAsync()
 		{
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
+			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-			if (data == null)
+			if (data == null || data.Filters.Urls == null)
 				return ReplyAsync("Anti-Url has no data to reset.");
 
-			Context.Database.FilterUrls.Remove(data);
+			data.Filters.Urls = null;
 			return ReplyAsync("Anti-Url has been reset & disabled.");
 		}
 	}
