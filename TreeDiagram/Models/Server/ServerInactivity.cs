@@ -3,7 +3,7 @@ using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerInactivity : ConfigBase
+    public class ServerInactivity
     {
         public bool IsEnabled { get; set; }
         public int InactiveDaysThreshold { get; set; }
@@ -14,7 +14,5 @@ namespace TreeDiagram.Models.Server
 
         public virtual List<UlongUserId> UserWhitelist { get; private set; } = new List<UlongUserId>();
         public virtual List<UlongRoleId> RoleWhitelist { get; private set; } = new List<UlongRoleId>();
-
-        public ServerInactivity(ulong id) : base(id) {}
     }
 }

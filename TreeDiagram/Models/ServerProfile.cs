@@ -9,5 +9,6 @@ namespace TreeDiagram.Models
         public virtual ServerFilters Filters { get; private set; } = new ServerFilters();
         public virtual ServerFun Fun { get; private set; } = new ServerFun();
         public virtual ServerCommand Command { get; set; } = null;
+        public virtual ServerInactivity Inactivity { get; set; } = null;
     }
 }
