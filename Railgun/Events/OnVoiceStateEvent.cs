@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
@@ -46,20 +47,23 @@ namespace Railgun.Events
                 data = profile.Music;
 			}
 
-			if (data == null) return;
+			if (data.AutoJoinConfigs.Count < 1) return;
 
-			var tc = data.AutoTextChannel != 0 ? await guild.GetTextChannelAsync(data.AutoTextChannel) : null;
 			var vc = user.VoiceChannel;
+            var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == vc.Id);
+
+            if (autoJoinConfig == null) return;
+
+            var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
+
+            if (tc == null) return;
 
             if (before.VoiceChannel == after.VoiceChannel)
                 if (after.IsDeafened || after.IsMuted) return;
 
-            if (vc.Id == data.AutoVoiceChannel && tc != null)
-            {
-                ISong song = null; 
-                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
-                await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
-            }
+            ISong song = null; 
+            if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
+            await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
         }
     }
 }

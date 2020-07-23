@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
+using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
@@ -10,8 +11,7 @@ namespace TreeDiagram.Models.Server
 		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 		
-		public ulong AutoTextChannel { get; set; }
-		public ulong AutoVoiceChannel { get; set; }
+		public virtual List<MusicAutoJoinConfig> AutoJoinConfigs { get; private set; } = new List<MusicAutoJoinConfig>();
 		public bool AutoSkip { get; set; }
 		public bool AutoDownload { get; set; }
 		public string AutoPlaySong { get; set; } = string.Empty;

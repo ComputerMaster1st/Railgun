@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
@@ -10,6 +11,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
 using Railgun.Music;
 using TreeDiagram;
+using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Music
 {
@@ -85,10 +87,31 @@ namespace Railgun.Commands.Music
 				songCount = playlist.Songs.Count;
 			}
 
-			var vc = data.AutoVoiceChannel != 0 ? await Context.Guild.GetVoiceChannelAsync(data.AutoVoiceChannel) : null;
-			var tc = data.AutoTextChannel != 0 ? await Context.Guild.GetTextChannelAsync(data.AutoTextChannel) : null;
 			var npTc = data.NowPlayingChannel != 0 ? await Context.Guild.GetTextChannelAsync(data.NowPlayingChannel) : null;
-			var autoJoinOutput = string.Format("{0} {1}", vc != null ? vc.Name : "Disabled", tc != null ? $"(#{tc.Name})" : "");
+			var autoJoinOutput = new StringBuilder();
+			var badAutoJoinConfigs = new List<MusicAutoJoinConfig>();
+
+			foreach (var autoJoinConfig in data.AutoJoinConfigs)
+			{
+				var vc = await Context.Guild.GetVoiceChannelAsync(autoJoinConfig.VoiceChannelId);
+				var tc = await Context.Guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
+
+				if (vc == null) {
+					badAutoJoinConfigs.Add(autoJoinConfig);
+					continue;
+				}
+
+				autoJoinOutput.AppendFormat("| {0}:{1} |", vc.Name, (npTc == null ? (tc == null ? "[UNKNOWN TEXT CHANNEL]" : tc.Name) : "[USING \"Now Playing\" CHANNEL]"));
+			}
+
+			foreach (var autoJoinConfig in badAutoJoinConfigs)
+				data.AutoJoinConfigs.Remove(autoJoinConfig);
+
+			if (data.AutoJoinConfigs.Count < 1) {
+				autoJoinOutput.Clear();
+				autoJoinOutput.AppendFormat("Not set.");
+			}
+
 			var autoDownloadOutput = data.AutoDownload ? "Enabled" : "Disabled";
 			var autoSkipOutput = data.AutoSkip ? "Enabled" : "Disabled";
 			var silentPlayingOutput = data.SilentNowPlaying ? "Enabled" : "Disabled";
