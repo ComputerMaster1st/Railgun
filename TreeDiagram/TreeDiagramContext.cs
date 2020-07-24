@@ -26,6 +26,7 @@ namespace TreeDiagram
 				x.Property(y => y.PlaylistId)
 					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
 			});
+			modelBuilder.Entity<ServerMusic>().HasMany(f => f.AutoJoinConfigs).WithOne().OnDelete(DeleteBehavior.Cascade);
 			
 			modelBuilder.Entity<ServerInactivity>(x =>
 			{
@@ -33,7 +34,6 @@ namespace TreeDiagram
 			});
 			
             modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<ServerMusic>().HasMany(f => f.AutoJoinConfigs).WithOne().OnDelete(DeleteBehavior.Cascade);
 			base.OnModelCreating(modelBuilder);
 		}
 
