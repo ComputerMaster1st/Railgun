@@ -59,7 +59,7 @@ namespace Railgun.Events
             if (tc == null) return;
 
             if (before.VoiceChannel == after.VoiceChannel)
-                if (after.IsDeafened || after.IsMuted) return;
+                if (before.IsDeafened != after.IsDeafened || before.IsMuted != after.IsMuted) return;
 
             ISong song = null; 
             if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
