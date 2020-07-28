@@ -16,6 +16,6 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.2" />
     <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.10.2" />
-    <PackageReference Include="YoutubeExplode" Version="5.1.1" />
+    <PackageReference Include="YoutubeExplode" Version="5.1.2" />
   </ItemGroup>
 </Project>
