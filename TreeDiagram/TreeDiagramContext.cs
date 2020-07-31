@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Models;
@@ -24,16 +25,16 @@ namespace TreeDiagram
 			modelBuilder.Entity<FilterCaps>(x => {
 				x.Property(y => y.IgnoredChannels)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 			});
 
 			modelBuilder.Entity<FilterUrl>(x => {
 				x.Property(y => y.IgnoredChannels)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 			});
 			
@@ -44,37 +45,34 @@ namespace TreeDiagram
 					.OnDelete(DeleteBehavior.Cascade);
 				x.Property(y => y.UserWhitelist)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 				x.Property(y => y.RoleWhitelist)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 			});
 
 			modelBuilder.Entity<ServerMusic>(x => {
 				x.Property(y => y.PlaylistId)
-					.HasConversion(
-						input => input.ToString(), 
-						output => ObjectId.Parse(output)
-					);
+					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
 				x.HasMany(y => y.AutoJoinConfigs)
 					.WithOne()
 					.OnDelete(DeleteBehavior.Cascade);
 				x.Property(y => y.AllowedRoles)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 			});
 
 			modelBuilder.Entity<ServerRoleRequest>(x => {
 				x.Property(y => y.RoleIds)
 					.HasConversion(
-						input => input.ToArray(),
-						output => new List<ulong>(output)
+						input => input.Select(f => (long)f).ToArray(),
+						output => output.Select(f => (ulong)f).ToList()
 					);
 			});
 			

@@ -27,8 +27,8 @@ namespace TreeDiagram.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal[]>("IgnoredChannels")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("IgnoredChannels")
+                        .HasColumnType("bigint[]");
 
                     b.Property<bool>("IncludeBots")
                         .HasColumnType("boolean");
@@ -63,8 +63,8 @@ namespace TreeDiagram.Migrations
                     b.Property<bool>("DenyMode")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal[]>("IgnoredChannels")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("IgnoredChannels")
+                        .HasColumnType("bigint[]");
 
                     b.Property<bool>("IncludeBots")
                         .HasColumnType("boolean");
@@ -215,11 +215,11 @@ namespace TreeDiagram.Migrations
                     b.Property<int>("KickDaysThreshold")
                         .HasColumnType("integer");
 
-                    b.Property<decimal[]>("RoleWhitelist")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("RoleWhitelist")
+                        .HasColumnType("bigint[]");
 
-                    b.Property<decimal[]>("UserWhitelist")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("UserWhitelist")
+                        .HasColumnType("bigint[]");
 
                     b.HasKey("Id");
 
@@ -260,8 +260,8 @@ namespace TreeDiagram.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal[]>("AllowedRoles")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("AllowedRoles")
+                        .HasColumnType("bigint[]");
 
                     b.Property<bool>("AutoDownload")
                         .HasColumnType("boolean");
@@ -309,8 +309,8 @@ namespace TreeDiagram.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal[]>("RoleIds")
-                        .HasColumnType("numeric[]");
+                    b.Property<long[]>("RoleIds")
+                        .HasColumnType("bigint[]");
 
                     b.HasKey("Id");
 

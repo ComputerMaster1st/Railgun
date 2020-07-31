@@ -17,7 +17,7 @@ namespace TreeDiagram.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     IsEnabled = table.Column<bool>(nullable: false),
                     IncludeBots = table.Column<bool>(nullable: false),
-                    IgnoredChannels = table.Column<decimal[]>(nullable: true),
+                    IgnoredChannels = table.Column<long[]>(nullable: true),
                     Percentage = table.Column<int>(nullable: false),
                     Length = table.Column<int>(nullable: false)
                 },
@@ -34,7 +34,7 @@ namespace TreeDiagram.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     IsEnabled = table.Column<bool>(nullable: false),
                     IncludeBots = table.Column<bool>(nullable: false),
-                    IgnoredChannels = table.Column<decimal[]>(nullable: true),
+                    IgnoredChannels = table.Column<long[]>(nullable: true),
                     BlockServerInvites = table.Column<bool>(nullable: false),
                     DenyMode = table.Column<bool>(nullable: false),
                     BannedUrls = table.Column<List<string>>(nullable: true)
@@ -111,8 +111,8 @@ namespace TreeDiagram.Migrations
                     InactiveDaysThreshold = table.Column<int>(nullable: false),
                     KickDaysThreshold = table.Column<int>(nullable: false),
                     InactiveRoleId = table.Column<decimal>(nullable: false),
-                    UserWhitelist = table.Column<decimal[]>(nullable: true),
-                    RoleWhitelist = table.Column<decimal[]>(nullable: true)
+                    UserWhitelist = table.Column<long[]>(nullable: true),
+                    RoleWhitelist = table.Column<long[]>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -152,7 +152,7 @@ namespace TreeDiagram.Migrations
                     SilentNowPlaying = table.Column<bool>(nullable: false),
                     SilentSongProcessing = table.Column<bool>(nullable: false),
                     NowPlayingChannel = table.Column<decimal>(nullable: false),
-                    AllowedRoles = table.Column<decimal[]>(nullable: true),
+                    AllowedRoles = table.Column<long[]>(nullable: true),
                     WhitelistMode = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -166,7 +166,7 @@ namespace TreeDiagram.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RoleIds = table.Column<decimal[]>(nullable: true)
+                    RoleIds = table.Column<long[]>(nullable: true)
                 },
                 constraints: table =>
                 {
