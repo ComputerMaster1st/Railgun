@@ -9,7 +9,7 @@ namespace TreeDiagram.Models.Server
 	public class ServerMusic
 	{
 		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 		
 		public virtual List<MusicAutoJoinConfig> AutoJoinConfigs { get; private set; } = new List<MusicAutoJoinConfig>();
 		public bool AutoSkip { get; set; }

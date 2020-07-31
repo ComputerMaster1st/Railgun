@@ -9,7 +9,7 @@ namespace TreeDiagram.Models.Server
     public class ServerWarning
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public int WarnLimit { get; set; }
         public virtual List<ServerWarningInfo> Warnings { get; private set; } = new List<ServerWarningInfo>();

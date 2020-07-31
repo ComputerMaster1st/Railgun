@@ -8,7 +8,7 @@ namespace TreeDiagram.Models.Server
     public class ServerRoleRequest
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
         
         public List<ulong> RoleIds { get; private set; } = new List<ulong>();
 

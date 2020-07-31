@@ -9,7 +9,7 @@ namespace TreeDiagram.Models.Server
     public class ServerJoinLeave
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public bool SendToDM { get; set; }
         public ulong ChannelId { get; set; }

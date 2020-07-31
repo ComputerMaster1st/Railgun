@@ -8,7 +8,7 @@ namespace TreeDiagram.Models.Filter
     public abstract class FilterBase : ITreeFilter
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public bool IsEnabled { get; set; }
         public bool IncludeBots { get; set; }
