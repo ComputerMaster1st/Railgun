@@ -13,7 +13,6 @@ namespace TreeDiagram.Models.Filter
         public bool IsEnabled { get; set; }
         public bool IncludeBots { get; set; }
         
-        [Column(TypeName="jsonb")]
         public virtual List<ulong> IgnoredChannels { get; private set; } = new List<ulong>();
     }
 }

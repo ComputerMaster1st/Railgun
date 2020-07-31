@@ -17,9 +17,7 @@ namespace TreeDiagram.Models.Server
 
         public virtual List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
 
-        [Column(TypeName="jsonb")]
         public virtual List<ulong> UserWhitelist { get; private set; } = new List<ulong>();
-        [Column(TypeName="jsonb")]
         public virtual List<ulong> RoleWhitelist { get; private set; } = new List<ulong>();
     }
 }

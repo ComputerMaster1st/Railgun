@@ -10,8 +10,7 @@ namespace TreeDiagram.Models.Server
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         
-        [Column(TypeName="jsonb")]
-        public virtual List<ulong> RoleIds { get; private set; } = new List<ulong>();
+        public List<ulong> RoleIds { get; private set; } = new List<ulong>();
 
         public bool AddRole(ulong roleId)
         {
