@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using TreeDiagram.Models;
+using TreeDiagram.Models.Filter;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.TreeTimer;
 
@@ -20,18 +21,66 @@ namespace TreeDiagram
 
 	    protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<ServerMusic>(x => {
-				x.Property(y => y.PlaylistId)
-					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+			modelBuilder.Entity<FilterCaps>(x => {
+				x.Property(y => y.IgnoredChannels)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
 			});
-			modelBuilder.Entity<ServerMusic>().HasMany(f => f.AutoJoinConfigs).WithOne().OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<FilterUrl>(x => {
+				x.Property(y => y.IgnoredChannels)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
+			});
 			
 			modelBuilder.Entity<ServerInactivity>(x =>
 			{
-				x.HasMany(f => f.Users).WithOne().OnDelete(DeleteBehavior.Cascade);
+				x.HasMany(y => y.Users)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+				x.Property(y => y.UserWhitelist)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
+				x.Property(y => y.RoleWhitelist)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
+			});
+
+			modelBuilder.Entity<ServerMusic>(x => {
+				x.Property(y => y.PlaylistId)
+					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+				x.HasMany(y => y.AutoJoinConfigs)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+				x.Property(y => y.AllowedRoles)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
+			});
+
+			modelBuilder.Entity<ServerRoleRequest>(x => {
+				x.Property(y => y.RoleIds)
+					.HasConversion(
+						input => input.ToArray(),
+						output => new List<ulong>(output)
+					);
 			});
 			
-            modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ServerWarning>(x => {
+				x.HasMany(y => y.Warnings)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+			});
+
 			base.OnModelCreating(modelBuilder);
 		}
 
