@@ -38,30 +38,27 @@ namespace Railgun.Music.Events
 
 			try 
             {
-                ServerMusic data;
-
+                var output = new StringBuilder();
+                
                 using (var scope = _services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                    var profile = db.ServerProfiles.GetOrCreateData(tc.GuildId);
-                    data = profile.Music;
-                }
+                    var profile = db.ServerProfiles.GetData(tc.GuildId);
 
-                if (data != null && data.SilentNowPlaying && args.Exception == null) return;
+                    if (profile != null && profile.Music.SilentNowPlaying && args.Exception == null) return;
+                    if (args.Exception != null)
+                    {
+                        SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
 
-                var output = new StringBuilder();
-                if (args.Exception != null)
-                {
-                    SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
+                        var logOutput = new StringBuilder()
+                            .AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
+                            .AppendFormat("---- Error : {0}", args.Exception.ToString());
 
-                    var logOutput = new StringBuilder()
-                        .AppendFormat("<{0} ({1})> Music Player Error!", tc.Guild.Name, tc.GuildId).AppendLine()
-                        .AppendFormat("---- Error : {0}", args.Exception.ToString());
+                        await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, logOutput.ToString());
 
-                    await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, logOutput.ToString());
-
-                    output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.")
-                        .AppendFormat("{0} {1}", Format.Bold("ERROR:"), args.Exception.Message).AppendLine();
+                        output.AppendLine("An error has occured while playing! The stream has been automatically reset. You may start playing music again at any time.")
+                            .AppendFormat("{0} {1}", Format.Bold("ERROR:"), args.Exception.Message).AppendLine();
+                    }
                 }
 
 				var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";

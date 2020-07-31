@@ -43,27 +43,30 @@ namespace Railgun.Events
 			using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                var profile = db.ServerProfiles.GetOrCreateData(guild.Id);
+                var profile = db.ServerProfiles.GetData(guild.Id);
+
+                if (profile == null) return;
+
                 data = profile.Music;
+
+                if (data.AutoJoinConfigs.Count < 1) return;
+
+                var vc = user.VoiceChannel;
+                var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == vc.Id);
+
+                if (autoJoinConfig == null) return;
+
+                var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
+
+                if (tc == null) return;
+
+                if (before.VoiceChannel == after.VoiceChannel)
+                    if (before.IsDeafened != after.IsDeafened || before.IsMuted != after.IsMuted) return;
+
+                ISong song = null; 
+                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
+                await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
 			}
-
-			if (data.AutoJoinConfigs.Count < 1) return;
-
-			var vc = user.VoiceChannel;
-            var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == vc.Id);
-
-            if (autoJoinConfig == null) return;
-
-            var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
-
-            if (tc == null) return;
-
-            if (before.VoiceChannel == after.VoiceChannel)
-                if (before.IsDeafened != after.IsDeafened || before.IsMuted != after.IsMuted) return;
-
-            ISong song = null; 
-            if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
-            await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
         }
     }
 }

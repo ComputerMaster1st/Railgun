@@ -32,40 +32,38 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
-            ServerGlobals sMention;
-            UserGlobals uMention = null;
             string username;
+            string notification;
 
 			using (var scope = _services.CreateScope())
 			{
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                var profile = db.ServerProfiles.GetOrCreateData(user.Guild.Id);
-                var inactivityData = profile.Inactivity;
+                var profile = db.ServerProfiles.GetData(user.Guild.Id);
 
-				if (inactivityData != null && inactivityData.IsEnabled && inactivityData.InactiveDaysThreshold != 0 && 
-				    inactivityData.InactiveRoleId != 0)
+                if (profile == null) return Task.CompletedTask;
+
+				if (profile.Inactivity.IsEnabled && profile.Inactivity.InactiveDaysThreshold != 0 && 
+				    profile.Inactivity.InactiveRoleId != 0)
 				{
-					if (inactivityData.Users.Any(u => u.UserId == user.Id))
-						inactivityData.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
-					else inactivityData.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+					if (profile.Inactivity.Users.Any(u => u.UserId == user.Id))
+						profile.Inactivity.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
+					else profile.Inactivity.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
 				}
 				
 				data = profile.JoinLeave;
-                sMention = profile.Globals;
+                var sMention = profile.Globals;
 
-                var userProfile = db.UserProfiles.GetOrCreateData(user.Id);
-                uMention = userProfile.Globals;
+                var userProfile = db.UserProfiles.GetData(user.Id);
                 username = SystemUtilities.GetUsernameOrMention(db, user);
+
+                notification = data.GetMessage(MsgType.Join);
+
+                if (string.IsNullOrEmpty(notification)) return Task.CompletedTask;
+
+                notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", username);
+                if ((sMention != null && sMention.DisableMentions) || (userProfile != null && userProfile.Globals.DisableMentions)) notification = notification.Replace("<user#disc>", $"{username}#{user.DiscriminatorValue}");
+
 			}
-
-			if (data == null) return Task.CompletedTask;
-
-			var notification = data.GetMessage(MsgType.Join);
-
-			if (string.IsNullOrEmpty(notification)) return Task.CompletedTask;
-
-			notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", username);
-            if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions)) notification = notification.Replace("<user#disc>", $"{username}#{user.DiscriminatorValue}");
             
 			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }

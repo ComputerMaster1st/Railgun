@@ -24,12 +24,13 @@ namespace Railgun.Events.OnMessageEvents
 			using (var scope = _services.CreateScope())
 			{
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var profile = db.ServerProfiles.GetOrCreateData(tc.GuildId);
-            	var data = profile.Inactivity;
+				var profile = db.ServerProfiles.GetData(tc.GuildId);
+
+				if (profile == null) return;
+				
 				var guild = tc.Guild;
 				var user = await guild.GetUserAsync(message.Author.Id);
-
-				if (data == null) return;
+            	var data = profile.Inactivity;
 				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
 				if (guild.OwnerId == user.Id) return;
 				if (data.UserWhitelist.Any((f) => f == user.Id)) return;

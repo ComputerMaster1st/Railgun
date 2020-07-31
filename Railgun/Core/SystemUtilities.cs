@@ -59,12 +59,10 @@ namespace Railgun.Core
 
         public static string GetUsernameOrMention(TreeDiagramContext db, IGuildUser user)
 		{
-			var profile = db.ServerProfiles.GetOrCreateData(user.GuildId);
-            var sMention = profile.Globals;
-			var userProfile = db.ServerProfiles.GetOrCreateData(user.Id);
-            var uMention = userProfile.Globals;
+			var profile = db.ServerProfiles.GetData(user.GuildId);
+			var userProfile = db.ServerProfiles.GetData(user.Id);
 
-			if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions))
+			if ((profile != null && profile.Globals.DisableMentions) || (userProfile != null && userProfile.Globals.DisableMentions))
 				return user.Username;
 			return user.Mention;
 		}

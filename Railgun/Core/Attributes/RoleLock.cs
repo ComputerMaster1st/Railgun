@@ -25,7 +25,9 @@ namespace Railgun.Core.Attributes
 			switch (_moduleType) 
 			{
 				case ModuleType.Music:
-					var profile = context.Database.ServerProfiles.GetOrCreateData(context.Guild.Id);
+					var profile = context.Database.ServerProfiles.GetData(context.Guild.Id);
+					if (profile == null) return Task.FromResult(PreconditionResult.FromSuccess());
+					
             		var data = profile.Music;
 
 					if (data.AllowedRoles.Count < 1) return Task.FromResult(PreconditionResult.FromSuccess());
