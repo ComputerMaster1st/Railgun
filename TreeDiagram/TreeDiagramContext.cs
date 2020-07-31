@@ -56,7 +56,10 @@ namespace TreeDiagram
 
 			modelBuilder.Entity<ServerMusic>(x => {
 				x.Property(y => y.PlaylistId)
-					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+					.HasConversion(
+						input => input.ToString(), 
+						output => ObjectId.Parse(output)
+					);
 				x.HasMany(y => y.AutoJoinConfigs)
 					.WithOne()
 					.OnDelete(DeleteBehavior.Cascade);
