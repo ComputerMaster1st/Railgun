@@ -22,7 +22,7 @@ namespace TreeDiagram.Models.Server
 		public bool SilentNowPlaying { get; set; }
 		public bool SilentSongProcessing { get; set; }
 		public ulong NowPlayingChannel { get; set; }
-		public virtual List<ulong> AllowedRoles { get; private set; } = new List<ulong>();
+		public List<ulong> AllowedRoles { get; private set; } = new List<ulong>();
 		public bool WhitelistMode { get; set; }
 	}
 }

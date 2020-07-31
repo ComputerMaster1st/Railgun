@@ -13,6 +13,6 @@ namespace TreeDiagram.Models.Filter
         public bool IsEnabled { get; set; }
         public bool IncludeBots { get; set; }
         
-        public virtual List<ulong> IgnoredChannels { get; private set; } = new List<ulong>();
+        public List<ulong> IgnoredChannels { get; private set; } = new List<ulong>();
     }
 }

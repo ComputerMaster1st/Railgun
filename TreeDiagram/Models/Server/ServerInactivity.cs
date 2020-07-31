@@ -17,7 +17,7 @@ namespace TreeDiagram.Models.Server
 
         public virtual List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
 
-        public virtual List<ulong> UserWhitelist { get; private set; } = new List<ulong>();
-        public virtual List<ulong> RoleWhitelist { get; private set; } = new List<ulong>();
+        public List<ulong> UserWhitelist { get; private set; } = new List<ulong>();
+        public List<ulong> RoleWhitelist { get; private set; } = new List<ulong>();
     }
 }
