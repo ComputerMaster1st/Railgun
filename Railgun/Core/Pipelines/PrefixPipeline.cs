@@ -34,7 +34,7 @@ namespace Railgun.Core.Pipelines
 				if (content.StartsWith(profile.Command.Prefix, StringComparison.CurrentCultureIgnoreCase))
 					return await ValidPrefixExecuteAsync(context, profile.Command.Prefix, msg, next);
 
-			var userProfile = ctx.Database.UserProfiles.GetData(ctx.Guild.Id);
+			var userProfile = ctx.Database.UserProfiles.GetData(ctx.Author.Id);
 
 			if (userProfile != null && !string.IsNullOrEmpty(userProfile.Globals.Prefix)) 
 				if (content.StartsWith(userProfile.Globals.Prefix, StringComparison.CurrentCultureIgnoreCase))
