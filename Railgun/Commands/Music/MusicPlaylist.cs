@@ -15,7 +15,7 @@ using Railgun.Core.Extensions;
 using Railgun.Music;
 using TreeDiagram;
 
-namespace Railgun.Commands.Music 
+namespace Railgun.Commands.Music
 {
     public partial class Music
     {
@@ -32,7 +32,8 @@ namespace Railgun.Commands.Music
 
             [Command, BotPerms(ChannelPermission.AttachFiles)]
             public async Task PlaylistAsync() {
-                var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
                 if (data == null || data.PlaylistId == ObjectId.Empty) {
                     await ReplyAsync("Server playlist == currently empty.");
@@ -76,7 +77,8 @@ namespace Railgun.Commands.Music
 
             [Command("export"), BotPerms(ChannelPermission.AttachFiles), UserPerms(GuildPermission.ManageGuild)]
             public async Task ExportAsync() {
-                var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
                 if (data == null || data.PlaylistId == ObjectId.Empty) {
                     await ReplyAsync("There's no playlist data to export.");
@@ -104,7 +106,8 @@ namespace Railgun.Commands.Music
 
             [Command("import"), UserPerms(GuildPermission.ManageGuild)]
             public async Task ImportAsync() {
-                var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
                 var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
                 if (Context.Message.Attachments.Count < 1) {

@@ -32,27 +32,30 @@ namespace Railgun.Events
         private Task ExecuteAsync(SocketGuildUser user)
         {
             ServerJoinLeave data;
-            ServerMention sMention;
-            UserMention uMention;
+            string notification;
 
             using (var scope = _services.CreateScope())
             {
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-				var inactivityData = db.ServerInactivities.GetData(user.Guild.Id);
+                var profile = db.ServerProfiles.GetData(user.Guild.Id);
+
+                if (profile == null) return Task.CompletedTask;
+
+                var inactivityData = profile.Inactivity;
 
 				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
 
-				data = db.ServerJoinLeaves.GetData(user.Guild.Id);
-                sMention = db.ServerMentions.GetData(user.Guild.Id);
-                uMention = db.UserMentions.GetData(user.Id);
+				data = profile.JoinLeave;
+                var sMention = profile.Globals;
+                var userProfile = db.UserProfiles.GetData(user.Id);
+
+                if (data == null) return Task.CompletedTask;
+
+                notification = data.GetMessage(MsgType.Leave);
+
+                if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", user.Username);
+                if ((sMention != null && sMention.DisableMentions) || (userProfile != null && userProfile.Globals.DisableMentions)) notification = notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
             }
-
-			if (data == null) return Task.CompletedTask;
-
-			var notification = data.GetMessage(MsgType.Leave);
-
-			if (!string.IsNullOrEmpty(notification)) notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", user.Username);
-            if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions)) notification = notification.Replace("<user#disc>", $"{user.Username}#{user.DiscriminatorValue}");
 
             return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }

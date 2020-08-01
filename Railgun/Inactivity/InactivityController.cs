@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Timers;
 using Railgun.Timers.Containers;
 using TreeDiagram;
+using TreeDiagram.Models;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
 
@@ -44,12 +45,12 @@ namespace Railgun.Inactivity
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 
-                if (!db.ServerInactivities.Any((f) => f.IsEnabled)) return;
+                if (!db.ServerProfiles.Any((f) => f.Inactivity.IsEnabled)) return;
 
-                var configs = new List<ServerInactivity>(db.ServerInactivities.AsQueryable().Where(
-                    (f) => f.IsEnabled 
-                           && f.InactiveRoleId != 0 
-                           && f.InactiveDaysThreshold != 0));
+                var configs = new List<ServerProfile>(db.ServerProfiles.AsQueryable().Where(
+                    (f) => f.Inactivity.IsEnabled 
+                           && f.Inactivity.InactiveRoleId != 0 
+                           && f.Inactivity.InactiveDaysThreshold != 0));
                 
                 if (configs.Count < 1) return;
                 
@@ -58,11 +59,12 @@ namespace Railgun.Inactivity
                     var guild = await _client.GetGuildAsync(config.Id);
                     var alreadyInactiveUsers = new List<UserActivityContainer>();
                     var badUserIds = new List<ulong>();
+                    var data = config.Inactivity;
     
-                    foreach (var container in config.Users) {
+                    foreach (var container in data.Users) {
                         var currentTime = DateTime.Now;
                         
-                        if (container.LastActive.AddDays(config.InactiveDaysThreshold) > currentTime) continue;
+                        if (container.LastActive.AddDays(data.InactiveDaysThreshold) > currentTime) continue;
     
                         var user = await guild.GetUserAsync(container.UserId);
                         if (user == null)
@@ -71,7 +73,7 @@ namespace Railgun.Inactivity
                             continue;
                         }
     
-                        if (user.RoleIds.Contains(config.InactiveRoleId))
+                        if (user.RoleIds.Contains(data.InactiveRoleId))
                         {
                             alreadyInactiveUsers.Add(container);
                             continue;
@@ -79,20 +81,20 @@ namespace Railgun.Inactivity
 
                         var timer = db.TimerAssignRoles.CreateTimer(config.Id, currentTime.AddMinutes(5));
                         timer.UserId = container.UserId;
-                        timer.RoleId = config.InactiveRoleId;
+                        timer.RoleId = data.InactiveRoleId;
     
                         _timerController.CreateAndStartTimer<AssignRoleTimerContainer>(timer);
                     }
 
-                    foreach (var id in badUserIds) config.Users.RemoveAll(u => u.UserId == id); 
+                    foreach (var id in badUserIds) data.Users.RemoveAll(u => u.UserId == id); 
                     if (alreadyInactiveUsers.Count < 1) return;
-                    if (config.KickDaysThreshold == 0) return;
+                    if (data.KickDaysThreshold == 0) return;
     
                     foreach (var container in alreadyInactiveUsers)
                     {
                         var currentTime = DateTime.Now;
                         
-                        if (container.LastActive.AddDays(config.KickDaysThreshold) > currentTime) continue;
+                        if (container.LastActive.AddDays(data.KickDaysThreshold) > currentTime) continue;
 
                         var timer = db.TimerKickUsers.CreateTimer(config.Id, currentTime.AddMinutes(5));
                         timer.UserId = container.UserId;

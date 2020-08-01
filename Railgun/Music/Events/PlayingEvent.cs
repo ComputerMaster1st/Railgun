@@ -39,21 +39,23 @@ namespace Railgun.Music.Events
 				ITextChannel tc;
 				
 				using (var scope = _services.CreateScope()) {
-					data = scope.ServiceProvider.GetService<TreeDiagramContext>().ServerMusics.GetData(args.GuildId);
-				}
+					var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+					var profile = db.ServerProfiles.GetData(args.GuildId);
+                    data = profile.Music;
 
-				if (data.NowPlayingChannel != 0)
-					tc = await (await _client.GetGuildAsync(args.GuildId)).GetTextChannelAsync(data.NowPlayingChannel);
-				else tc = _container.TextChannel;
+					if (data.NowPlayingChannel != 0)
+						tc = await (await _client.GetGuildAsync(args.GuildId)).GetTextChannelAsync(data.NowPlayingChannel);
+					else tc = _container.TextChannel;
 
-				if (!data.SilentNowPlaying) {
-					var output = new StringBuilder()
-						.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Title), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Id.ToString())).AppendLine()
-						.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Duration.ToString()), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Source}>"));
+					if (!data.SilentNowPlaying) {
+						var output = new StringBuilder()
+							.AppendFormat("Now Playing: {0} {1} ID: {2}", Format.Bold(args.Song.Metadata.Title), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Id.ToString())).AppendLine()
+							.AppendFormat("Time: {0} {1} Uploader: {2} {1} URL: {3}", Format.Bold(args.Song.Metadata.Duration.ToString()), SystemUtilities.GetSeparator, Format.Bold(args.Song.Metadata.Uploader), Format.Bold($"<{args.Song.Metadata.Source}>"));
 
-                    if (args.IsRatelimited) output.AppendLine().AppendLine(Format.Italics(Format.Bold("WARNING :") + " YouTube Rate-Limits (429) are currently in effect. Some songs may not work, however will still remain inside the playlist and be encoded/downloaded once the rate-limit has been cleared."));
+						if (args.IsRatelimited) output.AppendLine().AppendLine(Format.Italics(Format.Bold("WARNING :") + " YouTube Rate-Limits (429) are currently in effect. Some songs may not work, however will still remain inside the playlist and be encoded/downloaded once the rate-limit has been cleared."));
 
-					await tc.SendMessageAsync(output.ToString());
+						await tc.SendMessageAsync(output.ToString());
+					}
 				}
 
 				await PlayerUtilities.CreateOrModifyMusicPlayerLogEntryAsync(_config, _client, _container);

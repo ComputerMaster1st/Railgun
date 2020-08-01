@@ -111,7 +111,8 @@ namespace Railgun.Commands.Music
 				}
 
 				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 
 				await Context.Database.SaveChangesAsync();

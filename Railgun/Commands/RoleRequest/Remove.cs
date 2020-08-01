@@ -12,7 +12,7 @@ namespace Railgun.Commands.RoleRequest
     {
         [Alias("remove"), UserPerms(GuildPermission.ManageRoles)]
         public class Remove : SystemBase
-        {
+        {      
             [Command()]
             public Task RemoveAsync(IRole role)
             {
@@ -20,8 +20,10 @@ namespace Railgun.Commands.RoleRequest
                     return ReplyAsync("The role you tried to remove does not exist. " +
                                       "Please double-check in-case you mistyped.");
 
-                var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
-                if (data is null || data.RoleIds.Count == 0)
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
+
+                if (data.RoleIds.Count == 0)
                     return ReplyAsync("Role-Request has either not been setup or no roles were available.");
 
                 return ReplyAsync(data.RemoveRole(role.Id) ?

@@ -1,78 +1,81 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MongoDB.Bson;
+using TreeDiagram.Models;
 using TreeDiagram.Models.Filter;
-using TreeDiagram.Models.Fun;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.TreeTimer;
-using TreeDiagram.Models.User;
 
 namespace TreeDiagram
 {
-    public sealed class TreeDiagramContext : DbContext
-    {
-	    public DbSet<FilterCaps> FilterCapses { get; internal set; } = null;
-        public DbSet<FilterUrl> FilterUrls { get; internal set; } = null;
+	public sealed class TreeDiagramContext : DbContext
+	{
+		public DbSet<ServerProfile> ServerProfiles { get; internal set; } = null;
+		public DbSet<UserProfile> UserProfiles { get; internal set; } = null;
 
-        public DbSet<FunBite> FunBites { get; internal set; } = null;
-        public DbSet<FunRst> FunRsts { get; internal set; } = null;
+		public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
+		public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
+		public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
 
-        public DbSet<ServerCommand> ServerCommands { get; internal set; } = null;
-        public DbSet<ServerInactivity> ServerInactivities { get; internal set; } = null;
-		public DbSet<ServerJoinLeave> ServerJoinLeaves { get; internal set; } = null;
-		public DbSet<ServerMention> ServerMentions { get; internal set; } = null;
-		public DbSet<ServerMusic> ServerMusics { get; internal set; } = null;
-		public DbSet<ServerRoleRequest> ServerRoleRequests { get; internal set; } = null;
-		public DbSet<ServerWarning> ServerWarnings { get; internal set; } = null;
+		public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
 
-	    public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
-	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
-	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
-
-	    public DbSet<UserCommand> UserCommands { get; internal set; } = null;
-		public DbSet<UserMention> UserMentions { get; internal set; } = null;
-
-	    public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
-
-	    protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<ServerMusic>(x => {
-				x.Property(y => y.PlaylistId)
-					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
-				x.HasMany(f => f.AllowedRoles).WithOne().OnDelete(DeleteBehavior.Cascade);
+			var ulongConverter = new ValueConverter<List<ulong>, long[]>(
+				input => input.Select(v => (long)v).ToArray(),
+				output => output.Select(v => (ulong)v).ToList()
+			);
+
+			modelBuilder.Entity<FilterCaps>(x => {
+				x.Property(y => y.IgnoredChannels)
+					.HasConversion(ulongConverter);
+			});
+
+			modelBuilder.Entity<FilterUrl>(x => {
+				x.Property(y => y.IgnoredChannels)
+					.HasConversion(ulongConverter);
 			});
 			
 			modelBuilder.Entity<ServerInactivity>(x =>
 			{
-				x.HasMany(f => f.Users).WithOne().OnDelete(DeleteBehavior.Cascade);
-				x.HasMany(f => f.RoleWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
-				x.HasMany(f => f.UserWhitelist).WithOne().OnDelete(DeleteBehavior.Cascade);
+				x.HasMany(y => y.Users)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+				x.Property(y => y.UserWhitelist)
+					.HasConversion(ulongConverter);
+				x.Property(y => y.RoleWhitelist)
+					.HasConversion(ulongConverter);
+			});
+
+			modelBuilder.Entity<ServerMusic>(x => {
+				x.Property(y => y.PlaylistId)
+					.HasConversion(input => input.ToString(), output => ObjectId.Parse(output));
+				x.HasMany(y => y.AutoJoinConfigs)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+				x.Property(y => y.AllowedRoles)
+					.HasConversion(ulongConverter);
+			});
+
+			modelBuilder.Entity<ServerRoleRequest>(x => {
+				x.Property(y => y.RoleIds)
+					.HasConversion(ulongConverter);
 			});
 			
-            modelBuilder.Entity<ServerWarning>().HasMany(f => f.Warnings).WithOne().OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<FilterCaps>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<FilterUrl>().HasMany(f => f.IgnoredChannels).WithOne().OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<ServerRoleRequest>().HasMany(f => f.RoleIds).WithOne().OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ServerWarning>(x => {
+				x.HasMany(y => y.Warnings)
+					.WithOne()
+					.OnDelete(DeleteBehavior.Cascade);
+			});
+
 			base.OnModelCreating(modelBuilder);
 		}
 
-		public int CheckForBadConfigs(IEnumerable<ulong> ids)
+		public int CheckForBadConfigs(IEnumerable<ulong> serverIds)
 		{
-			var badConfigCount = 0;
-
-			badConfigCount += FilterCapses.ConfigCheck(ids);
-			badConfigCount += FilterUrls.ConfigCheck(ids);
-			
-			badConfigCount += FunBites.ConfigCheck(ids);
-			badConfigCount += FunRsts.ConfigCheck(ids);
-			
-			badConfigCount += ServerCommands.ConfigCheck(ids);
-            badConfigCount += ServerInactivities.ConfigCheck(ids);
-            badConfigCount += ServerMentions.ConfigCheck(ids);
-			badConfigCount += ServerMusics.ConfigCheck(ids);
-			badConfigCount += ServerWarnings.ConfigCheck(ids);
-			badConfigCount += ServerJoinLeaves.ConfigCheck(ids);
-			badConfigCount += ServerRoleRequests.ConfigCheck(ids);
+			var badConfigCount = ServerProfiles.ConfigCheck(serverIds);
 
 			if (badConfigCount > 0) SaveChanges();
 			return badConfigCount;
@@ -80,20 +83,7 @@ namespace TreeDiagram
 
 		public void DeleteGuildData(ulong id)
 		{
-			FilterCapses.DeleteData(id);
-			FilterUrls.DeleteData(id);
-			
-			FunBites.DeleteData(id);
-			FunRsts.DeleteData(id);
-			
-			ServerCommands.DeleteData(id);
-            ServerInactivities.DeleteData(id);
-            ServerMentions.DeleteData(id);
-			ServerMusics.DeleteData(id);
-			ServerWarnings.DeleteData(id);
-			ServerJoinLeaves.DeleteData(id);
-			ServerRoleRequests.DeleteData(id);
-
+			ServerProfiles.DeleteData(id);
 			SaveChanges();
 		}
 

@@ -7,13 +7,13 @@ using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
-using Railgun.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.SubModels;
+using TreeDiagram.Models;
+using TreeDiagram.Models.Filter;
 
 namespace Railgun.Commands
 {
-	[Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
+    [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public class AntiUrl : SystemBase
 	{
 		private string ProcessUrl(string url)
@@ -30,7 +30,9 @@ namespace Railgun.Commands
 		[Command]
 		public Task EnableAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
@@ -38,7 +40,9 @@ namespace Railgun.Commands
 		[Command("includebots")]
 		public Task IncludeBotsAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.IncludeBots = !data.IncludeBots;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
 		}
@@ -46,7 +50,9 @@ namespace Railgun.Commands
 		[Command("invites")]
 		public Task InvitesAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.BlockServerInvites = !data.BlockServerInvites;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
 		}
@@ -55,7 +61,8 @@ namespace Railgun.Commands
 		public Task AddAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
 			if (data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is already listed.");
@@ -70,9 +77,10 @@ namespace Railgun.Commands
 		public Task RemoveAsync(string url)
 		{
 			var newUrl = ProcessUrl(url);
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
-			if (data == null || !data.BannedUrls.Contains(newUrl))
+			if (!data.BannedUrls.Contains(newUrl))
 				return ReplyAsync("The Url specified is not listed.");
 
 			data.BannedUrls.Remove(newUrl);
@@ -83,13 +91,14 @@ namespace Railgun.Commands
 		public Task IgnoreAsync(ITextChannel pChannel = null)
 		{
 			var tc = pChannel ?? (ITextChannel)Context.Channel;
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
-			if (data.IgnoredChannels.Any(f => f.ChannelId == tc.Id)) {
-				data.IgnoredChannels.RemoveAll(f => f.ChannelId == tc.Id);
+			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
+				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
 				return ReplyAsync("Anti-Url is now monitoring this channel.");
 			} else {
-				data.IgnoredChannels.Add(new IgnoredChannels(tc.Id));
+				data.IgnoredChannels.Add(tc.Id);
 				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
 			}
 		}
@@ -97,7 +106,9 @@ namespace Railgun.Commands
 		[Command("mode")]
 		public Task ModeAsync()
 		{
-			var data = Context.Database.FilterUrls.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
+
 			data.DenyMode = !data.DenyMode;
 			if (!data.IsEnabled) data.IsEnabled = true;
 			return ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
@@ -106,12 +117,8 @@ namespace Railgun.Commands
 		[Command("show"), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ShowAsync()
 		{
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
-
-			if (data == null) {
-				await ReplyAsync("There are no settings available for Anti-Url. Currently disabled.");
-				return;
-			}
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Filters.Urls;
 
 			var initial = true;
 
@@ -124,12 +131,12 @@ namespace Railgun.Commands
 
 			if (data.IgnoredChannels.Count < 1) output.AppendLine("Ignored Channels : None");
 			else {
-				var deletedChannels = new List<IgnoredChannels>();
+				var deletedChannels = new List<ulong>();
 
-				foreach (var channel in data.IgnoredChannels) {
-					var tc = await Context.Guild.GetTextChannelAsync(channel.ChannelId);
+				foreach (var channelId in data.IgnoredChannels) {
+					var tc = await Context.Guild.GetTextChannelAsync(channelId);
 
-					if (tc == null) deletedChannels.Add(channel);
+					if (tc == null) deletedChannels.Add(channelId);
 					else if (initial) {
 						output.AppendFormat("Ignored Channels : #{0}", tc.Name).AppendLine();
 						initial = false;
@@ -160,12 +167,12 @@ namespace Railgun.Commands
 		[Command("reset")]
 		public Task ResetAsync()
 		{
-			var data = Context.Database.FilterUrls.GetData(Context.Guild.Id);
+			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
 			if (data == null)
 				return ReplyAsync("Anti-Url has no data to reset.");
 
-			Context.Database.FilterUrls.Remove(data);
+			data.Filters.ResetUrls();
 			return ReplyAsync("Anti-Url has been reset & disabled.");
 		}
 	}

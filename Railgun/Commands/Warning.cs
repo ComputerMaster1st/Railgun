@@ -38,7 +38,8 @@ namespace Railgun.Commands
 				return;
 			}
 
-			var data = Context.Database.ServerWarnings.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 			var userWarnings = data.GetWarnings(user.Id);
 
 			if (data.WarnLimit < 1) 
@@ -78,9 +79,10 @@ namespace Railgun.Commands
 		[Command("list"), UserPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ListAsync()
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 
-			if (data == null || data.Warnings.Count < 1) 
+			if (data.Warnings.Count < 1) 
 			{
 				await ReplyAsync("There are currently no users with warnings.");
 				return;
@@ -126,9 +128,10 @@ namespace Railgun.Commands
 		[Command("mylist")]
 		public Task MyListAsync()
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 
-			if (data == null || data.Warnings.Count < 1)
+			if (data.Warnings.Count < 1)
 				return ReplyAsync("There are currently no users with warnings.");
 
 			var warnings = data.GetWarnings(Context.Author.Id);
@@ -146,9 +149,10 @@ namespace Railgun.Commands
 		[Command("clear"), UserPerms(GuildPermission.BanMembers)]
 		public Task ClearAsync(IUser user)
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 
-			if (data == null || data.Warnings.Count < 1)
+			if (data.Warnings.Count < 1)
 				return ReplyAsync($"There are no warnings currently issued to {user.Mention}.");
 
 			var warnings = data.GetWarnings(user.Id);
@@ -163,9 +167,10 @@ namespace Railgun.Commands
 		[Command("empty"), UserPerms(GuildPermission.ManageGuild)]
 		public Task EmptyAsync()
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 
-			if (data == null || data.Warnings.Count < 1) 
+			if (data.Warnings.Count < 1) 
 				return ReplyAsync("Warnings list is already empty.");
 
 			data.Warnings.Clear();
@@ -175,7 +180,8 @@ namespace Railgun.Commands
 		[Command("limit"), UserPerms(GuildPermission.ManageGuild)]
 		public Task WarnLimitAsync(int limit = 5)
 		{
-			var data = Context.Database.ServerWarnings.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            var data = profile.Warning;
 
 			if (limit < 0)
 				return ReplyAsync("The limit entered is invalid. Must be 0 or higher.");
@@ -196,12 +202,12 @@ namespace Railgun.Commands
 		[Command("reset"), UserPerms(GuildPermission.ManageGuild)]
 		public Task ResetAsync()
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
 			if (data == null)
 				return ReplyAsync("Warnings has no data to reset.");
 
-			Context.Database.ServerWarnings.Remove(data);
+			data.ResetWarning();
 			return ReplyAsync("Warnings has been reset & disabled.");
 		}
 	}

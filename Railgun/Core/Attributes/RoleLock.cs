@@ -25,18 +25,21 @@ namespace Railgun.Core.Attributes
 			switch (_moduleType) 
 			{
 				case ModuleType.Music:
-					var data = context.Database.ServerMusics.GetData(context.Guild.Id);
+					var profile = context.Database.ServerProfiles.GetData(context.Guild.Id);
+					if (profile == null) return Task.FromResult(PreconditionResult.FromSuccess());
+					
+            		var data = profile.Music;
 
-					if (data == null || data.AllowedRoles.Count < 1) return Task.FromResult(PreconditionResult.FromSuccess());
+					if (data.AllowedRoles.Count < 1) return Task.FromResult(PreconditionResult.FromSuccess());
 
 					var tempOutput = new StringBuilder();
 
 					foreach (var allowedRole in data.AllowedRoles) {
-						var role = context.Guild.GetRole(allowedRole.RoleId);
+						var role = context.Guild.GetRole(allowedRole);
 
 						tempOutput.AppendLine($"| {role.Name} |");
 
-						if (user.RoleIds.Contains(allowedRole.RoleId)) return Task.FromResult(PreconditionResult.FromSuccess());
+						if (user.RoleIds.Contains(allowedRole)) return Task.FromResult(PreconditionResult.FromSuccess());
 					}
 
 					output.AppendLine("This command is locked to specific role(s). You must have the following role(s)...")

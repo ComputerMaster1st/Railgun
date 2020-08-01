@@ -42,9 +42,10 @@ namespace Railgun.Commands.Music
 			[Command("playlist")]
 			public async Task PlaylistAsync()
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
-				if (data == null || data.PlaylistId == ObjectId.Empty && !_full) {
+				if (data.PlaylistId == ObjectId.Empty && !_full) {
 					await ReplyAsync("Server playlist is already empty.");
 					return;
 				}
@@ -64,14 +65,14 @@ namespace Railgun.Commands.Music
 
 				await PlaylistAsync();
 
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
 				if (data == null) {
 					await ReplyAsync("Music has no data to reset.");
 					return;
 				}
 
-				Context.Database.ServerMusics.Remove(data);
+				data.ResetMusic();
 				await ReplyAsync("Music settings & playlist has been reset.");
 			}
 		}

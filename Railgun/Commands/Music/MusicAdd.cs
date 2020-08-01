@@ -36,7 +36,8 @@ namespace Railgun.Commands.Music
 					return;
 				}
 
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
 				var response = await ReplyAsync("Processing Attachment! Standby...");
 				var attachment = Context.Message.Attachments.FirstOrDefault();

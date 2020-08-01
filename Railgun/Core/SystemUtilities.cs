@@ -8,7 +8,6 @@ using MongoDB.Bson;
 using Railgun.Core.Enums;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
-using TreeDiagram.Models.User;
 
 namespace Railgun.Core
 {
@@ -60,10 +59,10 @@ namespace Railgun.Core
 
         public static string GetUsernameOrMention(TreeDiagramContext db, IGuildUser user)
 		{
-			ServerMention sMention = db.ServerMentions.GetData(user.GuildId);;
-			UserMention uMention = db.UserMentions.GetData(user.Id);
+			var profile = db.ServerProfiles.GetData(user.GuildId);
+			var userProfile = db.ServerProfiles.GetData(user.Id);
 
-			if ((sMention != null && sMention.DisableMentions) || (uMention != null && uMention.DisableMentions))
+			if ((profile != null && profile.Globals.DisableMentions) || (userProfile != null && userProfile.Globals.DisableMentions))
 				return user.Username;
 			return user.Mention;
 		}

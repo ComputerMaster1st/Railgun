@@ -28,9 +28,10 @@ namespace Railgun.Commands.Music
 			[Command]
 			public async Task RemoveAsync([Remainder] string ids)
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
-				if (data == null || data.PlaylistId == ObjectId.Empty)
+				if (data.PlaylistId == ObjectId.Empty)
 				{
 					await ReplyAsync("Unknown Music Id Given!");
 					return;
@@ -85,9 +86,10 @@ namespace Railgun.Commands.Music
 				}
 
 				var player = playerContainer.Player;
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 
-				if (data == null || data.PlaylistId == ObjectId.Empty || player == null) {
+				if (data.PlaylistId == ObjectId.Empty || player == null) {
 					await ReplyAsync("Can not remove current song because I am not in voice channel.");
 					return;
 				}

@@ -76,7 +76,7 @@ namespace Railgun.Commands.Server
 		[Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
 		public async Task BanAsync(IGuildUser user, [Remainder] string reason = "No Reason Specified")
 		{
-			var data = Context.Database.ServerWarnings.GetData(Context.Guild.Id);
+			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
 			if (!await SystemUtilities.CheckIfSelfIsHigherRoleAsync(Context.Guild, user)) {
 				await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.");
@@ -85,8 +85,8 @@ namespace Railgun.Commands.Server
 
 			await Context.Guild.AddBanAsync(user, 7, reason);
 
-			if (data != null && data.Warnings.Any(find => find.UserId == user.Id))
-				data.ResetWarnings(user.Id);
+			if (data != null && data.Warning != null && data.Warning.Warnings.Any(find => find.UserId == user.Id))
+				data.Warning.ResetWarnings(user.Id);
 
 			await ReplyAsync($"{Format.Bold(user.Username)} has been banned from the server. Reason: {Format.Bold(reason)}");
 

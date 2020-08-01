@@ -56,9 +56,9 @@ namespace Railgun.Events.OnMessageEvents
 
 								await _analytics.ExecutedCommand(context, cmdResult);
 
-								var data = context.Database.ServerCommands.GetData(guild.Id);
+                                var profile = context.Database.ServerProfiles.GetData(guild.Id);
 
-								if (data != null && data.DeleteCmdAfterUse) 
+								if (profile != null && profile.Command.DeleteCmdAfterUse) 
                                 {
                                     var self = await guild.GetCurrentUserAsync();
                                     var perms = self.GetPermissions(tc);

@@ -18,16 +18,17 @@ namespace Railgun.Commands.Inactivity
             {
                 if (user.IsBot || user.IsWebhook) return ReplyAsync("This user is a bot! Bots will always be ignored/whitelisted.");
 
-                var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
-                if (data.UserWhitelist.Any(f => f.UserId == user.Id))
+                if (data.UserWhitelist.Any(f => f == user.Id))
                 {
-                    data.UserWhitelist.RemoveAll(f => f.UserId == user.Id);
+                    data.UserWhitelist.RemoveAll(f => f == user.Id);
                     data.Users.Add(new UserActivityContainer(user.Id));
                     return ReplyAsync("User removed from whitelist!");
                 }
 
-                data.UserWhitelist.Add(new UlongUserId(user.Id));
+                data.UserWhitelist.Add(user.Id);
                 data.Users.RemoveAll(f => f.UserId == user.Id);
                 return ReplyAsync("User added to whitelist!");
             }
@@ -35,13 +36,14 @@ namespace Railgun.Commands.Inactivity
             [Command("role")]
             public async Task RoleAsync(IRole role)
             {
-                var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
                 var users = (await Context.Guild.GetUsersAsync())
                     .Where(f => f.RoleIds.Contains(role.Id));
 
-                if (data.RoleWhitelist.Any(f => f.RoleId == role.Id))
+                if (data.RoleWhitelist.Any(f => f == role.Id))
                 {
-                    data.RoleWhitelist.RemoveAll(f => f.RoleId == role.Id);
+                    data.RoleWhitelist.RemoveAll(f => f == role.Id);
 
                     foreach (var user in users)
                         if (data.Users.All(f => f.UserId != user.Id)) 
@@ -50,7 +52,7 @@ namespace Railgun.Commands.Inactivity
                     await ReplyAsync("Role removed from whitelisted!");
                 }
 
-                data.RoleWhitelist.Add(new UlongRoleId(role.Id));
+                data.RoleWhitelist.Add(role.Id);
 
                 foreach (var user in users) data.Users.RemoveAll(f => f.UserId == user.Id);
                 

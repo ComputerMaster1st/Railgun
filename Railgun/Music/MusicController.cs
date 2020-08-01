@@ -40,7 +40,9 @@ namespace Railgun.Music
             using (var scope = _services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
-                playlist = await SystemUtilities.GetPlaylistAsync(_musicService, db.ServerMusics.GetOrCreateData(tc.GuildId));
+                var profile = db.ServerProfiles.GetOrCreateData(tc.GuildId);
+                var data = profile.Music;
+                playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
             }
 
             return playlist;

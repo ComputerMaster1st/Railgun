@@ -3,14 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerCommand
+    public class ServerGlobals
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; private set; }
-
-        public string Prefix { get; set; }
-        public bool DeleteCmdAfterUse { get; set; }
-        public bool RespondToBots { get; set; }
-        public bool IgnoreModifiedMessages { get; set; }
+        
+        public bool DisableMentions { get; set; } = false;
     }
 }

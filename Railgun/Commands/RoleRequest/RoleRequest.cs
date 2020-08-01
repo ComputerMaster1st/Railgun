@@ -27,14 +27,16 @@ namespace Railgun.Commands.RoleRequest
                 return;
             }
             
-            var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
-            if (data is null || data.RoleIds.Count == 0)
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
+
+            if (data.RoleIds.Count == 0)
             {
                 await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
                                  "Please contact the server mod/admin to set it up.");
                 return;
             }
-            if (data.RoleIds.All(x => x.RoleId != role.Id))
+            if (data.RoleIds.All(x => x != role.Id))
             {
                 await ReplyAsync($"The role \"{Format.Bold(role.Name)}\" is not a public role. " +
                                  "Please check the list of publicly available roles.");
@@ -57,8 +59,10 @@ namespace Railgun.Commands.RoleRequest
         [Command("list")]
         public async Task ListAsync()
         {
-            var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
-            if (data is null || data.RoleIds.Count == 0)
+            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
+
+            if (data.RoleIds.Count == 0)
             {
                 await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
                                  "Please contact the server mod/admin to set it up.");
@@ -73,10 +77,10 @@ namespace Railgun.Commands.RoleRequest
             
             foreach (var id in data.RoleIds)
             {
-                var role = Context.Guild.Roles.FirstOrDefault(x => x.Id == id.RoleId);
+                var role = Context.Guild.Roles.FirstOrDefault(x => x.Id == id);
                 if (role is null)
                 {
-                    badIds.Add(id.RoleId);
+                    badIds.Add(id);
                     continue;
                 }
                 
@@ -91,12 +95,12 @@ namespace Railgun.Commands.RoleRequest
         [Command("reset")]
         public Task ResetAsync()
         {
-            var data = Context.Database.ServerRoleRequests.GetData(Context.Guild.Id);
+            var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
             if (data == null)
                 return ReplyAsync("Role-Request has no data to reset.");
 
-            Context.Database.ServerRoleRequests.Remove(data);
+            data.ResetRoleRequest();
             return ReplyAsync("Role-Request has been reset.");
         }
     }

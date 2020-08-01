@@ -8,7 +8,7 @@ using TreeDiagram;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("skip")]
 		public class MusicSkip : SystemBase
@@ -20,10 +20,11 @@ namespace Railgun.Commands.Music
 			[Command]
 			public async Task SkipAsync()
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || container == null) {
+				if (container == null) {
 					await ReplyAsync("Can not skip current song because I am not in voice channel.");
 					return;
 				}
@@ -54,10 +55,11 @@ namespace Railgun.Commands.Music
 			[Command("force"), UserPerms(GuildPermission.ManageMessages)]
 			public Task ForceAsync()
 			{
-				var data = Context.Database.ServerMusics.GetData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 
-				if (data == null || !data.VoteSkipEnabled) 
+				if (!data.VoteSkipEnabled) 
 					return ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");
 				if (container == null)
 					return ReplyAsync("Can not skip current song because I am not in voice channel.");

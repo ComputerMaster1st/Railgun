@@ -11,7 +11,7 @@ using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
-	public partial class Music
+    public partial class Music
 	{
 		[Alias("np")]
 		public class MusicNp : SystemBase
@@ -49,7 +49,8 @@ namespace Railgun.Commands.Music
 			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
 			public Task SetNpChannelAsync(ITextChannel tcParam = null)
 			{
-				var data = Context.Database.ServerMusics.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.Music;
 				var tc = tcParam ?? Context.Channel as ITextChannel;
 
 				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel)

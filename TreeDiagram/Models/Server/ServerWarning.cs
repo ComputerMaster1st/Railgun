@@ -1,15 +1,18 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerWarning : ConfigBase
+    public class ServerWarning
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; private set; }
+
         public int WarnLimit { get; set; }
         public virtual List<ServerWarningInfo> Warnings { get; private set; } = new List<ServerWarningInfo>();
-
-        public ServerWarning(ulong id) : base(id) { }
         
         public void AddWarning(ulong userId, string reason)
         {

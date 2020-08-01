@@ -8,6 +8,6 @@ namespace TreeDiagram.Interfaces
         bool IsEnabled { get; set; }
         bool IncludeBots { get; set; }
         
-        List<IgnoredChannels> IgnoredChannels { get; }
+        List<ulong> IgnoredChannels { get; }
     }
 }

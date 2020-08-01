@@ -20,7 +20,8 @@ namespace Railgun.Commands.RoleRequest
                     return ReplyAsync("The role you tried to add does not exist. " +
                                       "Please double-check in-case you mistyped.");
 
-                var data = Context.Database.ServerRoleRequests.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.RoleRequest;
 
                 return ReplyAsync(data.AddRole(role.Id) ?
                     $"Role {Format.Bold(role.Name)} is now available for role-request." :

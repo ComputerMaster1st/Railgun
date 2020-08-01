@@ -45,16 +45,15 @@ namespace Railgun.Events
         {
             _analytics.UpdatedMessages++;
 
-            ServerCommand data = null;
-
             using (var scope = _services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var channel = newMsg.Channel as ITextChannel;
-                data = db.ServerCommands.GetData(channel.GuildId);
+                var profile = db.ServerProfiles.GetData(channel.GuildId);
+
+                if (profile != null && profile.Command.IgnoreModifiedMessages) return;
             }
 
-            if (data != null && data.IgnoreModifiedMessages) return;
             await ExecuteAsync(newMsg);          
         }
 

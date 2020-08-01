@@ -17,7 +17,8 @@ namespace Railgun.Commands.Inactivity
             {
                 if (threshold < 0) return ReplyAsync($"Inactivity Threshold can {Format.Bold("NOT")} be below 1!");
 
-                var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
                 if (threshold == 0)
                 {
@@ -37,7 +38,8 @@ namespace Railgun.Commands.Inactivity
             {
                 if (threshold < 0) return ReplyAsync($"Inactivity Threshold can {Format.Bold("NOT")} be below 1!");
 
-                var data = Context.Database.ServerInactivities.GetOrCreateData(Context.Guild.Id);
+                var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+                var data = profile.Inactivity;
 
                 if (threshold == 0)
                 {

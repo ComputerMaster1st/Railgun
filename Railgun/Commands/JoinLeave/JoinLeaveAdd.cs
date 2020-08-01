@@ -8,7 +8,7 @@ using TreeDiagram.Enums;
 
 namespace Railgun.Commands.JoinLeave
 {
-	public partial class JoinLeave : SystemBase
+    public partial class JoinLeave : SystemBase
 	{
 		[Alias("add", "+")]
 		public class JoinLeaveAdd : SystemBase
@@ -17,7 +17,8 @@ namespace Railgun.Commands.JoinLeave
 			{
 				if (string.IsNullOrWhiteSpace(msg)) return ReplyAsync("Please specify a message to add.");
 
-				var data = Context.Database.ServerJoinLeaves.GetOrCreateData(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+            	var data = profile.JoinLeave;
 
 				if ((type == MsgType.Join && data.JoinMessages.Contains(msg)) || (type == MsgType.Leave && data.LeaveMessages.Contains(msg)))
 					return ReplyAsync("Specified message is already listed.");

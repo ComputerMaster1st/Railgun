@@ -10,7 +10,7 @@ namespace Railgun.Filters
         {
             if (data == null || !data.IsEnabled ||
 				(!data.IncludeBots && (message.Author.IsBot | message.Author.IsWebhook)) ||
-				data.IgnoredChannels.Any(f => f.ChannelId == (message.Channel as ITextChannel).Id)) return false;
+				data.IgnoredChannels.Any(f => f == (message.Channel as ITextChannel).Id)) return false;
             return true;
         }
     }

@@ -1,13 +1,17 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-	public class ServerMusic : ConfigBase
+	public class ServerMusic
 	{
-		public ulong AutoTextChannel { get; set; }
-		public ulong AutoVoiceChannel { get; set; }
+		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; private set; }
+		
+		public virtual List<MusicAutoJoinConfig> AutoJoinConfigs { get; private set; } = new List<MusicAutoJoinConfig>();
 		public bool AutoSkip { get; set; }
 		public bool AutoDownload { get; set; }
 		public string AutoPlaySong { get; set; } = string.Empty;
@@ -18,9 +22,16 @@ namespace TreeDiagram.Models.Server
 		public bool SilentNowPlaying { get; set; }
 		public bool SilentSongProcessing { get; set; }
 		public ulong NowPlayingChannel { get; set; }
-		public virtual List<UlongRoleId> AllowedRoles { get; private set; } = new List<UlongRoleId>();
-		public bool WhitelistMode { get; set; }
 
-		public ServerMusic(ulong id) : base(id) { }
+		private List<ulong> _allowedRoles;
+
+		public List<ulong> AllowedRoles { 
+			get {
+				if (_allowedRoles == null) _allowedRoles = new List<ulong>();
+				return _allowedRoles;
+			} private set {
+				_allowedRoles = value;
+			}}
+		public bool WhitelistMode { get; set; }
 	}
 }

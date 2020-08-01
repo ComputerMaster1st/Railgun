@@ -1,25 +1,35 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using TreeDiagram.Models.SubModels;
 
 namespace TreeDiagram.Models.Server
 {
-    public class ServerRoleRequest : ConfigBase
+    public class ServerRoleRequest
     {
-        public virtual List<UlongRoleId> RoleIds { get; private set; } = new List<UlongRoleId>();
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; private set; }
 
-        public ServerRoleRequest(ulong id) : base(id) { }
+        private List<ulong> _roleIds;
+        
+        public List<ulong> RoleIds { 
+            get {
+                if (_roleIds == null) _roleIds = new List<ulong>();
+                return _roleIds;
+            } private set {
+                _roleIds = value;
+            }}
 
         public bool AddRole(ulong roleId)
         {
-            if (RoleIds.Any(x => x.RoleId == roleId)) return false;
-            RoleIds.Add(new UlongRoleId(roleId));
+            if (RoleIds.Any(x => x == roleId)) return false;
+            RoleIds.Add(roleId);
             return true;
         }
 
         public bool RemoveRole(ulong roleId)
         {
-            if (RoleIds.RemoveAll(x => x.RoleId == roleId) > 0) return true;
+            if (RoleIds.RemoveAll(x => x == roleId) > 0) return true;
             return false;
         }
     }

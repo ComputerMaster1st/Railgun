@@ -36,18 +36,11 @@ namespace Railgun.Commands
 
         [Command("status")]
         public async Task StatusAsync() {
-            var channelCount = 0.00;
-            var userCount = 0.00;
             var commandsExecuted = 0;
             var installedCommands = _commandService.GetAllCommands().Count();
             var self = Process.GetCurrentProcess();
             var guilds = await Context.Client.GetGuildsAsync();
             var directorySize = new DirectoryInfo("/home/audiochord").EnumerateFiles().Sum(file => file.Length);
-
-            foreach (var guild in guilds) {
-                channelCount += (await guild.GetChannelsAsync()).Count();
-                userCount += (await guild.GetUsersAsync()).Count();
-            }
 
             foreach (var command in _analytics.UsedCommands) commandsExecuted += command.Value;
 
@@ -66,17 +59,13 @@ namespace Railgun.Commands
                 .AppendFormat("  Messages Deleted : {0} <{1}> ({2}/sec)", _analytics.DeletedMessages, _analytics.FilterDeletedMessages, Math.Round(_analytics.DeletedMessages / DateTime.Now.Subtract(self.StartTime).TotalSeconds, 4)).AppendLine()
                 .AppendFormat("Commands Available : {0}", installedCommands).AppendLine()
                 .AppendFormat(" Commands Executed : {0}", commandsExecuted).AppendLine()
-                .AppendFormat("     Music Streams : {0}", _playerController.PlayerContainers.Count).AppendLine()
                 .AppendLine()
                 .AppendFormat("    Client Latency : {0}ms", _client.Latency).AppendLine()
                 .AppendFormat("  Connected Shards : {0}", _client.Shards.Count).AppendLine()
                 .AppendFormat(" Connected Servers : {0}", guilds.Count).AppendLine()
-                .AppendFormat("    Total Channels : {0}", channelCount).AppendLine()
-                .AppendFormat("       Total Users : {0}", userCount).AppendLine()
-                .AppendFormat("  Music Repository : {0} ({1} GB)", await _musicService.EnumerateSongMetadataAsync().CountAsync(), Math.Round((((Convert.ToDecimal(directorySize)) / 1024) / 1024) / 1024, 2)).AppendLine()
                 .AppendLine()
-                .AppendFormat("     Avg. Channels : {0}/server", Math.Round(channelCount / guilds.Count, 0)).AppendLine()
-                .AppendFormat("        Avg. Users : {0}/server", Math.Round(userCount / guilds.Count, 0)).AppendLine()
+                .AppendFormat("     Music Streams : {0}", _playerController.PlayerContainers.Count).AppendLine()
+                .AppendFormat("  Music Repository : {0} ({1} GB)", await _musicService.EnumerateSongMetadataAsync().CountAsync(), Math.Round((((Convert.ToDecimal(directorySize)) / 1024) / 1024) / 1024, 2)).AppendLine()
                 .AppendLine()
                 .AppendFormat("        Started At : {0}", self.StartTime).AppendLine()
                 .AppendFormat("            Uptime : {0}", DateTime.Now - self.StartTime).AppendLine()
@@ -90,6 +79,7 @@ namespace Railgun.Commands
                 .AppendLine()
                 .AppendLine("End of Report!");
             
+            self.Dispose();
             await ReplyAsync(Format.Code(output.ToString()));
         }
 
@@ -98,20 +88,13 @@ namespace Railgun.Commands
             var output = new StringBuilder();
 
             output.AppendLine("TreeDiagram Configuration Report")
-                .AppendLine().AppendLine("Server/Guild Configurations :")
-                .AppendFormat(" Anti-Caps : {0}", Context.Database.FilterCapses.Count()).AppendLine()
-                .AppendFormat("  Anti-Url : {0}", Context.Database.FilterUrls.Count()).AppendLine()
-                .AppendFormat("      Bite : {0}", Context.Database.FunBites.Count()).AppendLine()
-                .AppendFormat("       RST : {0}", Context.Database.FunRsts.Count()).AppendLine()
-                .AppendFormat("   Command : {0}", Context.Database.ServerCommands.Count()).AppendLine()
-                .AppendFormat("Inactivity : {0}", Context.Database.ServerInactivities.Count()).AppendLine()
-                .AppendFormat(" JoinLeave : {0}", Context.Database.ServerJoinLeaves.Count()).AppendLine()
-                .AppendFormat("   Mention : {0}", Context.Database.ServerMentions.Count()).AppendLine()
-                .AppendFormat("     Music : {0}", Context.Database.ServerMusics.Count()).AppendLine()
-                .AppendFormat("   Warning : {0}", Context.Database.ServerWarnings.Count()).AppendLine()
-                .AppendLine().AppendLine("User Configurations :")
-                .AppendFormat("   Mention : {0}", Context.Database.UserMentions.Count()).AppendLine()
-                .AppendFormat("   Command : {0}", Context.Database.UserCommands.Count()).AppendLine()
+                .AppendLine()
+                .AppendFormat("  Servers/Guilds : {0}", Context.Database.ServerProfiles.Count()).AppendLine()
+                .AppendFormat("           Users : {0}", Context.Database.UserProfiles.Count()).AppendLine()
+                .AppendLine()
+                .AppendFormat("Assign Role Timers : {0}", Context.Database.TimerAssignRoles.Count()).AppendLine()
+                .AppendFormat("  Kick User Timers : {0}", Context.Database.TimerKickUsers.Count()).AppendLine()
+                .AppendFormat("  Remind Me Timers : {0}", Context.Database.TimerRemindMes.Count()).AppendLine()
                 .AppendLine()
                 .AppendLine("End of Report!");
             
