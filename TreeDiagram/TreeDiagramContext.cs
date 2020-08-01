@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MongoDB.Bson;
 using TreeDiagram.Models;
 using TreeDiagram.Models.Filter;
@@ -9,33 +10,32 @@ using TreeDiagram.Models.TreeTimer;
 
 namespace TreeDiagram
 {
-    public sealed class TreeDiagramContext : DbContext
-    {
+	public sealed class TreeDiagramContext : DbContext
+	{
 		public DbSet<ServerProfile> ServerProfiles { get; internal set; } = null;
 		public DbSet<UserProfile> UserProfiles { get; internal set; } = null;
 
 		public DbSet<TimerAssignRole> TimerAssignRoles { get; internal set; } = null;
-	    public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
-	    public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
+		public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
+		public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
 
-	    public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
+		public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
 
-	    protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			var ulongConverter = new ValueConverter<List<ulong>, long[]>(
+				input => input.Select(v => (long)v).ToArray(),
+				output => output.Select(v => (ulong)v).ToList()
+			);
+
 			modelBuilder.Entity<FilterCaps>(x => {
 				x.Property(y => y.IgnoredChannels)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 			});
 
 			modelBuilder.Entity<FilterUrl>(x => {
 				x.Property(y => y.IgnoredChannels)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 			});
 			
 			modelBuilder.Entity<ServerInactivity>(x =>
@@ -44,15 +44,9 @@ namespace TreeDiagram
 					.WithOne()
 					.OnDelete(DeleteBehavior.Cascade);
 				x.Property(y => y.UserWhitelist)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 				x.Property(y => y.RoleWhitelist)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 			});
 
 			modelBuilder.Entity<ServerMusic>(x => {
@@ -62,21 +56,15 @@ namespace TreeDiagram
 					.WithOne()
 					.OnDelete(DeleteBehavior.Cascade);
 				x.Property(y => y.AllowedRoles)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 			});
 
 			modelBuilder.Entity<ServerRoleRequest>(x => {
 				x.Property(y => y.RoleIds)
-					.HasConversion(
-						input => input.Select(f => (long)f).ToArray(),
-						output => output.Select(f => (ulong)f).ToList()
-					);
+					.HasConversion(ulongConverter);
 			});
 			
-            modelBuilder.Entity<ServerWarning>(x => {
+			modelBuilder.Entity<ServerWarning>(x => {
 				x.HasMany(y => y.Warnings)
 					.WithOne()
 					.OnDelete(DeleteBehavior.Cascade);

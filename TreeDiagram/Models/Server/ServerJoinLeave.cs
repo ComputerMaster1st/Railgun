@@ -15,8 +15,24 @@ namespace TreeDiagram.Models.Server
         public ulong ChannelId { get; set; }
         public int DeleteAfterMinutes { get; set; }
 
-        public List<string> JoinMessages { get; private set; } = new List<string>() { "Welcome to **<server>**, **<user>**!" };
-        public List<string> LeaveMessages { get; private set; } = new List<string>() { "Goodbye, **<user>**." };
+        private List<string> _joinMessages;
+        private List<string> _leaveMessages;
+
+        public List<string> JoinMessages { 
+            get {
+                if (_joinMessages == null) _joinMessages = new List<string>() { "Welcome to **<server>**, **<user>**!" };
+                return _joinMessages;
+            } private set {
+                _joinMessages = value;
+            }}
+
+        public List<string> LeaveMessages { 
+            get {
+                if (_leaveMessages == null) _leaveMessages = new List<string>() { "Goodbye, **<user>**." };
+                return _leaveMessages;
+            } private set {
+                _leaveMessages = value;
+            }}
 
         public void AddMessage(string message, MsgType type) {
             switch (type) {

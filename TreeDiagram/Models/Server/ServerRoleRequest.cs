@@ -9,8 +9,16 @@ namespace TreeDiagram.Models.Server
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; private set; }
+
+        private List<ulong> _roleIds;
         
-        public List<ulong> RoleIds { get; private set; } = new List<ulong>();
+        public List<ulong> RoleIds { 
+            get {
+                if (_roleIds == null) _roleIds = new List<ulong>();
+                return _roleIds;
+            } private set {
+                _roleIds = value;
+            }}
 
         public bool AddRole(ulong roleId)
         {

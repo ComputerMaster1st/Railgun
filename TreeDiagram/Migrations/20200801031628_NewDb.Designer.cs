@@ -11,7 +11,7 @@ using TreeDiagram;
 namespace TreeDiagram.Migrations
 {
     [DbContext(typeof(TreeDiagramContext))]
-    [Migration("20200731230535_NewDb")]
+    [Migration("20200801031628_NewDb")]
     partial class NewDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -15,9 +15,25 @@ namespace TreeDiagram.Models.Server
         public int KickDaysThreshold { get; set; }
         public ulong InactiveRoleId { get; set; }
 
+        private List<ulong> _userWhiteList;
+        private List<ulong> _roleWhiteList;
+
         public virtual List<UserActivityContainer> Users { get; private set; } = new List<UserActivityContainer>();
 
-        public List<ulong> UserWhitelist { get; private set; } = new List<ulong>();
-        public List<ulong> RoleWhitelist { get; private set; } = new List<ulong>();
+        public List<ulong> UserWhitelist { 
+            get {
+                if (_userWhiteList == null) _userWhiteList = new List<ulong>();
+                return _userWhiteList;
+            } private set {
+                _userWhiteList = value;
+            }}
+        
+        public List<ulong> RoleWhitelist { 
+            get {
+                if (_roleWhiteList == null) _roleWhiteList = new List<ulong>();
+                return _roleWhiteList;
+            } private set {
+                _roleWhiteList = new List<ulong>();
+            }}
     }
 }
