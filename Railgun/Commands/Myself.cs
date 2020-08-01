@@ -14,7 +14,7 @@ namespace Railgun.Commands
 		[Command("mention")]
 		public Task MentionsAsync()
 		{
-			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Author.Id);
             var data = profile.Globals;
 
 			data.DisableMentions = !data.DisableMentions;
@@ -24,7 +24,7 @@ namespace Railgun.Commands
 		[Command("prefix")]
 		public Task PrefixAsync([Remainder] string input = null)
 		{
-			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Author.Id);
             var data = profile.Globals;
 
 			if (string.IsNullOrWhiteSpace(input) && string.IsNullOrWhiteSpace(data.Prefix))
@@ -41,7 +41,7 @@ namespace Railgun.Commands
 		[Command("show")]
 		public Task ShowAsync()
 		{
-			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Guild.Id);
+			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Author.Id);
             var data = profile.Globals;
 			var output = new StringBuilder()
 				.AppendLine("Railgun User Configuration:").AppendLine()

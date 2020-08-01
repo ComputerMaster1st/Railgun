@@ -21,20 +21,26 @@ namespace Railgun.Core.Pipelines
 			var content = msg.Content;
 			var profile = ctx.Database.ServerProfiles.GetData(ctx.Guild.Id);
 
-			if (((profile == null || !profile.Command.RespondToBots) && msg.Author.IsBot) || msg.Author.IsWebhook)
+			if ((profile != null && !profile.Command.RespondToBots) && (msg.Author.IsBot || msg.Author.IsWebhook))
 				return new PrefixResult();
-
-			var userProfile = ctx.Database.UserProfiles.GetOrCreateData(ctx.Guild.Id);
 
 			if (content.StartsWith(_config.DiscordConfig.Prefix, StringComparison.CurrentCultureIgnoreCase))
 				return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix, msg, next);
-			else if (content.StartsWith(ctx.Client.CurrentUser.Mention, StringComparison.CurrentCultureIgnoreCase))
+
+			if (content.StartsWith(ctx.Client.CurrentUser.Mention, StringComparison.CurrentCultureIgnoreCase))
 				return await ValidPrefixExecuteAsync(context, ctx.Client.CurrentUser.Mention, msg, next);
-			else if ((profile.Command != null && !string.IsNullOrEmpty(profile.Command.Prefix)) && content.StartsWith(profile.Command.Prefix, StringComparison.CurrentCultureIgnoreCase))
-				return await ValidPrefixExecuteAsync(context, profile.Command.Prefix, msg, next);
-			else if ((userProfile != null && !string.IsNullOrEmpty(userProfile.Globals.Prefix)) && content.StartsWith(userProfile.Globals.Prefix, StringComparison.CurrentCultureIgnoreCase))
-				return await ValidPrefixExecuteAsync(context, userProfile.Globals.Prefix, msg, next);
-			else return new PrefixResult();
+
+			if (profile != null && !string.IsNullOrEmpty(profile.Command.Prefix))
+				if (content.StartsWith(profile.Command.Prefix, StringComparison.CurrentCultureIgnoreCase))
+					return await ValidPrefixExecuteAsync(context, profile.Command.Prefix, msg, next);
+
+			var userProfile = ctx.Database.UserProfiles.GetData(ctx.Guild.Id);
+
+			if (userProfile != null && !string.IsNullOrEmpty(userProfile.Globals.Prefix)) 
+				if (content.StartsWith(userProfile.Globals.Prefix, StringComparison.CurrentCultureIgnoreCase))
+					return await ValidPrefixExecuteAsync(context, userProfile.Globals.Prefix, msg, next);
+			
+			return new PrefixResult();
 		}
 
 		private async Task<IResult> ValidPrefixExecuteAsync(CommandExecutionContext context, string prefix, IUserMessage msg, Func<Task<IResult>> next)
