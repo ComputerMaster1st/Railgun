@@ -23,12 +23,12 @@ namespace Railgun.Commands.Inactivity
 
                 if (data.UserWhitelist.Any(f => f == user.Id))
                 {
-                    data.UserWhitelist.RemoveAll(f => f == user.Id);
+                    data.RemoveWhitelistUser(user.Id);
                     data.Users.Add(new UserActivityContainer(user.Id));
                     return ReplyAsync("User removed from whitelist!");
                 }
 
-                data.UserWhitelist.Add(user.Id);
+                data.AddWhitelistUser(user.Id);
                 data.Users.RemoveAll(f => f.UserId == user.Id);
                 return ReplyAsync("User added to whitelist!");
             }
@@ -43,7 +43,7 @@ namespace Railgun.Commands.Inactivity
 
                 if (data.RoleWhitelist.Any(f => f == role.Id))
                 {
-                    data.RoleWhitelist.RemoveAll(f => f == role.Id);
+                    data.RemoveWhitelistRole(role.Id);
 
                     foreach (var user in users)
                         if (data.Users.All(f => f.UserId != user.Id)) 
@@ -52,7 +52,7 @@ namespace Railgun.Commands.Inactivity
                     await ReplyAsync("Role removed from whitelisted!");
                 }
 
-                data.RoleWhitelist.Add(role.Id);
+                data.AddWhitelistRole(role.Id);
 
                 foreach (var user in users) data.Users.RemoveAll(f => f.UserId == user.Id);
                 

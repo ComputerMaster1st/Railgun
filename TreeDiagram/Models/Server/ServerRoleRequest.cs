@@ -22,15 +22,20 @@ namespace TreeDiagram.Models.Server
 
         public bool AddRole(ulong roleId)
         {
-            if (RoleIds.Any(x => x == roleId)) return false;
+            if (RoleIds.Contains(roleId)) return false;
+
+            RoleIds = new List<ulong>(RoleIds);
             RoleIds.Add(roleId);
             return true;
         }
 
         public bool RemoveRole(ulong roleId)
         {
-            if (RoleIds.RemoveAll(x => x == roleId) > 0) return true;
-            return false;
+            if (!RoleIds.Contains(roleId)) return false;
+
+            RoleIds = new List<ulong>(RoleIds);
+            RoleIds.RemoveAll(x => x == roleId);
+            return true;            
         }
     }
 }

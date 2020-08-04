@@ -18,7 +18,7 @@ namespace Railgun.Commands.Music
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
-				data.AllowedRoles.Add(role.Id);
+				data.AddAllowedRole(role.Id);
 
 				if (data.AllowedRoles.Count < 2) 
 					return ReplyAsync($"All music commands are now role-locked to {role.Name}.");
@@ -39,9 +39,9 @@ namespace Railgun.Commands.Music
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
-				var count = data.AllowedRoles.RemoveAll(allowedRole => allowedRole == role.Id);
+				var removed = data.RemoveAllowedRole(role.Id);
 
-				if (count < 1)
+				if (!removed)
 					return ReplyAsync("The role specified was never role-locked.");
 
 				var output = new StringBuilder()

@@ -21,5 +21,23 @@ namespace TreeDiagram.Models.Filter
         } private set {
             _ignoredChannels = value;
         }}
+
+        public bool AddIgnoreChannel(ulong channelId)
+        {
+            if (IgnoredChannels.Contains(channelId)) return false;
+
+            IgnoredChannels = new List<ulong>(IgnoredChannels);
+            IgnoredChannels.Add(channelId);
+            return true;
+        }
+
+        public bool RemoveIgnoreChannel(ulong channelId)
+        {
+            if (!IgnoredChannels.Contains(channelId)) return false;
+
+            IgnoredChannels = new List<ulong>(IgnoredChannels);
+            IgnoredChannels.RemoveAll(x => x == channelId);
+            return true;            
+        }
     }
 }

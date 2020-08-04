@@ -71,10 +71,10 @@ namespace Railgun.Commands
             var data = profile.Filters.Caps;
 
 			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
-				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
+				data.RemoveIgnoreChannel(tc.Id);
 				return ReplyAsync("Anti-Caps is now monitoring this channel.");
 			} else {
-				data.IgnoredChannels.Add(tc.Id);
+				data.AddIgnoreChannel(tc.Id);
 				return ReplyAsync("Anti-Caps is no longer monitoring this channel.");
 			}
 		}
@@ -109,7 +109,7 @@ namespace Railgun.Commands
 				}
 
 				if (deletedChannels.Count > 0)
-					deletedChannels.ForEach(channel => data.IgnoredChannels.Remove(channel));
+					deletedChannels.ForEach(channel => data.RemoveIgnoreChannel(channel));
 			} else output.AppendLine("Ignored Channels : None");
 
 			await ReplyAsync(Format.Code(output.ToString()));

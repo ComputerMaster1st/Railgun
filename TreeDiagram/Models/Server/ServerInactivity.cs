@@ -33,7 +33,43 @@ namespace TreeDiagram.Models.Server
                 if (_roleWhiteList == null) _roleWhiteList = new List<ulong>();
                 return _roleWhiteList;
             } private set {
-                _roleWhiteList = new List<ulong>();
+                _roleWhiteList = value;
             }}
+
+        public bool AddWhitelistUser(ulong userId)
+        {
+            if (UserWhitelist.Contains(userId)) return false;
+
+            UserWhitelist = new List<ulong>(UserWhitelist);
+            UserWhitelist.Add(userId);
+            return true;
+        }
+
+        public bool RemoveWhitelistUser(ulong userId)
+        {
+            if (!UserWhitelist.Contains(userId)) return false;
+
+            UserWhitelist = new List<ulong>(UserWhitelist);
+            UserWhitelist.RemoveAll(x => x == userId);
+            return true;            
+        }
+        
+        public bool AddWhitelistRole(ulong roleId)
+        {
+            if (RoleWhitelist.Contains(roleId)) return false;
+
+            RoleWhitelist = new List<ulong>(RoleWhitelist);
+            RoleWhitelist.Add(roleId);
+            return true;
+        }
+
+        public bool RemoveWhitelistRole(ulong roleId)
+        {
+            if (!RoleWhitelist.Contains(roleId)) return false;
+
+            RoleWhitelist = new List<ulong>(RoleWhitelist);
+            RoleWhitelist.RemoveAll(x => x == roleId);
+            return true;            
+        }
     }
 }

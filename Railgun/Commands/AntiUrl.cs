@@ -95,10 +95,10 @@ namespace Railgun.Commands
             var data = profile.Filters.Urls;
 
 			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
-				data.IgnoredChannels.RemoveAll(f => f == tc.Id);
+				data.RemoveIgnoreChannel(tc.Id);
 				return ReplyAsync("Anti-Url is now monitoring this channel.");
 			} else {
-				data.IgnoredChannels.Add(tc.Id);
+				data.AddIgnoreChannel(tc.Id);
 				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
 			}
 		}
@@ -143,7 +143,7 @@ namespace Railgun.Commands
 					} else output.AppendFormat("                 : #{0}", tc.Name).AppendLine();
 				}
 
-				if (deletedChannels.Count > 0) deletedChannels.ForEach(channel => data.IgnoredChannels.Remove(channel));
+				if (deletedChannels.Count > 0) deletedChannels.ForEach(channel => data.RemoveIgnoreChannel(channel));
 			}
 
 			if (data.BannedUrls.Count < 1)

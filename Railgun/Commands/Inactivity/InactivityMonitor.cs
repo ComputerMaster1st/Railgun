@@ -168,7 +168,7 @@ namespace Railgun.Commands.Inactivity
                     else deletedRoles.Add(roleId);
                 }
 
-                foreach (var id in deletedRoles) data.RoleWhitelist.RemoveAll(r => r == id);
+                foreach (var id in deletedRoles) data.RemoveWhitelistRole(id);
             }
             
             if (data.UserWhitelist.Count < 1) whitelistedUsers.AppendFormat("None");
@@ -185,7 +185,7 @@ namespace Railgun.Commands.Inactivity
                     else deletedUsers.Add(userId);
                 }
 
-                foreach (var id in deletedUsers) data.UserWhitelist.RemoveAll(u => u == id);
+                foreach (var id in deletedUsers) data.RemoveWhitelistUser(id);
             }
 
             var inactiveRole = Context.Guild.GetRole(data.InactiveRoleId);

@@ -32,6 +32,25 @@ namespace TreeDiagram.Models.Server
 			} private set {
 				_allowedRoles = value;
 			}}
+
 		public bool WhitelistMode { get; set; }
+
+		public bool AddAllowedRole(ulong roleId)
+        {
+            if (AllowedRoles.Contains(roleId)) return false;
+
+            AllowedRoles = new List<ulong>(AllowedRoles);
+            AllowedRoles.Add(roleId);
+            return true;
+        }
+
+        public bool RemoveAllowedRole(ulong roleId)
+        {
+            if (!AllowedRoles.Contains(roleId)) return false;
+
+            AllowedRoles = new List<ulong>(AllowedRoles);
+            AllowedRoles.RemoveAll(x => x == roleId);
+            return true;            
+        }
 	}
 }
