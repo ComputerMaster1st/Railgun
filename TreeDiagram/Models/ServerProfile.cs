@@ -18,18 +18,39 @@ namespace TreeDiagram.Models
         
         public ServerProfile(ulong id) : base(id) {}
 
-        public void ResetCommands() => Command = new ServerCommand();
+        public void ResetCommands() {
+            Command = null;
+            Command = new ServerCommand();
+        }
 
-        public void ResetGlobals() => Globals = new ServerGlobals();
+        public void ResetGlobals() {
+            Globals = null;
+            Globals = new ServerGlobals();
+        }
 
-        public void ResetInactivity() => Inactivity = new ServerInactivity();
+        public void ResetInactivity() {
+            Inactivity = null;
+            Inactivity = new ServerInactivity();
+        }
 
-        public void ResetJoinLeave() => JoinLeave = new ServerJoinLeave();
+        public void ResetJoinLeave() {
+            JoinLeave = null;
+            JoinLeave = new ServerJoinLeave();
+        }
 
-        public void ResetMusic() => Music = new ServerMusic();
+        public void ResetMusic() {
+            Music = null;
+            Music = new ServerMusic();
+        }
 
-        public void ResetRoleRequest() => RoleRequest = new ServerRoleRequest();
+        public void ResetRoleRequest() {
+            RoleRequest = null;
+            RoleRequest = new ServerRoleRequest();
+        }
 
-        public void ResetWarning() => Warning = new ServerWarning();
+        public void ResetWarning() {
+            Warning = null;
+            Warning = new ServerWarning();
+        }
     }
 }

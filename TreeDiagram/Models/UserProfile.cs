@@ -8,6 +8,9 @@ namespace TreeDiagram.Models
 
         public UserProfile(ulong id) : base(id) {}
 
-        public void ResetGlobals() => Globals = new UserGlobals();
+        public void ResetGlobals() {
+            Globals = null;
+            Globals = new UserGlobals();
+        }
     }
 }
