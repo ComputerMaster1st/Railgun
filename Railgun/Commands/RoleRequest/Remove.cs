@@ -33,7 +33,7 @@ namespace Railgun.Commands.RoleRequest
 
             [Command()]
             public Task RemoveAsync([Remainder] string role)
-                => RemoveAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
+                => RemoveAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, System.StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

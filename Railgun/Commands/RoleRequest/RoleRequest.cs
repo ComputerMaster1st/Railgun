@@ -14,10 +14,6 @@ namespace Railgun.Commands.RoleRequest
     public partial class RoleRequest : SystemBase
     {
         [Command]
-        public Task RoleAsync([Remainder] string roleName) 
-            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == roleName));
-
-        [Command]
         public async Task RoleAsync(IRole role)
         {
             if (role is null)
@@ -55,6 +51,10 @@ namespace Railgun.Commands.RoleRequest
             await user.AddRoleAsync(role);
             await ReplyAsync($"Role \"{Format.Bold(role.Name)}\" assigned.");
         }
+
+        [Command]
+        public Task RoleAsync([Remainder] string roleName)
+            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, System.StringComparison.OrdinalIgnoreCase)));
 
         [Command("list")]
         public async Task ListAsync()

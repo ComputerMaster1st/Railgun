@@ -30,7 +30,7 @@ namespace Railgun.Commands.RoleRequest
 
             [Command()]
             public Task AddAsync([Remainder] string role)
-                => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name == role));
+                => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, System.StringComparison.OrdinalIgnoreCase)));
         }
     }
 }
