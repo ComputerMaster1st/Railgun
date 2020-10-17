@@ -80,11 +80,13 @@ namespace Railgun.Music
 
 		private async Task<bool> IsAloneAsync()
 		{
-			var userCount = await GetUserCountAsync();
-			var userDeafenedCount = (await VoiceChannel.GetUsersAsync().FlattenAsync()).Count(user => user.IsDeafened);
+			var users = (await VoiceChannel.GetUsersAsync().FlattenAsync()).Where(user => !user.IsBot);
+			var userCount = users.Count();
+			var userSelfDeafenedCount = users.Count(user => user.IsSelfDeafened);
+			var userGuildDeafenedCount = users.Count(user => user.IsDeafened);
 
 			if (userCount < 1) return true;
-			if (userCount == userDeafenedCount) return true;
+			if (userCount == (userSelfDeafenedCount + userGuildDeafenedCount)) return true;
 
 			return false;
 		}

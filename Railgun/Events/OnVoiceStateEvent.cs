@@ -32,15 +32,19 @@ namespace Railgun.Events
         private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after)
         {
             if (sUser.IsBot || after.VoiceChannel == null) return;
-            if (before.VoiceChannel == after.VoiceChannel && before.IsMuted != after.IsMuted) return;
 
 			var guild = after.VoiceChannel.Guild as IGuild;
 			var user = await guild.GetUserAsync(sUser.Id);
 
-            if (user.IsDeafened) return;
-			if (_controller.GetPlayer(guild.Id) != null || user.VoiceChannel == null) return;
+            if (user.IsSelfDeafened) return;
 
-			ServerMusic data;
+            if (before.VoiceChannel != null && after.VoiceChannel != null)
+                if (before.VoiceChannel.Id == after.VoiceChannel.Id)
+                    if (before.IsSelfMuted != after.IsSelfMuted) return;
+
+            if (_controller.GetPlayer(guild.Id) != null || user.VoiceChannel == null) return;
+
+            ServerMusic data;
 
 			using (var scope = _services.CreateScope())
             {
