@@ -32,10 +32,12 @@ namespace Railgun.Events
         private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after)
         {
             if (sUser.IsBot || after.VoiceChannel == null) return;
+            if (before.VoiceChannel == after.VoiceChannel && before.IsMuted != after.IsMuted) return;
 
 			var guild = after.VoiceChannel.Guild as IGuild;
 			var user = await guild.GetUserAsync(sUser.Id);
 
+            if (user.IsDeafened) return;
 			if (_controller.GetPlayer(guild.Id) != null || user.VoiceChannel == null) return;
 
 			ServerMusic data;
@@ -59,9 +61,6 @@ namespace Railgun.Events
                 var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
 
                 if (tc == null) return;
-
-                if (before.VoiceChannel == after.VoiceChannel)
-                    if (before.IsDeafened != after.IsDeafened || before.IsMuted != after.IsMuted) return;
 
                 ISong song = null; 
                 if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
