@@ -78,7 +78,16 @@ namespace Railgun.Music
 
         public void StartPlayer() => PlayerTask = Task.Run(StartAsync);
 
-        private async Task<bool> IsAloneAsync() => await GetUserCountAsync() < 1;
+		private async Task<bool> IsAloneAsync()
+		{
+			var userCount = await GetUserCountAsync();
+			var userDeafenedCount = (await VoiceChannel.GetUsersAsync().FlattenAsync()).Count(user => user.IsDeafened);
+
+			if (userCount < 1) return true;
+			if (userCount == userDeafenedCount) return true;
+
+			return false;
+		}
 
 		public async Task ConnectToVoiceAsync()
 		{
