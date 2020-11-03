@@ -49,7 +49,6 @@ namespace Railgun
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
-        private SystemYTClient _systemYTClient = new SystemYTClient();
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
@@ -115,7 +114,6 @@ namespace Railgun
                 .AddSingleton(_commandService)
                 .AddSingleton(_musicServiceConfig)
                 .AddSingleton(_musicService)
-                .AddSingleton(_systemYTClient)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
@@ -131,7 +129,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
-                .AddSingleton(new YoutubeClient(_systemYTClient.YTClient))
+                .AddSingleton(new YoutubeClient(new HttpClient(new YoutubeClientHandler())))
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
