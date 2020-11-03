@@ -27,10 +27,11 @@ namespace Railgun.Music
         private readonly MusicService _musicService;
 		private readonly MetaDataEnricher _enricher;
 		private readonly YoutubeClient _ytClient;
+		private readonly SystemYTClient _systemYTClient;
 
         public List<PlayerContainer> PlayerContainers { get; } = new List<PlayerContainer>();
 
-        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, YoutubeClient ytClient, IServiceProvider services)
+        public PlayerController(MasterConfig config, IDiscordClient client, BotLog botLog, MusicService musicService, MetaDataEnricher enricher, YoutubeClient ytClient, SystemYTClient systemYTClient, IServiceProvider services)
         {
             _config = config;
             _client = client;
@@ -38,6 +39,7 @@ namespace Railgun.Music
 			_musicService = musicService;
 			_enricher = enricher;
 			_ytClient = ytClient;
+			_systemYTClient = systemYTClient;
             _services = services;
         }
 
@@ -74,7 +76,7 @@ namespace Railgun.Music
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop, _ytClient, _enricher));
+            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop, _ytClient, _systemYTClient, _enricher));
 
 			try
 			{

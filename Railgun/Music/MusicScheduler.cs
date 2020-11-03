@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Exceptions;
+using YoutubeExplode.Videos;
 
 namespace Railgun.Music.Scheduler
 {
@@ -17,6 +18,7 @@ namespace Railgun.Music.Scheduler
         private readonly MusicService _musicService;
         private readonly ObjectId _playlistId;
         private readonly YoutubeClient _ytClient;
+        private readonly SystemYTClient _systemYTClient;
         private readonly MetaDataEnricher _enricher;
         private readonly SemaphoreSlim _requestLock = new SemaphoreSlim(1);
         private readonly Random _random = new Random();
@@ -37,12 +39,13 @@ namespace Railgun.Music.Scheduler
 
         public bool IsRequestsPopulated => Requests.Any();
 
-        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher)
+        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, SystemYTClient systemYTClient, MetaDataEnricher enricher)
         {
             _musicService = musicService;
             _playlistId = playlistId;
             PlaylistAutoLoop = playlistAutoLoop;
             _ytClient = ytClient;
+            _systemYTClient = systemYTClient;
             _enricher = enricher;
         }
 
@@ -192,8 +195,29 @@ namespace Railgun.Music.Scheduler
 
 				if (request == null)
                 {
-					var videoId = YoutubeExplode.Videos.VideoId.TryParse(ytUrl);
-					var video = await _ytClient.Videos.GetAsync(videoId.Value);
+					var videoId = VideoId.TryParse(ytUrl);
+                    Video video = null;
+                    var retry = 3;
+
+                    while (retry > 0)
+                    {
+                        try
+                        {
+                            video = await _ytClient.Videos.GetAsync(videoId.Value);
+                            break;
+                        }
+                        catch (RequestLimitExceededException ex)
+                        {
+                            error = ex;
+                            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "Youtube Rate-Limited (429)!", ex));
+
+                            if (!_systemYTClient.Set429ed())
+                                break;
+                        }
+                    }
+
+                    if (video == null)
+                        throw error;
 
 					title = video.Title;
 					uploader = video.Author;
@@ -208,11 +232,6 @@ namespace Railgun.Music.Scheduler
 				song = await _musicService.DownloadSongAsync(ytUrl);
                 
                 return (true, error, song);
-            }
-            catch (RequestLimitExceededException ex)
-            {
-                error = ex;
-                SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Player", "Youtube Rate-Limited (429)!", ex));
             }
             catch (Exception ex)
             {
