@@ -49,15 +49,12 @@ namespace Railgun
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
-        private HttpClientHandler _youtubeHttpClientHandler = null;
-        private HttpClient _youtubehttpClient = null;
+        private SystemYTClient _systemYTClient = new SystemYTClient();
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
             _config = config;
             _client = client;
-
-            CreateYoutubeHttpClient();
         }
 
         public void Boot()
@@ -118,7 +115,7 @@ namespace Railgun
                 .AddSingleton(_commandService)
                 .AddSingleton(_musicServiceConfig)
                 .AddSingleton(_musicService)
-                .AddSingleton(_youtubeHttpClientHandler)
+                .AddSingleton(_systemYTClient)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
@@ -134,7 +131,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
-                .AddSingleton(new YoutubeClient(_youtubehttpClient))
+                .AddSingleton(new YoutubeClient(_systemYTClient.YTClient))
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
@@ -163,26 +160,6 @@ namespace Railgun
                 .LoadEvent(new OnReadyEvent(_config, _client, _serverCount, _serviceProvider));
 
             _serverCount.Start();
-        }
-
-        private void CreateYoutubeHttpClient()
-        {
-            _youtubeHttpClientHandler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
-            
-            if (_youtubeHttpClientHandler.SupportsAutomaticDecompression)
-                _youtubeHttpClientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-            var container = _youtubeHttpClientHandler.CookieContainer;
-
-            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-            foreach (var keyvaluepair in _config.YoutubeCookies)
-                container.Add(new Cookie(keyvaluepair.Key, keyvaluepair.Value, _config.YoutubeDirectory, _config.YoutubeDomain));
-
-            _youtubeHttpClientHandler.UseCookies = true;
-
-            _youtubehttpClient = new HttpClient(_youtubeHttpClientHandler, true);
-            _youtubehttpClient.DefaultRequestHeaders.Add("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36");
         }
     }
 }
