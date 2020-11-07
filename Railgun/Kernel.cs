@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using AudioChord;
@@ -49,11 +48,15 @@ namespace Railgun
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
+        private HttpClient _ytClient;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
             _config = config;
             _client = client;
+
+            _ytClient = new HttpClient(new YoutubeClientHandler(), true);
+            _ytClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
         }
 
         public void Boot()
@@ -129,7 +132,7 @@ namespace Railgun
                 )
                 .AddTransient<RandomCat>()
                 .AddSingleton(enricher)
-                .AddSingleton(new YoutubeClient(new HttpClient(new YoutubeClientHandler())))
+                .AddSingleton(new YoutubeClient(_ytClient))
                 .BuildServiceProvider();
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));

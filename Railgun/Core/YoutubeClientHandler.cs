@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -9,17 +10,28 @@ namespace Railgun.Core
 {
     public class YoutubeClientHandler : HttpClientHandler
     {
-        private volatile Queue<(string Address, int Port)> _proxies = new Queue<(string Address, int Port)>();
+        private ConcurrentQueue<(string Address, int Port)> _proxies = new ConcurrentQueue<(string Address, int Port)>();
+        private readonly RotateProxy _rotateProxy = new RotateProxy();
+        private readonly HttpClient _proxyClient = new HttpClient();
+
+        public YoutubeClientHandler()
+        {
+            if (SupportsAutomaticDecompression)
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            Proxy = _rotateProxy;
+            UseProxy = true;
+        }
 
         private void ParseProxies(string rawResponse)
         {
-            var lines = rawResponse.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
-            var tempList = new Queue<(string Address, int Port)>();
+            var lines = rawResponse.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var tempList = new ConcurrentQueue<(string Address, int Port)>();
 
             foreach (var line in lines)
             {
                 var proxy = line.Split(':', 2);
-                        
+
                 if (!_proxies.Any(x => x.Address == proxy[0]))
                     tempList.Enqueue((proxy[0], int.Parse(proxy[1])));
             }
@@ -29,33 +41,68 @@ namespace Railgun.Core
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            for (int i=5; i>0; i--)
+            //for (int i=5; i>0; i--)
+            while (true)
             {
                 if (_proxies.Count == 0)
                 {
-                    UseProxy = false;
                     var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=no&anonymity=all");
-                    var proxyResponse = await base.SendAsync(proxyRequest, cancellationToken);
+                    var proxyResponse = await _proxyClient.SendAsync(proxyRequest, cancellationToken);
+                    Console.WriteLine("Fetch Complete");
 
-                    if (proxyResponse.IsSuccessStatusCode) {
+                    if (proxyResponse.IsSuccessStatusCode)
+                    {
                         ParseProxies(await proxyResponse.Content.ReadAsStringAsync());
-                        UseProxy = true;
+
+                        if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
+                            continue;
+
+                        var proxy = Proxy as RotateProxy;
+                        proxy.RotateAddress(newProxy.Address, newProxy.Port);
+                        Console.WriteLine($"Found {_proxies.Count} Proxies!");
+                        Console.WriteLine($"Now Using {proxy.Address.OriginalString}");
                     }
                     else throw new HttpRequestException("Proxy Fetch Failure!");
                 }
 
-                var ytResponse = await base.SendAsync(request, cancellationToken);
-
-                if (ytResponse.StatusCode == HttpStatusCode.TooManyRequests)
+                try
                 {
-                    var newProxy = _proxies.Dequeue();
-                    Proxy = new WebProxy(newProxy.Address, newProxy.Port);
+                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+                    {
+                        var ytResponse = await base.SendAsync(request, cancellationTokenSource.Token);
+
+                        if (ytResponse.StatusCode == HttpStatusCode.TooManyRequests)
+                            if (!RotateProxy())
+                                continue;
+                        else
+                            return ytResponse;
+                    }
                 }
-                else 
-                    return ytResponse;
+                catch
+                {
+                    RotateProxy();
+                }
             }
 
-            throw new HttpRequestException("Retry Count Exceeded!");
+            //throw new HttpRequestException("Retry Count Exceeded!");
+        }
+
+        private bool RotateProxy()
+        {
+
+            if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
+                return false;
+
+            var proxy = Proxy as RotateProxy;
+            proxy.RotateAddress(newProxy.Address, newProxy.Port);
+
+            var cookies = CookieContainer.GetCookies(new Uri("https://www.youtube.com"));
+
+            foreach (Cookie cookie in cookies)
+                cookie.Expired = true;
+
+            Console.WriteLine($"Now Using {proxy.Address.OriginalString}");
+            return true;
         }
     }
 }
