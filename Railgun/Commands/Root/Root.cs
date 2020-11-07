@@ -26,9 +26,9 @@ namespace Railgun.Commands.Root
         private readonly DiscordShardedClient _client;
         private readonly PlayerController _playerController;
         private readonly TimerController _timerManager;
-        private readonly HttpClientHandler _youtubeHandler;
+        private readonly YoutubeClientHandler _youtubeHandler;
 
-        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController, HttpClientHandler handler) {
+        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController, YoutubeClientHandler handler) {
             _config = config;
             _client = client;
             _playerController = playerController;

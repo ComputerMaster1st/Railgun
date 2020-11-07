@@ -68,7 +68,7 @@ namespace Railgun.Core
 
                 try
                 {
-                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
                     {
                         var ytResponse = await base.SendAsync(request, cancellationTokenSource.Token);
 
@@ -84,9 +84,24 @@ namespace Railgun.Core
                             
                     }
                 }
-                catch
+                catch (TaskCanceledException)
                 {
+                    Console.WriteLine("Timeout! Swapping Proxy...");
                     RotateProxy();
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine("HttpRequestException! Swapping Proxy...");
+                    RotateProxy();
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("OperationCanceledException! Swapping Proxy...");
+                    RotateProxy();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
                 }
             }
 

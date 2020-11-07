@@ -49,13 +49,14 @@ namespace Railgun
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
         private HttpClient _ytClient;
+        private YoutubeClientHandler _ytHandler;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
             _config = config;
             _client = client;
-
-            _ytClient = new HttpClient(new YoutubeClientHandler(), true);
+            _ytHandler = new YoutubeClientHandler();
+            _ytClient = new HttpClient(_ytHandler, true);
             _ytClient.DefaultRequestHeaders.Add("User-Agent", "Chrome/86.0.4240.111");
         }
 
@@ -118,6 +119,7 @@ namespace Railgun
                 .AddSingleton(_commandService)
                 .AddSingleton(_musicServiceConfig)
                 .AddSingleton(_musicService)
+                .AddSingleton(_ytHandler)
                 .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<YoutubeSearch>()
