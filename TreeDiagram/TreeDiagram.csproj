@@ -3,7 +3,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AudioChord" Version="1.9.1" />
+    <PackageReference Include="AudioChord" Version="1.9.2" />
     <PackageReference Include="AudioChord.Caching.FileSystem" Version="1.1.3" />
     <PackageReference Include="AudioChord.Extractors.Discord" Version="1.0.6" />
     <PackageReference Include="AudioChord.Metadata.Postgres" Version="0.3.0" />

@@ -56,7 +56,7 @@ namespace Railgun
             _client = client;
 
             _ytClient = new HttpClient(new YoutubeClientHandler(), true);
-            _ytClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+            _ytClient.DefaultRequestHeaders.Add("User-Agent", "Chrome/86.0.4240.111");
         }
 
         public void Boot()
@@ -100,6 +100,7 @@ namespace Railgun
                     f.Hostname = mongo.Hostname;
                     f.Username = mongo.Username;
                     f.Password = mongo.Password;
+                    f.ExtractorConfiguration.ImportedHttpClient = _ytClient;
                 })
                 .Build();
             _musicService = new MusicService(_musicServiceConfig);
