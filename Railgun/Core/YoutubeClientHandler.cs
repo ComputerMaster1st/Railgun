@@ -46,6 +46,7 @@ namespace Railgun.Core
             {
                 if (_proxies.Count == 0)
                 {
+                    Console.WriteLine("Scraping for updated proxy server list...");
                     var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=no&anonymity=all");
                     var proxyResponse = await _proxyClient.SendAsync(proxyRequest, cancellationToken);
                     Console.WriteLine("Fetch Complete");
@@ -67,15 +68,20 @@ namespace Railgun.Core
 
                 try
                 {
-                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                     {
                         var ytResponse = await base.SendAsync(request, cancellationTokenSource.Token);
 
                         if (ytResponse.StatusCode == HttpStatusCode.TooManyRequests)
-                            if (!RotateProxy())
-                                continue;
+                        {
+                            if (!RotateProxy()) continue;
+                        }
                         else
+                        {
+                            Console.WriteLine($"Successful response on proxy: {(Proxy as RotateProxy).Address.OriginalString}");
                             return ytResponse;
+                        }
+                            
                     }
                 }
                 catch
@@ -89,7 +95,6 @@ namespace Railgun.Core
 
         private bool RotateProxy()
         {
-
             if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
                 return false;
 
