@@ -12,7 +12,8 @@ namespace Railgun.Core
     {
         private ConcurrentQueue<(string Address, int Port)> _proxies = new ConcurrentQueue<(string Address, int Port)>();
         private readonly RotateProxy _rotateProxy = new RotateProxy();
-        private readonly HttpClient _proxyClient = new HttpClient();
+        private readonly HttpClient _proxyClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(3) };
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1);
 
         public YoutubeClientHandler()
         {
@@ -41,82 +42,84 @@ namespace Railgun.Core
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            //for (int i=5; i>0; i--)
+            await _lock.WaitAsync();
+
             while (true)
             {
                 if (_proxies.Count == 0)
                 {
                     Console.WriteLine("Scraping for updated proxy server list...");
-                    var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=no&anonymity=all");
-                    var proxyResponse = await _proxyClient.SendAsync(proxyRequest, cancellationToken);
-                    Console.WriteLine("Fetch Complete");
-
-                    if (proxyResponse.IsSuccessStatusCode)
+                    try
                     {
-                        ParseProxies(await proxyResponse.Content.ReadAsStringAsync());
+                        var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=US&ssl=all&anonymity=all");
+                        var proxyResponse = await _proxyClient.SendAsync(proxyRequest);
+                            
+                        Console.WriteLine("Fetch Complete");
 
-                        if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
-                            continue;
+                        if (proxyResponse.IsSuccessStatusCode)
+                        {
+                            ParseProxies(await proxyResponse.Content.ReadAsStringAsync());
 
-                        var proxy = Proxy as RotateProxy;
-                        proxy.RotateAddress(newProxy.Address, newProxy.Port);
-                        Console.WriteLine($"Found {_proxies.Count} Proxies!");
-                        Console.WriteLine($"Now Using {proxy.Address.OriginalString}");
+                            if (_proxies.Count < 1) continue;
+
+                            Console.WriteLine($"Found {_proxies.Count} Proxies!");
+
+                            if (!await RotateProxyAsync()) continue;
+                        }
+                        else throw new HttpRequestException("Proxy Fetch Failure!");
                     }
-                    else throw new HttpRequestException("Proxy Fetch Failure!");
+                    catch (HttpRequestException ex)
+                    {
+                        if (ex.Message.Contains("Proxy Fetch Failure!"))
+                        {
+                            _lock.Release();
+                            throw ex;
+                        }
+                    }
+                    catch { continue; }
                 }
 
                 try
                 {
-                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
+                    Console.WriteLine($"Request Uri: {request.RequestUri.OriginalString}");
+                    var ytResponse = await base.SendAsync(new HttpRequestMessage(HttpMethod.Get, request.RequestUri), cancellationToken);
+
+                    if (ytResponse.IsSuccessStatusCode)
                     {
-                        var ytResponse = await base.SendAsync(request, cancellationTokenSource.Token);
-
-                        if (ytResponse.StatusCode == HttpStatusCode.TooManyRequests)
-                        {
-                            if (!RotateProxy()) continue;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Successful response on proxy: {(Proxy as RotateProxy).Address.OriginalString}");
-                            return ytResponse;
-                        }
-                            
+                        _lock.Release();
+                        return ytResponse;
                     }
+                    if (!await RotateProxyAsync()) continue;
                 }
-                catch (TaskCanceledException)
-                {
-                    Console.WriteLine("Timeout! Swapping Proxy...");
-                    RotateProxy();
-                }
-                catch (HttpRequestException)
-                {
-                    Console.WriteLine("HttpRequestException! Swapping Proxy...");
-                    RotateProxy();
-                }
-                catch (OperationCanceledException)
-                {
-                    Console.WriteLine("OperationCanceledException! Swapping Proxy...");
-                    RotateProxy();
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
+                catch (Exception) { await RotateProxyAsync(); }
             }
-
-            //throw new HttpRequestException("Retry Count Exceeded!");
         }
 
-        private bool RotateProxy()
+        private async Task<bool> RotateProxyAsync()
         {
-            if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
-                return false;
+            RotateProxy proxy;
 
-            var proxy = Proxy as RotateProxy;
-            proxy.RotateAddress(newProxy.Address, newProxy.Port);
+            while (true)
+            {
+                if (!_proxies.TryDequeue(out (string Address, int Port) newProxy))
+                    return false;
 
-            var cookies = CookieContainer.GetCookies(new Uri("https://www.youtube.com"));
+                proxy = Proxy as RotateProxy;
+                proxy.RotateAddress(newProxy.Address, newProxy.Port);
+
+                try
+                {
+                    Console.WriteLine($"Pinging/Tracing {proxy.Address}");
+                    var pingMsg = new HttpRequestMessage(HttpMethod.Get, proxy.Address);
+                    var pingResponse = await _proxyClient.SendAsync(pingMsg);
+
+                    Console.WriteLine($"Proxy Response From {proxy.Address}");
+                    break;
+                }
+                catch { }
+            }
+
+            var cookies = CookieContainer.GetCookies(new Uri("youtube.com"));
 
             foreach (Cookie cookie in cookies)
                 cookie.Expired = true;
