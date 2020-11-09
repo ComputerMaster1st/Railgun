@@ -13,7 +13,6 @@ namespace Railgun.Core
         private ConcurrentQueue<(string Address, int Port)> _proxies = new ConcurrentQueue<(string Address, int Port)>();
         private readonly RotateProxy _rotateProxy = new RotateProxy();
         private readonly HttpClient _proxyClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(3) };
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1);
 
         public YoutubeClientHandler()
         {
@@ -42,8 +41,6 @@ namespace Railgun.Core
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            await _lock.WaitAsync();
-
             while (true)
             {
                 if (_proxies.Count == 0)
@@ -72,7 +69,6 @@ namespace Railgun.Core
                     {
                         if (ex.Message.Contains("Proxy Fetch Failure!"))
                         {
-                            _lock.Release();
                             throw ex;
                         }
                     }
@@ -86,7 +82,6 @@ namespace Railgun.Core
 
                     if (ytResponse.IsSuccessStatusCode)
                     {
-                        _lock.Release();
                         return ytResponse;
                     }
                     if (!await RotateProxyAsync()) continue;
@@ -119,7 +114,7 @@ namespace Railgun.Core
                 catch { }
             }
 
-            var cookies = CookieContainer.GetCookies(new Uri("youtube.com"));
+            var cookies = CookieContainer.GetCookies(new Uri("https://youtube.com"));
 
             foreach (Cookie cookie in cookies)
                 cookie.Expired = true;
