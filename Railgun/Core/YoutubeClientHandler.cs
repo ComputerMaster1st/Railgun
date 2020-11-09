@@ -41,10 +41,17 @@ namespace Railgun.Core
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            var retry = 2;
+
             while (true)
             {
                 if (_proxies.Count == 0)
                 {
+                    if (retry == 0)
+                        throw new HttpRequestException("Proxy Rotator Retry Count Exceeded!");
+                    if (retry > 0)
+                        retry--;
+
                     Console.WriteLine("Scraping for updated proxy server list...");
                     try
                     {
