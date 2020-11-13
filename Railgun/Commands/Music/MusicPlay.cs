@@ -219,10 +219,10 @@ namespace Railgun.Commands.Music
 						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.Message);
 					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				} catch (Exception ex) {
-					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}");
+					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + ex.Message}. Developers have received the error report.");
 
 					var output = new StringBuilder()
-						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.Message);
+						.AppendFormat("<{0} ({1})> Download From Youtube Failure!", Context.Guild.Name, Context.Guild.Id).AppendLine().AppendLine(ex.ToString());
 					await _botLog.SendBotLogAsync(BotLogType.MusicManager, output.ToString());
 				}
 			}
