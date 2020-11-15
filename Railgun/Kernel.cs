@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using AudioChord;
@@ -49,13 +50,16 @@ namespace Railgun
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
         private HttpClient _ytClient;
-        private YoutubeClientHandler _ytHandler;
+        //private YoutubeClientHandler _ytHandler;
+        private HttpClientHandler _ytHandler;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
             _config = config;
             _client = client;
-            _ytHandler = new YoutubeClientHandler();
+            //_ytHandler = new YoutubeClientHandler();
+            _ytHandler = new SimpleYoutubeClientHandler();
+
             _ytClient = new HttpClient(_ytHandler, true);
             _ytClient.DefaultRequestHeaders.Add("User-Agent", "Chrome/86.0.4240.111");
         }
