@@ -19,7 +19,7 @@ namespace TreeDiagram
 		public DbSet<TimerKickUser> TimerKickUsers { get; internal set; } = null;
 		public DbSet<TimerRemindMe> TimerRemindMes { get; internal set; } = null;
 
-		public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }
+		public TreeDiagramContext(DbContextOptions optionsBuilder) : base(optionsBuilder) { }    
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
