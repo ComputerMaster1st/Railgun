@@ -5,7 +5,9 @@ namespace TreeDiagram.Models.SubModels
 {
     public class MusicAutoJoinConfig
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; private set; }
+
         public ulong VoiceChannelId { get; private set; }
         public ulong TextChannelId { get; set; }
 
