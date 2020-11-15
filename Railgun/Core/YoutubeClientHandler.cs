@@ -55,7 +55,7 @@ namespace Railgun.Core
                     Console.WriteLine("Scraping for updated proxy server list...");
                     try
                     {
-                        var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=US&ssl=all&anonymity=all");
+                        var proxyRequest = new HttpRequestMessage(HttpMethod.Get, "https://www.proxy-list.download/api/v1/get?type=http");
                         var proxyResponse = await _proxyClient.SendAsync(proxyRequest);
                             
                         Console.WriteLine("Fetch Complete");
