@@ -32,19 +32,18 @@ namespace Railgun.Commands.Music
                         return;
                     }
 
-                    var guildVc = await Context.Guild.GetVoiceChannelAsync(userVc.Id);
-                    var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == guildVc.Id);
+                    var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == userVc.Id);
 
                     if (autoJoinConfig == null) {
-                        data.AutoJoinConfigs.Add(new MusicAutoJoinConfig(guildVc.Id, Context.Channel.Id));
-                        await ReplyAsync(string.Format("Voice ({0}) & Text ({1}) channels have now been set for Auto-Join! To unset, use the command again while in the same voice & text channel.", guildVc.Name, Context.Channel.Name));
+                        data.AutoJoinConfigs.Add(new MusicAutoJoinConfig(userVc.Id, Context.Channel.Id));
+                        await ReplyAsync(string.Format("Voice ({0}) & Text ({1}) channels have now been set for Auto-Join! To unset, use the command again while in the same voice & text channel.", userVc.Name, Context.Channel.Name));
                         return;
                     }
 
                     if (autoJoinConfig.TextChannelId != Context.Channel.Id)
                     {
                         autoJoinConfig.TextChannelId = Context.Channel.Id;
-                        await ReplyAsync(string.Format("Text Channel ({1}) has now been set for Voice Channel ({0}).", guildVc.Name, Context.Channel.Name));
+                        await ReplyAsync(string.Format("Text Channel ({1}) has now been set for Voice Channel ({0}).", userVc.Name, Context.Channel.Name));
                         return;
                     }
 
