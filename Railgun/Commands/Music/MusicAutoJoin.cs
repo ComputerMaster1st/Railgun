@@ -20,30 +20,31 @@ namespace Railgun.Commands.Music
                 {
                     var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
                     var data = profile.Music;
-                    var vc = await Context.Guild.GetVoiceChannelAsync((Context.Author as IGuildUser).VoiceChannel.Id);
+                    var userVc = (Context.Author as IGuildUser).VoiceChannel;
 
-                    if (vc == null && data.AutoJoinConfigs.Count < 1) {
+                    if (userVc == null && data.AutoJoinConfigs.Count < 1) {
                         await ReplyAsync("Music Auto-Join is currently disabled. Please join a voice channel and run this command again to enable it.");
                         return;
                     }
 
-                    if (vc == null && data.AutoJoinConfigs.Count > 0) {
+                    if (userVc == null && data.AutoJoinConfigs.Count > 0) {
                         await ReplyAsync("Please join a voice channel to (un)set auto-join.");
                         return;
                     }
 
-                    var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == vc.Id);
+                    var guildVc = await Context.Guild.GetVoiceChannelAsync(userVc.Id);
+                    var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == guildVc.Id);
 
                     if (autoJoinConfig == null) {
-                        data.AutoJoinConfigs.Add(new MusicAutoJoinConfig(vc.Id, Context.Channel.Id));
-                        await ReplyAsync(string.Format("Voice ({0}) & Text ({1}) channels have now been set for Auto-Join! To unset, use the command again while in the same voice & text channel.", vc.Name, Context.Channel.Name));
+                        data.AutoJoinConfigs.Add(new MusicAutoJoinConfig(guildVc.Id, Context.Channel.Id));
+                        await ReplyAsync(string.Format("Voice ({0}) & Text ({1}) channels have now been set for Auto-Join! To unset, use the command again while in the same voice & text channel.", guildVc.Name, Context.Channel.Name));
                         return;
                     }
 
                     if (autoJoinConfig.TextChannelId != Context.Channel.Id)
                     {
                         autoJoinConfig.TextChannelId = Context.Channel.Id;
-                        await ReplyAsync(string.Format("Text Channel ({1}) has now been set for Voice Channel ({0}).", vc.Name, Context.Channel.Name));
+                        await ReplyAsync(string.Format("Text Channel ({1}) has now been set for Voice Channel ({0}).", guildVc.Name, Context.Channel.Name));
                         return;
                     }
 
