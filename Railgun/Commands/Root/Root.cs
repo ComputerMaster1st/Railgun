@@ -26,14 +26,12 @@ namespace Railgun.Commands.Root
         private readonly DiscordShardedClient _client;
         private readonly PlayerController _playerController;
         private readonly TimerController _timerManager;
-        private readonly YoutubeClientHandler _youtubeHandler;
 
-        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController, YoutubeClientHandler handler) {
+        public Root(MasterConfig config, DiscordShardedClient client, PlayerController playerController, TimerController timerController) {
             _config = config;
             _client = client;
             _playerController = playerController;
             _timerManager = timerController;
-            _youtubeHandler = handler;
         }
         
         [Command("show")]
@@ -172,31 +170,25 @@ namespace Railgun.Commands.Root
             
             await _client.StopAsync();
             await _client.LogoutAsync();
-
-            var container = _youtubeHandler.CookieContainer;
-            var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
-
-            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-            _config.UpdateYoutubeCookies(collection.ToList());
         }
 
-        [Command("cookies")]
-        public Task CookiesAsync()
-        {
-            var container = _youtubeHandler.CookieContainer;
-            var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
+        // [Command("cookies")]
+        // public Task CookiesAsync()
+        // {
+        //     var container = _youtubeHandler.CookieContainer;
+        //     var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
 
-            // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-            _config.UpdateYoutubeCookies(collection.ToList());
+        //     // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
+        //     _config.UpdateYoutubeCookies(collection.ToList());
 
-            var output = new StringBuilder();
+        //     var output = new StringBuilder();
 
-            foreach (var cookie in _config.YoutubeCookies)
-                output.AppendFormat("{0}: {1}", Format.Bold(cookie.Key), cookie.Value).AppendLine();
+        //     foreach (var cookie in _config.YoutubeCookies)
+        //         output.AppendFormat("{0}: {1}", Format.Bold(cookie.Key), cookie.Value).AppendLine();
 
-            output.AppendLine("All current cookies for Youtube.");
-            return ReplyAsync(output.ToString());
-        }
+        //     output.AppendLine("All current cookies for Youtube.");
+        //     return ReplyAsync(output.ToString());
+        // }
         
         [Command("prefix")]
         public async Task PrefixAsync([Remainder] string input) {
