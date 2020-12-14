@@ -7,6 +7,8 @@ using Finite.Commands;
 using Railgun.Core.Results;
 using Railgun.Core.Enums;
 using TreeDiagram;
+using Railgun.Core.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Railgun.Core.Attributes
 {
@@ -21,6 +23,11 @@ namespace Railgun.Core.Attributes
 		{
 			var user = context.Author as IGuildUser;
 			var output = new StringBuilder();
+
+			// Bot Admin Override
+			var config = services.GetService<MasterConfig>();
+			if (config.DiscordConfig.MasterAdminId == user.Id || config.DiscordConfig.OtherAdmins.Contains(user.Id))
+				return Task.FromResult(PreconditionResult.FromSuccess());
 
 			switch (_moduleType) 
 			{
