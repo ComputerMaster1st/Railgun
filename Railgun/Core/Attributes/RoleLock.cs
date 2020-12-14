@@ -29,6 +29,10 @@ namespace Railgun.Core.Attributes
 			if (config.DiscordConfig.MasterAdminId == user.Id || config.DiscordConfig.OtherAdmins.Contains(user.Id))
 				return Task.FromResult(PreconditionResult.FromSuccess());
 
+			// Server Owner Override
+			if (user.Guild.OwnerId == user.Id)
+				return Task.FromResult(PreconditionResult.FromSuccess());
+
 			switch (_moduleType) 
 			{
 				case ModuleType.Music:
