@@ -158,5 +158,19 @@ namespace Railgun.Commands
             
             return ReplyAsync(Format.Code(output.ToString()));
         }
+
+        [Command("shards")]
+        public Task ShardsAsync()
+        {
+            var output = new StringBuilder()
+                .AppendLine("Shard Status")
+                .AppendLine();
+
+            foreach (var shard in _client.Shards)
+                output.AppendFormat("SHARD #{0} => Connection State: {1}, Latency: {2}, Servers: {3}", shard.ShardId, shard.ConnectionState, shard.Latency, shard.Guilds.Count)
+                    .AppendLine();
+
+            return ReplyAsync(Format.Code(output.ToString()));
+        }
     }
 }
