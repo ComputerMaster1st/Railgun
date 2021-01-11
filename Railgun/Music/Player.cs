@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Discord.Audio;
-using MongoDB.Bson;
 using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
 using Railgun.Music.Scheduler;
-using YoutubeExplode;
 using YoutubeExplode.Exceptions;
 
 namespace Railgun.Music
@@ -102,6 +100,7 @@ namespace Railgun.Music
 		private async Task DisconnectFromVoiceAsync()
 		{
 			Status = PlayerStatus.Disconnecting;
+			_streamCancelled.Cancel();
 			await _client.StopAsync();
 			await Task.Delay(1000);
         }
