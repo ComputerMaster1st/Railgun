@@ -98,6 +98,20 @@ namespace Railgun.Commands.Music
 
 				return ReplyAsync($"Music Playlist Auto-Loop is now {Format.Bold(data.PlaylistAutoLoop ? "Enabled" : "Disabled")}.");
 			}
+
+			[Command("shuffle")]
+			public Task AutoShuffleAsync()
+            {
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+				var data = profile.Music;
+
+				data.DisableShuffle = !data.DisableShuffle;
+
+				var container = _playerController.GetPlayer(Context.Guild.Id);
+				if (container != null) container.Player.MusicScheduler.DisableShuffle = data.DisableShuffle;
+
+				return ReplyAsync($"Music Playlist Shuffle is now {Format.Bold(data.PlaylistAutoLoop ? "Enabled" : "Disabled")}.");
+			}
 		}
 	}
 }

@@ -22,6 +22,7 @@ namespace TreeDiagram.Models.Server
 		public bool SilentNowPlaying { get; set; }
 		public bool SilentSongProcessing { get; set; }
 		public ulong NowPlayingChannel { get; set; }
+		public bool DisableShuffle { get; set; }
 
 		private List<ulong> _allowedRoles;
 

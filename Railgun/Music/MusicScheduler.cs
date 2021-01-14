@@ -38,6 +38,8 @@ namespace Railgun.Music.Scheduler
 
         public bool IsRequestsPopulated => Requests.Any();
 
+        public bool DisableShuffle { get; set; }  = false;
+
         public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher)
         {
             _musicService = musicService;
@@ -102,7 +104,7 @@ namespace Railgun.Music.Scheduler
             }
 
             var songIds = _playlist.Where(x => x.Value == SongQueueStatus.Queued).Select(x => x.Key).ToList();
-            var songId = songIds[_random.Next(0, songIds.Count())];
+            var songId = DisableShuffle ? songIds.First() : songIds[_random.Next(0, songIds.Count())];
             request = await FetchSongAsync(songId);
 
             if (request.IsSuccess)
