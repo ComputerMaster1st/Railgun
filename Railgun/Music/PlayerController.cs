@@ -74,7 +74,7 @@ namespace Railgun.Music
             if (PlayerContainers.Any(c => c.GuildId == tc.GuildId)) return;
             var container = new PlayerContainer(tc);
             PlayerContainers.Add(container);
-            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop, _ytClient, _enricher));
+            var player = new Player(_musicService, vc, new MusicScheduler(_musicService, playlist.Id, data.PlaylistAutoLoop, _ytClient, _enricher, data.DisableShuffle));
 
 			try
 			{

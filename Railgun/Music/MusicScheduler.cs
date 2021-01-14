@@ -40,13 +40,14 @@ namespace Railgun.Music.Scheduler
 
         public bool DisableShuffle { get; set; }  = false;
 
-        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher)
+        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher, bool disableShuffle)
         {
             _musicService = musicService;
             _playlistId = playlistId;
             PlaylistAutoLoop = playlistAutoLoop;
             _ytClient = ytClient;
             _enricher = enricher;
+            DisableShuffle = disableShuffle;
         }
 
         public async Task<ISong> RequestNextSongAsync()
