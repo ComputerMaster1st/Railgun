@@ -110,7 +110,7 @@ namespace Railgun.Commands.Music
 				var container = _playerController.GetPlayer(Context.Guild.Id);
 				if (container != null) container.Player.MusicScheduler.DisableShuffle = data.DisableShuffle;
 
-				return ReplyAsync($"Music Playlist Shuffle is now {Format.Bold(data.DisableShuffle ? "Enabled" : "Disabled")}.");
+				return ReplyAsync($"Music Playlist Shuffle is now {Format.Bold(data.DisableShuffle ? "Disabled" : "Enabled")}.");
 			}
 		}
 	}
