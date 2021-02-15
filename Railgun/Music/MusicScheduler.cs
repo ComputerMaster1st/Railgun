@@ -2,6 +2,7 @@
 using Discord;
 using MongoDB.Bson;
 using Railgun.Core;
+using Railgun.Core.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Railgun.Music.Scheduler
 {
     public class MusicScheduler
     {
+        private readonly MusicServiceConfiguration _musicConfig;
         private readonly MusicService _musicService;
         private readonly ObjectId _playlistId;
         private readonly YoutubeClient _ytClient;
@@ -40,8 +42,9 @@ namespace Railgun.Music.Scheduler
 
         public bool DisableShuffle { get; set; }  = false;
 
-        public MusicScheduler(MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher, bool disableShuffle)
+        public MusicScheduler(MusicServiceConfiguration musicConfig, MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher, bool disableShuffle)
         {
+            _musicConfig = musicConfig;
             _musicService = musicService;
             _playlistId = playlistId;
             PlaylistAutoLoop = playlistAutoLoop;
@@ -198,6 +201,9 @@ namespace Railgun.Music.Scheduler
                 {
 					var videoId = VideoId.TryParse(ytUrl);
                     var video = await _ytClient.Videos.GetAsync(videoId.Value);
+
+                    if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
+                        return (false, new SongQueueException(string.Format("Song ({0}) Exceeds Maximum Limit: {1} Minutes", Format.EscapeUrl(video.Url), _musicConfig.ExtractorConfiguration.MaxSongDuration.TotalMinutes)), null);
 
 					title = video.Title;
 					uploader = video.Author;
