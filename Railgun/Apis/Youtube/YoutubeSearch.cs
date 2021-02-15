@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Apis.Services;
@@ -34,6 +35,31 @@ namespace Railgun.Apis.Youtube
             var snippet = result.Snippet;
 
             return new YoutubeVideoData(snippet.Title, result.Id.VideoId, snippet.ChannelTitle);
+        }
+
+        public async Task<IEnumerable<YoutubeVideoData>> GetVideosAsync(string playlistId)
+        {
+            var list = new List<YoutubeVideoData>();
+
+            var nextPageToken = "";
+            while (nextPageToken != null)
+            {
+                var request = _service.PlaylistItems.List("snippet");
+                request.Id = playlistId;
+                request.MaxResults = 50;
+                request.PageToken = nextPageToken;
+
+                var response = await request.ExecuteAsync();
+
+                if (response.Items.Count < 1) return null;
+
+                foreach (var item in response.Items)
+                    list.Add(new YoutubeVideoData(item.Snippet.Title, item.ContentDetails.VideoId, item.Snippet.ChannelTitle));
+
+                nextPageToken = response.NextPageToken;
+            }
+
+            return list;
         }
     }
 }
