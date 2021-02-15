@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Apis.Youtube;
 using Railgun.Core;
 using Railgun.Core.Enums;
 using TreeDiagram;
@@ -20,16 +21,14 @@ namespace Railgun.Music
     {
         private readonly BotLog _botLog;
         private readonly MusicService _musicService;
-        private readonly MusicServiceConfiguration _musicConfig;
-        private readonly YoutubeClient _ytClient;
+        private readonly YoutubeSearch _ytSearch;
         private readonly IServiceProvider _services;
 
-        public MusicController(BotLog botLog, MusicService musicService, MusicServiceConfiguration musicConfig, YoutubeClient ytClient, IServiceProvider services)
+        public MusicController(BotLog botLog, MusicService musicService, YoutubeSearch ytSearch, IServiceProvider services)
 		{
             _botLog = botLog;
             _musicService = musicService;
-            _musicConfig = musicConfig;
-            _ytClient = ytClient;
+            _ytSearch = ytSearch;
             _services = services;
 		}
 
@@ -136,11 +135,11 @@ namespace Railgun.Music
             }
 
             var startedAt = DateTime.Now;
-            IReadOnlyList<Video> youtubePlaylist;
+            IEnumerable<YoutubeVideoData> youtubePlaylist;
 
             try
             {
-                youtubePlaylist = await _ytClient.Playlists.GetVideosAsync(playlistId.Value);
+                youtubePlaylist = await _ytSearch.GetVideosAsync(playlistId);
             }
             catch (RequestLimitExceededException)
             {
@@ -152,8 +151,7 @@ namespace Railgun.Music
 
             var urls = new List<string>();
             foreach (var video in youtubePlaylist)
-                if (video.Duration <= _musicConfig.ExtractorConfiguration.MaxSongDuration)
-                    urls.Add(video.Url);
+                urls.Add(video.Url);
 
             var (InvalidUrls, Installed, Imported, NeedEncoding) = await ProcessSongIdsAsync(urls, tc);
 
