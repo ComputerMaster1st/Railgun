@@ -45,7 +45,7 @@ namespace Railgun.Apis.Youtube
             while (nextPageToken != null)
             {
                 var request = _service.PlaylistItems.List("snippet");
-                request.Id = playlistId;
+                request.PlaylistId = playlistId;
                 request.MaxResults = 50;
                 request.PageToken = nextPageToken;
 
@@ -54,7 +54,7 @@ namespace Railgun.Apis.Youtube
                 if (response.Items.Count < 1) return null;
 
                 foreach (var item in response.Items)
-                    list.Add(new YoutubeVideoData(item.Snippet.Title, item.ContentDetails.VideoId, item.Snippet.ChannelTitle));
+                    list.Add(new YoutubeVideoData(item.Snippet.Title, item.Snippet.ResourceId.VideoId, item.Snippet.ChannelTitle));
 
                 nextPageToken = response.NextPageToken;
             }
