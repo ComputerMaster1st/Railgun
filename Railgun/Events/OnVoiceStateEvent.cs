@@ -40,7 +40,7 @@ namespace Railgun.Events
 
             if (before.VoiceChannel != null && after.VoiceChannel != null)
                 if (before.VoiceChannel.Id == after.VoiceChannel.Id)
-                    if (before.IsSelfMuted != after.IsSelfMuted) return;
+                    return;
 
             if (_controller.GetPlayer(guild.Id) != null || user.VoiceChannel == null) return;
 
