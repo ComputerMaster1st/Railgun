@@ -19,7 +19,7 @@ namespace Railgun.Commands
 		public Bite(MasterConfig config) =>_config = config;
 
 		[Command]
-		public async Task BiteAsync(IUser user = null)
+		public async Task BiteAsync(IUser user)
 		{
 			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             var data = profile.Fun.Bites;
@@ -37,40 +37,50 @@ namespace Railgun.Commands
 				return;
 			}
 
-			var rand = new Random();
-			var i = 0;
-
-			if (user == null) i = rand.Next(1, 2);
-			else i = rand.Next(3, 6);
 
 			IGuildUser bitee = null;
 			IGuildUser biter = null;
 
-			switch (i) {
-				case 1:
-					biter = await Context.Guild.GetCurrentUserAsync();
-					bitee = await Context.Guild.GetUserAsync(Context.Author.Id);
-					break;
-				case 2:
-					biter = await Context.Guild.GetUserAsync(Context.Author.Id);
-					bitee = await Context.Guild.GetCurrentUserAsync();
-					break;
-				case 3:
-					biter = await Context.Guild.GetUserAsync(user.Id);
-					bitee = await Context.Guild.GetCurrentUserAsync();
-					break;
-				case 4:
-					biter = await Context.Guild.GetCurrentUserAsync();
-					bitee = await Context.Guild.GetUserAsync(user.Id);
-					break;
-				case 5:
-					biter = await Context.Guild.GetUserAsync(user.Id);
-					bitee = await Context.Guild.GetUserAsync(Context.Author.Id);
-					break;
-				case 6:
-					biter = await Context.Guild.GetUserAsync(Context.Author.Id);
-					bitee = await Context.Guild.GetUserAsync(user.Id);
-					break;
+			if (data.NoNameRandomness)
+            {
+				bitee = (IGuildUser)(user ?? Context.Author);
+				biter = Context.Author as IGuildUser;
+			}
+			else
+            {
+				var rand = new Random();
+				var i = 0;
+
+				if (user == null) i = rand.Next(1, 2);
+				else i = rand.Next(3, 6);
+
+				switch (i)
+				{
+					case 1:
+						biter = await Context.Guild.GetCurrentUserAsync();
+						bitee = await Context.Guild.GetUserAsync(Context.Author.Id);
+						break;
+					case 2:
+						biter = await Context.Guild.GetUserAsync(Context.Author.Id);
+						bitee = await Context.Guild.GetCurrentUserAsync();
+						break;
+					case 3:
+						biter = await Context.Guild.GetUserAsync(user.Id);
+						bitee = await Context.Guild.GetCurrentUserAsync();
+						break;
+					case 4:
+						biter = await Context.Guild.GetCurrentUserAsync();
+						bitee = await Context.Guild.GetUserAsync(user.Id);
+						break;
+					case 5:
+						biter = await Context.Guild.GetUserAsync(user.Id);
+						bitee = await Context.Guild.GetUserAsync(Context.Author.Id);
+						break;
+					case 6:
+						biter = await Context.Guild.GetUserAsync(Context.Author.Id);
+						bitee = await Context.Guild.GetUserAsync(user.Id);
+						break;
+				}
 			}
 
 			var biterName = SystemUtilities.GetUsernameOrMention(Context.Database, biter);
@@ -79,6 +89,9 @@ namespace Railgun.Commands
 
 			await ReplyAsync(biteMessage);
 		}
+
+		[Command]
+		public Task BiteAsync() => BiteAsync(null);
 
 		[Command("add")]
 		public Task AddAsync([Remainder] string msg)
@@ -144,6 +157,16 @@ namespace Railgun.Commands
 
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Bites are now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
+		}
+
+		[Command("norandom"), UserPerms(GuildPermission.ManageMessages)]
+		public Task NoRandomAsync()
+        {
+			var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+
+			data.Fun.Bites.NoNameRandomness = !data.Fun.Bites.NoNameRandomness;
+
+			return ReplyAsync($"Names used for bites are {(data.Fun.Bites.NoNameRandomness ? Format.Bold("no longer random") : Format.Bold("now random"))}!");
 		}
 
 		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]

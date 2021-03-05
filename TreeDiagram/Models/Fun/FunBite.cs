@@ -14,6 +14,8 @@ namespace TreeDiagram.Models.Fun
             } private set {
                 _bites = value;
             }}
+
+        public bool NoNameRandomness { get; set; } = false;
         
         public void AddBite(string message) {
             if (!Bites.Contains(message)) Bites.Add(message);
