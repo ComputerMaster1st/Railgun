@@ -276,5 +276,12 @@ namespace Railgun.Commands.Root
             output.Remove(output.Length - 3, 3);
             await ReplyAsync(output.ToString());
         }
+
+        [Command("serverleave")]
+        public async Task LeaveServerAsync(ulong serverId)
+        {
+            var guild = await Context.Client.GetGuildAsync(serverId);
+            await guild.LeaveAsync();
+        }
     }
 }
