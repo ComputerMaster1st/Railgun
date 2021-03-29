@@ -47,7 +47,7 @@ namespace Railgun.Commands.Music
 			}
 
 			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-			public Task SetNpChannelAsync(ITextChannel tcParam = null)
+			public Task SetNpChannelAsync(ITextChannel tcParam)
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
@@ -57,6 +57,9 @@ namespace Railgun.Commands.Music
 					return SetNpChannelAsync(data, tc);
 				return SetNpChannelAsync(data, tc, true);
 			}
-		}
+
+            [Command("channel"), UserPerms(GuildPermission.ManageGuild)]
+            public Task SetNpChannelAsync() => SetNpChannelAsync(null);
+        }
 	}
 }
