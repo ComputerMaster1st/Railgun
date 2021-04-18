@@ -211,7 +211,7 @@ namespace Railgun.Commands.Music
 					if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
 						throw new ArgumentOutOfRangeException($"Requested music is longer than {Format.Bold(_musicConfig.ExtractorConfiguration.MaxSongDuration.ToString(@"hh\:mm\:ss"))}");
 
-					await QueueSongAsync(playerContainer, playlist, new SongRequest(new SongId("YOUTUBE", video.Id), video.Title, video.Duration, video.Author), data, response);
+					await QueueSongAsync(playerContainer, playlist, new SongRequest(new SongId("YOUTUBE", video.Id), video.Title, video.Duration.GetValueOrDefault(), video.Author.Title), data, response);
                 } catch (RequestLimitExceededException ex) {
 					await response.ModifyAsync(x => x.Content = $"An error has occured! {Format.Bold("ERROR : ") + "Youtube Rate-Limited (Error Code: 429)! Please try again later."}");
 

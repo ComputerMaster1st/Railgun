@@ -206,7 +206,7 @@ namespace Railgun.Music.Scheduler
                         return (false, new SongQueueException(string.Format("Song ({0}) Exceeds Maximum Limit: {1} Minutes", Format.EscapeUrl(video.Url), _musicConfig.ExtractorConfiguration.MaxSongDuration.TotalMinutes)), null);
 
 					title = video.Title;
-					uploader = video.Author;
+					uploader = video.Author.Title;
 				}
                 else
                 {
