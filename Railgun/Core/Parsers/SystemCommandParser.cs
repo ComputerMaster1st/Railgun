@@ -105,12 +105,21 @@ namespace Railgun.Core.Parsers
                 }
                 else if (argument.Attributes.Any(x => x is Remainder))
                 {
-                    var output = new StringBuilder();
+                    var fullArgument = string.Empty;
 
-                    for (int subIndex = i; subIndex < match.Arguments.Length; subIndex++)
-                        output.AppendFormat("{0} ", match.Arguments[subIndex]);
-                    
-                    var ok = TryParseObject(execContext, argument, output.ToString().TrimEnd(' '), out var value);
+                    if (match.Arguments.Length > 0)
+                    {
+                        var msg = execContext.Context.Message;
+                        fullArgument = msg.Substring(msg.IndexOf(match.Arguments[i]));
+                    }
+
+                    //var output = new StringBuilder();
+
+                    //for (int subIndex = i; subIndex < match.Arguments.Length; subIndex++)
+                    //    output.AppendFormat("{0} ", match.Arguments[subIndex]);
+
+                    // output.ToString().TrimEnd(' ')
+                    var ok = TryParseObject(execContext, argument, fullArgument, out var value);
                     if (!ok) return false;
                     result[i] = value;
                 } 
