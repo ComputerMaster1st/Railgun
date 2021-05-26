@@ -14,7 +14,8 @@ namespace Railgun
             new DiscordSocketConfig()
             {
                 LogLevel = LogSeverity.Info,
-                DefaultRetryMode = RetryMode.AlwaysRetry
+                DefaultRetryMode = RetryMode.AlwaysRetry,
+                AlwaysDownloadUsers = true
             }
         );
 
