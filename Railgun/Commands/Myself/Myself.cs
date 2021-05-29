@@ -11,23 +11,6 @@ namespace Railgun.Commands.Myself
 	[Alias("myself", "self")]
 	public partial class Myself : SystemBase
 	{
-		[Command("prefix")]
-		public Task PrefixAsync([Remainder] string input = null)
-		{
-			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Author.Id);
-            var data = profile.Globals;
-
-			if (string.IsNullOrWhiteSpace(input) && string.IsNullOrWhiteSpace(data.Prefix))
-				return ReplyAsync("No prefix has been specified. Please specify a prefix.");
-			if (string.IsNullOrWhiteSpace(input) && !string.IsNullOrWhiteSpace(data.Prefix)) {
-				data.Prefix = string.Empty;
-				return ReplyAsync("Personal prefix has been removed.");
-			}
-
-			data.Prefix = input;
-			return ReplyAsync($"Personal prefix has been set! {Format.Code(input + " <command>")}!");
-		}
-
 		[Command("show")]
 		public Task ShowAsync()
 		{
