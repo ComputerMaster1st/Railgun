@@ -16,7 +16,8 @@ namespace Railgun.Commands.Warning
 	{
 		private readonly BotLog _botLog;
 
-		public Warning(BotLog botLog) =>_botLog = botLog;
+		public Warning(BotLog botLog)
+			=>_botLog = botLog;
 		
 		private Task WarnUserAsync(ServerWarning data, IUser user, string reason)
 		{

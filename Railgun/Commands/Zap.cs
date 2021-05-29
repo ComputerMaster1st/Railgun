@@ -10,7 +10,8 @@ namespace Railgun.Commands
     {
         private readonly IDiscordClient _client;
 
-        public Zap(IDiscordClient client) => _client = client;
+        public Zap(IDiscordClient client)
+            => _client = client;
         
         [Command]
         public Task ExecuteAsync(IGuildUser user) 

@@ -12,7 +12,8 @@ namespace Railgun.Commands.Rst
 	{
 		private readonly MasterConfig _config;
 
-		public Rst(MasterConfig config) => _config = config;
+		public Rst(MasterConfig config)
+			=> _config = config;
 
 		[Command]
 		public Task ExecuteAsync()
