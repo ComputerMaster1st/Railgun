@@ -13,10 +13,10 @@ using Railgun.Core.Configuration;
 using Railgun.Music;
 using Railgun.Utilities;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.Info
 {
     [Alias("info")]
-    public class Info : SystemBase
+    public partial class Info : SystemBase
     {
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
@@ -156,20 +156,6 @@ namespace Railgun.Commands
                 .AppendFormat("Assign Role : {0}", Context.Database.TimerAssignRoles.Count()).AppendLine()
                 .AppendFormat("Kick User   : {0}", Context.Database.TimerKickUsers.Count());
             
-            return ReplyAsync(Format.Code(output.ToString()));
-        }
-
-        [Command("shards")]
-        public Task ShardsAsync()
-        {
-            var output = new StringBuilder()
-                .AppendLine("Shard Status")
-                .AppendLine();
-
-            foreach (var shard in _client.Shards)
-                output.AppendFormat("SHARD #{0} => Connection State: {1}, Latency: {2}, Servers: {3}", shard.ShardId, shard.ConnectionState, shard.Latency, shard.Guilds.Count)
-                    .AppendLine();
-
             return ReplyAsync(Format.Code(output.ToString()));
         }
     }
