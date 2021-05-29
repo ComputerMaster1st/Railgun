@@ -146,17 +146,5 @@ namespace Railgun.Commands.Info
 
             await ReplyAsync(output.ToString());
         }
-
-        [Command("timers")]
-        public Task TimersAsync() {
-            var output = new StringBuilder()
-                .AppendLine("TreeDiagram Timers Status")
-                .AppendLine()
-                .AppendFormat("Remind Me   : {0}", Context.Database.TimerRemindMes.Count()).AppendLine()
-                .AppendFormat("Assign Role : {0}", Context.Database.TimerAssignRoles.Count()).AppendLine()
-                .AppendFormat("Kick User   : {0}", Context.Database.TimerKickUsers.Count());
-            
-            return ReplyAsync(Format.Code(output.ToString()));
-        }
     }
 }
