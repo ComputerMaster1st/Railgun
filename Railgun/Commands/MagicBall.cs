@@ -41,11 +41,16 @@ namespace Railgun.Commands
 
                 while (string.IsNullOrEmpty(result))
                 {
-                    try { result = _responses[rand.Next(0, _responses.Length)]; }
+                    try 
+                    { 
+                        result = _responses[rand.Next(0, _responses.Length)];
+                    }
                     catch
                     {
                         retry--;
-                        if (retry == 0) return "It appears the \"Magic 8 Ball.exe\" has stopped working! Use command again to retry.";
+
+                        if (retry == 0) 
+                            return "It appears the \"Magic 8 Ball.exe\" has stopped working! Use command again to retry.";
                     }
                 }
 
@@ -54,14 +59,20 @@ namespace Railgun.Commands
         }
 
         [Command]
-        public Task MagicBallAsync([Remainder] string query)
+        public Task ExecuteAsync([Remainder] string query)
         {
             var output = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(query)) output.AppendFormat("Your Question: {0}", query).AppendLine();
+            if (!string.IsNullOrWhiteSpace(query))
+                output.AppendFormat("Your Question: {0}", query).AppendLine();
+
             output.AppendFormat("8Ball's Response: {0}", RandomAnswer);
 
             return ReplyAsync(output.ToString());
         }
+
+        [Command]
+        public Task ExecuteAsync()
+            => ExecuteAsync(null);
     }
 }
