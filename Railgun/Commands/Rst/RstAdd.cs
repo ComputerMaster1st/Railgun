@@ -13,7 +13,7 @@ namespace Railgun.Commands.Rst
         public class RstAdd : SystemBase
         {
 			[Command]
-			public Task AddAsync([Remainder] string msg)
+			public Task ExecuteAsync([Remainder] string msg)
 			{
 				if (string.IsNullOrWhiteSpace(msg))
 					return ReplyAsync("Your message was empty. Please add a message to add.");
