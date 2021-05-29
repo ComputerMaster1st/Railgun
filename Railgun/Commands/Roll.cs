@@ -10,7 +10,7 @@ namespace Railgun.Commands
     public class Roll : SystemBase
     {        
         [Command]
-        public Task RollAsync(int num1 = 0, int num2 = 100) 
+        public Task ExecuteAsync(int num1, int num2) 
         {
             var name = SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser);
             var rand = new Random();
@@ -18,5 +18,13 @@ namespace Railgun.Commands
             
             return ReplyAsync($"{Format.Bold(name)} has rolled {Format.Bold(rng.ToString())}.");
         }
+
+        [Command]
+        public Task ExecuteAsync(int num1)
+            => ExecuteAsync(0, num1);
+
+        [Command]
+        public Task ExecuteAsync()
+            => ExecuteAsync(0, 100);
     }
 }
