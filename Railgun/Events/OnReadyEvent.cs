@@ -19,7 +19,7 @@ namespace Railgun.Events
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
         private readonly InactivityController _inactivityController;
-        private readonly PlayerController _playerController;
+        //private readonly PlayerController _playerController;
         private readonly TimerController _timerController;
         private readonly ServerCount _count;
         private readonly IServiceProvider _services;
@@ -35,7 +35,7 @@ namespace Railgun.Events
             _services = services;
 
             _inactivityController = services.GetService<InactivityController>();
-            _playerController = services.GetService<PlayerController>();
+            //_playerController = services.GetService<PlayerController>();
             _timerController = services.GetService<TimerController>();
         }
 
@@ -43,8 +43,8 @@ namespace Railgun.Events
 
         private async Task ExecuteAsync(DiscordSocketClient sClient)
         {
-            if (_playerController.PlayerContainers.Count > 0)
-				foreach (var player in _playerController.PlayerContainers) player.Player.CancelStream();
+    //        if (_playerController.PlayerContainers.Count > 0)
+				//foreach (var player in _playerController.PlayerContainers) player.Player.CancelStream();
 
 			if (!_shardsReady.ContainsKey(sClient.ShardId)) _shardsReady.Add(sClient.ShardId, false);
 			else _shardsReady[sClient.ShardId] = true;
