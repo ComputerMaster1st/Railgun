@@ -125,26 +125,5 @@ namespace Railgun.Commands.Info
 
             return ReplyAsync(Format.Code(output.ToString()));
         }
-
-        [Command("admins")]
-        public async Task AdminsAsync() {
-            var guild = await Context.Client.GetGuildAsync(_config.DiscordConfig.MasterGuildId);
-            var master = await guild.GetUserAsync(_config.DiscordConfig.MasterAdminId);
-            var output = new StringBuilder()
-                .AppendFormat(Format.Bold("{0}#{1}") + " is Railgun's Master Admin.", master.Username, master.DiscriminatorValue).AppendLine();
-            
-            foreach (var adminId in _config.DiscordConfig.OtherAdmins) {
-                var admin = await guild.GetUserAsync(adminId);
-
-                if (admin == null) {
-                    output.AppendFormat(Format.Bold("{0}"), adminId).AppendLine();
-                    break;
-                }
-
-                output.AppendFormat(Format.Bold("{0}#{1}"), admin.Username, admin.DiscriminatorValue).AppendLine();
-            }
-
-            await ReplyAsync(output.ToString());
-        }
     }
 }
