@@ -40,23 +40,6 @@ namespace Railgun.Commands.Rst
 			return ReplyAsync(msg);
 		}
 
-		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-		public Task RemoveAsync(int index)
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Rst;
-
-			if (data.Rst.Count < 1)
-				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-			if (!data.IsEnabled)
-				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-			if (index < 0 || index >= data.Rst.Count)
-				return ReplyAsync("The Message Id provided is out of bounds. Please recheck via RST List.");
-
-			data.Rst.RemoveAt(index);
-			return ReplyAsync("Message Removed!");
-		}
-
 		[Command("list"), BotPerms(ChannelPermission.AttachFiles)]
 		public Task ListAsync()
 		{
