@@ -6,21 +6,11 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.Myself
 {
 	[Alias("myself", "self")]
-	public class Myself : SystemBase
+	public partial class Myself : SystemBase
 	{
-		[Command("mention")]
-		public Task MentionsAsync()
-		{
-			var profile = Context.Database.UserProfiles.GetOrCreateData(Context.Author.Id);
-            var data = profile.Globals;
-
-			data.DisableMentions = !data.DisableMentions;
-			return ReplyAsync($"Personal mentions are now {(data.DisableMentions ? Format.Bold("Enabled") : Format.Bold("Disabled"))}.");
-		}
-
 		[Command("prefix")]
 		public Task PrefixAsync([Remainder] string input = null)
 		{
