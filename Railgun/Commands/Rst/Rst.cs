@@ -40,58 +40,6 @@ namespace Railgun.Commands.Rst
 			return ReplyAsync(msg);
 		}
 
-		[Command("import"), UserPerms(GuildPermission.ManageMessages)]
-		public async Task ImportAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Rst;
-			
-			if (Context.Message.Attachments.Count < 1)
-			{
-                await ReplyAsync("Please attach the RST data file.");
-                return;
-            }
-
-			var response = await ReplyAsync("Processing RST data file. Standby...");
-			var importFileUrl = Context.Message.Attachments.First().Url;
-            var importFileName = Context.Guild.Name + $"-rst-data{SystemUtilities.FileExtension}";
-
-			using (var webClient = new HttpClient())
-            using (var writer = File.OpenWrite(importFileName))
-			{
-                var importStream = await webClient.GetStreamAsync(importFileUrl);
-                await importStream.CopyToAsync(writer);
-            }
-
-			var importFile = await File.ReadAllLinesAsync(importFileName);
-			var rst = new StringBuilder();
-			var rstCount = 0;
-
-			foreach (var line in importFile) 
-			{
-				if (line.StartsWith('#')) continue;
-                if (line.StartsWith(">>>")) 
-				{
-					rst = new StringBuilder();
-					continue;
-				}
-				if (line.StartsWith("<<<"))
-				{
-					if (data.Rst.Contains(rst.ToString())) continue;
-
-					data.Rst.Add(rst.ToString());
-					rstCount++;
-					continue;
-				}
-
-                rst.AppendLine(line);
-            }
-
-            File.Delete(importFileName);
-
-			await response.ModifyAsync(x => x.Content = $"RST data file processed! Added {Format.Bold(rstCount.ToString())} RST entries!");
-		}
-
 		[Command("export"), UserPerms(GuildPermission.ManageMessages), BotPerms(ChannelPermission.AttachFiles)]
 		public async Task ExportAsync()
 		{
