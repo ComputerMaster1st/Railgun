@@ -15,7 +15,7 @@ using TreeDiagram;
 namespace Railgun.Commands.Rst
 {
     [Alias("rst")]
-	public class Rst : SystemBase
+	public partial class Rst : SystemBase
 	{
 		private readonly MasterConfig _config;
 
@@ -38,22 +38,6 @@ namespace Railgun.Commands.Rst
 						_config.DiscordConfig.Prefix)));
 
 			return ReplyAsync(msg);
-		}
-
-		[Command("add")]
-		public Task AddAsync([Remainder] string msg)
-		{
-			if (string.IsNullOrWhiteSpace(msg))
-				return ReplyAsync("Your message was empty. Please add a message to add.");
-
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Rst;
-
-			if (!data.IsEnabled)
-				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
-			data.AddRst(msg);
-			return ReplyAsync($"Added To RST: {Format.Code(msg)}");
 		}
 
 		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
