@@ -9,7 +9,7 @@ namespace Railgun.Commands
     public class Hello : SystemBase
     {        
         [Command]
-        public Task HelloAsync() {
+        public Task ExecuteAsync() {
             var name = SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser);
             return ReplyAsync($"Hello {Format.Bold(name)}, I'm Railgun! Here to shock your world!");
         }
