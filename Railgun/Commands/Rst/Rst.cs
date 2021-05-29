@@ -12,7 +12,7 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Extensions;
 using TreeDiagram;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.Rst
 {
     [Alias("rst")]
 	public class Rst : SystemBase
@@ -22,7 +22,7 @@ namespace Railgun.Commands
 		public Rst(MasterConfig config) => _config = config;
 
 		[Command]
-		public Task RstAsync()
+		public Task ExecuteAsync()
 		{
 			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             var data = profile.Fun.Rst;
@@ -33,7 +33,9 @@ namespace Railgun.Commands
 			var msg = data.GetRst();
 
 			if (string.IsNullOrEmpty(msg))
-				msg = $"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.";
+				msg = string.Format("RST is empty! Please add some stuff using {0}.", 
+					Format.Code(string.Format("{0}rst add [message]",
+						_config.DiscordConfig.Prefix)));
 
 			return ReplyAsync(msg);
 		}
