@@ -100,13 +100,5 @@ namespace Railgun.Commands.Info
             
             return ReplyAsync(Format.Code(output.ToString()));
         }
-
-        [Command("dev")]
-        public Task DeveloperAsync() {
-            var output = new StringBuilder()
-                .AppendFormat("Railgun has been written by {0}.", Format.Bold("ComputerMaster1st#6458")).AppendLine()
-                .AppendFormat("If you have any problems, issues, suggestions, etc, {0} can be found on this discord: {1}", Format.Bold("ComputerMaster1st"), Format.Bold("<https://discord.gg/Czw5ffx>")).AppendLine();
-            return ReplyAsync(output.ToString());
-        }
     }
 }
