@@ -40,16 +40,6 @@ namespace Railgun.Commands.Rst
 			return ReplyAsync(msg);
 		}
 
-		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
-		public Task AllowDenyAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Rst;
-
-			data.IsEnabled = !data.IsEnabled;
-			return ReplyAsync($"RST is now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
-		}
-
 		[Command("import"), UserPerms(GuildPermission.ManageMessages)]
 		public async Task ImportAsync()
 		{
