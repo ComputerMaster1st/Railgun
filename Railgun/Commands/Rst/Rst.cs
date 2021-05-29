@@ -1,15 +1,8 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Extensions;
 using TreeDiagram;
 
 namespace Railgun.Commands.Rst
@@ -38,18 +31,6 @@ namespace Railgun.Commands.Rst
 						_config.DiscordConfig.Prefix)));
 
 			return ReplyAsync(msg);
-		}
-
-		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
-		public Task ResetAsync()
-		{
-			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-			if (data == null)
-				return ReplyAsync("RST has no data to reset.");
-
-			data.Fun.ResetRst();
-			return ReplyAsync("RST has been reset.");
 		}
 	}
 }
