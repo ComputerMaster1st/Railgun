@@ -16,7 +16,9 @@ namespace Railgun.Commands
             var rand = new Random();
             var rng = num1 > num2 ? rand.Next(num2, num1) : rand.Next(num1, num2);
             
-            return ReplyAsync($"{Format.Bold(name)} has rolled {Format.Bold(rng.ToString())}.");
+            return ReplyAsync(string.Format("{0} has rolled {1}.",
+                Format.Bold(name),
+                Format.Bold(rng.ToString())));
         }
 
         [Command]
