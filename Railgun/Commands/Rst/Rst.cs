@@ -40,27 +40,6 @@ namespace Railgun.Commands.Rst
 			return ReplyAsync(msg);
 		}
 
-		[Command("list"), BotPerms(ChannelPermission.AttachFiles)]
-		public Task ListAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Rst;
-
-			if (data.Rst.Count < 1)
-				return ReplyAsync($"RST is empty! Please add some stuff using {Format.Code($"{_config.DiscordConfig.Prefix}rst add [message]")}.");
-			if (!data.IsEnabled)
-				return ReplyAsync($"RST is currently {Format.Bold("disabled")} on this server.");
-
-			var output = new StringBuilder()
-				.AppendLine("Randomly Selected Text List :").AppendLine();
-
-			data.Rst.ForEach(msg => output.AppendFormat("[{0}] {1}", Format.Code(data.Rst.IndexOf(msg).ToString()), msg).AppendLine());
-
-			if (output.Length < 1950)
-				return ReplyAsync(output.ToString());
-			return (Context.Channel as ITextChannel).SendStringAsFileAsync("RST.txt", output.ToString());
-		}
-
 		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
 		public Task AllowDenyAsync()
 		{
