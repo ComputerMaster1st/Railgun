@@ -108,22 +108,5 @@ namespace Railgun.Commands.Info
                 .AppendFormat("If you have any problems, issues, suggestions, etc, {0} can be found on this discord: {1}", Format.Bold("ComputerMaster1st"), Format.Bold("<https://discord.gg/Czw5ffx>")).AppendLine();
             return ReplyAsync(output.ToString());
         }
-
-        [Command("commands")]
-        public Task CommandAnalyticsAsync() {
-            var commands = _analytics.UsedCommands.OrderByDescending(r => r.Value);
-            var count = 20;
-            var output = new StringBuilder()
-                .AppendFormat("Railgun Top {0} Command Analytics:", count).AppendLine().AppendLine();
-            
-            foreach (var command in commands) {
-                output.AppendFormat("{0} <= {1}", command.Value, command.Key).AppendLine();
-                count--;
-
-                if (count < 1) break;
-            }
-
-            return ReplyAsync(Format.Code(output.ToString()));
-        }
     }
 }
