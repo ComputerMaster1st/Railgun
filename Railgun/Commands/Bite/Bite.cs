@@ -158,15 +158,5 @@ namespace Railgun.Commands.Bite
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Bites are now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
 		}
-
-		[Command("norandom"), UserPerms(GuildPermission.ManageMessages)]
-		public Task NoRandomAsync()
-        {
-			var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-
-			data.Fun.Bites.NoNameRandomness = !data.Fun.Bites.NoNameRandomness;
-
-			return ReplyAsync($"Names used for bites are {(data.Fun.Bites.NoNameRandomness ? Format.Bold("no longer random") : Format.Bold("now random"))}!");
-		}
 	}
 }
