@@ -131,22 +131,5 @@ namespace Railgun.Commands.Bite
 			return (Context.Channel as ITextChannel).SendStringAsFileAsync("Bites.txt", output.ToString(),
 				$"List of {Format.Bold(data.Bites.Count.ToString())} Bite Sentences");
 		}
-
-		[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-		public Task RemoveAsync(int index)
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Bites;
-
-			if (data == null || data.Bites.Count < 1)
-				return ReplyAsync("The list of bite sentences is already empty.");
-			if (!data.IsEnabled)
-				return ReplyAsync($"Bite is current {Format.Bold("disabled")} on this server.");
-			if (index < 0 || index >= data.Bites.Count)
-				return ReplyAsync("The Message Id provided is out of bounds. Please recheck via Bite List.");
-
-			data.Bites.RemoveAt(index);
-			return ReplyAsync("Message Removed.");
-		}
 	}
 }
