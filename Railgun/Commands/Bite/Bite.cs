@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
-using Railgun.Core.Extensions;
 using TreeDiagram;
 
 namespace Railgun.Commands.Bite
@@ -16,10 +14,11 @@ namespace Railgun.Commands.Bite
 	{
 		private readonly MasterConfig _config;
 
-		public Bite(MasterConfig config) =>_config = config;
+		public Bite(MasterConfig config)
+			=>_config = config;
 
 		[Command]
-		public async Task BiteAsync(IUser user)
+		public async Task ExecuteAsync(IUser user)
 		{
 			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             var data = profile.Fun.Bites;
@@ -32,11 +31,12 @@ namespace Railgun.Commands.Bite
 				await ReplyAsync(output.ToString());
 
 				return;
-			} else if (!data.IsEnabled) {
+			} 
+			if (!data.IsEnabled) {
 				await ReplyAsync($"Bite is currently {Format.Bold("disabled")} on this server.");
+
 				return;
 			}
-
 
 			IGuildUser bitee = null;
 			IGuildUser biter = null;
@@ -49,10 +49,12 @@ namespace Railgun.Commands.Bite
 			else
             {
 				var rand = new Random();
-				var i = 0;
+                int i;
 
-				if (user == null) i = rand.Next(1, 2);
-				else i = rand.Next(3, 6);
+                if (user == null) 
+					i = rand.Next(1, 2);
+				else 
+					i = rand.Next(3, 6);
 
 				switch (i)
 				{
@@ -85,12 +87,13 @@ namespace Railgun.Commands.Bite
 
 			var biterName = SystemUtilities.GetUsernameOrMention(Context.Database, biter);
 			var biteeName = SystemUtilities.GetUsernameOrMention(Context.Database, bitee);
+
 			var biteMessage = data.GetBite().Replace("<biter>", Format.Bold(biterName)).Replace("<bitee>", Format.Bold(biteeName));
 
 			await ReplyAsync(biteMessage);
 		}
 
 		[Command]
-		public Task BiteAsync() => BiteAsync(null);
+		public Task ExecuteAsync() => ExecuteAsync(null);
 	}
 }
