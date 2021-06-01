@@ -13,7 +13,7 @@ namespace Railgun.Commands.Bite
         public class BiteReset : SystemBase
         {
 			[Command]
-			public Task ResetAsync()
+			public Task ExecuteAsync()
 			{
 				var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 

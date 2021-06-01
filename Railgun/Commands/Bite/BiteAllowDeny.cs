@@ -13,7 +13,7 @@ namespace Railgun.Commands.Bite
         public class BiteAllowDeny : SystemBase
         {
             [Command]
-            public Task AllowDenyAsync()
+            public Task ExecuteAsync()
             {
                 var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
                 var data = profile.Fun.Bites;

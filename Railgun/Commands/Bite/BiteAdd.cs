@@ -13,7 +13,7 @@ namespace Railgun.Commands.Bite
         public class BiteAdd : SystemBase
         {
 			[Command]
-			public Task AddAsync([Remainder] string msg)
+			public Task ExecuteAsync([Remainder] string msg)
 			{
 				if (string.IsNullOrWhiteSpace(msg))
 					return ReplyAsync("You didn't specify a sentence!");

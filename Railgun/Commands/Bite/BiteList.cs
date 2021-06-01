@@ -21,7 +21,7 @@ namespace Railgun.Commands.Bite
 				=> _config = config;
 
 			[Command]
-			public Task ListAsync()
+			public Task ExecuteAsync()
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 				var data = profile.Fun.Bites;

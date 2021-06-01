@@ -13,7 +13,7 @@ namespace Railgun.Commands.Bite
         public class BiteRemove : SystemBase
         {
 			[Command]
-			public Task RemoveAsync(int index)
+			public Task ExecuteAsync(int index)
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 				var data = profile.Fun.Bites;

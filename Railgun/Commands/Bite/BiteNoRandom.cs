@@ -13,7 +13,7 @@ namespace Railgun.Commands.Bite
         public class BiteNoRandom : SystemBase
         {
             [Command]
-            public Task NoRandomAsync()
+            public Task ExecuteAsync()
             {
                 var data = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 
