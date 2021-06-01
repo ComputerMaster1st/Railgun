@@ -9,10 +9,10 @@ using Railgun.Core.Configuration;
 using Railgun.Core.Extensions;
 using TreeDiagram;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.Bite
 {
     [Alias("bite")]
-	public class Bite : SystemBase
+	public partial class Bite : SystemBase
 	{
 		private readonly MasterConfig _config;
 
@@ -167,18 +167,6 @@ namespace Railgun.Commands
 			data.Fun.Bites.NoNameRandomness = !data.Fun.Bites.NoNameRandomness;
 
 			return ReplyAsync($"Names used for bites are {(data.Fun.Bites.NoNameRandomness ? Format.Bold("no longer random") : Format.Bold("now random"))}!");
-		}
-
-		[Command("reset"), UserPerms(GuildPermission.ManageMessages)]
-		public Task ResetAsync()
-		{
-			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-			if (data == null || data.Fun.Bites == null)
-				return ReplyAsync("Bites has no data to reset.");
-
-			data.Fun.ResetBites();
-			return ReplyAsync("Bites has been reset.");
 		}
 	}
 }
