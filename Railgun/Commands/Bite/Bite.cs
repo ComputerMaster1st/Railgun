@@ -148,15 +148,5 @@ namespace Railgun.Commands.Bite
 			data.Bites.RemoveAt(index);
 			return ReplyAsync("Message Removed.");
 		}
-
-		[Command("allowdeny"), UserPerms(GuildPermission.ManageMessages)]
-		public Task AllowDenyAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Fun.Bites;
-
-			data.IsEnabled = !data.IsEnabled;
-			return ReplyAsync($"Bites are now {(data.IsEnabled ? Format.Bold("enabled") : Format.Bold("disabled"))}!");
-		}
 	}
 }
