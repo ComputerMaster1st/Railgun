@@ -97,11 +97,5 @@ namespace Railgun.Commands.Root
 
             await ReplyAsync(Format.Code(output.ToString()));
         }
-        
-        [Command("master")]
-        public Task MasterAsync() {
-            _config.AssignMasterGuild(Context.Guild.Id);
-            return ReplyAsync($"This server {Format.Bold(Context.Guild.Name)} has been set as master.");
-        }
     }
 }
