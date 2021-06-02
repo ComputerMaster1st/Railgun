@@ -224,22 +224,5 @@ namespace Railgun.Commands.Root
             _timerManager.Initialize();
             return ReplyAsync("Timer Manager Restarted!");
         }
-        
-        [Command("avatar")]
-        public async Task AvatarAsync(string url = null) {
-            if (string.IsNullOrWhiteSpace(url) && Context.Message.Attachments.Count < 1) {
-                await ReplyAsync("Please specify a url or upload an image.");
-                return;
-            }
-            
-            var imageUrl = !string.IsNullOrWhiteSpace(url) ? url : Context.Message.Attachments.FirstOrDefault().Url;
-
-            using (var webclient = new HttpClient()) {
-                var imageStream = await webclient.GetStreamAsync(imageUrl);
-
-                await _client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(imageStream));
-                await ReplyAsync("Applied Avatar!");
-            }
-        }
     }
 }
