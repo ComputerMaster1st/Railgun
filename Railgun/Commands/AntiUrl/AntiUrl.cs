@@ -84,21 +84,5 @@ namespace Railgun.Commands.AntiUrl
 			data.BannedUrls.Remove(newUrl);
 			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now removed from list.");
 		}
-
-		[Command("ignore")]
-		public Task IgnoreAsync(ITextChannel pChannel = null)
-		{
-			var tc = pChannel ?? (ITextChannel)Context.Channel;
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Urls;
-
-			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
-				data.RemoveIgnoreChannel(tc.Id);
-				return ReplyAsync("Anti-Url is now monitoring this channel.");
-			} else {
-				data.AddIgnoreChannel(tc.Id);
-				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
-			}
-		}
 	}
 }
