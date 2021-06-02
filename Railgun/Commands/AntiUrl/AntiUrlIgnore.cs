@@ -13,9 +13,8 @@ namespace Railgun.Commands.AntiUrl
         public class AntiUrlIgnore : SystemBase
         {
 			[Command]
-			public Task ExecuteAsync(ITextChannel pChannel)
+			public Task ExecuteAsync(ITextChannel tc)
 			{
-				var tc = pChannel ?? (ITextChannel)Context.Channel;
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 				var data = profile.Filters.Urls;
 
