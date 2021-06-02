@@ -47,20 +47,5 @@ namespace Railgun.Commands.AntiCaps
 
 			return ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.");
 		}
-
-		[Command("minlength")]
-		public Task MinLengthAsync(int length)
-		{
-			if (length < 0)
-				return ReplyAsync("Please specify a minimum message length of 0 or above.");
-
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Caps;
-
-			data.Length = length;
-			if (!data.IsEnabled) data.IsEnabled = true;
-
-			return ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.");
-		}
 	}
 }
