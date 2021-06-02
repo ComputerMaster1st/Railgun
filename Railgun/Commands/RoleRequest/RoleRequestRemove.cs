@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -13,8 +14,8 @@ namespace Railgun.Commands.RoleRequest
         [Alias("remove"), UserPerms(GuildPermission.ManageRoles)]
         public class Remove : SystemBase
         {      
-            [Command()]
-            public Task RemoveAsync(IRole role)
+            [Command]
+            public Task ExecuteAsync(IRole role)
             {
                 if (role is null)
                     return ReplyAsync("The role you tried to remove does not exist. " +
@@ -31,9 +32,9 @@ namespace Railgun.Commands.RoleRequest
                     $"Role {Format.Bold(role.Name)} isn't listed on role-request.");
             }
 
-            [Command()]
-            public Task RemoveAsync([Remainder] string role)
-                => RemoveAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, System.StringComparison.OrdinalIgnoreCase)));
+            [Command]
+            public Task ExecuteAsync([Remainder] string role)
+                => ExecuteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

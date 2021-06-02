@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -13,8 +14,8 @@ namespace Railgun.Commands.RoleRequest
         [Alias("add"), UserPerms(GuildPermission.ManageRoles)]
         public class Add : SystemBase
         {
-            [Command()]
-            public Task AddAsync(IRole role)
+            [Command]
+            public Task ExecuteAsync(IRole role)
             {
                 if (role is null)
                     return ReplyAsync("The role you tried to add does not exist. " +
@@ -29,8 +30,8 @@ namespace Railgun.Commands.RoleRequest
             }
 
             [Command()]
-            public Task AddAsync([Remainder] string role)
-                => AddAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, System.StringComparison.OrdinalIgnoreCase)));
+            public Task ExecuteAsync([Remainder] string role)
+                => ExecuteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase)));
         }
     }
 }
