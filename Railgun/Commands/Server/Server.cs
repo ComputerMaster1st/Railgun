@@ -27,31 +27,5 @@ namespace Railgun.Commands.Server
 			await Task.Delay(500);
 			await Context.Guild.LeaveAsync();
 		}
-
-		[Command("clear"), UserPerms(GuildPermission.ManageMessages), BotPerms(ChannelPermission.ManageMessages), BotPerms(GuildPermission.ReadMessageHistory)]
-		public async Task ClearAsync(int count = 100)
-		{
-			var deleted = 0;
-
-			while (count > 0) {
-				var subCount = count >= 100 ? 100 : count;
-				var tc = Context.Channel as ITextChannel;
-				var msgs = await tc.GetMessagesAsync(subCount).FlattenAsync();
-				var msgsToDelete = new List<IMessage>();
-
-				foreach (var msg in msgs)
-					if (msg.CreatedAt > DateTime.Now.AddDays(-13).AddHours(-23).AddMinutes(-50))
-						msgsToDelete.Add(msg);
-
-				await tc.DeleteMessagesAsync(msgsToDelete);
-
-				deleted += msgsToDelete.Count;
-
-				if (msgsToDelete.Count() == subCount) count -= subCount;
-				else break;
-			}
-
-			await ReplyAsync($"Up to {Format.Bold(deleted.ToString())} messages have been deleted from the channel.");
-		}
 	}
 }
