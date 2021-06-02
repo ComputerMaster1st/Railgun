@@ -8,13 +8,11 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using TreeDiagram;
-using TreeDiagram.Models;
-using TreeDiagram.Models.Filter;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.AntiUrl
 {
     [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
-	public class AntiUrl : SystemBase
+	public partial class AntiUrl : SystemBase
 	{
 		private string ProcessUrl(string url)
 		{
@@ -164,16 +162,6 @@ namespace Railgun.Commands
 			else await ReplyAsync(Format.Code(output.ToString()));
 		}
 
-		[Command("reset")]
-		public Task ResetAsync()
-		{
-			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
-			if (data == null)
-				return ReplyAsync("Anti-Url has no data to reset.");
-
-			data.Filters.ResetUrls();
-			return ReplyAsync("Anti-Url has been reset & disabled.");
-		}
 	}
 }
