@@ -8,10 +8,10 @@ using Railgun.Core;
 using Railgun.Core.Attributes;
 using TreeDiagram;
 
-namespace Railgun.Commands
+namespace Railgun.Commands.AntiCaps
 {
     [Alias("anticaps"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
-	public class AntiCaps : SystemBase
+	public partial class AntiCaps : SystemBase
 	{
 		[Command]
 		public Task EnableAsync()
@@ -113,18 +113,6 @@ namespace Railgun.Commands
 			} else output.AppendLine("Ignored Channels : None");
 
 			await ReplyAsync(Format.Code(output.ToString()));
-		}
-
-		[Command("reset")]
-		public Task ResetAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-			if (profile == null)
-				return ReplyAsync("Anti-Caps has no data to reset.");
-
-			profile.Filters.ResetCaps();
-			return ReplyAsync("Anti-Caps has been reset & disabled.");
 		}
 	}
 }
