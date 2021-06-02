@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
@@ -14,12 +11,13 @@ namespace Railgun.Commands.AntiCaps
 	public partial class AntiCaps : SystemBase
 	{
 		[Command]
-		public Task EnableAsync()
+		public Task ExecuteAsync()
 		{
 			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             var data = profile.Filters.Caps;
 
 			data.IsEnabled = !data.IsEnabled;
+
 			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
 	}
