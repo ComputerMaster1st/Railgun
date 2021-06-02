@@ -201,22 +201,5 @@ namespace Railgun.Commands.Root
             await UpdateStatusAsync();
             await ReplyAsync($"Prefix {Format.Code($"{_config.DiscordConfig.Prefix}<command>")} is now set.");
         }
-        
-        [Command("eval")]
-        public async Task EvalAsync([Remainder] string code) {
-            var eval = new EvalUtils(_client, Context, Context.Database);
-            string output;
-            
-            try { output = (await CSharpScript.EvaluateAsync(code, globals:eval)).ToString(); }
-            catch (Exception ex) { output = ex.Message; }
-            
-            if (output.Length > 1900) {
-                await (Context.Channel as ITextChannel).SendStringAsFileAsync("evalresult.txt", output, "Evaluation Results!", false);
-
-                return;
-            }
-            
-            await ReplyAsync(Format.Code(output));
-        }
     }
 }
