@@ -100,16 +100,5 @@ namespace Railgun.Commands.AntiUrl
 				return ReplyAsync("Anti-Url is no longer monitoring this channel.");
 			}
 		}
-
-		[Command("mode")]
-		public Task ModeAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Urls;
-
-			data.DenyMode = !data.DenyMode;
-			if (!data.IsEnabled) data.IsEnabled = true;
-			return ReplyAsync($"Switched Anti-Url Mode to {(data.DenyMode ? Format.Bold("Deny") : Format.Bold("Allow"))}. {(data.DenyMode ? "Deny" : "Allow")} all urls except listed.");
-		}
 	}
 }
