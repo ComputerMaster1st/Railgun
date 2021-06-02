@@ -144,33 +144,6 @@ namespace Railgun.Commands.Root
             GC.Collect();
             return ReplyAsync("GC Forced!");
         }
-        
-        [Command("dc")]
-        public async Task DcAsync([Remainder] string msg = null) {
-            await _client.SetStatusAsync(UserStatus.DoNotDisturb);
-            await _client.SetGameAsync("Shutting Down ...");
-            await ReplyAsync("Disconnecting ...");
-            
-            if (_playerController.PlayerContainers.Count > 0) {
-                try
-                {
-                    var output = new StringBuilder()
-                    .AppendFormat("{0} : Stopping music stream due to the following reason... {1}",
-                    Format.Bold("WARNING"), string.IsNullOrWhiteSpace(msg) ? Format.Bold("System Restart") : Format.Bold(msg));
-
-                    foreach (var playerInfo in _playerController.PlayerContainers)
-                    {
-                        await playerInfo.TextChannel.SendMessageAsync(output.ToString());
-                        playerInfo.Player.CancelStream();
-                    }
-                } catch { }
-            }
-            
-            while (_playerController.PlayerContainers.Count > 0) await Task.Delay(1000);
-            
-            await _client.StopAsync();
-            await _client.LogoutAsync();
-        }
 
         // [Command("cookies")]
         // public Task CookiesAsync()
