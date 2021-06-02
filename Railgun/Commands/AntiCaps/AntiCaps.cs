@@ -32,20 +32,5 @@ namespace Railgun.Commands.AntiCaps
 			data.IncludeBots = !data.IncludeBots;
 			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Monitoring" : "Ignoring")} bots.");
 		}
-
-		[Command("percent")]
-		public Task PercentAsync(int percent)
-		{
-			if (percent < 50 || percent > 100) 
-				return ReplyAsync("Anti-Caps Percentage must be between 50-100.");
-
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Caps;
-
-			data.Percentage = percent;
-			if (!data.IsEnabled) data.IsEnabled = true;
-
-			return ReplyAsync($"Anti-Caps is now set to trigger at {Format.Bold($"{percent}%")} sensitivity.");
-		}
 	}
 }
