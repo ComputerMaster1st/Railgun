@@ -102,26 +102,5 @@ namespace Railgun.Commands.Server
 			await ReplyAsync($"User ID {Format.Bold(user.ToString())} is now unbanned from the server.");
 			await _botLog.SendBotLogAsync(BotLogType.Common, $"User Unbanned {SystemUtilities.GetSeparator} <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}");
 		}
-
-		[Command("banlist"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers), BotPerms(ChannelPermission.AttachFiles)]
-		public async Task BanlistAsync()
-		{
-			var bans = await Context.Guild.GetBansAsync();
-			var output = new StringBuilder()
-				.AppendLine("Guild Banned Users List:").AppendLine();
-
-			if (bans.Count > 0) foreach (var ban in bans)
-					output.AppendFormat("{0} ({1}) => [{2}]", ban.User.Username, ban.User.Id, ban.Reason).AppendLine();
-			else output.AppendLine("Empty.");
-
-			output.AppendLine().AppendLine("End Of Banned User List!");
-
-			if (output.Length < 1950) {
-				await ReplyAsync(output.ToString());
-				return;
-			}
-
-			await (Context.Channel as ITextChannel).SendStringAsFileAsync("Banlist.txt", output.ToString(), "Ban List");
-		}
 	}
 }
