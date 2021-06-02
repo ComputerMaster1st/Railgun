@@ -113,11 +113,5 @@ namespace Railgun.Commands.Root
             foreach (var guild in guilds) output.AppendFormat("{0} : {1}", guild.Id, guild.Name).AppendLine();
             await (Context.Channel as ITextChannel).SendStringAsFileAsync("Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
         }
-        
-        [Command("updatestatus")]
-        public async Task UpdateStatusAsync() {
-            await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
-            await ReplyAsync("Playing Status has been updated!");
-        }
     }
 }
