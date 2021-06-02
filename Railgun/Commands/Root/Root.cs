@@ -103,15 +103,5 @@ namespace Railgun.Commands.Root
             _config.AssignMasterGuild(Context.Guild.Id);
             return ReplyAsync($"This server {Format.Bold(Context.Guild.Name)} has been set as master.");
         }
-        
-        [Command("serverlist"), BotPerms(ChannelPermission.AttachFiles)]
-        public async Task ServerListAsync() {
-            var guilds = await Context.Client.GetGuildsAsync();
-            var output = new StringBuilder()
-                .AppendFormat("Railgun Connected Server List: ({0} Servers Listed)", guilds.Count).AppendLine().AppendLine();
-            
-            foreach (var guild in guilds) output.AppendFormat("{0} : {1}", guild.Id, guild.Name).AppendLine();
-            await (Context.Channel as ITextChannel).SendStringAsFileAsync("Connected Servers.txt", output.ToString(), $"({guilds.Count} Servers Listed)", false);
-        }
     }
 }
