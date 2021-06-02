@@ -94,13 +94,5 @@ namespace Railgun.Commands.Server
 				.AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
 			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
-
-		[Command("unban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
-		public async Task UnbanAsync(ulong user)
-		{
-			await Context.Guild.RemoveBanAsync(user);
-			await ReplyAsync($"User ID {Format.Bold(user.ToString())} is now unbanned from the server.");
-			await _botLog.SendBotLogAsync(BotLogType.Common, $"User Unbanned {SystemUtilities.GetSeparator} <{Context.Guild.Name} ({Context.Guild.Id})> ID : {user}");
-		}
 	}
 }
