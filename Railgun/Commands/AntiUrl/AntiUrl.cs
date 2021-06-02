@@ -14,7 +14,7 @@ namespace Railgun.Commands.AntiUrl
     [Alias("antiurl"), UserPerms(GuildPermission.ManageMessages), BotPerms(GuildPermission.ManageMessages)]
 	public partial class AntiUrl : SystemBase
 	{
-		private string ProcessUrl(string url)
+		private static string ProcessUrl(string url)
 		{
 			var cleanUrl = url;
 			var parts = new string[] { "http://", "https://", "www." };
@@ -69,20 +69,6 @@ namespace Railgun.Commands.AntiUrl
 			if (!data.IsEnabled) data.IsEnabled = true;
 
 			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now added to list.");
-		}
-
-		[Command("remove")]
-		public Task RemoveAsync(string url)
-		{
-			var newUrl = ProcessUrl(url);
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Urls;
-
-			if (!data.BannedUrls.Contains(newUrl))
-				return ReplyAsync("The Url specified is not listed.");
-
-			data.BannedUrls.Remove(newUrl);
-			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now removed from list.");
 		}
 	}
 }
