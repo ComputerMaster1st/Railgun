@@ -54,21 +54,5 @@ namespace Railgun.Commands.AntiUrl
 			data.BlockServerInvites = !data.BlockServerInvites;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.BlockServerInvites ? "Blocking" : "Allowing")} server invites.");
 		}
-
-		[Command("add")]
-		public Task AddAsync(string url)
-		{
-			var newUrl = ProcessUrl(url);
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Urls;
-
-			if (data.BannedUrls.Contains(newUrl))
-				return ReplyAsync("The Url specified is already listed.");
-
-			data.BannedUrls.Add(newUrl);
-			if (!data.IsEnabled) data.IsEnabled = true;
-
-			return ReplyAsync($"The Url {Format.Bold(newUrl)} is now added to list.");
-		}
 	}
 }
