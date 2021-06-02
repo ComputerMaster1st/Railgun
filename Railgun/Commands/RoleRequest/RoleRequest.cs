@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,7 +55,7 @@ namespace Railgun.Commands.RoleRequest
 
         [Command]
         public Task RoleAsync([Remainder] string roleName)
-            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, System.StringComparison.OrdinalIgnoreCase)));
+            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase)));
 
         [Command("list")]
         public async Task ListAsync()
@@ -90,18 +91,6 @@ namespace Railgun.Commands.RoleRequest
             foreach (var id in badIds) data.RemoveRole(id);
 
             await ReplyAsync(output.ToString());
-        }
-
-        [Command("reset")]
-        public Task ResetAsync()
-        {
-            var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-            if (data == null)
-                return ReplyAsync("Role-Request has no data to reset.");
-
-            data.ResetRoleRequest();
-            return ReplyAsync("Role-Request has been reset.");
         }
     }
 }

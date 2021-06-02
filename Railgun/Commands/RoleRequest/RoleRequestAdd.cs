@@ -29,7 +29,7 @@ namespace Railgun.Commands.RoleRequest
                     $"Role {Format.Bold(role.Name)} is already available for role-request.");
             }
 
-            [Command()]
+            [Command]
             public Task ExecuteAsync([Remainder] string role)
                 => ExecuteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase)));
         }
