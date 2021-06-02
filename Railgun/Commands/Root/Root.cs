@@ -119,23 +119,5 @@ namespace Railgun.Commands.Root
             await _client.SetGameAsync($"{_config.DiscordConfig.Prefix}help {SystemUtilities.GetSeparator} On {_client.Guilds.Count} Servers!", type:ActivityType.Watching);
             await ReplyAsync("Playing Status has been updated!");
         }
-        
-        [Command("selfinvite")]
-        public async Task SelfInviteAsync(ulong id) {
-            var guild = await Context.Client.GetGuildAsync(id);
-            
-            try {
-                var invites = await guild.GetInvitesAsync();
-                var output = new StringBuilder()
-                    .AppendFormat("Invite for {0}", Format.Bold($"{guild.Name} ({guild.Id}")).AppendLine()
-                    .AppendLine()
-                    .AppendLine(invites.FirstOrDefault().Url);
-                
-                var masterAdmin = await Context.Client.GetUserAsync(_config.DiscordConfig.MasterAdminId);
-                var dm = await masterAdmin.GetOrCreateDMChannelAsync();
-                
-                await dm.SendMessageAsync(output.ToString());
-            } catch { await ReplyAsync($"Unable to get invites for server id {Format.Bold(id.ToString())}"); }
-        }
     }
 }
