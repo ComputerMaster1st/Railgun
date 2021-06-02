@@ -59,16 +59,6 @@ namespace Railgun.Commands.Server
 				data.RespondToBots = !data.RespondToBots;
 				return ReplyAsync($"I will {Format.Bold(data.RespondToBots ? "now" : "no longer")} respond to other bots.");
 			}
-
-			[Command("ignoreoldmsgs")]
-			public Task IgnoreOldMessagesAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Command;
-
-				data.IgnoreModifiedMessages = !data.IgnoreModifiedMessages;
-				return ReplyAsync($"I will {Format.Bold(data.IgnoreModifiedMessages ? "now" : "no longer")} ignore modified messages. This includes pinned messages from now on.");
-			}
 		}
 	}
 }
