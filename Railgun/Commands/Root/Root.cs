@@ -218,11 +218,5 @@ namespace Railgun.Commands.Root
             
             await ReplyAsync(Format.Code(output));
         }
-        
-        [Command("timer-restart")]
-        public Task TimerRestartAsync() {
-            _timerManager.Initialize();
-            return ReplyAsync("Timer Manager Restarted!");
-        }
     }
 }
