@@ -62,21 +62,5 @@ namespace Railgun.Commands.AntiCaps
 
 			return ReplyAsync($"Anti-Caps is now set to scan messages longer than {Format.Bold(length.ToString())} characters.");
 		}
-
-		[Command("ignore")]
-		public Task IgnoreAsync(ITextChannel pChannel = null)
-		{
-			var tc = pChannel ?? Context.Channel as ITextChannel;
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Caps;
-
-			if (data.IgnoredChannels.Any(f => f == tc.Id)) {
-				data.RemoveIgnoreChannel(tc.Id);
-				return ReplyAsync("Anti-Caps is now monitoring this channel.");
-			} else {
-				data.AddIgnoreChannel(tc.Id);
-				return ReplyAsync("Anti-Caps is no longer monitoring this channel.");
-			}
-		}
 	}
 }
