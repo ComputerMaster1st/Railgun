@@ -39,16 +39,6 @@ namespace Railgun.Commands.Server
 				data.Prefix = input;
 				return ReplyAsync($"Server prefix has been set! {Format.Code(input = "<command>")}!");
 			}
-
-			[Command("deletecmd"), BotPerms(GuildPermission.ManageMessages)]
-			public Task DeleteCmdAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Command;
-
-				data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
-				return ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
-			}
 		}
 	}
 }
