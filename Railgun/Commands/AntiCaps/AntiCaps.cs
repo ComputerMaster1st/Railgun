@@ -22,15 +22,5 @@ namespace Railgun.Commands.AntiCaps
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
-
-		[Command("includebots")]
-		public Task IncludeBotsAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Caps;
-
-			data.IncludeBots = !data.IncludeBots;
-			return ReplyAsync($"Anti-Caps is now {Format.Bold(data.IsEnabled ? "Monitoring" : "Ignoring")} bots.");
-		}
 	}
 }
