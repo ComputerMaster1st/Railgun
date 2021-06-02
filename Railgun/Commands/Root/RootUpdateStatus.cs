@@ -14,6 +14,9 @@ namespace Railgun.Commands.Root
         {
             private readonly MasterConfig _config;
 
+            public RootUpdateStatus(MasterConfig config)
+                => _config = config;
+
             [Command]
             public async Task ExecuteAsync()
             {
