@@ -49,16 +49,6 @@ namespace Railgun.Commands.Server
 				data.DeleteCmdAfterUse = !data.DeleteCmdAfterUse;
 				return ReplyAsync($"Commands used will {Format.Bold(data.DeleteCmdAfterUse ? "now" : "no longer")} be deleted.");
 			}
-
-			[Command("respondtobots")]
-			public Task RespondAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Command;
-
-				data.RespondToBots = !data.RespondToBots;
-				return ReplyAsync($"I will {Format.Bold(data.RespondToBots ? "now" : "no longer")} respond to other bots.");
-			}
 		}
 	}
 }
