@@ -11,7 +11,7 @@ namespace Railgun.Commands.Server
 	public partial class Server
 	{
 		[Alias("config"), UserPerms(GuildPermission.ManageGuild)]
-		public class ServerConfig : SystemBase
+		public partial class ServerConfig : SystemBase
 		{
 			[Command("mention")]
 			public Task MentionAsync()
@@ -68,24 +68,6 @@ namespace Railgun.Commands.Server
 
 				data.IgnoreModifiedMessages = !data.IgnoreModifiedMessages;
 				return ReplyAsync($"I will {Format.Bold(data.IgnoreModifiedMessages ? "now" : "no longer")} ignore modified messages. This includes pinned messages from now on.");
-			}
-
-			[Command("show")]
-			public Task ShowAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var command = profile.Command;
-				var mention = profile.Globals;
-				var output = new StringBuilder()
-					.AppendLine("Railgun Server Configuration").AppendLine()
-					.AppendFormat("    Server Name : {0}", Context.Guild.Name).AppendLine()
-					.AppendFormat("      Server ID : {0}", Context.Guild.Id).AppendLine().AppendLine()
-					.AppendFormat("     Delete CMD : {0}", command != null && command.DeleteCmdAfterUse ? "Yes" : "No").AppendLine()
-					.AppendFormat("Respond To Bots : {0}", command != null && command.RespondToBots ? "Yes" : "No").AppendLine()
-					.AppendFormat("  Allow Mention : {0}", mention != null && mention.DisableMentions ? "No" : "Yes").AppendLine()
-					.AppendFormat("  Server Prefix : {0}", command != null && !string.IsNullOrEmpty(command.Prefix) ? command.Prefix : "Not Set").AppendLine();
-
-				return ReplyAsync(Format.Code(output.ToString()));
 			}
 		}
 	}
