@@ -53,8 +53,5 @@ namespace Railgun.Commands.Server
 
 			await ReplyAsync($"Up to {Format.Bold(deleted.ToString())} messages have been deleted from the channel.");
 		}
-
-		[Command("id"), UserPerms(GuildPermission.ManageGuild)]
-		public Task IdAsync() => ReplyAsync($"This server's ID is {Format.Bold(Context.Guild.Id.ToString())}");
 	}
 }
