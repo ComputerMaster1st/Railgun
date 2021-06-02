@@ -189,17 +189,5 @@ namespace Railgun.Commands.Root
         //     output.AppendLine("All current cookies for Youtube.");
         //     return ReplyAsync(output.ToString());
         // }
-        
-        [Command("prefix")]
-        public async Task PrefixAsync([Remainder] string input) {
-            if (string.IsNullOrWhiteSpace(input)) {
-                await ReplyAsync("Please specify a prefix.");
-                return;
-            }
-            
-            _config.AssignPrefix(input);
-            await UpdateStatusAsync();
-            await ReplyAsync($"Prefix {Format.Code($"{_config.DiscordConfig.Prefix}<command>")} is now set.");
-        }
     }
 }
