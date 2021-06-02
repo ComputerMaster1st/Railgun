@@ -137,30 +137,5 @@ namespace Railgun.Commands.Root
                 await dm.SendMessageAsync(output.ToString());
             } catch { await ReplyAsync($"Unable to get invites for server id {Format.Bold(id.ToString())}"); }
         }
-        
-        [Command("gc")]
-        public Task GcAsync() {
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            return ReplyAsync("GC Forced!");
-        }
-
-        // [Command("cookies")]
-        // public Task CookiesAsync()
-        // {
-        //     var container = _youtubeHandler.CookieContainer;
-        //     var collection = container.GetCookies(new Uri("https://" + _config.YoutubeDomain));
-
-        //     // Use LOGIN_INFO, SAPISID, APISID, SSID, HSID, SID, VISITOR_INFO1_LIVE, PREF, YSC
-        //     _config.UpdateYoutubeCookies(collection.ToList());
-
-        //     var output = new StringBuilder();
-
-        //     foreach (var cookie in _config.YoutubeCookies)
-        //         output.AppendFormat("{0}: {1}", Format.Bold(cookie.Key), cookie.Value).AppendLine();
-
-        //     output.AppendLine("All current cookies for Youtube.");
-        //     return ReplyAsync(output.ToString());
-        // }
     }
 }
