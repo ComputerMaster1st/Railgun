@@ -2,9 +2,6 @@
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using TreeDiagram;
 
@@ -16,7 +13,7 @@ namespace Railgun.Commands.Warning
 		public class WarningLimit : SystemBase
 		{
 			[Command]
-			public Task WarnLimitAsync(int limit = 5)
+			public Task ExecuteAsync(int limit)
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
 				var data = profile.Warning;
@@ -42,6 +39,10 @@ namespace Railgun.Commands.Warning
 
 				return ReplyAsync(message);
 			}
+
+			[Command]
+			public Task ExecuteAsync()
+				=> ExecuteAsync(5);
 		}
 	}
 }

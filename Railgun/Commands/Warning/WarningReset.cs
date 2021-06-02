@@ -13,7 +13,7 @@ namespace Railgun.Commands.Warning
         public class WarningReset : SystemBase
         {
 			[Command]
-			public Task ResetAsync()
+			public Task ExecuteAsync()
 			{
 				var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
 
