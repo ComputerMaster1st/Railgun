@@ -72,27 +72,5 @@ namespace Railgun.Commands.Server
 				.AppendFormat("User Kicked {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
 			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
 		}
-
-		[Command("ban"), UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
-		public async Task BanAsync(IGuildUser user, [Remainder] string reason = "No Reason Specified")
-		{
-			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-			if (!await SystemUtilities.CheckIfSelfIsHigherRoleAsync(Context.Guild, user)) {
-				await ReplyAsync($"Unable to ban {user.Username} as my role isn't high enough.");
-				return;
-			}
-
-			await Context.Guild.AddBanAsync(user, 7, reason);
-
-			if (data != null && data.Warning != null && data.Warning.Warnings.Any(find => find.UserId == user.Id))
-				data.Warning.ResetWarnings(user.Id);
-
-			await ReplyAsync($"{Format.Bold(user.Username)} has been banned from the server. Reason: {Format.Bold(reason)}");
-
-			var output = new StringBuilder()
-				.AppendFormat("User Banned {0} <{1} ({2})> {3}#{4}", SystemUtilities.GetSeparator, Context.Guild.Name, Context.Guild.Id, user.Username, user.DiscriminatorValue).AppendLine().AppendFormat("---- Reason : {0}", reason);
-			await _botLog.SendBotLogAsync(BotLogType.Common, output.ToString());
-		}
 	}
 }
