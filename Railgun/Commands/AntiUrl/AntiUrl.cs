@@ -34,15 +34,5 @@ namespace Railgun.Commands.AntiUrl
 			data.IsEnabled = !data.IsEnabled;
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
-
-		[Command("includebots")]
-		public Task IncludeBotsAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Filters.Urls;
-
-			data.IncludeBots = !data.IncludeBots;
-			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IncludeBots ? "Monitoring" : "Ignoring")} bots.");
-		}
 	}
 }
