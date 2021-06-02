@@ -1,12 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
-using Railgun.Core.Extensions;
 using TreeDiagram;
 
 namespace Railgun.Commands.AntiUrl
@@ -26,12 +22,13 @@ namespace Railgun.Commands.AntiUrl
 		}
 
 		[Command]
-		public Task EnableAsync()
+		public Task ExecuteAsync()
 		{
 			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             var data = profile.Filters.Urls;
 
 			data.IsEnabled = !data.IsEnabled;
+
 			return ReplyAsync($"Anti-Url is now {Format.Bold(data.IsEnabled ? "Enabled" : "Disabled")}.");
 		}
 	}
