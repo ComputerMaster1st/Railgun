@@ -13,7 +13,7 @@ namespace Railgun.Commands.RoleRequest
     public partial class RoleRequest : SystemBase
     {
         [Command]
-        public async Task RoleAsync(IRole role)
+        public async Task ExecuteAsync(IRole role)
         {
             if (role is null)
             {
@@ -52,7 +52,7 @@ namespace Railgun.Commands.RoleRequest
         }
 
         [Command]
-        public Task RoleAsync([Remainder] string roleName)
-            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase)));
+        public Task ExecuteAsync([Remainder] string roleName)
+            => ExecuteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase)));
     }
 }
