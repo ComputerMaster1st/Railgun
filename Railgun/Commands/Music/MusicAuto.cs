@@ -62,16 +62,6 @@ namespace Railgun.Commands.Music
 				data.AutoPlaySong = string.Empty;
 				return ReplyAsync("Will no longer play specific song on auto-join.");
 			}
-
-			[Command("skip")]
-			public Task SkipAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-
-				data.AutoSkip = !data.AutoSkip;
-				return ReplyAsync($"Music Auto-Skip is now {Format.Bold(data.AutoSkip ? "Enabled" : "Disabled")}.");
-			}
 		}
 	}
 }
