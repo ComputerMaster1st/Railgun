@@ -4,34 +4,27 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Music;
-using TreeDiagram;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
     public partial class Music
 	{
-		[Alias("np")]
-		public class MusicNp : SystemBase
+		[Alias("np", "nowplaying", "playing")]
+		public partial class MusicNp : SystemBase
 		{
-			private readonly PlayerController _playerController;
+			private readonly PlayerController _players;
 
-			public MusicNp(PlayerController playerController) => _playerController = playerController;
-
-			private Task SetNpChannelAsync(ServerMusic data, ITextChannel tc, bool locked = false)
-			{
-				data.NowPlayingChannel = locked ? tc.Id : 0;
-				return ReplyAsync($"{Format.Bold("Now Playing")} messages are {Format.Bold(locked ? "Now" : "No Longer")} locked to #{tc.Name}.");
-			}
+			public MusicNp(PlayerController playerController)
+				=> _players = playerController;
 
 			[Command]
-			public Task NowPlayingAsync()
+			public Task ExecuteAsync()
 			{
-				var container = _playerController.GetPlayer(Context.Guild.Id);
+				var container = _players.GetPlayer(Context.Guild.Id);
 
-				if (container == null) return ReplyAsync("I'm not playing anything at this time.");
+				if (container == null) 
+					return ReplyAsync("I'm not playing anything at this time.");
 
 				var player = container.Player;
 				var meta = player.CurrentSong.Metadata;
@@ -45,21 +38,6 @@ namespace Railgun.Commands.Music
 
 				return ReplyAsync(output.ToString());
 			}
-
-			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-			public Task SetNpChannelAsync(ITextChannel tcParam)
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-				var tc = tcParam ?? Context.Channel as ITextChannel;
-
-				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel)
-					return SetNpChannelAsync(data, tc);
-				return SetNpChannelAsync(data, tc, true);
-			}
-
-            [Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-            public Task SetNpChannelAsync() => SetNpChannelAsync(null);
         }
 	}
 }

@@ -1,6 +1,5 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
@@ -14,7 +13,7 @@ namespace Railgun.Commands.RoleRequest
     public partial class RoleRequest : SystemBase
     {
         [Command]
-        public async Task RoleAsync(IRole role)
+        public async Task ExecuteAsync(IRole role)
         {
             if (role is null)
             {
@@ -53,55 +52,7 @@ namespace Railgun.Commands.RoleRequest
         }
 
         [Command]
-        public Task RoleAsync([Remainder] string roleName)
-            => RoleAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, System.StringComparison.OrdinalIgnoreCase)));
-
-        [Command("list")]
-        public async Task ListAsync()
-        {
-            var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.RoleRequest;
-
-            if (data.RoleIds.Count == 0)
-            {
-                await ReplyAsync("Role-Request has either not been setup or no roles are available. " +
-                                 "Please contact the server mod/admin to set it up.");
-                return;
-            }
-
-            var badIds = new List<ulong>();
-            var output = new StringBuilder()
-                .AppendFormat("{0} Publicly available roles on {1}", Format.Bold(data.RoleIds.Count.ToString()), 
-                    Format.Bold(Context.Guild.Name)).AppendLine()
-                .AppendLine();
-            
-            foreach (var id in data.RoleIds)
-            {
-                var role = Context.Guild.Roles.FirstOrDefault(x => x.Id == id);
-                if (role is null)
-                {
-                    badIds.Add(id);
-                    continue;
-                }
-                
-                output.AppendFormat("{0}", role.Name).AppendLine();
-            }
-
-            foreach (var id in badIds) data.RemoveRole(id);
-
-            await ReplyAsync(output.ToString());
-        }
-
-        [Command("reset")]
-        public Task ResetAsync()
-        {
-            var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-            if (data == null)
-                return ReplyAsync("Role-Request has no data to reset.");
-
-            data.ResetRoleRequest();
-            return ReplyAsync("Role-Request has been reset.");
-        }
+        public Task ExecuteAsync([Remainder] string roleName)
+            => ExecuteAsync(Context.Guild.Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase)));
     }
 }

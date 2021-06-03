@@ -8,32 +8,24 @@ namespace Railgun.Commands.Music
     public partial class Music
     {
         [Alias("leave")]
-        public class MusicLeave : SystemBase
+        public partial class MusicLeave : SystemBase
         {
-            private readonly PlayerController _playerController;
+            private readonly PlayerController _players;
             
-            public MusicLeave(PlayerController playerController) => _playerController = playerController;
+            public MusicLeave(PlayerController playerController)
+                => _players = playerController;
             
             [Command]
-            public async Task LeaveAsync() {
-                if (_playerController.GetPlayer(Context.Guild.Id) == null) {
+            public async Task ExecuteAsync() 
+            {
+                if (_players.GetPlayer(Context.Guild.Id) == null) {
                     await ReplyAsync("I'm not streaming any music at this time.");
                     return;
                 }
             
                 await ReplyAsync("Stopping Music Stream...");
-                _playerController.DisconnectPlayer(Context.Guild.Id);
-            }
-            
-            [Command("aftersong")]
-            public Task LeaveAfterSongAsync() {
-                var container = _playerController.GetPlayer(Context.Guild.Id);
-                
-                if (container == null) 
-                    return ReplyAsync("I'm not streaming any music at this time.");
-                
-                container.Player.LeaveAfterSong = true;
-                return ReplyAsync("I shall leave after this song has finished playing.");
+
+                _players.DisconnectPlayer(Context.Guild.Id);
             }
         }
     }

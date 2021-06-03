@@ -7,15 +7,16 @@ using Railgun.Core.Attributes;
 
 namespace Railgun.Commands
 {
-    [Alias("cat")]
+    [Alias("cat"), BotPerms(ChannelPermission.AttachFiles)]
     public class Cat : SystemBase
     {
         private readonly RandomCat _randomCat;
 
-        public Cat(RandomCat randomCat) => _randomCat = randomCat;
+        public Cat(RandomCat randomCat)
+            => _randomCat = randomCat;
         
-        [Command, BotPerms(ChannelPermission.AttachFiles)]
-        public async Task CatAsync() 
+        [Command]
+        public async Task ExecuteAsync() 
             => await Context.Channel.SendFileAsync(await _randomCat.GetRandomCatAsync(), "CatImg.png");
     }
 }

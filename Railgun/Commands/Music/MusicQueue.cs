@@ -1,12 +1,10 @@
-﻿using AudioChord;
-using Discord;
+﻿using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using Railgun.Music;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,19 +13,17 @@ namespace Railgun.Commands.Music
     public partial class Music
     {
         [Alias("queue")]
-        public class MusicQueue : SystemBase
+        public partial class MusicQueue : SystemBase
         {
-			private readonly PlayerController _playerController;
+			private readonly PlayerController _players;
 
-			public MusicQueue(PlayerController playerController)
-            {
-				_playerController = playerController;
-            }
+            public MusicQueue(PlayerController playerController)
+				=> _players = playerController;
 
-			[Command, BotPerms(ChannelPermission.AttachFiles)]
-			public Task QueueAsync()
+            [Command, BotPerms(ChannelPermission.AttachFiles)]
+			public Task ExecuteAsync()
 			{
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
+				var playerContainer = _players.GetPlayer(Context.Guild.Id);
 
 				if (playerContainer == null)
 					return ReplyAsync("I'm not playing anything at this time.");
@@ -83,32 +79,6 @@ namespace Railgun.Commands.Music
 					return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.MusicScheduler.Requests.Count})");
 				return ReplyAsync(output.ToString());
 			}
-
-			[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-			public async Task RemoveAsync(string songIdRaw)
-			{
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-
-				if (playerContainer == null)
-				{
-					await ReplyAsync("There is no music player active at this time.");
-					return;
-				}
-
-				var songId = SongId.Parse(songIdRaw);
-				var player = playerContainer.Player;
-				var request = player.MusicScheduler.Requests.FirstOrDefault(f => f.Id.ToString() == songId.ToString());
-
-				if (request == null)
-				{
-					await ReplyAsync("Specified song is not in the queue.");
-					return;
-				}
-
-				await player.MusicScheduler.RemoveSongRequestAsync(request);
-				await ReplyAsync("Song removed from queue!");
-				return;
-            }
 		}
     }
 }

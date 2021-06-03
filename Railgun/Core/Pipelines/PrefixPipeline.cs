@@ -5,6 +5,7 @@ using Finite.Commands;
 using Railgun.Core.Results;
 using Railgun.Core.Configuration;
 using TreeDiagram;
+using Discord.WebSocket;
 
 namespace Railgun.Core.Pipelines
 {
@@ -17,6 +18,7 @@ namespace Railgun.Core.Pipelines
 		public async Task<IResult> ExecuteAsync(CommandExecutionContext context, Func<Task<IResult>> next)
 		{
 			var ctx = context.Context as SystemContext;
+			var client = ctx.Client as DiscordShardedClient;
 			var msg = (IUserMessage)ctx.Message;
 			var content = msg.Content;
 			var profile = ctx.Database.ServerProfiles.GetData(ctx.Guild.Id);
@@ -27,8 +29,8 @@ namespace Railgun.Core.Pipelines
 			if (content.StartsWith(_config.DiscordConfig.Prefix, StringComparison.CurrentCultureIgnoreCase))
 				return await ValidPrefixExecuteAsync(context, _config.DiscordConfig.Prefix, msg, next);
 
-			if (content.StartsWith(ctx.Client.CurrentUser.Mention, StringComparison.CurrentCultureIgnoreCase))
-				return await ValidPrefixExecuteAsync(context, ctx.Client.CurrentUser.Mention, msg, next);
+			if (content.StartsWith(client.CurrentUser.Mention, StringComparison.CurrentCultureIgnoreCase))
+				return await ValidPrefixExecuteAsync(context, client.CurrentUser.Mention, msg, next);
 
 			if (profile != null && !string.IsNullOrEmpty(profile.Command.Prefix))
 				if (content.StartsWith(profile.Command.Prefix, StringComparison.CurrentCultureIgnoreCase))

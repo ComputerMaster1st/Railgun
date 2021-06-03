@@ -14,7 +14,7 @@ namespace Railgun.Commands
         public Ping(DiscordShardedClient client) => _client = client;
 
         [Command]
-        public Task PingAsync()
+        public Task ExecuteAsync()
             => ReplyAsync($"Discord Client Latency : {Format.Bold(_client.Latency.ToString())}ms");
     }
 }
