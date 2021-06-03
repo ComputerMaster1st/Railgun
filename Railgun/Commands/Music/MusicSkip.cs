@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
 
@@ -13,16 +12,17 @@ namespace Railgun.Commands.Music
 		[Alias("skip")]
 		public partial class MusicSkip : SystemBase
 		{
-			private readonly PlayerController _playerController;
+			private readonly PlayerController _players;
 
-			public MusicSkip(PlayerController playerManager) => _playerController = playerManager;
+			public MusicSkip(PlayerController playerManager)
+				=> _players = playerManager;
 
 			[Command]
-			public async Task SkipAsync()
+			public async Task ExecuteAsync()
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
-				var container = _playerController.GetPlayer(Context.Guild.Id);
+				var container = _players.GetPlayer(Context.Guild.Id);
 
 				if (container == null) {
 					await ReplyAsync("Can not skip current song because I am not in voice channel.");
@@ -49,6 +49,7 @@ namespace Railgun.Commands.Music
 				}
 
 				player.SkipMusic();
+
 				await ReplyAsync("Vote-Skipping music now...");
 			}
 		}
