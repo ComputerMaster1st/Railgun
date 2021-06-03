@@ -45,18 +45,5 @@ namespace Railgun.Commands.JoinLeave
 			data.DeleteAfterMinutes = minutes;
 			return ReplyAsync($"Join/Leave notifications will now be deleted after {minutes} minutes.");
 		}
-
-		[Command("sendtodm")]
-		public Task DmAsync()
-		{
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.JoinLeave;
-
-			if (data.ChannelId == 0) 
-				return ReplyAsync("Join/Leave Notifications is currently turned off. Please turn on before using this command.");
-
-			data.SendToDM = !data.SendToDM;
-			return ReplyAsync($"Join/Leave Notification will {Format.Bold((data.SendToDM ? "Now" : "No Longer"))} be sent via DMs.");
-		}
 	}
 }
