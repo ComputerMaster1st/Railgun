@@ -4,28 +4,27 @@ using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
-using Railgun.Core.Attributes;
 using Railgun.Music;
-using TreeDiagram;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Commands.Music
 {
     public partial class Music
 	{
-		[Alias("np")]
+		[Alias("np", "nowplaying", "playing")]
 		public partial class MusicNp : SystemBase
 		{
-			private readonly PlayerController _playerController;
+			private readonly PlayerController _players;
 
-			public MusicNp(PlayerController playerController) => _playerController = playerController;
+			public MusicNp(PlayerController playerController)
+				=> _players = playerController;
 
 			[Command]
-			public Task NowPlayingAsync()
+			public Task ExecuteAsync()
 			{
-				var container = _playerController.GetPlayer(Context.Guild.Id);
+				var container = _players.GetPlayer(Context.Guild.Id);
 
-				if (container == null) return ReplyAsync("I'm not playing anything at this time.");
+				if (container == null) 
+					return ReplyAsync("I'm not playing anything at this time.");
 
 				var player = container.Player;
 				var meta = player.CurrentSong.Metadata;
