@@ -90,17 +90,5 @@ namespace Railgun.Commands.JoinLeave
 
 			await (Context.Channel as ITextChannel).SendStringAsFileAsync("JoinLeave Notifications.txt", output.ToString());
 		}
-
-		[Command("reset")]
-		public Task ResetAsync()
-		{
-			var data = Context.Database.ServerProfiles.GetData(Context.Guild.Id);
-
-			if (data == null)
-				return ReplyAsync("Join/Leave Notifications has no data to reset.");
-
-			data.ResetJoinLeave();
-			return ReplyAsync("Join/Leave Notifications has been reset & disabled.");
-		}
 	}
 }
