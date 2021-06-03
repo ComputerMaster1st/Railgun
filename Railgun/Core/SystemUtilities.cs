@@ -74,7 +74,7 @@ namespace Railgun.Core
             {
 				try 
                 {
-					await (await user.GetOrCreateDMChannelAsync()).SendMessageAsync(message);
+					await (await user.CreateDMChannelAsync()).SendMessageAsync(message);
 				} catch { // Ignored
 				}
 

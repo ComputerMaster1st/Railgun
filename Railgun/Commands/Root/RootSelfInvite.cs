@@ -32,7 +32,7 @@ namespace Railgun.Commands.Root
                         .AppendLine(invites.FirstOrDefault().Url);
 
                     var masterAdmin = await Context.Client.GetUserAsync(_config.DiscordConfig.MasterAdminId);
-                    var dm = await masterAdmin.GetOrCreateDMChannelAsync();
+                    var dm = await masterAdmin.CreateDMChannelAsync();
 
                     await dm.SendMessageAsync(output.ToString());
                 }

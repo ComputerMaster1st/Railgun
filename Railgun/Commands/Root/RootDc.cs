@@ -16,6 +16,9 @@ namespace Railgun.Commands.Root
         {
             private readonly PlayerController _players;
 
+            public RootDc(PlayerController players)
+                => _players = players;
+
             [Command]
             public async Task ExecuteAsync([Remainder] string msg)
             {

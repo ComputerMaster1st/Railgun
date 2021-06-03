@@ -21,11 +21,18 @@ namespace Railgun.Commands.Info
         {
             private readonly DiscordShardedClient _client;
             private readonly CommandService<SystemContext> _commandService;
-
             private readonly MusicService _musicService;
-
             private readonly Analytics _analytics;
-            private readonly PlayerController _playerController;
+            private readonly PlayerController _players;
+
+            public InfoStatus(DiscordShardedClient client, CommandService<SystemContext> commandService, MusicService musicService, Analytics analytics, PlayerController players)
+            {
+                _client = client;
+                _commandService = commandService;
+                _musicService = musicService;
+                _analytics = analytics;
+                _players = players;
+            }
 
             [Command]
             public async Task ExecuteAsync()
@@ -74,7 +81,7 @@ namespace Railgun.Commands.Info
                     .AppendFormat("  Connected Shards : {0}", _client.Shards.Count).AppendLine()
                     .AppendFormat(" Connected Servers : {0}", guilds.Count).AppendLine()
                     .AppendLine()
-                    .AppendFormat("     Music Streams : {0}", _playerController.PlayerContainers.Count).AppendLine()
+                    .AppendFormat("     Music Streams : {0}", _players.PlayerContainers.Count).AppendLine()
                     .AppendFormat("  Music Repository : {0} ({1} GB)", 
                         await _musicService.EnumerateSongMetadataAsync()
                             .CountAsync(), 
