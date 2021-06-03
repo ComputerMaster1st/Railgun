@@ -6,7 +6,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Utilities;
 using TreeDiagram;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Events
 {
