@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
@@ -12,7 +7,6 @@ using MongoDB.Bson;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
-using Railgun.Music;
 using TreeDiagram;
 
 namespace Railgun.Commands.Music
@@ -23,15 +17,13 @@ namespace Railgun.Commands.Music
         public partial class MusicPlaylist : SystemBase
         {
             private readonly MusicService _musicService;
-            private readonly MusicController _musicController;
 
-            public MusicPlaylist(MusicService musicService, MusicController musicController) {
-                _musicService = musicService;
-                _musicController = musicController;
-            }
+            public MusicPlaylist(MusicService musicService)
+                => _musicService = musicService;
 
             [Command, BotPerms(ChannelPermission.AttachFiles)]
-            public async Task PlaylistAsync() {
+            public async Task ExecuteAsync() 
+            {
                 var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
 
