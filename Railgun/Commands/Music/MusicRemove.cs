@@ -14,7 +14,7 @@ namespace Railgun.Commands.Music
 	public partial class Music
 	{
 		[Alias("remove"), UserPerms(GuildPermission.ManageGuild)]
-		public class MusicRemove : SystemBase
+		public partial class MusicRemove : SystemBase
 		{
 			private readonly PlayerController _playerController;
 			private readonly MusicService _musicService;
@@ -73,34 +73,6 @@ namespace Railgun.Commands.Music
 				if (playlistUpdated) await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 
 				await ReplyAsync(output.ToString());
-			}
-
-			[Command("current")]
-			public async Task CurrentAsync()
-			{
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-
-				if (playerContainer == null) {
-					await ReplyAsync("Cannot use this command if there's no active music stream at this time.");
-					return;
-				}
-
-				var player = playerContainer.Player;
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-
-				if (data.PlaylistId == ObjectId.Empty || player == null) {
-					await ReplyAsync("Can not remove current song because I am not in voice channel.");
-					return;
-				}
-
-				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
-				playlist.Songs.Remove(player.CurrentSong.Metadata.Id);
-
-				await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
-				await ReplyAsync("Removed from playlist. Skipping to next song...");
-
-				player.SkipMusic();
 			}
 		}
 	}
