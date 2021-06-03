@@ -99,42 +99,6 @@ namespace Railgun.Commands.Music
 				await response.ModifyAsync(x => x.Content = output.ToString());
 			}
 
-			[Command]
-			public async Task PlayAsync([Remainder] string input = null)
-			{
-				if (string.IsNullOrWhiteSpace(input) && Context.Message.Attachments.Count < 1) {
-					await ReplyAsync("Please specify either a YouTube Link, Music Id, Search Query or upload an audio file.");
-					return;
-				} else if (((IGuildUser)Context.Author).VoiceChannel == null) {
-					await ReplyAsync("You're not in a voice channel! Please join one.");
-					return;
-				}
-
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
-
-				await Context.Database.SaveChangesAsync();
-
-				var response = await ReplyAsync("Standby...");
-
-				if (Context.Message.Attachments.Count > 0)
-					await UploadAsync(playerContainer, playlist, data, response);
-				else if (input.StartsWith("YOUTUBE#") || input.StartsWith("DISCORD#"))
-					await AddByIdAsync(input, playerContainer, playlist, data, response);
-				else if (input.StartsWith("http://") || input.StartsWith("https://"))
-					await AddByUrlAsync(input.Trim('<', '>'), playerContainer, playlist, data, response);
-				else await SearchAsync(input, playerContainer, playlist, data, response);
-			}
-
-			[Command("onetime")]
-			public Task PlayOneTimeAsync([Remainder] string input = null)
-			{
-				_playOneTimeOnly = true;
-				return PlayAsync(input);
-			}
-
 			private async Task UploadAsync(PlayerContainer playerContainer, Playlist playlist, ServerMusic data, IUserMessage response)
 			{
 				try {
@@ -246,6 +210,57 @@ namespace Railgun.Commands.Music
 				}
 
 				await AddByUrlAsync($"https://youtu.be/{video.Id}", playerContainer, playlist, data, response);
+			}
+
+			[Command]
+			public async Task ExecuteAsync([Remainder] string input)
+			{
+				if (((IGuildUser)Context.Author).VoiceChannel == null)
+				{
+					await ReplyAsync("You're not in a voice channel! Please join one.");
+					return;
+				}
+
+				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
+				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
+				var data = profile.Music;
+				var playlist = await SystemUtilities.GetPlaylistAsync(_musicService, data);
+
+				await Context.Database.SaveChangesAsync();
+
+				var response = await ReplyAsync("Standby...");
+
+				if (Context.Message.Attachments.Count > 0)
+					await UploadAsync(playerContainer, playlist, data, response);
+				else if (input.StartsWith("YOUTUBE#") || input.StartsWith("DISCORD#"))
+					await AddByIdAsync(input, playerContainer, playlist, data, response);
+				else if (input.StartsWith("http://") || input.StartsWith("https://"))
+					await AddByUrlAsync(input.Trim('<', '>'), playerContainer, playlist, data, response);
+				else 
+					await SearchAsync(input, playerContainer, playlist, data, response);
+			}
+
+			[Command]
+			public Task ExecuteAsync()
+			{
+				if (Context.Message.Attachments.Count > 0)
+					return ExecuteAsync(null);
+
+				return ReplyAsync("Please specify either a YouTube Link, Music Id, Search Query or upload an audio file.");
+			}
+
+			[Command("onetime")]
+			public Task PlayOneTimeAsync([Remainder] string input)
+			{
+				_playOneTimeOnly = true;
+				return ExecuteAsync(input);
+			}
+
+			[Command("onetime")]
+			public Task PlayOneTimeAsync()
+			{
+				_playOneTimeOnly = true;
+				return ExecuteAsync();
 			}
 		}
 	}
