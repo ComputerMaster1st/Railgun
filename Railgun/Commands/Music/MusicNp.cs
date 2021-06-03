@@ -14,17 +14,11 @@ namespace Railgun.Commands.Music
     public partial class Music
 	{
 		[Alias("np")]
-		public class MusicNp : SystemBase
+		public partial class MusicNp : SystemBase
 		{
 			private readonly PlayerController _playerController;
 
 			public MusicNp(PlayerController playerController) => _playerController = playerController;
-
-			private Task SetNpChannelAsync(ServerMusic data, ITextChannel tc, bool locked = false)
-			{
-				data.NowPlayingChannel = locked ? tc.Id : 0;
-				return ReplyAsync($"{Format.Bold("Now Playing")} messages are {Format.Bold(locked ? "Now" : "No Longer")} locked to #{tc.Name}.");
-			}
 
 			[Command]
 			public Task NowPlayingAsync()
@@ -45,21 +39,6 @@ namespace Railgun.Commands.Music
 
 				return ReplyAsync(output.ToString());
 			}
-
-			[Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-			public Task SetNpChannelAsync(ITextChannel tcParam)
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-				var tc = tcParam ?? Context.Channel as ITextChannel;
-
-				if (data.NowPlayingChannel != 0 && tc.Id == data.NowPlayingChannel)
-					return SetNpChannelAsync(data, tc);
-				return SetNpChannelAsync(data, tc, true);
-			}
-
-            [Command("channel"), UserPerms(GuildPermission.ManageGuild)]
-            public Task SetNpChannelAsync() => SetNpChannelAsync(null);
         }
 	}
 }
