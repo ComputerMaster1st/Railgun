@@ -13,11 +13,13 @@ namespace Railgun.Commands.Music
 		public partial class MusicVote : SystemBase
 		{			
 			[Command]
-			public Task EnableAsync()
+			public Task ExecuteAsync()
 			{
 				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
             	var data = profile.Music;
+
 				data.VoteSkipEnabled = !data.VoteSkipEnabled;
+
 				return ReplyAsync($"Music Vote-Skip is now {(data.VoteSkipEnabled ? Format.Bold($"Enabled @ {data.VoteSkipLimit}%") : Format.Bold("Disabled"))}.");
 			}
 		}
