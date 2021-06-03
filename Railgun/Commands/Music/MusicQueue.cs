@@ -1,12 +1,10 @@
-﻿using AudioChord;
-using Discord;
+﻿using Discord;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Extensions;
 using Railgun.Music;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,15 +15,15 @@ namespace Railgun.Commands.Music
         [Alias("queue")]
         public partial class MusicQueue : SystemBase
         {
-			private readonly PlayerController _playerController;
+			private readonly PlayerController _players;
 
             public MusicQueue(PlayerController playerController)
-				=> _playerController = playerController;
+				=> _players = playerController;
 
             [Command, BotPerms(ChannelPermission.AttachFiles)]
-			public Task QueueAsync()
+			public Task ExecuteAsync()
 			{
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
+				var playerContainer = _players.GetPlayer(Context.Guild.Id);
 
 				if (playerContainer == null)
 					return ReplyAsync("I'm not playing anything at this time.");
