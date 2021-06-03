@@ -82,20 +82,6 @@ namespace Railgun.Commands.Music
 				data.AutoDownload = !data.AutoDownload;
 				return ReplyAsync($"Music Auto-Download is now {Format.Bold(data.AutoDownload ? "Enabled" : "Disabled")}.");
 			}
-
-			[Command("loop")]
-			public Task AutoLoopAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-				
-				data.PlaylistAutoLoop = !data.PlaylistAutoLoop;
-
-				var container = _playerController.GetPlayer(Context.Guild.Id);
-				if (container != null) container.Player.MusicScheduler.PlaylistAutoLoop = data.PlaylistAutoLoop;
-
-				return ReplyAsync($"Music Playlist Auto-Loop is now {Format.Bold(data.PlaylistAutoLoop ? "Enabled" : "Disabled")}.");
-			}
 		}
 	}
 }
