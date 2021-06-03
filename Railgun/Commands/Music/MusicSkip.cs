@@ -11,7 +11,7 @@ namespace Railgun.Commands.Music
     public partial class Music
 	{
 		[Alias("skip")]
-		public class MusicSkip : SystemBase
+		public partial class MusicSkip : SystemBase
 		{
 			private readonly PlayerController _playerController;
 
@@ -50,22 +50,6 @@ namespace Railgun.Commands.Music
 
 				player.SkipMusic();
 				await ReplyAsync("Vote-Skipping music now...");
-			}
-
-			[Command("force"), UserPerms(GuildPermission.ManageMessages)]
-			public Task ForceAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-				var container = _playerController.GetPlayer(Context.Guild.Id);
-
-				if (!data.VoteSkipEnabled) 
-					return ReplyAsync("This command is not available due to Music Vote-Skip being disabled.");
-				if (container == null)
-					return ReplyAsync("Can not skip current song because I am not in voice channel.");
-
-				container.Player.SkipMusic();
-				return ReplyAsync("Force-Skipping music now...");
 			}
 		}
 	}
