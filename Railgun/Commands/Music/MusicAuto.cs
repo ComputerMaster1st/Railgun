@@ -72,16 +72,6 @@ namespace Railgun.Commands.Music
 				data.AutoSkip = !data.AutoSkip;
 				return ReplyAsync($"Music Auto-Skip is now {Format.Bold(data.AutoSkip ? "Enabled" : "Disabled")}.");
 			}
-
-			[Command("download")]
-			public Task DownloadAsync()
-			{
-				var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            	var data = profile.Music;
-
-				data.AutoDownload = !data.AutoDownload;
-				return ReplyAsync($"Music Auto-Download is now {Format.Bold(data.AutoDownload ? "Enabled" : "Disabled")}.");
-			}
 		}
 	}
 }
