@@ -1,17 +1,12 @@
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Finite.Commands;
-using MongoDB.Bson;
 using Railgun.Core;
 using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Enums;
 using Railgun.Music;
-using TreeDiagram;
-using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Music
 {
@@ -65,14 +60,5 @@ namespace Railgun.Commands.Music
 			var container = _playerController.GetPlayer(Context.Guild.Id);
 			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
 		}
-
-		[Command("whitelist")]
-		public Task WhitelistAsync()
-        {
-			var profile = Context.Database.ServerProfiles.GetOrCreateData(Context.Guild.Id);
-            var data = profile.Music;
-			data.WhitelistMode = !data.WhitelistMode;
-			return ReplyAsync($"Music Whitelist Mode is now {Format.Bold(data.WhitelistMode ? "Enabled" : "Disabled")}.");
-        }
 	}
 }
