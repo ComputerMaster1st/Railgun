@@ -37,21 +37,5 @@ namespace Railgun.Commands.Music
 
 			return _playerController.CreatePlayerAsync(user, vc, (ITextChannel)Context.Channel);
 		}
-
-        [Command("repeat")]
-        public Task RepeatAsync() => RepeatAsync(1);
-
-		[Command("repeat")]
-		public Task RepeatAsync(int count)
-		{
-			var container = _playerController.GetPlayer(Context.Guild.Id);
-
-			if (container == null) return ReplyAsync("I'm not playing anything at this time.");
-
-			var player = container.Player;
-			player.RepeatSong = count;
-
-			return ReplyAsync("Repeating song after finishing.");
-		}
 	}
 }
