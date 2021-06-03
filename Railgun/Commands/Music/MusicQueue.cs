@@ -15,16 +15,14 @@ namespace Railgun.Commands.Music
     public partial class Music
     {
         [Alias("queue")]
-        public class MusicQueue : SystemBase
+        public partial class MusicQueue : SystemBase
         {
 			private readonly PlayerController _playerController;
 
-			public MusicQueue(PlayerController playerController)
-            {
-				_playerController = playerController;
-            }
+            public MusicQueue(PlayerController playerController)
+				=> _playerController = playerController;
 
-			[Command, BotPerms(ChannelPermission.AttachFiles)]
+            [Command, BotPerms(ChannelPermission.AttachFiles)]
 			public Task QueueAsync()
 			{
 				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
@@ -83,32 +81,6 @@ namespace Railgun.Commands.Music
 					return (Context.Channel as ITextChannel).SendStringAsFileAsync("Queue.txt", output.ToString(), $"Queued Music Requests ({player.MusicScheduler.Requests.Count})");
 				return ReplyAsync(output.ToString());
 			}
-
-			[Command("remove"), UserPerms(GuildPermission.ManageMessages)]
-			public async Task RemoveAsync(string songIdRaw)
-			{
-				var playerContainer = _playerController.GetPlayer(Context.Guild.Id);
-
-				if (playerContainer == null)
-				{
-					await ReplyAsync("There is no music player active at this time.");
-					return;
-				}
-
-				var songId = SongId.Parse(songIdRaw);
-				var player = playerContainer.Player;
-				var request = player.MusicScheduler.Requests.FirstOrDefault(f => f.Id.ToString() == songId.ToString());
-
-				if (request == null)
-				{
-					await ReplyAsync("Specified song is not in the queue.");
-					return;
-				}
-
-				await player.MusicScheduler.RemoveSongRequestAsync(request);
-				await ReplyAsync("Song removed from queue!");
-				return;
-            }
 		}
     }
 }
