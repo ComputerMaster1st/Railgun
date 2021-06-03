@@ -12,7 +12,7 @@ namespace Railgun.Commands.Music
     public partial class Music
     {
         [Alias("root"), BotAdmin]
-        public class MusicRoot : SystemBase
+        public partial class MusicRoot : SystemBase
         {
             private readonly PlayerController _playerController;
 
@@ -44,12 +44,6 @@ namespace Railgun.Commands.Music
                 if (output.Length < 1950)
                     return ReplyAsync(Format.Code(output.ToString()));
                 return (Context.Channel as ITextChannel).SendStringAsFileAsync("ActivePlayers.txt", output.ToString(), includeGuildName:false);
-            }
-            
-            [Command("kill")]
-            public Task KillAsync(ulong id) {
-                if (_playerController.DisconnectPlayer(id)) return ReplyAsync($"Sent 'Kill Code' to Player ID {id}.");
-                return ReplyAsync($"No player found with ID {id}.");
             }
         }
     }
