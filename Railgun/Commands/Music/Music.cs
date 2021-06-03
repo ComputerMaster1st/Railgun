@@ -53,12 +53,5 @@ namespace Railgun.Commands.Music
 
 			return ReplyAsync("Repeating song after finishing.");
 		}
-
-		[Command("ping")]
-		public Task PingAsync()
-		{
-			var container = _playerController.GetPlayer(Context.Guild.Id);
-			return ReplyAsync(container == null ? "Can not check ping due to not being in voice channel." : $"Ping to Discord Voice: {Format.Bold(container.Player.Latency.ToString())}ms");
-		}
 	}
 }
