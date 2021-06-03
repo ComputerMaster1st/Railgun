@@ -8,7 +8,7 @@ using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Commands.Inactivity
 {
-    public partial class InactivityMonitor
+    public partial class Inactivity
     {
         [Alias("whitelist")]
         public class Whitelist : SystemBase

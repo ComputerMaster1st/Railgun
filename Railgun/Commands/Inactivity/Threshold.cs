@@ -7,7 +7,7 @@ using TreeDiagram;
 
 namespace Railgun.Commands.Inactivity
 {
-    public partial class InactivityMonitor
+    public partial class Inactivity
     {
         [Alias("threshold")]
         public class Threshold : SystemBase

@@ -14,7 +14,7 @@ using TreeDiagram.Models.SubModels;
 namespace Railgun.Commands.Inactivity
 {
     [Alias("inactive-monitor", "inactive", "imon"), UserPerms(GuildPermission.ManageGuild), BotPerms(GuildPermission.ManageRoles)]
-    public partial class InactivityMonitor : SystemBase
+    public partial class Inactivity : SystemBase
     {
         [Command("enable")]
         public Task EnableAsync()

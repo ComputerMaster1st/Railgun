@@ -8,7 +8,7 @@ using TreeDiagram;
 
 namespace Railgun.Commands.Inactivity
 {
-    public partial class InactivityMonitor
+    public partial class Inactivity
     {
         [Alias("kick")]
         public class Kick : SystemBase
