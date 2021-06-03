@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Discord;
+using Discord.WebSocket;
 using Finite.Commands;
 using Railgun.Core;
 
@@ -8,15 +9,12 @@ namespace Railgun.Commands
     [Alias("zap")]
     public class Zap : SystemBase
     {
-        private readonly IDiscordClient _client;
-
-        public Zap(IDiscordClient client)
-            => _client = client;
-        
         [Command]
         public Task ExecuteAsync(IGuildUser user) 
         {
-            if (user != null && user.Id == _client.CurrentUser.Id) 
+            var client = Context.Client as DiscordShardedClient;
+
+            if (user != null && user.Id == client.CurrentUser.Id) 
                 return ReplyAsync("I'm immune to electricity, BAKA!");
 
             var name = SystemUtilities.GetUsernameOrMention(Context.Database, user ?? Context.Author as IGuildUser);

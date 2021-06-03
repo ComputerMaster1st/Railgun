@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using Finite.Commands;
 using Railgun.Core;
 using System.Linq;
@@ -20,8 +21,9 @@ namespace Railgun.Commands.Root
                 using (var webclient = new HttpClient())
                 {
                     var imageStream = await webclient.GetStreamAsync(imageUrl);
+                    var client = Context.Client as DiscordShardedClient;
 
-                    await Context.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(imageStream));
+                    await client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(imageStream));
 
                     await ReplyAsync("Applied Avatar!");
                 }

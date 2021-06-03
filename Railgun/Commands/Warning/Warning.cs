@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Discord.WebSocket;
 using Finite.Commands;
 using Railgun.Core;
 using Railgun.Core.Attributes;
@@ -29,7 +30,9 @@ namespace Railgun.Commands.Warning
 		[Command, UserPerms(GuildPermission.BanMembers), BotPerms(GuildPermission.BanMembers)]
 		public async Task ExecuteAsync(IGuildUser user, [Remainder] string reason)
 		{
-			if (user.Id == Context.Client.CurrentUser.Id) 
+			var client = Context.Client as DiscordShardedClient;
+
+			if (user.Id == client.CurrentUser.Id) 
 			{
 				await ReplyAsync("You can not warn me. Just No. Baka.");
 				return;
