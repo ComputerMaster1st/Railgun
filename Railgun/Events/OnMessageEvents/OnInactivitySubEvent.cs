@@ -4,20 +4,24 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Attributes;
 using TreeDiagram;
 using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Events.OnMessageEvents
 {
+	[PreInitialize]
     public class OnInactivitySubEvent : IOnMessageEvent
     {
         private readonly IServiceProvider _services;
 
-        public OnInactivitySubEvent(IServiceProvider services) => _services = services;
+        public OnInactivitySubEvent(IServiceProvider services)
+			=> _services = services;
 
         public async Task ExecuteAsync(SocketMessage message)
         {
-            if (message.Author.IsBot  || message.Author.IsWebhook) return;
+            if (message.Author.IsBot  || message.Author.IsWebhook)
+				return;
 
 			var tc = message.Channel as ITextChannel;
 
@@ -26,15 +30,25 @@ namespace Railgun.Events.OnMessageEvents
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
 				var profile = db.ServerProfiles.GetData(tc.GuildId);
 
-				if (profile == null) return;
+				if (profile == null)
+					return;
 				
 				var guild = tc.Guild;
 				var user = await guild.GetUserAsync(message.Author.Id);
             	var data = profile.Inactivity;
-				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0) return;
-				if (guild.OwnerId == user.Id) return;
-				if (data.UserWhitelist.Any((f) => f == user.Id)) return;
-				foreach (var roleId in data.RoleWhitelist) if (user.RoleIds.Contains(roleId)) return;
+
+				if (!data.IsEnabled || data.InactiveDaysThreshold == 0 || data.InactiveRoleId == 0)
+					return;
+
+				if (guild.OwnerId == user.Id)
+					return;
+
+				if (data.UserWhitelist.Any((f) => f == user.Id))
+					return;
+
+				foreach (var roleId in data.RoleWhitelist)
+					if (user.RoleIds.Contains(roleId))
+						return;
 
 				if (data.Users.Any((f) => f.UserId == user.Id))
 				{
@@ -42,6 +56,7 @@ namespace Railgun.Events.OnMessageEvents
 						await user.RemoveRoleAsync(guild.GetRole(data.InactiveRoleId));
 	                    
 					data.Users.First(f => f.UserId == user.Id).LastActive = DateTime.Now;
+
 					return;
 				}
 

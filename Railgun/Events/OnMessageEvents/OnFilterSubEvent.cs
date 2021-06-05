@@ -1,11 +1,13 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Railgun.Core.Attributes;
 using Railgun.Filters;
 using Railgun.Utilities;
 
 namespace Railgun.Events.OnMessageEvents
 {
+    [PreInitialize]
     public class OnFilterSubEvent : IOnMessageEvent
     {
         private readonly FilterLoader _filterLoader;

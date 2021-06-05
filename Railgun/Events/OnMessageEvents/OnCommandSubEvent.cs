@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Finite.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
 using Railgun.Core.Results;
 using Railgun.Utilities;
@@ -13,6 +14,7 @@ using TreeDiagram;
 
 namespace Railgun.Events.OnMessageEvents
 {
+    [PreInitialize]
     public class OnCommandSubEvent : IOnMessageEvent
     {
         private readonly IDiscordClient _client;
@@ -51,8 +53,11 @@ namespace Railgun.Events.OnMessageEvents
 						case CommandResult c:
 							if (result.IsSuccess)
                             {
-								if (!(result is CommandResult cmdResult)) return;
-								if (cmdResult.CommandPath == "root dc") return;
+								if (!(result is CommandResult cmdResult))
+                                    return;
+
+								if (cmdResult.CommandPath == "root dc")
+                                    return;
 
 								await _analytics.ExecutedCommand(context, cmdResult);
 
@@ -63,10 +68,12 @@ namespace Railgun.Events.OnMessageEvents
                                     var self = await guild.GetCurrentUserAsync();
                                     var perms = self.GetPermissions(tc);
 
-                                    if (perms.ManageMessages) await msg.DeleteAsync();
+                                    if (perms.ManageMessages)
+                                        await msg.DeleteAsync();
                                 }
 							} 
-                            else await LogCommandErrorAsync(context, c);
+                            else
+                                await LogCommandErrorAsync(context, c);
 							break;
 					}
 				}
