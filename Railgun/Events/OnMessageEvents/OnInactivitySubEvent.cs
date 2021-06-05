@@ -9,7 +9,7 @@ using TreeDiagram.Models.SubModels;
 
 namespace Railgun.Events.OnMessageEvents
 {
-    public class OnInactivitySubEvent : IOnMessageSubEvent
+    public class OnInactivitySubEvent : IOnMessageEvent
     {
         private readonly IServiceProvider _services;
 

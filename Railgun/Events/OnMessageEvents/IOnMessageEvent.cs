@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Discord.WebSocket;
 
-namespace Railgun.Events
+namespace Railgun.Events.OnMessageEvents
 {
-    public interface IOnMessageSubEvent
+    public interface IOnMessageEvent
     {
          Task ExecuteAsync(SocketMessage message);
     }

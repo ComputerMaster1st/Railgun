@@ -6,7 +6,7 @@ using Railgun.Utilities;
 
 namespace Railgun.Events.OnMessageEvents
 {
-    public class OnFilterSubEvent : IOnMessageSubEvent
+    public class OnFilterSubEvent : IOnMessageEvent
     {
         private readonly FilterLoader _filterLoader;
         private readonly Analytics _analytics;

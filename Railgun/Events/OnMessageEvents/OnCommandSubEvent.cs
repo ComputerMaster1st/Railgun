@@ -13,7 +13,7 @@ using TreeDiagram;
 
 namespace Railgun.Events.OnMessageEvents
 {
-    public class OnCommandSubEvent : IOnMessageSubEvent
+    public class OnCommandSubEvent : IOnMessageEvent
     {
         private readonly IDiscordClient _client;
         private readonly CommandService<SystemContext> _commands;

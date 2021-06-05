@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Events.OnMessageEvents;
 using Railgun.Utilities;
 using TreeDiagram;
 
@@ -14,7 +15,7 @@ namespace Railgun.Events
         private readonly DiscordShardedClient _client;
         private readonly Analytics _analytics;
         private readonly IServiceProvider _services;
-        private readonly List<IOnMessageSubEvent> _subEvents = new List<IOnMessageSubEvent>();
+        private readonly List<IOnMessageEvent> _subEvents = new List<IOnMessageEvent>();
 
         public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics, IServiceProvider services)
         {
@@ -28,7 +29,7 @@ namespace Railgun.Events
             _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
         }
 
-        public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)
+        public OnMessageReceivedEvent AddSubEvent(IOnMessageEvent sEvent)
         {
             _subEvents.Add(sEvent);
             return this;
