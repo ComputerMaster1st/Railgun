@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core;
@@ -10,12 +9,13 @@ namespace Railgun
     class Program
     {
         private MasterConfig _config = null;
-        private DiscordShardedClient _client = new DiscordShardedClient(
+        private readonly DiscordShardedClient _client = new DiscordShardedClient(
             new DiscordSocketConfig()
             {
                 LogLevel = LogSeverity.Info,
                 DefaultRetryMode = RetryMode.AlwaysRetry,
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                GatewayIntents = GatewayIntents.All
             }
         );
 
