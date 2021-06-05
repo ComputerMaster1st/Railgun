@@ -15,7 +15,7 @@ namespace Railgun
                 LogLevel = LogSeverity.Info,
                 DefaultRetryMode = RetryMode.AlwaysRetry,
                 AlwaysDownloadUsers = true,
-                GatewayIntents = GatewayIntents.All
+                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers
             }
         );
 
