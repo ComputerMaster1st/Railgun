@@ -40,7 +40,8 @@ namespace Railgun.Core.Parsers
         {
             var result = Tokenize(executionContext.Context.Message, executionContext.PrefixLength);
 
-            if (!result.IsSuccess) return result;
+            if (!result.IsSuccess) 
+                return result;
 
             string[] tokenStream = result.TokenStream;
             var commands = executionContext.CommandService;
@@ -63,15 +64,21 @@ namespace Railgun.Core.Parsers
         protected bool TryParseObject(CommandExecutionContext execContext, ParameterInfo param, string value, out object result)
         {
             var factory = execContext.CommandService.TypeReaderFactory;
-            if (factory.TryGetTypeReader(param.Type, out var reader)) return ((ISystemTypeReader)reader).TryRead(value, execContext.Context, out result);
-            else if (_defaultParsers.TryGetValue(param.Type, out var parser))
+
+            if (factory.TryGetTypeReader(param.Type, out var reader)) 
+                return ((ISystemTypeReader)reader).TryRead(value, execContext.Context, out result);
+
+            if (_defaultParsers.TryGetValue(param.Type, out var parser))
             {
                 var (success, parsed) = parser(value);
+
                 result = parsed;
+
                 return success;
             }
 
             result = null;
+
             return false;
         }
 
@@ -84,7 +91,10 @@ namespace Railgun.Core.Parsers
                 for (int i = startPos; i < match.Arguments.Length; i++) 
                 {
                     var ok = TryParseObject(execContext, argument, match.Arguments[i], out var value);
-                    if (!ok) return false;
+
+                    if (!ok)
+                        return false;
+
                     parsed[i - startPos] = value;
                 }
 
@@ -92,6 +102,7 @@ namespace Railgun.Core.Parsers
             }
 
             var parameters = match.Command.Parameters;
+
             result = new object[parameters.Count];
 
             for (int i = 0; i < parameters.Count; i++)
@@ -100,7 +111,9 @@ namespace Railgun.Core.Parsers
 
                 if ((i == parameters.Count - 1) && argument.Attributes.Any(x => x is ParamArrayAttribute))
                 {
-                    if (!TryParseMultiple(argument, i, out var multiple)) return false;
+                    if (!TryParseMultiple(argument, i, out var multiple)) 
+                        return false;
+
                     result[i] = multiple;
                 }
                 else if (argument.Attributes.Any(x => x is Remainder))
@@ -113,21 +126,22 @@ namespace Railgun.Core.Parsers
                         fullArgument = msg.Substring(msg.IndexOf(match.Arguments[i]));
                     }
 
-                    //var output = new StringBuilder();
-
-                    //for (int subIndex = i; subIndex < match.Arguments.Length; subIndex++)
-                    //    output.AppendFormat("{0} ", match.Arguments[subIndex]);
-
-                    // output.ToString().TrimEnd(' ')
                     var ok = TryParseObject(execContext, argument, fullArgument, out var value);
-                    if (!ok) return false;
+
+                    if (!ok) 
+                        return false;
+
                     result[i] = value;
                 } 
-                else if (match.Arguments.Length < 1) return false;
+                else if (match.Arguments.Length < 1) 
+                    return false;
                 else
                 {
                     var ok = TryParseObject(execContext, argument, match.Arguments[i], out var value);
-                    if (!ok) return false;
+
+                    if (!ok) 
+                        return false;
+
                     result[i] = value;
                 }
             }
@@ -140,7 +154,8 @@ namespace Railgun.Core.Parsers
             TokenizerResult Failure(TokenizerFailureReason reason, int position)
                 => new TokenizerResult((int)reason, commandText, position);
 
-            if (prefixLength >= commandText.Length) throw new ArgumentOutOfRangeException(nameof(prefixLength));
+            if (prefixLength >= commandText.Length)
+                throw new ArgumentOutOfRangeException(nameof(prefixLength));
 
             var paramBuilder = new StringBuilder();
             var result = new List<string>();
@@ -189,7 +204,9 @@ namespace Railgun.Core.Parsers
             // Add any final parameters
             result.Add(paramBuilder.ToString());
 
-            if (state != TokenizerState.Normal) return Failure(TokenizerFailureReason.InvalidState, commandText.Length);
+            if (state != TokenizerState.Normal) 
+                return Failure(TokenizerFailureReason.InvalidState, commandText.Length);
+
             return new TokenizerResult(result.ToArray());
         }
     }
