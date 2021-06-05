@@ -5,44 +5,46 @@ using AudioChord;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Attributes;
 using Railgun.Music;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
 namespace Railgun.Events
 {
-    public class OnVoiceStateEvent : IEvent
+    [PreInitialize]
+    public class OnVoiceStateEvent
     {
-        private readonly DiscordShardedClient _client;
-        private readonly PlayerController _controller;
-        private readonly MusicService _music;
+        private readonly PlayerController _players;
+        private readonly MusicService _musicService;
         private readonly IServiceProvider _services;
 
-        public OnVoiceStateEvent(DiscordShardedClient client, IServiceProvider services)
+        public OnVoiceStateEvent(DiscordShardedClient client, PlayerController players, MusicService musicService, IServiceProvider services)
         {
-            _client = client;
+            _players = players;
+            _musicService = musicService;
             _services = services;
 
-            _controller = services.GetService<PlayerController>();
-            _music = services.GetService<MusicService>();
+            client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, before, after));
         }
-
-        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, before, after));
 
         private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after)
         {
-            if (sUser.IsBot || after.VoiceChannel == null) return;
+            if (sUser.IsBot || after.VoiceChannel == null)
+                return;
 
 			var guild = after.VoiceChannel.Guild as IGuild;
 			var user = await guild.GetUserAsync(sUser.Id);
 
-            if (user.IsSelfDeafened) return;
+            if (user.IsSelfDeafened)
+                return;
 
             if (before.VoiceChannel != null && after.VoiceChannel != null)
                 if (before.VoiceChannel.Id == after.VoiceChannel.Id)
                     return;
 
-            if (_controller.GetPlayer(guild.Id) != null || user.VoiceChannel == null) return;
+            if (_players.GetPlayer(guild.Id) != null || user.VoiceChannel == null)
+                return;
 
             ServerMusic data;
 
@@ -51,24 +53,31 @@ namespace Railgun.Events
 				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var profile = db.ServerProfiles.GetData(guild.Id);
 
-                if (profile == null) return;
+                if (profile == null)
+                    return;
 
                 data = profile.Music;
 
-                if (data.AutoJoinConfigs.Count < 1) return;
+                if (data.AutoJoinConfigs.Count < 1)
+                    return;
 
                 var vc = user.VoiceChannel;
                 var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == vc.Id);
 
-                if (autoJoinConfig == null) return;
+                if (autoJoinConfig == null)
+                    return;
 
                 var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
 
-                if (tc == null) return;
+                if (tc == null)
+                    return;
 
-                ISong song = null; 
-                if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
-                await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
+                ISong song = null;
+
+                if (!string.IsNullOrEmpty(data.AutoPlaySong))
+                    song = await _musicService.GetSongAsync(SongId.Parse(data.AutoPlaySong));
+
+                await _players.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
 			}
         }
     }
