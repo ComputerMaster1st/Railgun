@@ -1,26 +1,26 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using Railgun.Core.Attributes;
 using Railgun.Utilities;
 
 namespace Railgun.Events
 {
-    public class OnMessageDeletedEvent : IEvent
+    [PreInitialize]
+    public class OnMessageDeletedEvent
     {
-        private readonly DiscordShardedClient _client;
         private readonly Analytics _analytics;
 
         public OnMessageDeletedEvent(DiscordShardedClient client, Analytics analytics)
         {
-            _client = client;
             _analytics = analytics;
-        }
 
-        public void Load() => _client.MessageDeleted += (oldMessage, channel) => Task.Factory.StartNew(async () => await ExecuteAsync());
+            client.MessageDeleted += (oldMessage, channel) => Task.Factory.StartNew(async () => await ExecuteAsync());
+        }
 
         private Task ExecuteAsync()
         {
             _analytics.DeletedMessages++;
+
             return Task.CompletedTask;
         }
     }
