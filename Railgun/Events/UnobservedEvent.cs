@@ -1,23 +1,28 @@
-using System;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
 
 namespace Railgun.Events
 {
-    public class UnobservedEvent : IEvent
+    [PreInitialize]
+    public class UnobservedEvent
     {
-        private BotLog _botLog;
+        private readonly BotLog _botLog;
 
-        public UnobservedEvent(BotLog botLog) => _botLog = botLog;
+        public UnobservedEvent(BotLog botLog)
+        {
+            _botLog = botLog;
 
-        public void Load() => TaskScheduler.UnobservedTaskException += (s, e) => Task.Factory.StartNew(async () => await ExecuteAsync(e));
+            TaskScheduler.UnobservedTaskException += (s, e) => Task.Factory.StartNew(async () => await ExecuteAsync(e));
+        }
 
         private Task ExecuteAsync(UnobservedTaskExceptionEventArgs e)
         {
             e.SetObserved();
+
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "System", "An unobserved task threw an exception!", e.Exception));
 
             var output = new StringBuilder()
