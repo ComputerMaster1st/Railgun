@@ -38,33 +38,38 @@ namespace Railgun
     {
         private readonly MasterConfig _config;
         private readonly DiscordShardedClient _client;
+        private readonly HttpClient _ytClient;
+        private readonly HttpClientHandler _ytHandler;
+        private readonly BotLog _botLog;
+        private readonly ServerCount _serverCount;
+        private readonly Analytics _analytics;
 
-        private BotLog _botLog = null;
-        private ServerCount _serverCount = null;
-        private CommandService<SystemContext> _commandService;
+        private CommandService<SystemContext> _commandService = null;
         private EventLoader _eventLoader = null;
-        private Analytics _analytics = null;
         private FilterLoader _filterLoader = null;
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
-        private HttpClient _ytClient;
-        //private YoutubeClientHandler _ytHandler;
-        private HttpClientHandler _ytHandler;
 
         public Kernel(MasterConfig config, DiscordShardedClient client)
         {
             _config = config;
             _client = client;
-            //_ytHandler = new YoutubeClientHandler();
-            _ytHandler = new SimpleYoutubeClientHandler();
 
+            _botLog = new BotLog(_config, _client);
+            _serverCount = new ServerCount(_config, _client);
+
+            _ytHandler = new SimpleYoutubeClientHandler();
             _ytClient = new HttpClient(_ytHandler, true);
             _ytClient.DefaultRequestHeaders.Add("User-Agent", "Chrome/86.0.4240.111");
+
+            _analytics = new Analytics(_botLog);
         }
 
         public void Boot()
         {
+            #region Command Service
+
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Command Service..."));
 
             _commandService = new CommandServiceBuilder<SystemContext>()
@@ -82,13 +87,17 @@ namespace Railgun
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", $"Loaded {_commandService.GetAllCommands().Count()} Commands!"));
 
-#if DEBUG
-            DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
-#endif
+            #endregion
+
+            #region Music Service (AudioChord)
 
             var postgre = _config.PostgreSqlConfig;
             var mongo = _config.MongoDbConfig;
             var enricher = new MetaDataEnricher();
+
+#if DEBUG
+            DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+#endif
 
             _musicServiceConfig = new MusicServiceBuilder()
                 .WithPostgresMetadataProvider($"Server={postgre.Hostname};Port=5432;Database=AudioChord;UserId={postgre.Username};Password={postgre.Password};")
@@ -108,38 +117,59 @@ namespace Railgun
                 })
                 .Build();
             _musicService = new MusicService(_musicServiceConfig);
-            _botLog = new BotLog(_config, _client);
-            _serverCount = new ServerCount(_config, _client);
-            _analytics = new Analytics(_botLog);
+
+            #endregion
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Preparing Dependency Injection..."));
-            
-            _serviceProvider = new ServiceCollection()
-                .AddSingleton(_config)
+
+            var collection = new ServiceCollection();
+
+            #region Dependency Injection: Core
+
+            collection.AddSingleton(_config)
                 .AddSingleton(_client)
-                .AddSingleton(_botLog)
-                .AddSingleton(_analytics)
+                .AddSingleton<IDiscordClient>(_client)
                 .AddSingleton(_commandService)
+                .AddSingleton(_botLog);
+
+            #endregion
+
+            #region Dependency Injection: Database
+
+            collection.AddDbContext<TreeDiagramContext>(options =>
+            {
+                options.UseNpgsql($"Server={postgre.Hostname};Port=5432;Database={postgre.Database};UserId={postgre.Username};Password={postgre.Password};")
+                    .EnableSensitiveDataLogging()
+                    .UseLazyLoadingProxies();
+            }, ServiceLifetime.Transient);
+
+            #endregion
+
+            #region Dependency Injection: Services
+
+            collection.AddSingleton(_analytics)
                 .AddSingleton(_musicServiceConfig)
                 .AddSingleton(_musicService)
                 .AddSingleton(_ytHandler)
-                .AddSingleton<IDiscordClient>(_client)
+                .AddSingleton(enricher)
                 .AddSingleton<PlayerController>()
-                .AddSingleton<YoutubeSearch>()
                 .AddSingleton<TimerController>()
                 .AddSingleton<InactivityController>()
-                .AddSingleton<MusicController>()
-                .AddDbContext<TreeDiagramContext>(options => {
-                    options.UseNpgsql($"Server={postgre.Hostname};Port=5432;Database={postgre.Database};UserId={postgre.Username};Password={postgre.Password};")
-                        .EnableSensitiveDataLogging()
-                        .UseLazyLoadingProxies();
-                    }, 
-                    ServiceLifetime.Transient
-                )
+                .AddSingleton<MusicController>();
+
+            #endregion
+
+            #region Dependency Injection: API
+
+            collection.AddSingleton<YoutubeSearch>()
                 .AddTransient<RandomCat>()
-                .AddSingleton(enricher)
-                .AddSingleton(new YoutubeClient(_ytClient))
-                .BuildServiceProvider();
+                .AddSingleton(new YoutubeClient(_ytClient));
+
+            #endregion
+
+            _serviceProvider = collection.BuildServiceProvider();
+
+            #region Dependency Injection: Filters
 
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
 
@@ -148,16 +178,15 @@ namespace Railgun
                 .AddMessageFilter<AntiInvite>()
                 .AddMessageFilter<AntiUrl>();
 
+            #endregion
+
+            #region Dependency Injection: Events
+
             SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Events..."));
 
             _eventLoader = new EventLoader()
                 .LoadEvent(new ConsoleLogEvent(_config, _client))
                 .LoadEvent(new UnobservedEvent(_botLog))
-                .LoadEvent(new OnMessageReceivedEvent(_client, _analytics, _serviceProvider)
-                    .AddSubEvent(new OnInactivitySubEvent(_serviceProvider))
-                    .AddSubEvent(new OnFilterSubEvent(_filterLoader, _analytics))
-                    .AddSubEvent(new OnCommandSubEvent(_client, _commandService, _analytics, _botLog, _serviceProvider))
-                )
                 .LoadEvent(new OnMessageDeletedEvent(_client, _analytics))
                 .LoadEvent(new OnGuildJoinEvent(_client, _botLog))
                 .LoadEvent(new OnGuildLeaveEvent(_client, _botLog, _serviceProvider))
@@ -165,6 +194,19 @@ namespace Railgun
                 .LoadEvent(new OnUserLeftEvent(_client, _botLog, _serviceProvider))
                 .LoadEvent(new OnVoiceStateEvent(_client, _serviceProvider))
                 .LoadEvent(new OnReadyEvent(_config, _client, _serverCount, _serviceProvider));
+
+            #endregion
+
+            #region Dependency Injection: Message Handling
+
+            _eventLoader.
+                LoadEvent(new OnMessageReceivedEvent(_client, _analytics, _serviceProvider)
+                    .AddSubEvent(new OnInactivitySubEvent(_serviceProvider))
+                    .AddSubEvent(new OnFilterSubEvent(_filterLoader, _analytics))
+                    .AddSubEvent(new OnCommandSubEvent(_client, _commandService, _analytics, _botLog, _serviceProvider))
+                );
+
+            #endregion
 
             _serverCount.Start();
         }
