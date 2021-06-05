@@ -4,44 +4,40 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Railgun.Core.Attributes;
 using Railgun.Events.OnMessageEvents;
 using Railgun.Utilities;
 using TreeDiagram;
 
 namespace Railgun.Events
 {
-    public class OnMessageReceivedEvent : IEvent
+    [PreInitialize]
+    public class OnMessageReceivedEvent
     {
-        private readonly DiscordShardedClient _client;
         private readonly Analytics _analytics;
         private readonly IServiceProvider _services;
         private readonly List<IOnMessageEvent> _subEvents = new List<IOnMessageEvent>();
 
         public OnMessageReceivedEvent(DiscordShardedClient client, Analytics analytics, IServiceProvider services)
         {
-            _client = client;
             _analytics = analytics;
             _services = services;
+
+            client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
+            client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
         }
 
-        public void Load() {
-            _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
-        }
+        public void AddSubEvent(IOnMessageEvent sEvent)
+            => _subEvents.Add(sEvent);
 
-        public OnMessageReceivedEvent AddSubEvent(IOnMessageEvent sEvent)
-        {
-            _subEvents.Add(sEvent);
-            return this;
-        }
-
-        private async Task ExecuteReceivedAsync(SocketMessage message)
+        private Task ExecuteReceivedAsync(SocketMessage message)
         {
             _analytics.ReceivedMessages++;
-            await ExecuteAsync(message);
+
+            return ExecuteAsync(message);
         }
 
-        private async Task ExecuteUpdatedAsync(SocketMessage newMsg)
+        private Task ExecuteUpdatedAsync(SocketMessage newMsg)
         {
             _analytics.UpdatedMessages++;
 
@@ -51,10 +47,11 @@ namespace Railgun.Events
                 var channel = newMsg.Channel as ITextChannel;
                 var profile = db.ServerProfiles.GetData(channel.GuildId);
 
-                if (profile != null && profile.Command.IgnoreModifiedMessages) return;
+                if (profile != null && profile.Command.IgnoreModifiedMessages)
+                    return Task.CompletedTask;
             }
 
-            await ExecuteAsync(newMsg);          
+            return ExecuteAsync(newMsg);          
         }
 
         private async Task ExecuteAsync(SocketMessage message)
