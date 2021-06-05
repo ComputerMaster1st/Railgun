@@ -1,23 +1,25 @@
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using Railgun.Core.Attributes;
 using Railgun.Core.Enums;
 
 namespace Railgun.Events
 {
-    public class OnGuildJoinEvent : IEvent
+    [PreInitialize]
+    public class OnGuildJoinEvent
     {
-        private readonly DiscordShardedClient _client;
         private readonly BotLog _botLog;
 
         public OnGuildJoinEvent(DiscordShardedClient client, BotLog botLog)
         {
-            _client = client;
             _botLog = botLog;
+
+            client.JoinedGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
         }
 
-        public void Load() => _client.JoinedGuild += (guild) => Task.Factory.StartNew(async () => await ExecuteAsync(guild));
-
         private Task ExecuteAsync(SocketGuild guild)
-            => _botLog.SendBotLogAsync(BotLogType.GuildManager, $"<{guild.Name.Replace("@", "(at)")} ({guild.Id})> Joined");
+            => _botLog.SendBotLogAsync(BotLogType.GuildManager, string.Format("<{0} ({1})> Joined",
+                guild.Name.Replace("@", "(at)"),
+                guild.Id));
     }
 }
