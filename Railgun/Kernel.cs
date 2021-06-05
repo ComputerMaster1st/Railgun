@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Railgun.Apis.RandomCat;
 using Railgun.Apis.Youtube;
 using Railgun.Core;
+using Railgun.Core.Attributes;
 using Railgun.Core.Configuration;
 using Railgun.Core.Factories;
 using Railgun.Core.Parsers;
@@ -45,7 +47,6 @@ namespace Railgun
         private readonly Analytics _analytics;
 
         private CommandService<SystemContext> _commandService = null;
-        private EventLoader _eventLoader = null;
         private FilterLoader _filterLoader = null;
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
@@ -167,11 +168,7 @@ namespace Railgun
 
             #endregion
 
-            _serviceProvider = collection.BuildServiceProvider();
-
             #region Dependency Injection: Filters
-
-            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Filters..."));
 
             _filterLoader = new FilterLoader(_serviceProvider)
                 .AddMessageFilter<AntiCaps>()
@@ -182,33 +179,58 @@ namespace Railgun
 
             #region Dependency Injection: Events
 
-            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "Kernel", "Loading Events..."));
-
-            _eventLoader = new EventLoader()
-                .LoadEvent(new ConsoleLogEvent(_config, _client))
-                .LoadEvent(new UnobservedEvent(_botLog))
-                .LoadEvent(new OnMessageDeletedEvent(_client, _analytics))
-                .LoadEvent(new OnGuildJoinEvent(_client, _botLog))
-                .LoadEvent(new OnGuildLeaveEvent(_client, _botLog, _serviceProvider))
-                .LoadEvent(new OnUserJoinEvent(_client, _botLog, _serviceProvider))
-                .LoadEvent(new OnUserLeftEvent(_client, _botLog, _serviceProvider))
-                .LoadEvent(new OnVoiceStateEvent(_client, _serviceProvider))
-                .LoadEvent(new OnReadyEvent(_config, _client, _serverCount, _serviceProvider));
+            collection.AddSingleton<ConsoleLogEvent>()
+                .AddSingleton<UnobservedEvent>()
+                .AddSingleton<OnMessageReceivedEvent>()
+                .AddSingleton<OnMessageDeletedEvent>()
+                .AddSingleton<OnGuildJoinEvent>()
+                .AddSingleton<OnGuildLeaveEvent>()
+                .AddSingleton<OnUserJoinEvent>()
+                .AddSingleton<OnUserLeftEvent>()
+                .AddSingleton<OnVoiceStateEvent>()
+                .AddSingleton<OnReadyEvent>();
 
             #endregion
 
             #region Dependency Injection: Message Handling
 
-            _eventLoader.
-                LoadEvent(new OnMessageReceivedEvent(_client, _analytics, _serviceProvider)
-                    .AddSubEvent(new OnInactivitySubEvent(_serviceProvider))
-                    .AddSubEvent(new OnFilterSubEvent(_filterLoader, _analytics))
-                    .AddSubEvent(new OnCommandSubEvent(_client, _commandService, _analytics, _botLog, _serviceProvider))
-                );
+            collection.AddSingleton<OnInactivitySubEvent>()
+                .AddSingleton<OnFilterSubEvent>()
+                .AddSingleton<OnCommandSubEvent>();
 
             #endregion
 
+            _serviceProvider = collection.BuildServiceProvider();
+
+            PreInitialize(collection);
+
             _serverCount.Start();
+        }
+
+        private int PreInitialize(IEnumerable collection)
+        {
+            var events = 0;
+
+            var msgHandler = _serviceProvider.GetService<OnMessageReceivedEvent>();
+
+            foreach (ServiceDescriptor service in collection)
+            {
+                if (service.ServiceType.GetCustomAttribute<PreInitialize>() is null || service.ImplementationType is null)
+                    continue;
+
+                var preInitializeObject = _serviceProvider.GetService(service.ImplementationType);
+
+                if (preInitializeObject is IOnMessageEvent)
+                {
+                    msgHandler.AddSubEvent(preInitializeObject as IOnMessageEvent);
+
+                    events++;
+                }
+                else
+                    events++;
+            }
+
+            return events;
         }
     }
 }
