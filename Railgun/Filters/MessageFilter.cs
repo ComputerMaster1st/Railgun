@@ -7,17 +7,20 @@ using TreeDiagram;
 
 namespace Railgun.Filters
 {
-    public class FilterLoader
+    public class MessageFilter
     {
         private readonly IServiceProvider _services;
         private readonly List<IMessageFilter> _filters = new List<IMessageFilter>();
 
-        public FilterLoader(IServiceProvider services) => _services = services;
+        public MessageFilter(IServiceProvider services)
+            => _services = services;
 
-        public void AddMessageFilter(IMessageFilter filter) => _filters.Add(filter);
+        public void AddMessageFilter(IMessageFilter filter)
+            => _filters.Add(filter);
 
         public async Task<IUserMessage> ApplyFilterAsync(IUserMessage msg) {
-            if (string.IsNullOrWhiteSpace(msg.Content)) return null;
+            if (string.IsNullOrWhiteSpace(msg.Content))
+                return null;
 
             var tc = (ITextChannel)msg.Channel;
             var self = await tc.Guild.GetCurrentUserAsync();
@@ -30,7 +33,9 @@ namespace Railgun.Filters
                 foreach (var filter in _filters) 
                 {
                     result = await filter.FilterAsync(tc, msg, self, db);
-                    if (result != null) break;
+
+                    if (result != null)
+                        break;
                 }
             }
 

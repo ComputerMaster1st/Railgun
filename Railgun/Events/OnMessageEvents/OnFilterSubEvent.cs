@@ -10,10 +10,10 @@ namespace Railgun.Events.OnMessageEvents
     [PreInitialize]
     public class OnFilterSubEvent : IOnMessageEvent
     {
-        private readonly FilterLoader _filterLoader;
+        private readonly MessageFilter _filterLoader;
         private readonly Analytics _analytics;
 
-        public OnFilterSubEvent(FilterLoader loader, Analytics analytics)
+        public OnFilterSubEvent(MessageFilter loader, Analytics analytics)
         {
             _filterLoader = loader;
             _analytics = analytics;

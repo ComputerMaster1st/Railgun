@@ -47,7 +47,7 @@ namespace Railgun
         private readonly Analytics _analytics;
 
         private CommandService<SystemContext> _commandService = null;
-        private FilterLoader _filterLoader = null;
+        private MessageFilter _filterLoader = null;
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
@@ -170,7 +170,7 @@ namespace Railgun
 
             #region Dependency Injection: Filters
 
-            _filterLoader = new FilterLoader(_serviceProvider)
+            _filterLoader = new MessageFilter(_serviceProvider)
                 .AddMessageFilter<AntiCaps>()
                 .AddMessageFilter<AntiInvite>()
                 .AddMessageFilter<AntiUrl>();
