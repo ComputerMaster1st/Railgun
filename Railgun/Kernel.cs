@@ -170,10 +170,10 @@ namespace Railgun
 
             #region Dependency Injection: Filters
 
-            _filterLoader = new MessageFilter(_serviceProvider)
-                .AddMessageFilter<AntiCaps>()
-                .AddMessageFilter<AntiInvite>()
-                .AddMessageFilter<AntiUrl>();
+            collection.AddSingleton<MessageFilter>()
+                .AddSingleton<AntiCaps>()
+                .AddSingleton<AntiInvite>()
+                .AddSingleton<AntiUrl>();
 
             #endregion
 
