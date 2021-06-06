@@ -2,24 +2,29 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Railgun.Core.Attributes;
 using TreeDiagram;
-using TreeDiagram.Interfaces;
 using TreeDiagram.Models.Filter;
 
 namespace Railgun.Filters
 {
+    [PreInitialize]
     public class AntiUrl : FilterBase, IMessageFilter
 	{
 		private readonly Regex _regex = new Regex("(http(s)?)://(www.)?", RegexOptions.Compiled);
 
 		private bool CheckContentForUrl(FilterUrl data, string content)
 		{
-			if (data.DenyMode && data.BannedUrls.Count < 1 && _regex.IsMatch(content)) return true;
+			if (data.DenyMode && data.BannedUrls.Count < 1 && _regex.IsMatch(content))
+				return true;
 
 			foreach (var url in data.BannedUrls)
 			{
-				if (data.DenyMode && !content.Contains(url) && _regex.IsMatch(content)) return true;
-				if (!data.DenyMode && content.Contains(url)) return true;
+				if (data.DenyMode && !content.Contains(url) && _regex.IsMatch(content))
+					return true;
+
+				if (!data.DenyMode && content.Contains(url))
+					return true;
 			}
 
 			return false;
@@ -28,17 +33,24 @@ namespace Railgun.Filters
 		public async Task<IUserMessage> FilterAsync(ITextChannel tc, IUserMessage message, IGuildUser self, TreeDiagramContext context)
 		{
 			var profile = context.ServerProfiles.GetData(tc.GuildId);
-			if (profile == null) return null;
+
+			if (profile == null)
+				return null;
             
             var data = profile.Filters.Urls;
 
-			if (!CheckConditions(data as ITreeFilter, message)) return null;
+			if (!CheckConditions(data, message))
+				return null;
+
 			var user = message.Author;
 
-			if (message.Author.Id == self.Id) return null;
+			if (message.Author.Id == self.Id)
+				return null;
+
 			if (!self.GetPermissions(tc).ManageMessages) 
 			{
 				await tc.SendMessageAsync($"{Format.Bold("Anti-Url :")} Triggered but missing {Format.Bold("Manage Messages")} permission!");
+
 				return null;
 			}
 
@@ -49,11 +61,14 @@ namespace Railgun.Filters
 			if (_regex.IsMatch(content) && CheckContentForUrl(data, content))
 			{
 				output.AppendFormat("Unlisted Url Block");
+
 				return await tc.SendMessageAsync(output.ToString());
 			}
+
 			if (CheckContentForUrl(data, content))
 			{
 				output.AppendFormat("Listed Url Block");
+
 				return await tc.SendMessageAsync(output.ToString());
 			}
 
