@@ -47,7 +47,6 @@ namespace Railgun
         private readonly Analytics _analytics;
 
         private CommandService<SystemContext> _commandService = null;
-        private MessageFilter _filterLoader = null;
         private IServiceProvider _serviceProvider = null;
         private MusicServiceConfiguration _musicServiceConfig = null;
         private MusicService _musicService = null;
@@ -202,16 +201,25 @@ namespace Railgun
 
             _serviceProvider = collection.BuildServiceProvider();
 
-            PreInitialize(collection);
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "BootLoader", "Dependency Injection Loaded!"));
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "BootLoader", "Loading Filters & Events..."));
+
+            (int Events, int Filters) = PreInitialize(collection);
+
+            SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Info, "BootLoader", string.Format("{0} Filters & {1} Events Loaded!",
+                Filters,
+                Events)));
 
             _serverCount.Start();
         }
 
-        private int PreInitialize(IEnumerable collection)
+        private (int Events, int Filters) PreInitialize(IEnumerable collection)
         {
             var events = 0;
+            var filters = 0;
 
             var msgHandler = _serviceProvider.GetService<OnMessageReceivedEvent>();
+            var messageFilter = _serviceProvider.GetService<MessageFilter>();
 
             foreach (ServiceDescriptor service in collection)
             {
@@ -220,17 +228,28 @@ namespace Railgun
 
                 var preInitializeObject = _serviceProvider.GetService(service.ImplementationType);
 
-                if (preInitializeObject is IOnMessageEvent)
+                switch (preInitializeObject)
                 {
-                    msgHandler.AddSubEvent(preInitializeObject as IOnMessageEvent);
+                    case IOnMessageEvent msgEvent:
+                        msgHandler.AddSubEvent(msgEvent);
 
-                    events++;
+                        events++;
+
+                        break;
+                    case IMessageFilter msgFilter:
+                        messageFilter.AddMessageFilter(msgFilter);
+
+                        filters++;
+
+                        break;
+                    default:
+                        events++;
+
+                        break;
                 }
-                else
-                    events++;
             }
 
-            return events;
+            return (events, filters);
         }
     }
 }
