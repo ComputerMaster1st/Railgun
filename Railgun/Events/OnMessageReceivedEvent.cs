@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TreeDiagram;
 
 namespace Railgun.Events
@@ -23,9 +23,18 @@ namespace Railgun.Events
             _services = services;
         }
 
-        public void Load() {
-            _client.MessageReceived += (message) => Task.Factory.StartNew(async () => await ExecuteReceivedAsync(message));
-            _client.MessageUpdated += (cachedMessage, newMessage, channel) => Task.Factory.StartNew(async () => await ExecuteUpdatedAsync(newMessage));
+        public void Load()
+        {
+            _client.MessageReceived += (message) =>
+            {
+                Task.Run(() => ExecuteAsync(message)).ConfigureAwait(false);
+                return Task.CompletedTask;
+            };
+            _client.MessageUpdated += (cachedMessage, newMessage, channel) =>
+            {
+                Task.Run(() => ExecuteAsync(newMessage)).ConfigureAwait(false);
+                return Task.CompletedTask;
+            };
         }
 
         public OnMessageReceivedEvent AddSubEvent(IOnMessageSubEvent sEvent)
@@ -53,7 +62,7 @@ namespace Railgun.Events
                 if (profile != null && profile.Command.IgnoreModifiedMessages) return;
             }
 
-            await ExecuteAsync(newMsg);          
+            await ExecuteAsync(newMsg);
         }
 
         private async Task ExecuteAsync(SocketMessage message)

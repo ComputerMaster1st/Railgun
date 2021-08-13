@@ -1,16 +1,13 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
-using Railgun.Core.Enums;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
 using TreeDiagram.Models.SubModels;
-using TreeDiagram.Models.User;
 
 namespace Railgun.Events
 {
@@ -27,7 +24,11 @@ namespace Railgun.Events
             _services = services;
         }
 
-        public void Load() => _client.UserJoined += (user) => Task.Factory.StartNew(async () => await ExecuteAsync(user));
+        public void Load() => _client.UserJoined += (user) =>
+        {
+            Task.Run(() => ExecuteAsync(user)).ConfigureAwait(false);
+            return Task.CompletedTask;
+        };
 
         private Task ExecuteAsync(SocketGuildUser user)
         {
@@ -35,22 +36,22 @@ namespace Railgun.Events
             string username;
             string notification;
 
-			using (var scope = _services.CreateScope())
-			{
-				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+            using (var scope = _services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var profile = db.ServerProfiles.GetData(user.Guild.Id);
 
                 if (profile == null) return Task.CompletedTask;
 
-				if (profile.Inactivity.IsEnabled && profile.Inactivity.InactiveDaysThreshold != 0 && 
-				    profile.Inactivity.InactiveRoleId != 0)
-				{
-					if (profile.Inactivity.Users.Any(u => u.UserId == user.Id))
-						profile.Inactivity.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
-					else profile.Inactivity.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
-				}
-				
-				data = profile.JoinLeave;
+                if (profile.Inactivity.IsEnabled && profile.Inactivity.InactiveDaysThreshold != 0 &&
+                    profile.Inactivity.InactiveRoleId != 0)
+                {
+                    if (profile.Inactivity.Users.Any(u => u.UserId == user.Id))
+                        profile.Inactivity.Users.First(u => u.UserId == user.Id).LastActive = DateTime.Now;
+                    else profile.Inactivity.Users.Add(new UserActivityContainer(user.Id) { LastActive = DateTime.Now });
+                }
+
+                data = profile.JoinLeave;
                 var sMention = profile.Globals;
 
                 var userProfile = db.UserProfiles.GetData(user.Id);
@@ -63,9 +64,9 @@ namespace Railgun.Events
                 notification = notification.Replace("<server>", user.Guild.Name).Replace("<user>", username);
                 if ((sMention != null && sMention.DisableMentions) || (userProfile != null && userProfile.Globals.DisableMentions)) notification = notification.Replace("<user#disc>", $"{username}#{user.DiscriminatorValue}");
 
-			}
-            
-			return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
+            }
+
+            return SystemUtilities.SendJoinLeaveMessageAsync(data, user, notification, _botLog);
         }
     }
 }

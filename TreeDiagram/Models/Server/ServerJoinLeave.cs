@@ -18,24 +18,36 @@ namespace TreeDiagram.Models.Server
         private List<string> _joinMessages;
         private List<string> _leaveMessages;
 
-        public List<string> JoinMessages { 
-            get {
+        public List<string> JoinMessages
+        {
+            get
+            {
                 if (_joinMessages == null) _joinMessages = new List<string>() { "Welcome to **<server>**, **<user>**!" };
                 return _joinMessages;
-            } private set {
+            }
+            private set
+            {
                 _joinMessages = value;
-            }}
+            }
+        }
 
-        public List<string> LeaveMessages { 
-            get {
+        public List<string> LeaveMessages
+        {
+            get
+            {
                 if (_leaveMessages == null) _leaveMessages = new List<string>() { "Goodbye, **<user>**." };
                 return _leaveMessages;
-            } private set {
+            }
+            private set
+            {
                 _leaveMessages = value;
-            }}
+            }
+        }
 
-        public void AddMessage(string message, MsgType type) {
-            switch (type) {
+        public void AddMessage(string message, MsgType type)
+        {
+            switch (type)
+            {
                 case MsgType.Join:
                     JoinMessages.Add(message);
                     break;
@@ -47,8 +59,10 @@ namespace TreeDiagram.Models.Server
             }
         }
 
-        public void RemoveMessage(int index, MsgType type) {
-            switch (type) {
+        public void RemoveMessage(int index, MsgType type)
+        {
+            switch (type)
+            {
                 case MsgType.Join:
                     JoinMessages.RemoveAt(index);
                     break;
@@ -60,7 +74,8 @@ namespace TreeDiagram.Models.Server
             }
         }
 
-        public string GetMessage(MsgType type) {
+        public string GetMessage(MsgType type)
+        {
             var rand = new Random();
             string message = null;
 
@@ -72,7 +87,7 @@ namespace TreeDiagram.Models.Server
                     {
                         case MsgType.Join:
                             if (JoinMessages.Count < 1) return null;
-                            
+
                             message = JoinMessages[(rand.Next(0, JoinMessages.Count))];
                             break;
                         case MsgType.Leave:

@@ -1,16 +1,11 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
-using Railgun.Core.Enums;
+using System;
+using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Enums;
 using TreeDiagram.Models.Server;
-using TreeDiagram.Models.SubModels;
-using TreeDiagram.Models.User;
 
 namespace Railgun.Events
 {
@@ -27,7 +22,11 @@ namespace Railgun.Events
             _services = services;
         }
 
-        public void Load() => _client.UserLeft += (user) => Task.Factory.StartNew(async () => await ExecuteAsync(user));
+        public void Load() => _client.UserLeft += (user) =>
+        {
+            Task.Run(() => ExecuteAsync(user)).ConfigureAwait(false);
+            return Task.CompletedTask;
+        };
 
         private Task ExecuteAsync(SocketGuildUser user)
         {
@@ -36,16 +35,16 @@ namespace Railgun.Events
 
             using (var scope = _services.CreateScope())
             {
-				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var profile = db.ServerProfiles.GetData(user.Guild.Id);
 
                 if (profile == null) return Task.CompletedTask;
 
                 var inactivityData = profile.Inactivity;
 
-				inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
+                inactivityData?.Users.RemoveAll(u => u.UserId == user.Id);
 
-				data = profile.JoinLeave;
+                data = profile.JoinLeave;
                 var sMention = profile.Globals;
                 var userProfile = db.UserProfiles.GetData(user.Id);
 

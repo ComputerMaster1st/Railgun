@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Discord.WebSocket;
 using Railgun.Utilities;
+using System.Threading.Tasks;
 
 namespace Railgun.Events
 {
@@ -16,7 +15,11 @@ namespace Railgun.Events
             _analytics = analytics;
         }
 
-        public void Load() => _client.MessageDeleted += (oldMessage, channel) => Task.Factory.StartNew(async () => await ExecuteAsync());
+        public void Load() => _client.MessageDeleted += (oldMessage, channel) =>
+        {
+            Task.Run(() => ExecuteAsync()).ConfigureAwait(false);
+            return Task.CompletedTask;
+        };
 
         private Task ExecuteAsync()
         {

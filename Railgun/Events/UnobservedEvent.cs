@@ -1,9 +1,8 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using Railgun.Core;
 using Railgun.Core.Enums;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Railgun.Events
 {
@@ -13,7 +12,10 @@ namespace Railgun.Events
 
         public UnobservedEvent(BotLog botLog) => _botLog = botLog;
 
-        public void Load() => TaskScheduler.UnobservedTaskException += (s, e) => Task.Factory.StartNew(async () => await ExecuteAsync(e));
+        public void Load() => TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            Task.Run(() => ExecuteAsync(e)).ConfigureAwait(false);
+        };
 
         private Task ExecuteAsync(UnobservedTaskExceptionEventArgs e)
         {
@@ -23,7 +25,7 @@ namespace Railgun.Events
             var output = new StringBuilder()
                 .AppendLine("An unobserved task threw an exception!")
                 .AppendLine(e.Exception.InnerException.ToString());
-            
+
             return _botLog.SendBotLogAsync(BotLogType.TaskScheduler, output.ToString());
         }
     }

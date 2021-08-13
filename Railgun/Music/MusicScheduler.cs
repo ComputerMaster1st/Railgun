@@ -2,7 +2,6 @@
 using Discord;
 using MongoDB.Bson;
 using Railgun.Core;
-using Railgun.Core.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +39,7 @@ namespace Railgun.Music.Scheduler
 
         public bool IsRequestsPopulated => Requests.Any();
 
-        public bool DisableShuffle { get; set; }  = false;
+        public bool DisableShuffle { get; set; } = false;
 
         public MusicScheduler(MusicServiceConfiguration musicConfig, MusicService musicService, ObjectId playlistId, bool playlistAutoLoop, YoutubeClient ytClient, MetaDataEnricher enricher, bool disableShuffle)
         {
@@ -74,7 +73,7 @@ namespace Railgun.Music.Scheduler
                     throw new NullReferenceException("No song to play! If you believe there is an issue, please report to our developers.");
                 if (!song.IsSuccess && song.Error != null)
                     throw song.Error;
-                
+
                 return song.Song;
             }
             finally
@@ -121,11 +120,11 @@ namespace Railgun.Music.Scheduler
             {
                 AssignQueueStatus(songId, SongQueueStatus.RateLimited);
                 return request;
-            } 
+            }
 
             playlist.Songs.Remove(songId);
             _playlist.Remove(songId);
-                    
+
             var ex = new SongQueueException($"A song failed to queue! - {songId}", request.Error);
             request.Error = ex;
 
@@ -134,7 +133,7 @@ namespace Railgun.Music.Scheduler
         }
 
         private async Task<(bool IsSuccess, Exception Error, ISong Song)> FetchFromQueueAsync(Playlist playlist)
-        {   
+        {
             (bool IsSuccess, Exception Error, ISong Song) song = (false, null, null);
             var request = Requests.FirstOrDefault();
 
@@ -149,7 +148,7 @@ namespace Railgun.Music.Scheduler
 
             song = await FetchSongAsync(request.Id);
 
-            if (song.IsSuccess) 
+            if (song.IsSuccess)
             {
                 Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
                 AssignQueueStatus(request.Id, SongQueueStatus.Played);
@@ -166,7 +165,7 @@ namespace Railgun.Music.Scheduler
             playlist.Songs.Remove(request.Id);
             _playlist.Remove(request.Id);
             Requests.RemoveAll(x => x.Id.ToString() == request.Id.ToString());
-                    
+
             var ex = new SongQueueException($"A song failed to queue! - {request.Id}", song.Error);
             song.Error = ex;
 
@@ -193,30 +192,30 @@ namespace Railgun.Music.Scheduler
                 if (id.ProcessorId == "DISCORD") return (false, null, null);
 
                 var request = Requests.FirstOrDefault(f => f.Id == id);
-				var ytUrl = "https://youtu.be/" + id.SourceId;
-				string title;
-				string uploader;
+                var ytUrl = "https://youtu.be/" + id.SourceId;
+                string title;
+                string uploader;
 
-				if (request == null)
+                if (request == null)
                 {
-					var videoId = VideoId.TryParse(ytUrl);
+                    var videoId = VideoId.TryParse(ytUrl);
                     var video = await _ytClient.Videos.GetAsync(videoId.Value);
 
                     if (video.Duration > _musicConfig.ExtractorConfiguration.MaxSongDuration)
                         return (false, new SongQueueException(string.Format("Song ({0}) Exceeds Maximum Limit: {1} Minutes", Format.EscapeUrl(video.Url), _musicConfig.ExtractorConfiguration.MaxSongDuration.TotalMinutes)), null);
 
-					title = video.Title;
-					uploader = video.Author.Title;
-				}
+                    title = video.Title;
+                    uploader = video.Author.Title;
+                }
                 else
                 {
-					title = request.Name;
-					uploader = request.Uploader;
+                    title = request.Name;
+                    uploader = request.Uploader;
                 }
 
-				_enricher.AddMapping(uploader, id, title);
-				song = await _musicService.DownloadSongAsync(ytUrl);
-                
+                _enricher.AddMapping(uploader, id, title);
+                song = await _musicService.DownloadSongAsync(ytUrl);
+
                 return (true, error, song);
             }
             catch (RequestLimitExceededException ex)

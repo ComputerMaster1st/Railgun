@@ -1,9 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Railgun.Core;
 using Railgun.Core.Configuration;
+using System.Threading.Tasks;
 
 namespace Railgun.Events
 {
@@ -18,7 +17,11 @@ namespace Railgun.Events
             _client = client;
         }
 
-        public void Load() => _client.Log += (message) => Task.Factory.StartNew(async () => await ExecuteAsync(message));
+        public void Load() => _client.Log += (message) =>
+        {
+            Task.Run(() => ExecuteAsync(message)).ConfigureAwait(false);
+            return Task.CompletedTask;
+        };
 
         private Task ExecuteAsync(LogMessage message)
         {

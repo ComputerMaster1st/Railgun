@@ -1,11 +1,11 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Music;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Models.Server;
 
@@ -27,14 +27,18 @@ namespace Railgun.Events
             _music = services.GetService<MusicService>();
         }
 
-        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) => Task.Factory.StartNew(async () => await ExecuteAsync(user, before, after));
+        public void Load() => _client.UserVoiceStateUpdated += (user, before, after) =>
+        {
+            Task.Run(() => ExecuteAsync(user, before, after)).ConfigureAwait(false);
+            return Task.CompletedTask;
+        };
 
         private async Task ExecuteAsync(SocketUser sUser, SocketVoiceState before, SocketVoiceState after)
         {
             if (sUser.IsBot || after.VoiceChannel == null) return;
 
-			var guild = after.VoiceChannel.Guild as IGuild;
-			var user = await guild.GetUserAsync(sUser.Id);
+            var guild = after.VoiceChannel.Guild as IGuild;
+            var user = await guild.GetUserAsync(sUser.Id);
 
             if (user.IsSelfDeafened) return;
 
@@ -46,9 +50,9 @@ namespace Railgun.Events
 
             ServerMusic data;
 
-			using (var scope = _services.CreateScope())
+            using (var scope = _services.CreateScope())
             {
-				var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
+                var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                 var profile = db.ServerProfiles.GetData(guild.Id);
 
                 if (profile == null) return;
@@ -66,10 +70,10 @@ namespace Railgun.Events
 
                 if (tc == null) return;
 
-                ISong song = null; 
+                ISong song = null;
                 if (!string.IsNullOrEmpty(data.AutoPlaySong)) song = await _music.GetSongAsync(SongId.Parse(data.AutoPlaySong));
                 await _controller.CreatePlayerAsync(user, vc, tc, true, song != null ? new SongRequest(song) : null);
-			}
+            }
         }
     }
 }

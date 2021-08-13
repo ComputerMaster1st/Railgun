@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Railgun.Core;
 using Railgun.Core.Enums;
 using Railgun.Core.Results;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Railgun.Utilities
 {
@@ -20,7 +20,8 @@ namespace Railgun.Utilities
 
         public Analytics(BotLog botLog) => _botLog = botLog;
 
-        public Task ExecutedCommand(SystemContext ctx, CommandResult result) {
+        public Task ExecutedCommand(SystemContext ctx, CommandResult result)
+        {
             var cmdString = result.CommandPath;
             var guild = ctx.Guild;
 
@@ -30,7 +31,7 @@ namespace Railgun.Utilities
             var output = new StringBuilder()
                 .AppendFormat("<{0} <{1}>>", guild.Name, guild.Id).AppendLine()
                 .AppendFormat("---- Command : {0}", cmdString).AppendLine();
-            
+
             if (ctx.Message.Content.Length < 250)
                 output.AppendFormat("---- Content : {0}", ctx.Message.Content).AppendLine();
 

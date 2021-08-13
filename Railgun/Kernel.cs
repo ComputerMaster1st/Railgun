@@ -1,8 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
 using AudioChord;
 using AudioChord.Caching.FileSystem;
 using AudioChord.Extractors;
@@ -29,6 +24,10 @@ using Railgun.Inactivity;
 using Railgun.Music;
 using Railgun.Timers;
 using Railgun.Utilities;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using TreeDiagram;
 using YoutubeExplode;
 
@@ -109,7 +108,8 @@ namespace Railgun
                 .WithExtractor<YouTubeExtractor>()
                 .WithExtractor<DiscordExtractor>()
                 .WithEnRicher(enricher)
-                .Configure(f => {
+                .Configure(f =>
+                {
                     f.Hostname = mongo.Hostname;
                     f.Username = mongo.Username;
                     f.Password = mongo.Password;
@@ -152,6 +152,7 @@ namespace Railgun
                 .AddSingleton(_musicService)
                 .AddSingleton(_ytHandler)
                 .AddSingleton(enricher)
+                .AddSingleton(_serverCount)
                 .AddSingleton<PlayerController>()
                 .AddSingleton<TimerController>()
                 .AddSingleton<InactivityController>()
