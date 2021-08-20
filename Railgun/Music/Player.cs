@@ -154,7 +154,7 @@ namespace Railgun.Music
                                 QueueFailed?.Invoke(this, new QueueFailEventArgs(VoiceChannel.GuildId, inEx));
                                 continue;
                             }
-                            catch (NullReferenceException inEx)
+                            catch (PlaylistEmptyException inEx)
                             {
                                 ex = inEx;
                                 _disconnectReason = DisconnectReason.Auto;
@@ -223,8 +223,7 @@ namespace Railgun.Music
                     _disconnectReason = DisconnectReason.Exception;
                 }
 
-                if (!(ex is NullReferenceException))
-                    Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _disconnectReason, ex));
+                Finished?.Invoke(this, new FinishedEventArgs(VoiceChannel.GuildId, _disconnectReason, ex));
 
                 Status = PlayerStatus.Disconnected;
             }

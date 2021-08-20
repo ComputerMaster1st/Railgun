@@ -1,14 +1,13 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Core;
 using Railgun.Core.Containers;
 using Railgun.Core.Enums;
 using Railgun.Music.PlayerEventArgs;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 using TreeDiagram;
-using TreeDiagram.Models.Server;
 
 namespace Railgun.Music.Events
 {
@@ -26,7 +25,7 @@ namespace Railgun.Music.Events
             _services = services;
         }
 
-        public void Load(PlayerContainer container) 
+        public void Load(PlayerContainer container)
         {
             _container = container;
             _container.Player.Finished += async (s, a) => await ExecuteAsync(a);
@@ -34,19 +33,19 @@ namespace Railgun.Music.Events
 
         private async Task ExecuteAsync(FinishedEventArgs args)
         {
-			var tc = _container.TextChannel;
+            var tc = _container.TextChannel;
 
-			try 
+            try
             {
                 var output = new StringBuilder();
-                
+
                 using (var scope = _services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetService<TreeDiagramContext>();
                     var profile = db.ServerProfiles.GetData(tc.GuildId);
 
                     if (profile != null && profile.Music.SilentNowPlaying && args.Exception == null) return;
-                    if (args.Exception != null)
+                    if (args.Exception != null && !(args.Exception is PlaylistEmptyException))
                     {
                         SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Error, "Music", $"{tc.GuildId} Exception!", args.Exception));
 
@@ -61,22 +60,22 @@ namespace Railgun.Music.Events
                     }
                 }
 
-				var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";
+                var autoOutput = args.Reason != DisconnectReason.Manual ? "Auto-" : "";
 
-				output.AppendFormat("{0}Left Voice Channel", autoOutput);
+                output.AppendFormat("{0}Left Voice Channel", autoOutput);
 
-				await tc.SendMessageAsync(output.ToString());
-			} 
-            catch 
+                await tc.SendMessageAsync(output.ToString());
+            }
+            catch
             {
-				SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
-				await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, $"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected");
-			} 
-            finally 
+                SystemUtilities.LogToConsoleAndFile(new LogMessage(LogSeverity.Warning, "Music", $"{args.GuildId} Missing TC!"));
+                await _botLog.SendBotLogAsync(BotLogType.MusicPlayerError, $"<{tc.Guild.Name} ({args.GuildId})> Crash-Disconnected");
+            }
+            finally
             {
-				await _container.LogEntry.DeleteAsync();
-				await _controller.StopPlayerAsync(args.GuildId, true);
-			}
+                await _container.LogEntry.DeleteAsync();
+                await _controller.StopPlayerAsync(args.GuildId, true);
+            }
         }
     }
 }
