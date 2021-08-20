@@ -25,6 +25,7 @@ using Railgun.Music;
 using Railgun.Timers;
 using Railgun.Utilities;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
