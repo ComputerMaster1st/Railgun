@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,6 +11,21 @@ namespace TreeDiagram.Models.SubModels
 
         public ulong VoiceChannelId { get; private set; }
         public ulong TextChannelId { get; set; }
+
+        private List<ulong> _listenForUsers;
+
+        public List<ulong> ListenForUsers
+        {
+            get
+            {
+                if (_listenForUsers == null) _listenForUsers = new List<ulong>();
+                return _listenForUsers;
+            }
+            private set
+            {
+                _listenForUsers = value;
+            }
+        }
 
         public MusicAutoJoinConfig(ulong voiceChannelId, ulong textChannelId)
         {

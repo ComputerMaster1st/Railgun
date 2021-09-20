@@ -6,6 +6,7 @@ using System.Linq;
 using TreeDiagram.Models;
 using TreeDiagram.Models.Filter;
 using TreeDiagram.Models.Server;
+using TreeDiagram.Models.SubModels;
 using TreeDiagram.Models.TreeTimer;
 
 namespace TreeDiagram
@@ -59,6 +60,12 @@ namespace TreeDiagram
                     .WithOne()
                     .OnDelete(DeleteBehavior.Cascade);
                 x.Property(y => y.AllowedRoles)
+                    .HasConversion(ulongConverter);
+            });
+
+            modelBuilder.Entity<MusicAutoJoinConfig>(x =>
+            {
+                x.Property(y => y.ListenForUsers)
                     .HasConversion(ulongConverter);
             });
 
