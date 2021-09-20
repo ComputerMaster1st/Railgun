@@ -42,7 +42,7 @@ namespace Railgun.Commands.Music
 
                         if (autoJoinConfig.ListenForUsers.Contains(user.Id))
                         {
-                            autoJoinConfig.ListenForUsers.Remove(user.Id);
+                            autoJoinConfig.RemoveListeningUser(user.Id);
 
                             output.AppendFormat("Removed {0} from Auto-Join Listener for this voice channel.", Format.Bold(user.Username)).AppendLine();
 
@@ -51,7 +51,7 @@ namespace Railgun.Commands.Music
                         }
                         else
                         {
-                            autoJoinConfig.ListenForUsers.Add(user.Id);
+                            autoJoinConfig.AddListeningUser(user.Id);
 
                             output.AppendFormat("Added {0} to Auto-Join Listener for this voice channel.", Format.Bold(user.Username)).AppendLine();
 
@@ -90,7 +90,7 @@ namespace Railgun.Commands.Music
                             return;
                         }
 
-                        autoJoinConfig.ListenForUsers.Clear();
+                        autoJoinConfig.ClearListeningUser();
 
                         await ReplyAsync("Auto-Join Listeners is now cleared. All users will now trigger Auto-Join.");
                     }

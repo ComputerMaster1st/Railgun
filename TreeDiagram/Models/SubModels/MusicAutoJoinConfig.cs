@@ -32,5 +32,26 @@ namespace TreeDiagram.Models.SubModels
             VoiceChannelId = voiceChannelId;
             TextChannelId = textChannelId;
         }
+
+        public bool AddListeningUser(ulong userId)
+        {
+            if (ListenForUsers.Contains(userId)) return false;
+
+            ListenForUsers = new List<ulong>(ListenForUsers);
+            ListenForUsers.Add(userId);
+            return true;
+        }
+
+        public bool RemoveListeningUser(ulong userId)
+        {
+            if (!ListenForUsers.Contains(userId)) return false;
+
+            ListenForUsers = new List<ulong>(ListenForUsers);
+            ListenForUsers.RemoveAll(x => x == userId);
+            return true;
+        }
+
+        public void ClearListeningUser()
+            => ListenForUsers = new List<ulong>();
     }
 }
