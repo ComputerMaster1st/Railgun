@@ -1,8 +1,8 @@
-using System.Linq;
-using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
+using System.Linq;
+using System.Threading.Tasks;
 using TreeDiagram;
 using TreeDiagram.Models.SubModels;
 
@@ -13,7 +13,7 @@ namespace Railgun.Commands.Music
         public partial class MusicAuto
         {
             [Alias("join")]
-            public class MusicAutoJoin : SystemBase
+            public partial class MusicAutoJoin : SystemBase
             {
                 [Command]
                 public async Task JoinAsync()
@@ -22,19 +22,22 @@ namespace Railgun.Commands.Music
                     var data = profile.Music;
                     var userVc = (Context.Author as IGuildUser).VoiceChannel;
 
-                    if (userVc == null && data.AutoJoinConfigs.Count < 1) {
+                    if (userVc == null && data.AutoJoinConfigs.Count < 1)
+                    {
                         await ReplyAsync("Music Auto-Join is currently disabled. Please join a voice channel and run this command again to enable it.");
                         return;
                     }
 
-                    if (userVc == null && data.AutoJoinConfigs.Count > 0) {
+                    if (userVc == null && data.AutoJoinConfigs.Count > 0)
+                    {
                         await ReplyAsync("Please join a voice channel to (un)set auto-join.");
                         return;
                     }
 
                     var autoJoinConfig = data.AutoJoinConfigs.FirstOrDefault(f => f.VoiceChannelId == userVc.Id);
 
-                    if (autoJoinConfig == null) {
+                    if (autoJoinConfig == null)
+                    {
                         data.AutoJoinConfigs.Add(new MusicAutoJoinConfig(userVc.Id, Context.Channel.Id));
                         await ReplyAsync(string.Format("Voice ({0}) & Text ({1}) channels have now been set for Auto-Join! To unset, use the command again while in the same voice & text channel.", userVc.Name, Context.Channel.Name));
                         return;

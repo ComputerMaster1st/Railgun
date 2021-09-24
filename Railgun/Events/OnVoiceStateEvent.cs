@@ -66,6 +66,9 @@ namespace Railgun.Events
 
                 if (autoJoinConfig == null) return;
 
+                if (autoJoinConfig.ListenForUsers.Count > 0 && !autoJoinConfig.ListenForUsers.Contains(user.Id))
+                    return;
+
                 var tc = await guild.GetTextChannelAsync(autoJoinConfig.TextChannelId);
 
                 if (tc == null) return;
