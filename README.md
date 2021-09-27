@@ -9,7 +9,7 @@ It is best to not download the source code. The reason being is due to Railgun u
 
 You may review the code and use different pieces, however please do not straight up copy it. For further info, please contact us via [NekoTech](https://discord.gg/fFbMNGbXVv).
 
-## How to Invite Railgun
+## How to Invite Railgun (aka Cryzen)
 https://discordapp.com/api/oauth2/authorize?client_id=890953679128100905&scope=bot
 
 ## Contacting The Developer
