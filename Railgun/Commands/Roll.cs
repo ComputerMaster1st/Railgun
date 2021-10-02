@@ -1,32 +1,28 @@
-using System;
-using System.Threading.Tasks;
 using Discord;
 using Finite.Commands;
 using Railgun.Core;
+using System;
+using System.Threading.Tasks;
 
 namespace Railgun.Commands
 {
     [Alias("roll")]
     public class Roll : SystemBase
-    {        
+    {
         [Command]
-        public Task ExecuteAsync(int num1, int num2) 
+        public Task ExecuteAsync(int num1)
         {
             var name = SystemUtilities.GetUsernameOrMention(Context.Database, Context.Author as IGuildUser);
             var rand = new Random();
-            var rng = num1 > num2 ? rand.Next(num2, num1) : rand.Next(num1, num2);
-            
+            var rng = rand.Next(0, num1);
+
             return ReplyAsync(string.Format("{0} has rolled {1}.",
                 Format.Bold(name),
                 Format.Bold(rng.ToString())));
         }
 
         [Command]
-        public Task ExecuteAsync(int num1)
-            => ExecuteAsync(0, num1);
-
-        [Command]
         public Task ExecuteAsync()
-            => ExecuteAsync(0, 100);
+            => ExecuteAsync(100);
     }
 }
