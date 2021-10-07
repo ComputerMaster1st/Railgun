@@ -48,7 +48,6 @@ namespace Railgun.Commands.Music
 
                     foreach (var song in playlist.Songs)
                     {
-                        if (song.ProcessorId != "YOUTUBE") continue;
                         output.AppendLine(song.ToString());
                     }
 
