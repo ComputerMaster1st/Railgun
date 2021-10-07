@@ -1,16 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AudioChord;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Railgun.Apis.Youtube;
 using Railgun.Core;
 using Railgun.Core.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using TreeDiagram;
-using YoutubeExplode;
 using YoutubeExplode.Exceptions;
 using YoutubeExplode.Videos;
 using Playlist = AudioChord.Playlist;
@@ -25,12 +24,12 @@ namespace Railgun.Music
         private readonly IServiceProvider _services;
 
         public MusicController(BotLog botLog, MusicService musicService, YoutubeSearch ytSearch, IServiceProvider services)
-		{
+        {
             _botLog = botLog;
             _musicService = musicService;
             _ytSearch = ytSearch;
             _services = services;
-		}
+        }
 
         private async Task<Playlist> GetPlaylistAsync(ITextChannel tc)
         {
@@ -115,14 +114,14 @@ namespace Railgun.Music
         }
 
         public async Task AddYoutubeSongsAsync(IEnumerable<string> urls, ITextChannel tc)
-		{
+        {
             await tc.SendMessageAsync($"Processing {Format.Bold(urls.Count().ToString())} song(s)... This may take some time depending on how many songs there are.");
 
             var (InvalidUrls, Installed, Imported, NeedEncoding) = await ProcessSongIdsAsync(urls, tc);
 
             await Task.Delay(1000);
-			await tc.SendMessageAsync(BuildMsgOutput(Installed, Imported, InvalidUrls, NeedEncoding));
-		}
+            await tc.SendMessageAsync(BuildMsgOutput(Installed, Imported, InvalidUrls, NeedEncoding));
+        }
 
         public async Task ProcessYoutubePlaylistAsync(string playlistUrl, ITextChannel tc)
         {
