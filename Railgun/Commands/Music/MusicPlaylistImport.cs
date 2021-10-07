@@ -80,7 +80,7 @@ namespace Railgun.Commands.Music
                         }
                     }
 
-                    await _musicService.Playlist.UpdateAsync(playlist);
+                    await SystemUtilities.UpdatePlaylistAsync(_musicService, playlist);
 
                     File.Delete(importFileName);
 
